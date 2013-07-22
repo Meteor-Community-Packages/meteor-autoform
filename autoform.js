@@ -59,26 +59,27 @@ if (Meteor.isClient) {
             }
 
             //get current value
-            //TODO handle dates and select boxes
-            var value;
+            var value, arrayVal;
             if (_.isArray(defs.type)) {
-                if (defs.type === Date) {
+                if (defs.type[0] === Date) {
                     if (self._doc && name in self._doc) {
-                        value = dateToFieldDateString(self._doc[name]);
+                        arrayVal = self._doc[name];
+                        value = [];
+                        _.each(arrayVal, function (v) {
+                            value.push(dateToFieldDateString(v));
+                        });
                     } else {
-                        value = "";
-                    }
-                } else if (defs.type === Boolean) {
-                    if (self._doc && name in self._doc) {
-                        value = self._doc[name];
-                    } else {
-                        value = false;
+                        value = [];
                     }
                 } else {
                     if (self._doc && name in self._doc) {
-                        value = self._doc[name].toString();
+                        arrayVal = self._doc[name];
+                        value = [];
+                        _.each(arrayVal, function (v) {
+                            value.push(v.toString());
+                        });
                     } else {
-                        value = "";
+                        value = [];
                     }
                 }
             } else {
@@ -210,16 +211,31 @@ if (Meteor.isClient) {
 
             if (selectOptions) {
                 //build anything that should be a select, which is anything with defs.options
-                var multiple = "";
+                var multiple = "", isMultiple;
                 if (_.isArray(defs.type)) {
                     multiple = " multiple";
+                    isMultiple = true;
                 }
                 html = '<select data-collection-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + multiple + '>';
-                if (firstOption) {
+                if (firstOption && !isMultiple) {
                     html += '<option value="">' + firstOption + '</option>';
                 }
                 _.each(selectOptions, function(opt) {
-                    html += '<option value="' + opt.value + '"' + (opt.value === value ? ' selected' : '') + '>' + opt.label + '</option>';
+                    var selected;
+                    if (isMultiple) {
+                        if (_.contains(value, opt.value)) {
+                            selected = ' selected';
+                        } else {
+                            selected = '';
+                        }
+                    } else {
+                        if (opt.value === value) {
+                            selected = ' selected';
+                        } else {
+                            selected = '';
+                        }
+                    }
+                    html += '<option value="' + opt.value + '"' + selected + '>' + opt.label + '</option>';
                 });
                 html += '</select>';
             } else if (defs.type === String && rows) {
