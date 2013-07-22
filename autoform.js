@@ -351,6 +351,9 @@ var formValues = function(template) {
                 doc[name] = true;
             } else if (val === "false") { //boolean select
                 doc[name] = false;
+            } else if (field.hasAttribute("multiple")) {
+                //multiple select, so we want an array value
+                doc[name] = getSelectValues(field);
             } else {
                 doc[name] = val;
             }
@@ -425,4 +428,18 @@ var dateToFieldDateString = function(date) {
         d = "0" + d;
     }
     return date.getUTCFullYear() + '-' + m + '-' + d;
+};
+var getSelectValues = function (select) {
+  var result = [];
+  var options = select && select.options;
+  var opt;
+
+  for (var i=0, iLen=options.length; i<iLen; i++) {
+    opt = options[i];
+
+    if (opt.selected) {
+      result.push(opt.value || opt.text);
+    }
+  }
+  return result;
 };
