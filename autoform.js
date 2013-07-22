@@ -282,7 +282,7 @@ if (Meteor.isClient) {
                         template.find("form").reset();
                     }
                     if (cb) {
-                        cb(arguments);
+                        cb(error, result);
                     }
                 });
             },
@@ -310,7 +310,7 @@ if (Meteor.isClient) {
                 var cb = collection2Obj._callbacks && collection2Obj._callbacks.update ? collection2Obj._callbacks.update : null;
                 collection2Obj.update(self._doc._id, updateObj, function(error) {
                     if (cb) {
-                        cb(arguments);
+                        cb(error);
                     }
                 });
             },
@@ -321,7 +321,7 @@ if (Meteor.isClient) {
                 var cb = collection2Obj._callbacks && collection2Obj._callbacks.remove ? collection2Obj._callbacks.remove : null;
                 collection2Obj.remove(self._doc._id, function(error) {
                     if (cb) {
-                        cb(arguments);
+                        cb(error);
                     }
                 });
             }
