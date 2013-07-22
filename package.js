@@ -4,5 +4,5 @@ Package.describe({
 
 Package.on_use(function(api) {
   api.use(['underscore', 'templating']);
-  api.add_files(['form-handlebars-template.html', 'form-handlebars.js'], ['client']);
+  api.add_files(['autoform.html', 'autoform.js'], ['client']);
 });
