@@ -167,13 +167,9 @@ if (Meteor.isClient) {
             }
 
             //clean hash; we're adding these explicitly, so we don't want to have two
-            var rows = hash.rows || defs.rows;
             var firstOption, radio, select, trueLabel, falseLabel, selectOptions;
             if ("name" in hash) {
                 delete hash.name;
-            }
-            if ("rows" in hash) {
-                delete hash.rows;
             }
             if ("value" in hash) {
                 delete hash.value;
@@ -238,8 +234,8 @@ if (Meteor.isClient) {
                     html += '<option value="' + opt.value + '"' + selected + '>' + opt.label + '</option>';
                 });
                 html += '</select>';
-            } else if (defs.type === String && rows) {
-                html = '<textarea data-collection-key="' + name + '" name="' + name + '" rows="' + rows + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
+            } else if (defs.type === String && hash.rows) {
+                html = '<textarea data-collection-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
             } else if (defs.type === Boolean) {
                 if (radio) {
                     html = '<label class="radio"><input type="radio" data-collection-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + trueLabel + '</label>';
