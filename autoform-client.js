@@ -135,7 +135,9 @@ if (typeof Handlebars !== 'undefined') {
 
         //get type
         var type = "text";
-        if (defs.type === String && defs.regEx === SchemaRegEx.Email) {
+        if (hash.type) {
+            type = hash.type;
+        } else if (defs.type === String && defs.regEx === SchemaRegEx.Email) {
             type = "email";
         } else if (defs.type === String && defs.regEx === SchemaRegEx.Url) {
             type = "url";
@@ -188,6 +190,9 @@ if (typeof Handlebars !== 'undefined') {
         var firstOption, radio, select, trueLabel, falseLabel, selectOptions;
         if ("name" in hash) {
             delete hash.name;
+        }
+        if ("type" in hash) {
+            delete hash.type;
         }
         if ("value" in hash) {
             delete hash.value;
