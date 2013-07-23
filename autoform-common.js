@@ -48,7 +48,7 @@ _.extend(AutoForm.prototype, {
             self.deps[name].changed();
         });
 
-        return !!self.invalidFields.length;
+        return !self.invalidFields.length;
     },
     resetValidation: function() {
         var self = this, removedFields = [];
