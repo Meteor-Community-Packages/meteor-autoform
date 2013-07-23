@@ -8,6 +8,7 @@ Package.on_use(function(api) {
     api.use('startup', 'client');
     api.use('templating', 'client');
     api.use('collection2', ['client', 'server']);
-
-    api.add_files(['autoform.html', 'autoform.js'], ['client']);
+    
+    api.add_files(['autoform-common.js'], ['client', 'server']);
+    api.add_files(['autoform.html', 'autoform-client.js'], ['client']);
 });
