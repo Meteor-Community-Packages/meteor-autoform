@@ -301,7 +301,7 @@ if (typeof Handlebars !== 'undefined') {
                     template.find("form").reset();
                 }
                 if (cb) {
-                    cb(error, result);
+                    cb(error, result, template);
                 }
             });
         },
@@ -329,7 +329,7 @@ if (typeof Handlebars !== 'undefined') {
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.update ? collection2Obj._callbacks.update : null;
             collection2Obj.update(self._doc._id, updateObj, function(error) {
                 if (cb) {
-                    cb(error);
+                    cb(error, template);
                 }
             });
         },
@@ -340,11 +340,11 @@ if (typeof Handlebars !== 'undefined') {
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.remove ? collection2Obj._callbacks.remove : null;
             collection2Obj.remove(self._doc._id, function(error) {
                 if (cb) {
-                    cb(error);
+                    cb(error, template);
                 }
             });
         },
-        'click button[data-meteor-call]': function(event, template) {
+        'click button[data-meteor-method]': function(event, template) {
             event.preventDefault();
             var doc = formValues(template);
 
@@ -352,7 +352,7 @@ if (typeof Handlebars !== 'undefined') {
             doc = cleanNulls(doc);
 
             var simpleSchemaObj = window[template.data.schema];
-            var method = event.currentTarget.getAttribute("data-meteor-call");
+            var method = event.currentTarget.getAttribute("data-meteor-method");
             var cb = simpleSchemaObj._callbacks && simpleSchemaObj._callbacks[method] ? simpleSchemaObj._callbacks[method] : function() {
             };
 
@@ -361,7 +361,7 @@ if (typeof Handlebars !== 'undefined') {
                     if (!error) {
                         template.find("form").reset();
                     }
-                    cb(error, result);
+                    cb(error, result, template);
                 });
             }
         }
