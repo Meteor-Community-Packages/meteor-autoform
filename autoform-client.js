@@ -357,7 +357,7 @@ if (typeof Handlebars !== 'undefined') {
             };
 
             if (simpleSchemaObj.validate(doc)) {
-                Meteor.call(method, function(error, result) {
+                Meteor.call(method, doc, function(error, result) {
                     if (!error) {
                         template.find("form").reset();
                     }
