@@ -17,18 +17,25 @@ if (typeof Handlebars !== 'undefined') {
         if (!options) {
             return "";
         }
-        if (!window || (!window[options.hash.collection] && !window[options.hash.schema])) {
+        var hash = options.hash || {};
+        if (!window || (!window[hash.collection] && !window[hash.schema])) {
             return options.fn(this);
         }
         var context, autoFormContext = {};
-        if (options.hash.collection) {
-            context = {_c2: window[options.hash.collection], _doc: options.hash.doc};
-            autoFormContext.collection = options.hash.collection;
+        if (hash.collection) {
+            context = {_c2: window[hash.collection], _doc: hash.doc};
+            autoFormContext.collection = hash.collection;
+            delete hash.collection;
         } else {
-            context = {_ss: window[options.hash.schema], _doc: options.hash.doc};
-            autoFormContext.schema = options.hash.schema;
+            context = {_ss: window[hash.schema], _doc: hash.doc};
+            autoFormContext.schema = hash.schema;
+            delete hash.schema;
+        }
+        if (hash.doc) {
+            delete hash.doc;
         }
         autoFormContext.content = options.fn(context);
+        autoFormContext.atts = objToAttributes(hash);
         return new Handlebars.SafeString(Template._autoForm(autoFormContext));
     });
     Handlebars.registerHelper("afFieldMessage", function(name) {
