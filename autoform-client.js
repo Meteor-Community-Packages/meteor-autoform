@@ -76,10 +76,11 @@ if (typeof Handlebars !== 'undefined') {
         if (!defs) {
             throw new Error("Invalid field name");
         }
+        var expectsArray = _.isArray(defs.type);
 
         //get current value
         var value, arrayVal;
-        if (_.isArray(defs.type)) {
+        if (expectsArray) {
             if (defs.type[0] === Date) {
                 if (self._flatDoc && name in self._flatDoc) {
                     arrayVal = self._flatDoc[name];
@@ -128,7 +129,7 @@ if (typeof Handlebars !== 'undefined') {
 
         //handle boolean values
         var checked = "", checkedOpposite = "";
-        if (defs.type === Boolean && value === "true") {
+        if (defs.type === Boolean && value) {
             checked = " checked";
         } else {
             checkedOpposite = " checked";
@@ -232,7 +233,11 @@ if (typeof Handlebars !== 'undefined') {
         if (selectOptions) {
             //build anything that should be a select, which is anything with defs.options
             var multiple = "", isMultiple;
-            if (_.isArray(defs.type)) {
+            if (expectsArray) {
+                multiple = " multiple";
+                isMultiple = true;
+            }
+            if (!_.isArray(value)) {
                 multiple = " multiple";
                 isMultiple = true;
             }
@@ -243,13 +248,13 @@ if (typeof Handlebars !== 'undefined') {
             _.each(selectOptions, function(opt) {
                 var selected;
                 if (isMultiple) {
-                    if (_.contains(value, opt.value)) {
+                    if (_.contains(value, opt.value.toString())) {
                         selected = ' selected';
                     } else {
                         selected = '';
                     }
                 } else {
-                    if (opt.value === value) {
+                    if (opt.value.toString() === value) {
                         selected = ' selected';
                     } else {
                         selected = '';
