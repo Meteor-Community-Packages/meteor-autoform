@@ -288,7 +288,7 @@ if (typeof Handlebars !== 'undefined') {
 
             //for inserts, delete any properties that are null, undefined, or empty strings
             doc = cleanNulls(doc);
-            doc = expandDotNotation(doc); //inserts should not use dot notation but rather actual subdocuments
+            doc = expandObj(doc); //inserts should not use dot notation but rather actual subdocuments
 
             var collection2Obj = window[template.data.collection];
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.insert ? collection2Obj._callbacks.insert : null;
