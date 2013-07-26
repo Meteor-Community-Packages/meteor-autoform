@@ -288,6 +288,7 @@ if (typeof Handlebars !== 'undefined') {
 
             //for inserts, delete any properties that are null, undefined, or empty strings
             doc = cleanNulls(doc);
+            doc = expandDotNotation(doc); //inserts should not use dot notation but rather actual subdocuments
 
             var collection2Obj = window[template.data.collection];
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.insert ? collection2Obj._callbacks.insert : null;
@@ -369,15 +370,19 @@ var formValues = function(template) {
     _.each(fields, function(field) {
         var name = field.getAttribute("data-collection-key");
         var val = field.value;
+        var type = field.getAttribute("type") || "";
+        type = type.toLowerCase();
+        var tagName = field.tagName || "";
+        tagName = tagName.toLowerCase();
 
         //handle checkbox
-        if (field.getAttribute("type") === "checkbox") {
+        if (type === "checkbox") {
             doc[name] = field.checked;
             return;
         }
 
         //handle radio
-        if (field.getAttribute("type") === "radio") {
+        if (type === "radio") {
             if (field.checked) {
                 if (val === "true") { //boolean radio
                     doc[name] = true;
@@ -391,7 +396,7 @@ var formValues = function(template) {
         }
 
         //handle select
-        if (field.tagName.toLowerCase() === "select") {
+        if (tagName === "select") {
             if (val === "true") { //boolean select
                 doc[name] = true;
             } else if (val === "false") { //boolean select
@@ -406,7 +411,7 @@ var formValues = function(template) {
         }
 
         //handle number inputs
-        if (field.getAttribute("type") === "number") {
+        if (type === "number") {
             var floatVal = parseFloat(val);
             if (!isNaN(floatVal)) {
                 doc[name] = floatVal;
@@ -417,7 +422,7 @@ var formValues = function(template) {
         }
 
         //handle date inputs
-        if (field.getAttribute("type") === "date") {
+        if (type === "date") {
             if (typeof val === "string" && val.length) {
                 var datePieces = val.split("-");
                 var year = parseInt(datePieces[0], 10);
@@ -430,7 +435,7 @@ var formValues = function(template) {
             return;
         }
 
-        //handle text inputs
+        //handle all other inputs
         doc[name] = val;
     });
     return doc;
@@ -444,6 +449,29 @@ var objToAttributes = function(obj) {
         a += ' ' + key + '="' + value + '"';
     });
     return a;
+};
+var expandDotNotation = function(doc) {
+    //expands something like doc["a.b.c"] = d into doc[a][b][c] = d;
+    var newDoc = {}, subkeys, subkey, subkeylen, current;
+    _.each(doc, function(val, key) {
+        subkeys = key.split(".");
+        subkeylen = subkeys.length;
+        current = newDoc;
+        for (var i = 0; i < subkeylen; i++) {
+            subkey = subkeys[i];
+            if (current[subkey] && !_.isObject(current[subkey])) {
+                break; //already set for some reason; leave it alone
+            }
+            if (i === subkeylen - 1) {
+                //last iteration; time to set the value
+                current[subkey] = val;
+            } else if (!_.isObject(current[subkey])) {
+                current[subkey] = {};
+            }
+            current = current[subkey];
+        }
+    });
+    return newDoc;
 };
 var cleanNulls = function(doc) {
     var newDoc = {};
