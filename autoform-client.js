@@ -21,13 +21,24 @@ if (typeof Handlebars !== 'undefined') {
         if (!window || (!window[hash.collection] && !window[hash.schema])) {
             return options.fn(this);
         }
+        
+        var schemaObj = window[hash.collection] || window[hash.schema];
+        
+        var flatDoc, schemaKeys;
+        if (hash.doc) {
+            schemaKeys = _.keys(schemaObj.simpleSchema().schema());
+            flatDoc = collapseObj(hash.doc, schemaKeys);
+        } else {
+            flatDoc = {};
+        }
+        
         var context, autoFormContext = {};
         if (hash.collection) {
-            context = {_c2: window[hash.collection], _doc: hash.doc, _flatDoc: collapseObj(hash.doc)};
+            context = {_c2: schemaObj, _doc: hash.doc, _flatDoc: flatDoc};
             autoFormContext.collection = hash.collection;
             delete hash.collection;
         } else {
-            context = {_ss: window[hash.schema], _doc: hash.doc, _flatDoc: collapseObj(hash.doc)};
+            context = {_ss: schemaObj, _doc: hash.doc, _flatDoc: flatDoc};
             autoFormContext.schema = hash.schema;
             delete hash.schema;
         }
