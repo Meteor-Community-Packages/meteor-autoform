@@ -229,7 +229,7 @@ if (typeof Handlebars !== 'undefined') {
             selectOptions = hash.options;
             delete hash.options;
         }
-
+        
         if (selectOptions) {
             //build anything that should be a select, which is anything with defs.options
             var multiple = "", isMultiple;
@@ -237,6 +237,7 @@ if (typeof Handlebars !== 'undefined') {
                 multiple = " multiple";
                 isMultiple = true;
             }
+            hash.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
             html = '<select data-collection-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + multiple + '>';
             if (firstOption && !isMultiple) {
                 html += '<option value="">' + firstOption + '</option>';
