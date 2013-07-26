@@ -290,7 +290,7 @@ if (typeof Handlebars !== 'undefined') {
             return "";
         }
         var hash = options && options.hash ? options.hash : {};
-        var defs = obj.schema(name);
+        var defs = obj.simpleSchema.schema(name);
         if (!defs) {
             throw new Error("Invalid field name");
         }
@@ -360,15 +360,15 @@ if (typeof Handlebars !== 'undefined') {
             event.preventDefault();
             var doc = formValues(template);
 
-            //for inserts, delete any properties that are null, undefined, or empty strings
+            //delete any properties that are null, undefined, or empty strings
             doc = cleanNulls(doc);
 
-            var simpleSchemaObj = window[template.data.schema];
+            var autoFormObj = window[template.data.schema];
             var method = event.currentTarget.getAttribute("data-meteor-method");
-            var cb = simpleSchemaObj._callbacks && simpleSchemaObj._callbacks[method] ? simpleSchemaObj._callbacks[method] : function() {
+            var cb = autoFormObj._callbacks && autoFormObj._callbacks[method] ? autoFormObj._callbacks[method] : function() {
             };
 
-            if (simpleSchemaObj.validate(doc)) {
+            if (autoFormObj.validate(doc)) {
                 Meteor.call(method, doc, function(error, result) {
                     if (!error) {
                         template.find("form").reset();
@@ -384,7 +384,6 @@ var formValues = function(template) {
     var fields = template.findAll("[data-collection-key]");
     var doc = {};
     _.each(fields, function(field) {
-        //TODO handle dates, etc. and do it based on info specified in the schema
         var name = field.getAttribute("data-collection-key");
         var val = field.value;
 
