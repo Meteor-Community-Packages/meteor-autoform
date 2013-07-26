@@ -23,11 +23,11 @@ if (typeof Handlebars !== 'undefined') {
         }
         var context, autoFormContext = {};
         if (hash.collection) {
-            context = {_c2: window[hash.collection], _doc: hash.doc};
+            context = {_c2: window[hash.collection], _doc: hash.doc, _flatDoc: collapseObj(hash.doc)};
             autoFormContext.collection = hash.collection;
             delete hash.collection;
         } else {
-            context = {_ss: window[hash.schema], _doc: hash.doc};
+            context = {_ss: window[hash.schema], _doc: hash.doc, _flatDoc: collapseObj(hash.doc)};
             autoFormContext.schema = hash.schema;
             delete hash.schema;
         }
@@ -70,8 +70,8 @@ if (typeof Handlebars !== 'undefined') {
         var value, arrayVal;
         if (_.isArray(defs.type)) {
             if (defs.type[0] === Date) {
-                if (self._doc && name in self._doc) {
-                    arrayVal = self._doc[name];
+                if (self._flatDoc && name in self._flatDoc) {
+                    arrayVal = self._flatDoc[name];
                     value = [];
                     _.each(arrayVal, function(v) {
                         value.push(dateToFieldDateString(v));
@@ -80,8 +80,8 @@ if (typeof Handlebars !== 'undefined') {
                     value = [];
                 }
             } else {
-                if (self._doc && name in self._doc) {
-                    arrayVal = self._doc[name];
+                if (self._flatDoc && name in self._flatDoc) {
+                    arrayVal = self._flatDoc[name];
                     value = [];
                     _.each(arrayVal, function(v) {
                         value.push(v.toString());
@@ -92,20 +92,20 @@ if (typeof Handlebars !== 'undefined') {
             }
         } else {
             if (defs.type === Date) {
-                if (self._doc && name in self._doc) {
-                    value = dateToFieldDateString(self._doc[name]);
+                if (self._flatDoc && name in self._flatDoc) {
+                    value = dateToFieldDateString(self._flatDoc[name]);
                 } else {
                     value = "";
                 }
             } else if (defs.type === Boolean) {
-                if (self._doc && name in self._doc) {
-                    value = self._doc[name];
+                if (self._flatDoc && name in self._flatDoc) {
+                    value = self._flatDoc[name];
                 } else {
                     value = false;
                 }
             } else {
-                if (self._doc && name in self._doc) {
-                    value = self._doc[name].toString();
+                if (self._flatDoc && name in self._flatDoc) {
+                    value = self._flatDoc[name].toString();
                 } else {
                     value = "";
                 }
@@ -450,9 +450,37 @@ var objToAttributes = function(obj) {
     });
     return a;
 };
-var expandDotNotation = function(doc) {
-    //expands something like doc["a.b.c"] = d into doc[a][b][c] = d;
-    var newDoc = {}, subkeys, subkey, subkeylen, current;
+//collapses object into one level, with dot notation following the mongo $set syntax
+var collapseObj = function(doc, skip) {
+    var res = {};
+    (function recurse(obj, current) {
+        if (_.isArray(obj)) {
+            for (var i = 0, ln = obj.length; i < ln; i++) {
+                var value = obj[i];
+                var newKey = (current ? current + "." + i : i);  // joined index with dot
+                if (value && (typeof value === "object" || _.isArray(value)) && !_.contains(skip, newKey)) {
+                    recurse(value, newKey);  // it's a nested object or array, so do it again
+                } else {
+                    res[newKey] = value;  // it's not an object or array, so set the property
+                }
+            }
+        } else {
+            for (var key in obj) {
+                var value = obj[key];
+                var newKey = (current ? current + "." + key : key);  // joined key with dot
+                if (value && (typeof value === "object" || _.isArray(value)) && !_.contains(skip, newKey)) {
+                    recurse(value, newKey);  // it's a nested object or array, so do it again
+                } else {
+                    res[newKey] = value;  // it's not an object or array, so set the property
+                }
+            }
+        }
+    })(doc);
+    return res;
+};
+//opposite of collapseObj
+var expandObj = function(doc) {
+    var newDoc = {}, subkeys, subkey, subkeylen, nextPiece, current;
     _.each(doc, function(val, key) {
         subkeys = key.split(".");
         subkeylen = subkeys.length;
@@ -465,8 +493,15 @@ var expandDotNotation = function(doc) {
             if (i === subkeylen - 1) {
                 //last iteration; time to set the value
                 current[subkey] = val;
-            } else if (!_.isObject(current[subkey])) {
-                current[subkey] = {};
+            } else {
+                //see if the next piece is a number
+                nextPiece = subkeys[i+1];
+                nextPiece = parseInt(nextPiece, 10);
+                if (isNaN(nextPiece) && !_.isObject(current[subkey])) {
+                    current[subkey] = {};
+                } else if (!_.isArray(current[subkey])) {
+                    current[subkey] = [];
+                }
             }
             current = current[subkey];
         }
