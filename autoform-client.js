@@ -237,10 +237,6 @@ if (typeof Handlebars !== 'undefined') {
                 multiple = " multiple";
                 isMultiple = true;
             }
-            if (!_.isArray(value)) {
-                multiple = " multiple";
-                isMultiple = true;
-            }
             html = '<select data-collection-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + multiple + '>';
             if (firstOption && !isMultiple) {
                 html += '<option value="">' + firstOption + '</option>';
