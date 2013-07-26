@@ -44,7 +44,7 @@ if (typeof Handlebars !== 'undefined') {
         if (!obj) {
             return "";
         }
-        return obj.simpleSchema.keyErrorMessage(name);
+        return obj.simpleSchema().keyErrorMessage(name);
     });
     Handlebars.registerHelper("afFieldIsInvalid", function(name) {
         var self = this;
@@ -52,7 +52,7 @@ if (typeof Handlebars !== 'undefined') {
         if (!obj) {
             return false;
         }
-        return obj.simpleSchema.keyIsInvalid(name);
+        return obj.simpleSchema().keyIsInvalid(name);
     });
     Handlebars.registerHelper("afFieldInput", function(name, options) {
         var html, self = this;
@@ -61,7 +61,7 @@ if (typeof Handlebars !== 'undefined') {
             return "";
         }
         var hash = options && options.hash ? options.hash : {};
-        var defs = obj.simpleSchema.schema(name);
+        var defs = obj.simpleSchema().schema(name);
         if (!defs) {
             throw new Error("Invalid field name");
         }
@@ -273,7 +273,7 @@ if (typeof Handlebars !== 'undefined') {
             return "";
         }
         var hash = options && options.hash ? options.hash : {};
-        var defs = obj.simpleSchema.schema(name);
+        var defs = obj.simpleSchema().schema(name);
         if (!defs) {
             throw new Error("Invalid field name");
         }
