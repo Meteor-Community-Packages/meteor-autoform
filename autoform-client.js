@@ -21,9 +21,9 @@ if (typeof Handlebars !== 'undefined') {
         if (!window || (!window[hash.collection] && !window[hash.schema])) {
             return options.fn(this);
         }
-        
+
         var schemaObj = window[hash.collection] || window[hash.schema];
-        
+
         var flatDoc, schemaKeys;
         if (hash.doc) {
             schemaKeys = _.keys(schemaObj.simpleSchema().schema());
@@ -31,7 +31,7 @@ if (typeof Handlebars !== 'undefined') {
         } else {
             flatDoc = {};
         }
-        
+
         var context, autoFormContext = {};
         if (hash.collection) {
             context = {_c2: schemaObj, _doc: hash.doc, _flatDoc: flatDoc};
@@ -229,7 +229,7 @@ if (typeof Handlebars !== 'undefined') {
             selectOptions = hash.options;
             delete hash.options;
         }
-        
+
         if (selectOptions) {
             //build anything that should be a select, which is anything with defs.options
             var multiple = "", isMultiple;
@@ -375,6 +375,19 @@ if (typeof Handlebars !== 'undefined') {
             }
         }
     });
+
+    //This is a workaround for what seems to be a Meteor issue.
+    //When Meteor updates an existing form, it selectively updates the attributes,
+    //but attributes that are properties don't have the properties updated to match.
+    //This means that selected is not updated properly even if the selected
+    //attribute is on the element.
+    Template._autoForm.rendered = function() {
+        _.each(this.findAll("option"), function(optionElement) {
+            if (optionElement.hasAttribute("selected")) {
+                optionElement.selected = true;
+            }
+        });
+    };
 }
 
 var formValues = function(template) {
@@ -508,7 +521,7 @@ var expandObj = function(doc) {
                 current[subkey] = val;
             } else {
                 //see if the next piece is a number
-                nextPiece = subkeys[i+1];
+                nextPiece = subkeys[i + 1];
                 nextPiece = parseInt(nextPiece, 10);
                 if (isNaN(nextPiece) && !_.isObject(current[subkey])) {
                     current[subkey] = {};
