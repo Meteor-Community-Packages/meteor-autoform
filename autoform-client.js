@@ -18,11 +18,11 @@ if (typeof Handlebars !== 'undefined') {
             return "";
         }
         var hash = options.hash || {};
-        if (!window || (!window[hash.collection] && !window[hash.schema])) {
+        if (!window || !window[hash.schema]) {
             return options.fn(this);
         }
 
-        var schemaObj = window[hash.collection] || window[hash.schema];
+        var schemaObj = window[hash.schema];
 
         var flatDoc, schemaKeys;
         if (hash.doc) {
@@ -32,16 +32,11 @@ if (typeof Handlebars !== 'undefined') {
             flatDoc = {};
         }
 
-        var context, autoFormContext = {};
-        if (hash.collection) {
-            context = {_c2: schemaObj, _doc: hash.doc, _flatDoc: flatDoc};
-            autoFormContext.collection = hash.collection;
-            delete hash.collection;
-        } else {
-            context = {_ss: schemaObj, _doc: hash.doc, _flatDoc: flatDoc};
-            autoFormContext.schema = hash.schema;
-            delete hash.schema;
-        }
+        var context = {_ss: schemaObj, _doc: hash.doc, _flatDoc: flatDoc};
+        var autoFormContext = {
+            schema: hash.schema
+        };
+        delete hash.schema;
         if (hash.doc) {
             delete hash.doc;
         }
@@ -51,7 +46,7 @@ if (typeof Handlebars !== 'undefined') {
     });
     Handlebars.registerHelper("afFieldMessage", function(name) {
         var self = this;
-        var obj = self._c2 || self._ss;
+        var obj = self._ss;
         if (!obj) {
             return "";
         }
@@ -59,7 +54,7 @@ if (typeof Handlebars !== 'undefined') {
     });
     Handlebars.registerHelper("afFieldIsInvalid", function(name) {
         var self = this;
-        var obj = self._c2 || self._ss;
+        var obj = self._ss;
         if (!obj) {
             return false;
         }
@@ -67,7 +62,7 @@ if (typeof Handlebars !== 'undefined') {
     });
     Handlebars.registerHelper("afFieldInput", function(name, options) {
         var html, self = this;
-        var obj = self._c2 || self._ss;
+        var obj = self._ss;
         if (!obj) {
             return "";
         }
@@ -202,8 +197,8 @@ if (typeof Handlebars !== 'undefined') {
         if ("step" in hash) {
             delete hash.step;
         }
-        if ("data-collection-key" in hash) {
-            delete hash["data-collection-key"];
+        if ("data-schema-key" in hash) {
+            delete hash["data-schema-key"];
         }
         if ("firstOption" in hash) {
             firstOption = hash.firstOption;
@@ -238,7 +233,7 @@ if (typeof Handlebars !== 'undefined') {
                 isMultiple = true;
             }
             hash.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
-            html = '<select data-collection-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + multiple + '>';
+            html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + multiple + '>';
             if (firstOption && !isMultiple) {
                 html += '<option value="">' + firstOption + '</option>';
             }
@@ -261,27 +256,27 @@ if (typeof Handlebars !== 'undefined') {
             });
             html += '</select>';
         } else if (defs.type === String && hash.rows) {
-            html = '<textarea data-collection-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
+            html = '<textarea data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
         } else if (defs.type === Boolean) {
             if (radio) {
-                html = '<label class="radio"><input type="radio" data-collection-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + trueLabel + '</label>';
-                html += '<label class="radio"><input type="radio" data-collection-key="' + name + '" name="' + name + '" value="false"' + checkedOpposite + objToAttributes(hash) + req + ' /> ' + falseLabel + '</label>';
+                html = '<label class="radio"><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + trueLabel + '</label>';
+                html += '<label class="radio"><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="false"' + checkedOpposite + objToAttributes(hash) + req + ' /> ' + falseLabel + '</label>';
             } else if (select) {
-                html = '<select data-collection-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + '>';
+                html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + '>';
                 html += '<option value="true"' + (value ? ' selected' : '') + '>' + trueLabel + '</option>';
                 html += '<option value="false"' + (!value ? ' selected' : '') + '>' + falseLabel + '</option>';
                 html += '</select>';
             } else {
-                html = '<label for="' + name + '" class="checkbox"><input type="checkbox" data-collection-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + label + '</label>';
+                html = '<label for="' + name + '" class="checkbox"><input type="checkbox" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + label + '</label>';
             }
         } else {
-            html = '<input type="' + type + '" data-collection-key="' + name + '" name="' + name + '" value="' + value + '"' + objToAttributes(hash) + req + max + min + step + ' />';
+            html = '<input type="' + type + '" data-schema-key="' + name + '" name="' + name + '" value="' + value + '"' + objToAttributes(hash) + req + max + min + step + ' />';
         }
         return new Handlebars.SafeString(html);
     });
     Handlebars.registerHelper("afFieldLabel", function(name, options) {
         var label, self = this;
-        var obj = self._c2 || self._ss;
+        var obj = self._ss;
         if (!obj) {
             return "";
         }
@@ -303,7 +298,7 @@ if (typeof Handlebars !== 'undefined') {
             doc = cleanNulls(doc);
             doc = expandObj(doc); //inserts should not use dot notation but rather actual subdocuments
 
-            var collection2Obj = window[template.data.collection];
+            var collection2Obj = window[template.data.schema];
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.insert ? collection2Obj._callbacks.insert : null;
             collection2Obj.insert(doc, function(error, result) {
                 if (!error) {
@@ -334,7 +329,7 @@ if (typeof Handlebars !== 'undefined') {
                 updateObj.$unset = nulls;
             }
 
-            var collection2Obj = window[template.data.collection];
+            var collection2Obj = window[template.data.schema];
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.update ? collection2Obj._callbacks.update : null;
             collection2Obj.update(self._doc._id, updateObj, function(error) {
                 if (cb) {
@@ -345,7 +340,7 @@ if (typeof Handlebars !== 'undefined') {
         'click .remove[type=submit]': function(event, template) {
             event.preventDefault();
             var self = this;
-            var collection2Obj = window[template.data.collection];
+            var collection2Obj = window[template.data.schema];
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.remove ? collection2Obj._callbacks.remove : null;
             collection2Obj.remove(self._doc._id, function(error) {
                 if (cb) {
@@ -366,12 +361,18 @@ if (typeof Handlebars !== 'undefined') {
             };
 
             if (autoFormObj.validate(doc)) {
-                Meteor.call(method, doc, function(error, result) {
+                Meteor.call("_autoFormCheckFirst", method, template.data.schema, doc, function(error, result) {
                     if (!error) {
                         template.find("form").reset();
                     }
                     cb(error, result, template);
                 });
+            }
+        },
+        'click [type=reset]': function() {
+            var autoFormObj = window[template.data.schema];
+            if (autoFormObj) {
+                autoFormObj.simpleSchema().resetValidation();
             }
         }
     });
@@ -391,10 +392,10 @@ if (typeof Handlebars !== 'undefined') {
 }
 
 var formValues = function(template) {
-    var fields = template.findAll("[data-collection-key]");
+    var fields = template.findAll("[data-schema-key]");
     var doc = {};
     _.each(fields, function(field) {
-        var name = field.getAttribute("data-collection-key");
+        var name = field.getAttribute("data-schema-key");
         var val = field.value;
         var type = field.getAttribute("type") || "";
         type = type.toLowerCase();
