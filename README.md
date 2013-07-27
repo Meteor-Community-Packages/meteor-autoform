@@ -3,8 +3,8 @@ AutoForm
 
 AutoForm is a smart package for Meteor that adds handlebars helpers to easily create basic
 forms with automatic insert and update events, and automatic reactive validation. 
-Requires and automatically installs the collection2 package, which in turn
-requires the simple-schema package.
+Requires and automatically installs the [collection2](https://github.com/aldeed/meteor-collection2) package, which in turn
+requires the [simple-schema](https://github.com/aldeed/meteor-simple-schema) package.
 
 ## Example
 
@@ -42,8 +42,7 @@ Books = new Meteor.Collection2("books", {
 });
 ```
 
-Creating insert, update, and delete forms with automatic validation and events
-is now as simple as this:
+Creating an insert form with automatic validation and submission is now as simple as this:
 
 ```html
 {{#autoForm schema='Books'}}
@@ -93,12 +92,12 @@ And that's it! You don't have to write any specific javascript functions to vali
 or perform the insert.
 
 Notice the following:
-*`autoForm` is a block helper. `{{#autoForm}}` and `{{/autoForm}}` are replaced
+* `autoForm` is a block helper. `{{#autoForm}}` and `{{/autoForm}}` are replaced
 with `<form>` and `</form>`, respectively. All of the helpers within expect to
 be within an autoForm block.
-*All of the helpers that generate HTML elements can take any attributes you want to supply,
+* All of the helpers that generate HTML elements can take any attributes you want to supply,
 and will add all of them to the generated HTML element. So you can add class, id, etc.
-*As long as you use a button with type=submit and the "insert" class, validation
+* As long as you use a button with type=submit and the "insert" class, validation
 and insertion will happen automatically, and the `afFieldIsInvalid` and `afFieldMessage`
 helpers will reactively update.
 
@@ -149,19 +148,19 @@ What about an update? It's pretty much the same:
 ```
 
 Notice the following:
-*The form is identical to the insert form except that the `doc` attribute is
+* The form is identical to the insert form except that the `doc` attribute is
 supplied on the `autoForm` helper, and the submit button has the "update" class
 instead of the "insert" class.
-*The form will function just like the insert form, too, except that the current
+* The form will function just like the insert form, too, except that the current
 values of all the fields will be pulled from the document supplied in the `doc`
 attribute, and that document will be updated when the user clicks the submit button.
-*Since the forms are so similar, you can actually use the same form for both inserts
+* Since the forms are so similar, you can actually use the same form for both inserts
 and updates if you want. Just swap the class on the submit button, and for inserts,
 pass in null or undefined to the `doc` attribute.
 
 And finally, how about an example of a remove form:
 
-```js
+```html
 {{#autoForm schema='Books' doc=this}}
   <button type="submit" class="btn btn-primary remove">Delete</button>
 {{/autoForm}}
@@ -178,10 +177,10 @@ Use this block helper instead of `<form>` elements to wrap your form and gain al
 helpers must be used within an `autoForm` block.
 
 Attributes:
-*`schema`: Required. Pass either the name of a Collection2 instance or the name of an AutoForm instance.
-*`doc`: Required for update and remove actions. Pass the current document object. It's usually easiest to pass
+* `schema`: Required. Pass either the name of a Collection2 instance or the name of an AutoForm instance.
+* `doc`: Required for update and remove actions. Pass the current document object. It's usually easiest to pass
 the name of a custom helper that returns the object by calling `findOne()`.
-*Any additional attributes are passed along to the `<form>` element, meaning that you can add classes, etc. It's a
+* Any additional attributes are passed along to the `<form>` element, meaning that you can add classes, etc. It's a
 good idea to specify an `id` attribute if you want Meteor's input preservation to work.
 
 ### afFieldMessage "propertyName"
@@ -229,7 +228,24 @@ For boolean attributes, such as autofocus, you must specify some value after the
 `=`, but the value makes no difference. The mere presence of the attribute will
 cause it to be added to the DOM element.
 
-### afFieldLabel
+As mentioned, you must pass in `options` if you want a `<select>` control. The value of the
+options attribute must be an array of objects, where each object has a `label` key and a `value` key. For example:
+
+```html
+{{afFieldInput 'year' options=yearOptions}}
+```
+
+```js
+Handlebars.registerHelper("yearOptions", function() {
+    return [
+        {label: "2013", value: 2013},
+        {label: "2014", value: 2014},
+        {label: "2015", value: 2015}
+    ];
+});
+```
+
+### afFieldLabel "propertyName" [options]
 
 Adds a `<label>` element with the `label` defined in the schema, or the property
 name if no label is defined. You can specify any additional attributes for the helper,
@@ -363,7 +379,9 @@ Documents.callbacks({
         }
     },
     remove: function(error) {
-        console.log("Remove Error:", error);
+        if (error) {
+            console.log("Remove Error:", error);
+        }
     }
 });
 ```
@@ -470,6 +488,10 @@ as you would expect.
 Assigning to an object in an array might also work, but this has not been thoroughly tested yet. For example,
 `{{afFieldInput 'addresses.1.street'}}` should correctly pull existing values from and save
 new values to `doc.addresses[1].street`. This probably doesn't work 100% yet, though. (Pull request welcome.)
+
+## More Examples
+
+A somewhat messy, work-in-progress example app is [here](https://github.com/aldeed/meteor-autoform-example).
 
 ## Contributing
 
