@@ -11,16 +11,16 @@
     {{/each}}
     <div>
         {{#if ../doInsert}}
-        <button type="submit" class="{{../buttonClasses}} insert">{{../buttonContent}}</button>
+        <button type="submit" class="{{../../buttonClasses}} insert">{{../../buttonContent}}</button>
         {{/if}}
         {{#if ../doUpdate}}
-        <button type="submit" class="{{../buttonClasses}} update">{{../buttonContent}}</button>
+        <button type="submit" class="{{../../buttonClasses}} update">{{../../buttonContent}}</button>
         {{/if}}
         {{#if ../doRemove}}
-        <button type="submit" class="{{../buttonClasses}} remove">{{../buttonContent}}</button>
+        <button type="submit" class="{{../../buttonClasses}} remove">{{../../buttonContent}}</button>
         {{/if}}
         {{#if ../doMethod}}
-        <button type="submit" data-meteor-method="{{../method}}" class="{{../buttonClasses}}">{{../buttonContent}}</button>
+        <button type="submit" data-meteor-method="{{../../method}}" class="{{../../buttonClasses}}">{{../../buttonContent}}</button>
         {{/if}}
     </div>
     {{/autoForm}}
