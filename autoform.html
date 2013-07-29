@@ -6,21 +6,21 @@
 
 <template name="_quickForm">
     {{#autoForm schema=schema atts=atts}}
-    {{#each formFields}}
+    {{#each ../formFields}}
         {{afQuickField this}}
     {{/each}}
     <div>
-        {{#if doInsert}}
-        <button type="submit" class="{{buttonClasses}} insert">{{buttonContent}}</button>
+        {{#if ../doInsert}}
+        <button type="submit" class="{{../buttonClasses}} insert">{{../buttonContent}}</button>
         {{/if}}
-        {{#if doUpdate}}
-        <button type="submit" class="{{buttonClasses}} update">{{buttonContent}}</button>
+        {{#if ../doUpdate}}
+        <button type="submit" class="{{../buttonClasses}} update">{{../buttonContent}}</button>
         {{/if}}
-        {{#if doRemove}}
-        <button type="submit" class="{{buttonClasses}} remove">{{buttonContent}}</button>
+        {{#if ../doRemove}}
+        <button type="submit" class="{{../buttonClasses}} remove">{{../buttonContent}}</button>
         {{/if}}
-        {{#if doMethod}}
-        <button type="submit" data-meteor-method="{{method}}" class="{{buttonClasses}}">{{buttonContent}}</button>
+        {{#if ../doMethod}}
+        <button type="submit" data-meteor-method="{{../method}}" class="{{../buttonClasses}}">{{../buttonContent}}</button>
         {{/if}}
     </div>
     {{/autoForm}}
