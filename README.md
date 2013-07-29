@@ -518,6 +518,56 @@ Assigning to an object in an array might also work, but this has not been thorou
 `{{afFieldInput 'addresses.1.street'}}` should correctly pull existing values from and save
 new values to `doc.addresses[1].street`. This probably doesn't work 100% yet, though. (Pull request welcome.)
 
+## QuickForm
+
+If your goal is to quickly develop a form that allows you to insert, update, remove, or call a method with validation,
+check out the included `{{quickForm}}` helper. This helper will create the whole form for you in one line,
+with fields, labels, and error messages based on the corresponding SimpleSchema.
+
+Syntax:
+
+```html
+{{quickForm schema="MyAutoFormOrCollection2ObjectName" type="typeOfForm" method="methodName" buttonClasses="class1 class2" buttonContent="Insert" anotherFormAttribute="value"}}
+```
+
+* `type`: Must be supplied and must be "insert", "update", "remove", or "method".
+* `method`: If type="method", specify the name of the method to call (for the data-meteor-method attribute on the submit button).
+* `buttonClasses`: class attribute for the submit button.
+* `buttonContent`: The submit button content. If you don't set this, "Submit" is used.
+
+Those are the only supported attributes at this time. Any other attributes you specify will be output as
+attributes of the `<form>` element, just like when using the `{{autoForm}}` block helper.
+
+### afQuickField "propertyName" [options]
+
+Similar to the `{{quickForm}}` helper, you can use `{{afQuickField}}` to output everything for a single field
+at once: the label, the input, and the error message.
+
+### Future QuickForm Features
+
+Eventually the quickForm helper will have a few different built in styles you can choose from, like horizontal, vertical, and responsive,
+as well as the ability to put the labels in placeholder instead of label.
+
+## Using Block Helpers Within and AutoForm
+
+Because of the way the `{{#autoForm}}` block helper keeps track of data, if you use a block helper
+within an autoForm and that block helper changes the context, things won't work correctly. Examples of
+problematic block helpers are `{{#each}}` and `{{#with}}`.
+
+To get around this issue, every "af"-prefixed helper you call within one of these "sub-blocks" must
+provide an "autoform" attribute that supplies the autoform context, which you can get by using
+the Handlebars "../" syntax.
+
+An example will be clearer:
+
+```html
+{{#autoForm schema="Books" id="myBookForm"}}
+    {{#with "title"}}
+        {{afQuickField this autoform=../this}}
+    {{/with}}
+{{/autoForm}}
+```
+
 ## More Examples
 
 A somewhat messy, work-in-progress example app is [here](https://github.com/aldeed/meteor-autoform-example).
