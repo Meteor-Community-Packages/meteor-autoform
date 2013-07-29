@@ -4,9 +4,11 @@ AutoForm.prototype.callbacks = function(cb) {
 };
 
 //add callbacks() method to Meteor.Collection2
-Meteor.Collection2.prototype.callbacks = function(cb) {
-    this._callbacks = cb;
-};
+if (typeof Meteor.Collection2 !== 'undefined') {
+    Meteor.Collection2.prototype.callbacks = function(cb) {
+        this._callbacks = cb;
+    };
+}
 
 if (typeof Handlebars !== 'undefined') {
     Handlebars.registerHelper("autoForm", function(options) {
