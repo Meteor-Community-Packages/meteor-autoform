@@ -33,11 +33,11 @@ if (typeof Handlebars !== 'undefined') {
             schema: hash.schema
         };
         delete hash.schema;
-        if (hash.doc) {
+        if ("doc" in hash) {
             delete hash.doc;
         }
         autoFormContext.content = options.fn(context);
-        autoFormContext.atts = hash.atts || objToAttributes(hash);
+        autoFormContext.atts = hash.atts ? objToAttributes(hash.atts) : objToAttributes(hash);
         return new Handlebars.SafeString(Template._autoForm(autoFormContext));
     });
     Handlebars.registerHelper("quickForm", function(options) {
