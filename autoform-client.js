@@ -37,7 +37,7 @@ if (typeof Handlebars !== 'undefined') {
             delete hash.doc;
         }
         autoFormContext.content = options.fn(context);
-        autoFormContext.atts = objToAttributes(hash);
+        autoFormContext.atts = hash.atts || objToAttributes(hash);
         return new Handlebars.SafeString(Template._autoForm(autoFormContext));
     });
     Handlebars.registerHelper("quickForm", function(options) {
@@ -80,7 +80,7 @@ if (typeof Handlebars !== 'undefined') {
             delete hash.buttonContent;
         }
         delete hash.schema;
-        context.atts = objToAttributes(hash);
+        context.atts = hash;
         return new Handlebars.SafeString(Template._quickForm(context));
     });
     Handlebars.registerHelper("afQuickField", function(name) {

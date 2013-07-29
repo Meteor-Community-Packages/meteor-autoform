@@ -5,7 +5,7 @@
 </template>
 
 <template name="_quickForm">
-    {{#autoForm schema="{{schema}}"{{atts}}}}
+    {{#autoForm schema=schema atts=atts}}
     {{#each formFields}}
         {{afQuickField this}}
     {{/each}}
