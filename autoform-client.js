@@ -75,8 +75,8 @@ if (typeof Handlebars !== 'undefined') {
             context.buttonClasses = hash.buttonClasses;
             delete hash.buttonClasses;
         }
+        context.buttonContent = hash.buttonContent || "Submit";
         if ("buttonContent" in hash) {
-            context.buttonContent = hash.buttonContent || "Submit";
             delete hash.buttonContent;
         }
         delete hash.schema;
