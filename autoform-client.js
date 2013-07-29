@@ -40,6 +40,52 @@ if (typeof Handlebars !== 'undefined') {
         autoFormContext.atts = objToAttributes(hash);
         return new Handlebars.SafeString(Template._autoForm(autoFormContext));
     });
+    Handlebars.registerHelper("quickForm", function(options) {
+        if (!options) {
+            return "";
+        }
+        var hash = options.hash || {};
+        if (!window || !window[hash.schema]) {
+            return "";
+        }
+
+        var schemaObj = window[hash.schema];
+
+        var context = {
+            schema: hash.schema,
+            formFields: _.keys(schemaObj)
+        };
+        if ("type" in hash) {
+            if (hash.type === "insert") {
+                context.doInsert = true;
+            } else if (hash.type === "update") {
+                context.doUpdate = true;
+            } else if (hash.type === "remove") {
+                context.doRemove = true;
+            } else if (hash.type === "method") {
+                context.doMethod = true;
+                context.method = hash.method;
+            }
+            delete hash.type;
+        }
+        if ("method" in hash) {
+            delete hash.method;
+        }
+        if ("buttonClasses" in hash) {
+            context.buttonClasses = hash.buttonClasses;
+            delete hash.buttonClasses;
+        }
+        if ("buttonContent" in hash) {
+            context.buttonContent = hash.buttonContent;
+            delete hash.buttonContent;
+        }
+        delete hash.schema;
+        context.atts = objToAttributes(hash);
+        return new Handlebars.SafeString(Template._quickForm(context));
+    });
+    Handlebars.registerHelper("afQuickField", function(name) {
+        return new Handlebars.SafeString(Template._afQuickField({name: name}));
+    });
     Handlebars.registerHelper("afFieldMessage", function(name) {
         var self = this;
         var obj = self._ss;
@@ -295,12 +341,12 @@ if (typeof Handlebars !== 'undefined') {
             doc = expandObj(doc); //inserts should not use dot notation but rather actual subdocuments
 
             var collection2Obj = window[template.data.schema];
-            
+
             //call beforeInsert if present
             if (collection2Obj.beforeInsert) {
                 doc = collection2Obj.beforeInsert(doc);
             }
-            
+
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.insert ? collection2Obj._callbacks.insert : null;
             collection2Obj.insert(doc, function(error, result) {
                 if (!error) {
@@ -332,12 +378,12 @@ if (typeof Handlebars !== 'undefined') {
             }
 
             var collection2Obj = window[template.data.schema];
-            
+
             //call beforeUpdate if present
             if (collection2Obj.beforeUpdate) {
                 updateObj = collection2Obj.beforeUpdate(updateObj);
             }
-            
+
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.update ? collection2Obj._callbacks.update : null;
             collection2Obj.update(self._doc._id, updateObj, function(error) {
                 if (cb) {
@@ -365,12 +411,12 @@ if (typeof Handlebars !== 'undefined') {
 
             var autoFormObj = window[template.data.schema];
             var method = event.currentTarget.getAttribute("data-meteor-method");
-            
+
             //call beforeMethod if present
             if (autoFormObj.beforeMethod) {
                 doc = autoFormObj.beforeMethod(doc, method);
             }
-            
+
             var cb = autoFormObj._callbacks && autoFormObj._callbacks[method] ? autoFormObj._callbacks[method] : function() {
             };
 
