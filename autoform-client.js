@@ -86,16 +86,16 @@ if (typeof Handlebars !== 'undefined') {
     Handlebars.registerHelper("afQuickField", function(name) {
         return new Handlebars.SafeString(Template._afQuickField({name: name}));
     });
-    Handlebars.registerHelper("afFieldMessage", function(name) {
-        var self = this;
+    Handlebars.registerHelper("afFieldMessage", function(name, options) {
+        var self = options.hash.autoform || this;
         var obj = self._ss;
         if (!obj) {
             return "";
         }
         return obj.simpleSchema().keyErrorMessage(name);
     });
-    Handlebars.registerHelper("afFieldIsInvalid", function(name) {
-        var self = this;
+    Handlebars.registerHelper("afFieldIsInvalid", function(name, options) {
+        var self = options.hash.autoform || this;
         var obj = self._ss;
         if (!obj) {
             return false;
@@ -103,7 +103,7 @@ if (typeof Handlebars !== 'undefined') {
         return obj.simpleSchema().keyIsInvalid(name);
     });
     Handlebars.registerHelper("afFieldInput", function(name, options) {
-        var html, self = this;
+        var html, self = options.hash.autoform || this;
         var obj = self._ss;
         if (!obj) {
             return "";
@@ -230,6 +230,9 @@ if (typeof Handlebars !== 'undefined') {
         if ("name" in hash) {
             delete hash.name;
         }
+        if ("autoform" in hash) {
+            delete hash.autoform;
+        }
         if ("type" in hash) {
             delete hash.type;
         }
@@ -317,7 +320,7 @@ if (typeof Handlebars !== 'undefined') {
         return new Handlebars.SafeString(html);
     });
     Handlebars.registerHelper("afFieldLabel", function(name, options) {
-        var label, self = this;
+        var label, self = options.hash.autoform || this;
         var obj = self._ss;
         if (!obj) {
             return "";
@@ -326,6 +329,10 @@ if (typeof Handlebars !== 'undefined') {
         var defs = obj.simpleSchema().schema(name);
         if (!defs) {
             throw new Error("Invalid field name");
+        }
+        
+        if ("autoform" in hash) {
+            delete hash.autoform;
         }
 
         label = defs.label || name;

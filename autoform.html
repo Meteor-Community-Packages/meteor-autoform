@@ -7,7 +7,7 @@
 <template name="_quickForm">
     {{#autoForm schema=schema atts=atts}}
     {{#each ../formFields}}
-        {{afQuickField this}}
+        {{afQuickField this autoform=../this}}
     {{/each}}
     <div>
         {{#if ../doInsert}}
