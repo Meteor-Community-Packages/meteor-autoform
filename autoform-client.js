@@ -85,7 +85,17 @@ if (typeof Handlebars !== 'undefined') {
     });
     Handlebars.registerHelper("afQuickField", function(name, options) {
         var autoform = options.hash.autoform || this;
-        return new Handlebars.SafeString(Template._afQuickField({name: name, autoform: autoform}));
+        var obj = autoform._ss;
+        if (!obj) {
+            throw new Error("afQuickField helper must be used within an autoForm block");
+        }
+        var defs = obj.simpleSchema().schema(name);
+        if (!defs) {
+            throw new Error("Invalid field name");
+        }
+        var skipLabel = (defs.type === Boolean); //boolean type renders a check box that already has a label
+        
+        return new Handlebars.SafeString(Template._afQuickField({name: name, autoform: autoform, skipLabel: skipLabel}));
     });
     Handlebars.registerHelper("afFieldMessage", function(name, options) {
         var self = options.hash.autoform || this;
