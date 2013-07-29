@@ -53,7 +53,7 @@ if (typeof Handlebars !== 'undefined') {
 
         var context = {
             schema: hash.schema,
-            formFields: _.keys(schemaObj)
+            formFields: _.keys(schemaObj.simpleSchema().schema())
         };
         if ("type" in hash) {
             if (hash.type === "insert") {
