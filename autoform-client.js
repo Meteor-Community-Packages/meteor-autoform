@@ -76,15 +76,16 @@ if (typeof Handlebars !== 'undefined') {
             delete hash.buttonClasses;
         }
         if ("buttonContent" in hash) {
-            context.buttonContent = hash.buttonContent;
+            context.buttonContent = hash.buttonContent || "Submit";
             delete hash.buttonContent;
         }
         delete hash.schema;
         context.atts = hash;
         return new Handlebars.SafeString(Template._quickForm(context));
     });
-    Handlebars.registerHelper("afQuickField", function(name) {
-        return new Handlebars.SafeString(Template._afQuickField({name: name}));
+    Handlebars.registerHelper("afQuickField", function(name, options) {
+        var autoform = options.hash.autoform || this;
+        return new Handlebars.SafeString(Template._afQuickField({name: name, autoform: autoform}));
     });
     Handlebars.registerHelper("afFieldMessage", function(name, options) {
         var self = options.hash.autoform || this;
