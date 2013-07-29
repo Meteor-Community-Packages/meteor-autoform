@@ -1,16 +1,12 @@
 //add callbacks() method to AutoForm
-_.extend(AutoForm.prototype, {
-    callbacks: function(cb) {
-        this._callbacks = cb;
-    }
-});
+AutoForm.prototype.callbacks = function(cb) {
+    this._callbacks = cb;
+};
 
 //add callbacks() method to Meteor.Collection2
-_.extend(Meteor.Collection2.prototype, {
-    callbacks: function(cb) {
-        this._callbacks = cb;
-    }
-});
+Meteor.Collection2.prototype.callbacks = function(cb) {
+    this._callbacks = cb;
+};
 
 if (typeof Handlebars !== 'undefined') {
     Handlebars.registerHelper("autoForm", function(options) {
@@ -299,6 +295,12 @@ if (typeof Handlebars !== 'undefined') {
             doc = expandObj(doc); //inserts should not use dot notation but rather actual subdocuments
 
             var collection2Obj = window[template.data.schema];
+            
+            //call beforeInsert if present
+            if (collection2Obj.beforeInsert) {
+                doc = collection2Obj.beforeInsert(doc);
+            }
+            
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.insert ? collection2Obj._callbacks.insert : null;
             collection2Obj.insert(doc, function(error, result) {
                 if (!error) {
@@ -330,6 +332,12 @@ if (typeof Handlebars !== 'undefined') {
             }
 
             var collection2Obj = window[template.data.schema];
+            
+            //call beforeUpdate if present
+            if (collection2Obj.beforeUpdate) {
+                updateObj = collection2Obj.beforeUpdate(updateObj);
+            }
+            
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.update ? collection2Obj._callbacks.update : null;
             collection2Obj.update(self._doc._id, updateObj, function(error) {
                 if (cb) {
@@ -357,6 +365,12 @@ if (typeof Handlebars !== 'undefined') {
 
             var autoFormObj = window[template.data.schema];
             var method = event.currentTarget.getAttribute("data-meteor-method");
+            
+            //call beforeMethod if present
+            if (autoFormObj.beforeMethod) {
+                doc = autoFormObj.beforeMethod(doc, method);
+            }
+            
             var cb = autoFormObj._callbacks && autoFormObj._callbacks[method] ? autoFormObj._callbacks[method] : function() {
             };
 

@@ -410,6 +410,35 @@ might be so that you can call `find()` or `findAll()` to clean up certain form f
 or show additional error-related elements if not. This should be rarely needed unless
 you have complex custom controls in your form.
 
+## Modifying the Form Object
+
+When the user submits an AutoForm, an object that contains all of the form data is automatically generated. If
+the submission action is insert or a method call, this is a normal document object. If the submission action is
+update, this is a mongo-style update object with `$set` and potentially `$unset` objects. In most cases,
+the object will be perfect for your needs. However, you might find that you want to modify the object in some way.
+For example, you might want to add the current user's ID to a document before it is inserted. To do this,
+you can define a function to be called after the form data is gathered into an object, but before the
+object is validated or submitted.
+
+### MyCollection2.beforeInsert
+
+You can set `MyCollection2.beforeInsert` equal to a function the takes the object to be inserted as its only argument
+and returns a modified copy of the object. Remember that whatever modifications you make must still pass SimpleSchema
+validation.
+
+### MyCollection2.beforeUpdate
+
+You can set `MyCollection2.beforeUpdate` equal to a function the takes the update object as its only argument
+and returns a modified copy of the object. Remember that whatever modifications you make must still pass SimpleSchema
+validation. Keep in mind that the object this function receives will have the `$set` and potentially `$unset` keys
+at the first level.
+
+### MyAutoForm.beforeMethod
+
+You can set `MyAutoForm.beforeMethod` equal to a function the takes the object that will be passed to a method
+as its first argument and the name of the method as its second argument. This function must return a modified copy
+of the object. Remember that whatever modifications you make must still pass SimpleSchema validation.
+
 ## Complex Controls
 
 If you need to have more complex form controls but still want to use an AutoForm, a good trick
