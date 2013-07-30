@@ -4,7 +4,7 @@
     "homepage": "https://github.com/aldeed/meteor-autoform",
     "author": "Eric Dobbertin (http://dairystatedesigns.com)",
     "version": "0.1.0",
-    "git": "https://github.com/aldeed/meteor-meteor-autoform.git",
+    "git": "https://github.com/aldeed/meteor-autoform.git",
     "packages": {
         "simple-schema": "0.1.0"
     }
