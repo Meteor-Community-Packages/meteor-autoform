@@ -429,10 +429,17 @@ validation.
 
 ### MyCollection2.beforeUpdate
 
-You can set `MyCollection2.beforeUpdate` equal to a function the takes the update object as its only argument
-and returns a modified copy of the object. Remember that whatever modifications you make must still pass SimpleSchema
+You can set `MyCollection2.beforeUpdate` equal to a function the takes the ID of
+the document to be updated as it's first argument and the update object as its second argument
+and returns a modified copy of the update object. Remember that whatever modifications you make must still pass SimpleSchema
 validation. Keep in mind that the object this function receives will have the `$set` and potentially `$unset` keys
 at the first level.
+
+### MyCollection2.beforeRemove
+
+You can set `MyCollection2.beforeRemove` equal to a function the takes the ID of
+the document to be removed as its only argument and returns `false` to cancel the
+removal.
 
 ### MyAutoForm.beforeMethod
 

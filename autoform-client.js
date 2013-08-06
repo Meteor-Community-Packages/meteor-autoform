@@ -363,7 +363,7 @@ if (typeof Handlebars !== 'undefined') {
             var collection2Obj = window[template.data.schema];
 
             //call beforeInsert if present
-            if (collection2Obj.beforeInsert) {
+            if (typeof collection2Obj.beforeInsert === "function") {
                 doc = collection2Obj.beforeInsert(doc);
             }
 
@@ -400,8 +400,8 @@ if (typeof Handlebars !== 'undefined') {
             var collection2Obj = window[template.data.schema];
 
             //call beforeUpdate if present
-            if (collection2Obj.beforeUpdate) {
-                updateObj = collection2Obj.beforeUpdate(updateObj);
+            if (typeof collection2Obj.beforeUpdate === "function") {
+                updateObj = collection2Obj.beforeUpdate(self._doc._id, updateObj);
             }
 
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.update ? collection2Obj._callbacks.update : null;
@@ -415,6 +415,14 @@ if (typeof Handlebars !== 'undefined') {
             event.preventDefault();
             var self = this;
             var collection2Obj = window[template.data.schema];
+            
+            //call beforeUpdate if present
+            if (typeof collection2Obj.beforeRemove === "function") {
+                if (! collection2Obj.beforeRemove(self._doc._id)) {
+                    return;
+                };
+            }
+            
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.remove ? collection2Obj._callbacks.remove : null;
             collection2Obj.remove(self._doc._id, function(error) {
                 if (cb) {
@@ -433,7 +441,7 @@ if (typeof Handlebars !== 'undefined') {
             var method = event.currentTarget.getAttribute("data-meteor-method");
 
             //call beforeMethod if present
-            if (autoFormObj.beforeMethod) {
+            if (typeof autoFormObj.beforeMethod === "function") {
                 doc = autoFormObj.beforeMethod(doc, method);
             }
 
