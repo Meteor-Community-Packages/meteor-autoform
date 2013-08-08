@@ -49,35 +49,35 @@ Creating an insert form with automatic validation and submission is now as simpl
 {{#autoForm schema='Books'}}
 <fieldset>
     <legend>Add a Book</legend>
-    <div class="control-group{{#if afFieldIsInvalid 'title'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'title'}} has-error{{/if}}">
         {{afFieldLabel 'title'}}
         {{afFieldInput 'title'}}
         {{#if afFieldIsInvalid 'title'}}
         <span class="help-block">{{afFieldMessage 'title'}}</span>
         {{/if}}
     </div>
-    <div class="control-group{{#if afFieldIsInvalid 'author'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'author'}} has-error{{/if}}">
         {{afFieldLabel 'author'}}
         {{afFieldInput 'author'}}
         {{#if afFieldIsInvalid 'author'}}
         <span class="help-block">{{afFieldMessage 'author'}}</span>
         {{/if}}
     </div>
-    <div class="control-group{{#if afFieldIsInvalid 'summary'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'summary'}} has-error{{/if}}">
         {{afFieldLabel 'summary'}}
         {{afFieldInput 'summary'}}
         {{#if afFieldIsInvalid 'summary'}}
         <span class="help-block">{{afFieldMessage 'summary'}}</span>
         {{/if}}
     </div>
-    <div class="control-group{{#if afFieldIsInvalid 'copies'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'copies'}} has-error{{/if}}">
         {{afFieldLabel 'copies'}}
         {{afFieldInput 'copies'}}
         {{#if afFieldIsInvalid 'copies'}}
         <span class="help-block">{{afFieldMessage 'copies'}}</span>
         {{/if}}
     </div>
-    <div class="control-group{{#if afFieldIsInvalid 'lastCheckedOut'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'lastCheckedOut'}} has-error{{/if}}">
         {{afFieldLabel 'lastCheckedOut'}}
         {{afFieldInput 'lastCheckedOut'}}
         {{#if afFieldIsInvalid 'lastCheckedOut'}}
@@ -108,35 +108,35 @@ What about an update? It's pretty much the same:
 {{#autoForm schema='Books' doc=selectedBook}}
 <fieldset>
     <legend>Edit Book</legend>
-    <div class="control-group{{#if afFieldIsInvalid 'title'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'title'}} has-error{{/if}}">
         {{afFieldLabel 'title'}}
         {{afFieldInput 'title'}}
         {{#if afFieldIsInvalid 'title'}}
         <span class="help-block">{{afFieldMessage 'title'}}</span>
         {{/if}}
     </div>
-    <div class="control-group{{#if afFieldIsInvalid 'author'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'author'}} has-error{{/if}}">
         {{afFieldLabel 'author'}}
         {{afFieldInput 'author'}}
         {{#if afFieldIsInvalid 'author'}}
         <span class="help-block">{{afFieldMessage 'author'}}</span>
         {{/if}}
     </div>
-    <div class="control-group{{#if afFieldIsInvalid 'summary'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'summary'}} has-error{{/if}}">
         {{afFieldLabel 'summary'}}
         {{afFieldInput 'summary'}}
         {{#if afFieldIsInvalid 'summary'}}
         <span class="help-block">{{afFieldMessage 'summary'}}</span>
         {{/if}}
     </div>
-    <div class="control-group{{#if afFieldIsInvalid 'copies'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'copies'}} has-error{{/if}}">
         {{afFieldLabel 'copies'}}
         {{afFieldInput 'copies'}}
         {{#if afFieldIsInvalid 'copies'}}
         <span class="help-block">{{afFieldMessage 'copies'}}</span>
         {{/if}}
     </div>
-    <div class="control-group{{#if afFieldIsInvalid 'lastCheckedOut'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'lastCheckedOut'}} has-error{{/if}}">
         {{afFieldLabel 'lastCheckedOut'}}
         {{afFieldInput 'lastCheckedOut'}}
         {{#if afFieldIsInvalid 'lastCheckedOut'}}
@@ -212,8 +212,9 @@ attribute when calling the helper.
 `radio` or `select` attributes when calling the helper, then a radio or select
 control will be used instead. Use the `trueLabel` and `falseLabel` attributes
 to set the label used in the radio or select controls.
-* If options is set, a `<select>` control is used instead. If type is also an array, such as `[String]`, then
-it is a multiple-select control.
+* If you supply the `options` attribute on the helper, a `<select>` control is used instead. If type is also an array, such as `[String]`, then
+it is a multiple-select control. If you prefer radios or checkboxes (for example, if it is a short list of options),
+then simply add the `noselect` attribute (set to anything).
 * If optional is `false` or not set in the schema, the `required` attribute is added to the DOM element.
 * Specifying `max` when type is `String` causes the `maxlength` attribute to be added to the DOM element.
 * Specifying `min` or `max` dates when type is `Date` causes those dates to be added to the DOM element in
@@ -233,7 +234,7 @@ As mentioned, you must pass in `options` if you want a `<select>` control. The v
 options attribute must be an array of objects, where each object has a `label` key and a `value` key. For example:
 
 ```html
-{{afFieldInput 'year' options=yearOptions}}
+{{afFieldInput "year" options=yearOptions}}
 ```
 
 ```js
@@ -244,6 +245,13 @@ Handlebars.registerHelper("yearOptions", function() {
         {label: "2015", value: 2015}
     ];
 });
+```
+
+Or if you wanted those options to appear as checkboxes or radios instead, the
+html would look like this:
+
+```html
+{{afFieldInput "year" options=yearOptions noselect="true"}}
 ```
 
 ### afFieldLabel "propertyName" [options]
@@ -299,21 +307,21 @@ The HTML:
 {{#autoForm schema="ContactForm" id="contactForm"}}
 <fieldset>
     <legend>Contact Us</legend>
-    <div class="control-group{{#if afFieldIsInvalid 'name'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'name'}} has-error{{/if}}">
         {{afFieldLabel "name" class="control-label"}}
         {{afFieldInput "name"}}
         {{#if afFieldIsInvalid "name"}}
         <span class="help-block">{{afFieldMessage "name"}}</span>
         {{/if}}
     </div>
-    <div class="control-group{{#if afFieldIsInvalid 'email'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'email'}} has-error{{/if}}">
         {{afFieldLabel "email" class="control-label"}}
         {{afFieldInput "email"}}
         {{#if afFieldIsInvalid "email"}}
         <span class="help-block">{{afFieldMessage "email"}}</span>
         {{/if}}
     </div>
-    <div class="control-group{{#if afFieldIsInvalid 'message'}} error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid 'message'}} has-error{{/if}}">
         {{afFieldLabel "message" class="control-label"}}
         {{afFieldInput "message" rows="10"}}
         {{#if afFieldIsInvalid "message"}}
@@ -529,7 +537,7 @@ new values to `doc.addresses[1].street`. This probably doesn't work 100% yet, th
 ## QuickForm
 
 If your goal is to quickly develop a form that allows you to insert, update, remove, or call a method with validation,
-check out the included `{{quickForm}}` helper. This helper will create the whole form for you in one line,
+check out the included `{{quickForm}}` and `{{afQuickField}}` helpers. `{{quickForm}}` will create the whole form for you in one line,
 with fields, labels, and error messages based on the corresponding SimpleSchema.
 
 Syntax:
@@ -549,7 +557,30 @@ attributes of the `<form>` element, just like when using the `{{autoForm}}` bloc
 ### afQuickField "propertyName" [options]
 
 Similar to the `{{quickForm}}` helper, you can use `{{afQuickField}}` to output everything for a single field
-at once: the label, the input, and the error message.
+at once: the label, the input, and the error message. Currently the default HTML markup and classes
+matches what you would expect when using Bootstrap 3.
+
+Any attributes you add will be passed along to the `{{afFieldInput}}` helper, so you can, for example,
+pass in options to create a select control.
+
+But what if you want to pass additional attributes to the label element? Simply prepend any attribute with
+"label-" and it will be passed along to `{{afFieldLabel}}` instead of `{{afFieldInput}}`.
+
+### afQuickField Example
+
+```html
+{{#autoForm schema="Documents" doc=selectedDoc}}
+    {{afQuickField 'firstField' autofocus='true'}}
+    {{afQuickField 'weirdColors' style="color: orange" label-style="color: green"}}
+    {{afQuickField "longString" rows="5"}}
+    {{afQuickField "radioBoolean" radio="true" trueLabel="Yes" falseLabel="No"}}
+    {{afQuickField "selectBoolean" select="true" trueLabel="Yes" falseLabel="No"}}
+    {{afQuickField "optionsButNoSelect" options=numSelectOptions noselect="true"}}
+    {{afQuickField "firstOptionSelect" firstOption="(Select Something)" options=numSelectOptions}}
+    {{afQuickField "decimal" step="0.01"}}
+    {{> buttons}}
+{{/autoForm}}
+```
 
 ### Future QuickForm Features
 

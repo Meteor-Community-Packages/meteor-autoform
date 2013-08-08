@@ -27,11 +27,9 @@
 </template>
 
 <template name="_afQuickField">
-    <div class="control-group{{#if afFieldIsInvalid name autoform=autoform}} error{{/if}}">
-        {{#unless skipLabel}}
-        {{afFieldLabel name autoform=autoform}}
-        {{/unless}}
-        {{afFieldInput name autoform=autoform}}
+    <div class="form-group{{#if afFieldIsInvalid name autoform=autoform}} has-error{{/if}}">
+        {{{labelHtml}}}
+        {{{inputHtml}}}
         <span class="help-block">{{afFieldMessage name autoform=autoform}}</span>
     </div>
 </template>

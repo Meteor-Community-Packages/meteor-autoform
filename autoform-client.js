@@ -86,7 +86,7 @@ if (typeof Handlebars !== 'undefined') {
         return new Handlebars.SafeString(Template._quickForm(context));
     });
     Handlebars.registerHelper("afQuickField", function(name, options) {
-        var autoform = options.hash.autoform || this;
+        var hash = options.hash, autoform = hash.autoform || this;
         var obj = autoform._ss;
         if (!obj) {
             throw new Error("afQuickField helper must be used within an autoForm block");
@@ -95,261 +95,75 @@ if (typeof Handlebars !== 'undefined') {
         if (!defs) {
             throw new Error("Invalid field name");
         }
-        var skipLabel = (defs.type === Boolean); //boolean type renders a check box that already has a label
-        
-        return new Handlebars.SafeString(Template._afQuickField({name: name, autoform: autoform, skipLabel: skipLabel}));
+
+        //boolean type renders a check box that already has a label, so don't generate another label
+        var skipLabel = (defs.type === Boolean && !("select" in hash) && !("radio" in hash));
+
+        //separate label hash from input hash; label items begin with "label-"
+        var labelHash = {};
+        var inputHash = {};
+        _.each(hash, function(val, key) {
+            if (key.indexOf("label-") === 0) {
+                key = key.substring(6);
+                labelHash[key] = val;
+            } else {
+                inputHash[key] = val;
+            }
+        });
+
+        //set up context for _afQuickField template
+        var context = {name: name, autoform: autoform};
+
+        //add label HTML to _afQuickField template context
+        if (skipLabel) {
+            context.labelHtml = "";
+        } else {
+            context.labelHtml = createLabelHtml(name, defs, labelHash);
+        }
+
+        //add input HTML to _afQuickField template context
+        context.inputHtml = createInputHtml(name, autoform, defs, inputHash);
+
+        return new Handlebars.SafeString(Template._afQuickField(context));
     });
     Handlebars.registerHelper("afFieldMessage", function(name, options) {
-        var self = options.hash.autoform || this;
-        var obj = self._ss;
+        var autoform = options.hash.autoform || this, obj = autoform._ss;
         if (!obj) {
-            return "";
+            throw new Error("afFieldMessage helper must be used within an autoForm block helper");
         }
         return obj.simpleSchema().keyErrorMessage(name);
     });
     Handlebars.registerHelper("afFieldIsInvalid", function(name, options) {
-        var self = options.hash.autoform || this;
-        var obj = self._ss;
+        var autoform = options.hash.autoform || this, obj = autoform._ss;
         if (!obj) {
-            return false;
+            throw new Error("afFieldIsInvalid helper must be used within an autoForm block helper");
         }
         return obj.simpleSchema().keyIsInvalid(name);
     });
     Handlebars.registerHelper("afFieldInput", function(name, options) {
-        var html, self = options.hash.autoform || this;
-        var obj = self._ss;
+        var autoform = options.hash.autoform || this, obj = autoform._ss;
         if (!obj) {
-            return "";
+            throw new Error("afFieldInput helper must be used within an autoForm block helper");
         }
-        var hash = options && options.hash ? options.hash : {};
         var defs = obj.simpleSchema().schema(name);
         if (!defs) {
             throw new Error("Invalid field name");
         }
-        var expectsArray = _.isArray(defs.type);
-
-        //get current value
-        var value, arrayVal;
-        if (expectsArray) {
-            if (defs.type[0] === Date) {
-                if (self._flatDoc && name in self._flatDoc) {
-                    arrayVal = self._flatDoc[name];
-                    value = [];
-                    _.each(arrayVal, function(v) {
-                        value.push(dateToFieldDateString(v));
-                    });
-                } else {
-                    value = [];
-                }
-            } else {
-                if (self._flatDoc && name in self._flatDoc) {
-                    arrayVal = self._flatDoc[name];
-                    value = [];
-                    _.each(arrayVal, function(v) {
-                        value.push(v.toString());
-                    });
-                } else {
-                    value = [];
-                }
-            }
-        } else {
-            if (defs.type === Date) {
-                if (self._flatDoc && name in self._flatDoc) {
-                    value = dateToFieldDateString(self._flatDoc[name]);
-                } else {
-                    value = "";
-                }
-            } else if (defs.type === Boolean) {
-                if (self._flatDoc && name in self._flatDoc) {
-                    value = self._flatDoc[name];
-                } else {
-                    value = false;
-                }
-            } else {
-                if (self._flatDoc && name in self._flatDoc) {
-                    value = self._flatDoc[name].toString();
-                } else {
-                    value = "";
-                }
-            }
-        }
-
-        //required?
-        var req = defs.optional ? "" : " required";
-
-        //handle boolean values
-        var checked = "", checkedOpposite = "";
-        if (defs.type === Boolean && value) {
-            checked = " checked";
-        } else {
-            checkedOpposite = " checked";
-        }
-
-        //get type
-        var type = "text";
-        if (hash.type) {
-            type = hash.type;
-        } else if (defs.type === String && defs.regEx === SchemaRegEx.Email) {
-            type = "email";
-        } else if (defs.type === String && defs.regEx === SchemaRegEx.Url) {
-            type = "url";
-        } else if (defs.type === Number) {
-            type = "number";
-        } else if (defs.type === Date) {
-            type = "date";
-        }
-
-        var label = defs.label || name;
-
-        //get correct max/min attributes
-        var max = "", min = "";
-        if (defs.type === String) {
-            if (defs.max) {
-                max = ' maxlength="' + defs.max + '"';
-            }
-        } else {
-            //max
-            if (hash.max) {
-                max = ' max="' + hash.max + '"';
-            } else if (defs.max) {
-                if (defs.max instanceof Date) {
-                    max = ' max="' + dateToFieldDateString(defs.max) + '"';
-                } else {
-                    max = ' max="' + defs.max + '"';
-                }
-            }
-            //min
-            if (hash.min) {
-                min = ' min="' + hash.min + '"';
-            } else if (defs.min) {
-                if (defs.min instanceof Date) {
-                    min = ' min="' + defs.min.getUTCFullYear() + '-' + (defs.min.getUTCMonth() + 1) + '-' + defs.min.getUTCDate() + '"';
-                } else {
-                    min = ' min="' + defs.min + '"';
-                }
-            }
-        }
-
-        //get step value
-        var step = "";
-        if (hash.step) {
-            step = ' step="' + hash.step + '"';
-        } else if (defs.decimal) {
-            step = ' step="0.01"';
-        }
-
-        //clean hash; we're adding these explicitly, so we don't want to have two
-        var firstOption, radio, select, trueLabel, falseLabel, selectOptions;
-        if ("name" in hash) {
-            delete hash.name;
-        }
-        if ("autoform" in hash) {
-            delete hash.autoform;
-        }
-        if ("type" in hash) {
-            delete hash.type;
-        }
-        if ("value" in hash) {
-            delete hash.value;
-        }
-        if ("step" in hash) {
-            delete hash.step;
-        }
-        if ("data-schema-key" in hash) {
-            delete hash["data-schema-key"];
-        }
-        if ("firstOption" in hash) {
-            firstOption = hash.firstOption;
-            delete hash.firstOption;
-        }
-        if ("radio" in hash) {
-            radio = hash.radio;
-            delete hash.radio;
-        }
-        if ("select" in hash) {
-            select = hash.select;
-            delete hash.select;
-        }
-        if ("trueLabel" in hash) {
-            trueLabel = hash.trueLabel;
-            delete hash.trueLabel;
-        }
-        if ("falseLabel" in hash) {
-            falseLabel = hash.falseLabel;
-            delete hash.falseLabel;
-        }
-        if ("options" in hash) {
-            selectOptions = hash.options;
-            delete hash.options;
-        }
-
-        if (selectOptions) {
-            //build anything that should be a select, which is anything with defs.options
-            var multiple = "", isMultiple;
-            if (expectsArray) {
-                multiple = " multiple";
-                isMultiple = true;
-            }
-            hash.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
-            html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + multiple + '>';
-            if (firstOption && !isMultiple) {
-                html += '<option value="">' + firstOption + '</option>';
-            }
-            _.each(selectOptions, function(opt) {
-                var selected;
-                if (isMultiple) {
-                    if (_.contains(value, opt.value.toString())) {
-                        selected = ' selected';
-                    } else {
-                        selected = '';
-                    }
-                } else {
-                    if (opt.value.toString() === value) {
-                        selected = ' selected';
-                    } else {
-                        selected = '';
-                    }
-                }
-                html += '<option value="' + opt.value + '"' + selected + '>' + opt.label + '</option>';
-            });
-            html += '</select>';
-        } else if (defs.type === String && hash.rows) {
-            html = '<textarea data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
-        } else if (defs.type === Boolean) {
-            if (radio) {
-                html = '<label class="radio"><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + trueLabel + '</label>';
-                html += '<label class="radio"><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="false"' + checkedOpposite + objToAttributes(hash) + req + ' /> ' + falseLabel + '</label>';
-            } else if (select) {
-                html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + '>';
-                html += '<option value="true"' + (value ? ' selected' : '') + '>' + trueLabel + '</option>';
-                html += '<option value="false"' + (!value ? ' selected' : '') + '>' + falseLabel + '</option>';
-                html += '</select>';
-            } else {
-                html = '<label for="' + name + '" class="checkbox"><input type="checkbox" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + label + '</label>';
-            }
-        } else {
-            html = '<input type="' + type + '" data-schema-key="' + name + '" name="' + name + '" value="' + value + '"' + objToAttributes(hash) + req + max + min + step + ' />';
-        }
+        var html = createInputHtml(name, autoform, defs, options.hash);
         return new Handlebars.SafeString(html);
     });
     Handlebars.registerHelper("afFieldLabel", function(name, options) {
-        var label, self = options.hash.autoform || this;
-        var obj = self._ss;
+        var autoform = options.hash.autoform || this, obj = autoform._ss;
         if (!obj) {
-            return "";
+            throw new Error("afFieldLabel helper must be used within an autoForm block helper");
         }
-        var hash = options && options.hash ? options.hash : {};
         var defs = obj.simpleSchema().schema(name);
         if (!defs) {
             throw new Error("Invalid field name");
         }
-        
-        if ("autoform" in hash) {
-            delete hash.autoform;
-        }
 
-        label = defs.label || name;
-        return new Handlebars.SafeString('<label' + objToAttributes(hash) + '>' + label + '</label>');
+        var html = createLabelHtml(name, defs, options.hash);
+        return new Handlebars.SafeString(html);
     });
     Template._autoForm.events({
         'click .insert[type=submit]': function(event, template) {
@@ -415,14 +229,15 @@ if (typeof Handlebars !== 'undefined') {
             event.preventDefault();
             var self = this;
             var collection2Obj = window[template.data.schema];
-            
+
             //call beforeUpdate if present
             if (typeof collection2Obj.beforeRemove === "function") {
-                if (! collection2Obj.beforeRemove(self._doc._id)) {
+                if (!collection2Obj.beforeRemove(self._doc._id)) {
                     return;
-                };
+                }
+                ;
             }
-            
+
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.remove ? collection2Obj._callbacks.remove : null;
             collection2Obj.remove(self._doc._id, function(error) {
                 if (cb) {
@@ -492,7 +307,14 @@ var formValues = function(template) {
 
         //handle checkbox
         if (type === "checkbox") {
-            doc[name] = field.checked;
+            if (val === "true") { //boolean checkbox
+                doc[name] = field.checked;
+            } else if (field.checked) { //array checkbox
+                if (!_.isArray(doc[name])) {
+                    doc[name] = [];
+                }
+                doc[name].push(val);
+            }
             return;
         }
 
@@ -665,4 +487,260 @@ var getSelectValues = function(select) {
         }
     }
     return result;
+};
+var createInputHtml = function(name, autoform, defs, hash) {
+    var html, expectsArray = _.isArray(defs.type);
+
+    //get current value
+    var value, arrayVal;
+    if (expectsArray) {
+        if (defs.type[0] === Date) {
+            if (autoform._flatDoc && name in autoform._flatDoc) {
+                arrayVal = autoform._flatDoc[name];
+                value = [];
+                _.each(arrayVal, function(v) {
+                    value.push(dateToFieldDateString(v));
+                });
+            } else {
+                value = [];
+            }
+        } else {
+            if (autoform._flatDoc && name in autoform._flatDoc) {
+                arrayVal = autoform._flatDoc[name];
+                value = [];
+                _.each(arrayVal, function(v) {
+                    value.push(v.toString());
+                });
+            } else {
+                value = [];
+            }
+        }
+    } else {
+        if (defs.type === Date) {
+            if (autoform._flatDoc && name in autoform._flatDoc) {
+                value = dateToFieldDateString(autoform._flatDoc[name]);
+            } else {
+                value = "";
+            }
+        } else if (defs.type === Boolean) {
+            if (autoform._flatDoc && name in autoform._flatDoc) {
+                value = autoform._flatDoc[name];
+            } else {
+                value = false;
+            }
+        } else {
+            if (autoform._flatDoc && name in autoform._flatDoc) {
+                value = autoform._flatDoc[name].toString();
+            } else {
+                value = "";
+            }
+        }
+    }
+
+    //required?
+    var req = defs.optional ? "" : " required";
+
+    //handle boolean values
+    var checked = "", checkedOpposite = "";
+    if (defs.type === Boolean && value) {
+        checked = " checked";
+    } else {
+        checkedOpposite = " checked";
+    }
+
+    //get type
+    var type = "text";
+    if (hash.type) {
+        type = hash.type;
+    } else if (defs.type === String && defs.regEx === SchemaRegEx.Email) {
+        type = "email";
+    } else if (defs.type === String && defs.regEx === SchemaRegEx.Url) {
+        type = "url";
+    } else if (defs.type === Number) {
+        type = "number";
+    } else if (defs.type === Date) {
+        type = "date";
+    }
+
+    var label = defs.label || name;
+
+    //get correct max/min attributes
+    var max = "", min = "";
+    if (defs.type === String) {
+        if (defs.max) {
+            max = ' maxlength="' + defs.max + '"';
+        }
+    } else {
+        //max
+        if (hash.max) {
+            max = ' max="' + hash.max + '"';
+        } else if (defs.max) {
+            if (defs.max instanceof Date) {
+                max = ' max="' + dateToFieldDateString(defs.max) + '"';
+            } else {
+                max = ' max="' + defs.max + '"';
+            }
+        }
+        //min
+        if (hash.min) {
+            min = ' min="' + hash.min + '"';
+        } else if (defs.min) {
+            if (defs.min instanceof Date) {
+                min = ' min="' + defs.min.getUTCFullYear() + '-' + (defs.min.getUTCMonth() + 1) + '-' + defs.min.getUTCDate() + '"';
+            } else {
+                min = ' min="' + defs.min + '"';
+            }
+        }
+    }
+
+    //get step value
+    var step = "";
+    if (hash.step) {
+        step = ' step="' + hash.step + '"';
+    } else if (defs.decimal) {
+        step = ' step="0.01"';
+    }
+
+    //clean hash; we're adding these explicitly, so we don't want to have two
+    var firstOption, radio, select, trueLabel, falseLabel, selectOptions, noselect;
+    if ("name" in hash) {
+        delete hash.name;
+    }
+    if ("autoform" in hash) {
+        delete hash.autoform;
+    }
+    if ("type" in hash) {
+        delete hash.type;
+    }
+    if ("value" in hash) {
+        delete hash.value;
+    }
+    if ("step" in hash) {
+        delete hash.step;
+    }
+    if ("data-schema-key" in hash) {
+        delete hash["data-schema-key"];
+    }
+    if ("firstOption" in hash) {
+        firstOption = hash.firstOption;
+        delete hash.firstOption;
+    }
+    if ("radio" in hash) {
+        radio = hash.radio;
+        delete hash.radio;
+    }
+    if ("select" in hash) {
+        select = hash.select;
+        delete hash.select;
+    }
+    if ("noselect" in hash) {
+        noselect = hash.noselect;
+        delete hash.noselect;
+    }
+    if ("trueLabel" in hash) {
+        trueLabel = hash.trueLabel;
+        delete hash.trueLabel;
+    }
+    if ("falseLabel" in hash) {
+        falseLabel = hash.falseLabel;
+        delete hash.falseLabel;
+    }
+    if ("options" in hash) {
+        selectOptions = hash.options;
+        delete hash.options;
+    }
+
+    //add bootstrap's control-label class to label element
+    if ("class" in hash) {
+        hash.class += " form-control";
+    } else {
+        hash.class = "form-control";
+    }
+
+    if (selectOptions) {
+        //build anything that should be a select, which is anything with defs.options
+        var multiple = "", isMultiple;
+        if (expectsArray) {
+            multiple = " multiple";
+            isMultiple = true;
+        }
+        if (noselect) {
+            html = "";
+            _.each(selectOptions, function(opt) {
+                var checked, inputType;
+                if (isMultiple) {
+                    inputType = "checkbox";
+                    if (_.contains(value, opt.value.toString())) {
+                        checked = ' checked';
+                    } else {
+                        checked = '';
+                    }
+                } else {
+                    inputType = "radio";
+                    if (opt.value.toString() === value) {
+                        checked = ' checked';
+                    } else {
+                        checked = '';
+                    }
+                }
+                html += '<div class="' + inputType + '"><label><input type="' + inputType + '" data-schema-key="' + name + '" name="' + name + '" value="' + opt.value + '"' + checked + objToAttributes(hash) + ' /> ' + opt.label + '</label></div>';
+            });
+        } else {
+            hash.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
+            html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + multiple + '>';
+            if (firstOption && !isMultiple) {
+                html += '<option value="">' + firstOption + '</option>';
+            }
+            _.each(selectOptions, function(opt) {
+                var selected;
+                if (isMultiple) {
+                    if (_.contains(value, opt.value.toString())) {
+                        selected = ' selected';
+                    } else {
+                        selected = '';
+                    }
+                } else {
+                    if (opt.value.toString() === value) {
+                        selected = ' selected';
+                    } else {
+                        selected = '';
+                    }
+                }
+                html += '<option value="' + opt.value + '"' + selected + '>' + opt.label + '</option>';
+            });
+            html += '</select>';
+        }
+    } else if (defs.type === String && hash.rows) {
+        html = '<textarea data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
+    } else if (defs.type === Boolean) {
+        if (radio) {
+            html = '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + trueLabel + '</label></div>';
+            html += '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="false"' + checkedOpposite + objToAttributes(hash) + req + ' /> ' + falseLabel + '</label></div>';
+        } else if (select) {
+            html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + '>';
+            html += '<option value="false"' + (!value ? ' selected' : '') + '>' + falseLabel + '</option>';
+            html += '<option value="true"' + (value ? ' selected' : '') + '>' + trueLabel + '</option>';
+            html += '</select>';
+        } else {
+            html = '<div class="checkbox"><label for="' + name + '"><input type="checkbox" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + label + '</label></div>';
+        }
+    } else {
+        html = '<input type="' + type + '" data-schema-key="' + name + '" name="' + name + '" value="' + value + '"' + objToAttributes(hash) + req + max + min + step + ' />';
+    }
+    return html;
+};
+var createLabelHtml = function(name, defs, hash) {
+    if ("autoform" in hash) {
+        delete hash.autoform;
+    }
+
+    //add bootstrap's control-label class to label element
+    if ("class" in hash) {
+        hash.class += " control-label";
+    } else {
+        hash.class = "control-label";
+    }
+
+    var label = defs.label || name;
+    return '<label' + objToAttributes(hash) + '>' + label + '</label>';
 };
