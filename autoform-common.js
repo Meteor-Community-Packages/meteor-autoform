@@ -6,19 +6,29 @@ AutoForm = function(schema) {
     self._simpleSchema = new SimpleSchema(schema);
 };
 
-_.extend(AutoForm.prototype, {
-    validate: function(doc) {
-        var self = this, schema = self._simpleSchema;
+AutoForm.prototype.validate = function(doc) {
+    var self = this, schema = self._simpleSchema;
 
-        //clean doc
-        doc = schema.filter(doc);
-        doc = schema.autoTypeConvert(doc);
-        //validate doc
-        schema.validate(doc);
+    //clean doc
+    doc = schema.filter(doc);
+    doc = schema.autoTypeConvert(doc);
+    //validate doc
+    schema.validate(doc);
 
-        return schema.valid();
-    },
-    simpleSchema: function() {
-        return this._simpleSchema;
-    }
-});
+    return schema.valid();
+};
+
+AutoForm.prototype.simpleSchema = function() {
+    return this._simpleSchema;
+};
+
+AutoForm.prototype.callbacks = function(cb) {
+    this._callbacks = cb;
+};
+
+//add callbacks() method to Meteor.Collection2
+if (typeof Meteor.Collection2 !== 'undefined') {
+    Meteor.Collection2.prototype.callbacks = function(cb) {
+        this._callbacks = cb;
+    };
+}

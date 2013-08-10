@@ -1,15 +1,3 @@
-//add callbacks() method to AutoForm
-AutoForm.prototype.callbacks = function(cb) {
-    this._callbacks = cb;
-};
-
-//add callbacks() method to Meteor.Collection2
-if (typeof Meteor.Collection2 !== 'undefined') {
-    Meteor.Collection2.prototype.callbacks = function(cb) {
-        this._callbacks = cb;
-    };
-}
-
 if (typeof Handlebars !== 'undefined') {
     Handlebars.registerHelper("autoForm", function(options) {
         if (!options) {
