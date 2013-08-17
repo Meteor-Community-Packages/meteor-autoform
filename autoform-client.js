@@ -260,7 +260,7 @@ if (typeof Handlebars !== 'undefined') {
                 });
             }
         },
-        'click [type=reset]': function() {
+        'click [type=reset]': function(event, template) {
             var autoFormObj = window[template.data.schema];
             if (autoFormObj) {
                 autoFormObj.simpleSchema().resetValidation();
