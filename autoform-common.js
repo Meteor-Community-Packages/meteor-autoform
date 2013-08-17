@@ -1,6 +1,6 @@
 //define AutoForm object; used for forms that are not related to collections
 
-// @export AutoForm
+//exported
 AutoForm = function(schema) {
     var self = this;
     self._simpleSchema = new SimpleSchema(schema);
