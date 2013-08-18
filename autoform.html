@@ -1,11 +1,11 @@
 <template name="_autoForm">
-    <form{{atts}}>
+    <form{{{atts}}}>
         {{{content}}}
     </form>
 </template>
 
 <template name="_quickForm">
-    {{#autoForm schema=schema atts=atts}}
+    {{#autoForm schema=schema doc=doc validation=validation atts=atts}}
     {{#each ../formFields}}
         {{afQuickField this autoform=../this}}
     {{/each}}

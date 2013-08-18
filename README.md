@@ -181,6 +181,7 @@ Attributes:
 * `schema`: Required. Pass either the name of a Collection2 instance or the name of an AutoForm instance.
 * `doc`: Required for update and remove actions. Pass the current document object. It's usually easiest to pass
 the name of a custom helper that returns the object by calling `findOne()`.
+* `validation`: Optional. See the "Fine Tuning Validation" section.
 * Any additional attributes are passed along to the `<form>` element, meaning that you can add classes, etc. It's a
 good idea to specify an `id` attribute if you want Meteor's input preservation to work.
 
@@ -454,6 +455,19 @@ removal.
 You can set `MyAutoForm.beforeMethod` equal to a function the takes the object that will be passed to a method
 as its first argument and the name of the method as its second argument. This function must return a modified copy
 of the object. Remember that whatever modifications you make must still pass SimpleSchema validation.
+
+## Fine Tuning Validation
+
+To control when fields should be validated, use the `validation` attribute on
+the `{{autoform}}` helper. Supported values are:
+* `none`: Do not validate any form fields at any time.
+* `submit`: Validate all form fields only when the form is submitted.
+* `keyup`: Validate each form field on every key press (throttled to run at most once every 300 milliseconds). Also validate all fields again when the form is submitted.
+* `blur`: Validate each form field when the user moves the cursor off it (throttled to run at most once every 300 milliseconds). Also validate all fields again when the form is submitted.
+* `submitThenKeyup`: At first acts like the `submit` option, but after the user attempts to submit the form and it fails validation, subsequently acts like `keyup`.
+* `submitThenBlur`: At first acts like the `submit` option, but after the user attempts to submit the form and it fails validation, subsequently acts like `blur`.
+
+If you do not include the validation attribute, `submitThenKeyup` is used as the default validation method.
 
 ## Complex Controls
 

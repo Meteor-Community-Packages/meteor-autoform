@@ -18,6 +18,18 @@ AutoForm.prototype.validate = function(doc) {
     return schema.valid();
 };
 
+AutoForm.prototype.validateOne = function(doc, keyName) {
+    var self = this, schema = self._simpleSchema;
+
+    //clean doc
+    doc = schema.filter(doc);
+    doc = schema.autoTypeConvert(doc);
+    //validate doc
+    schema.validateOne(doc, keyName);
+
+    return !schema.keyIsInvalid(keyName);
+};
+
 AutoForm.prototype.simpleSchema = function() {
     return this._simpleSchema;
 };

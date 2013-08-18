@@ -26,8 +26,14 @@ if (typeof Handlebars !== 'undefined') {
         if ("doc" in hash) {
             delete hash.doc;
         }
+        var vType = hash.validation || "submitThenKeyup";
+        if ("validation" in hash) {
+            delete hash.validation;
+        }
         autoFormContext.content = options.fn(context);
-        autoFormContext.atts = hash.atts ? objToAttributes(hash.atts) : objToAttributes(hash);
+        var atts = hash.atts || hash;
+        atts['data-autoform-validation'] = vType;
+        autoFormContext.atts = objToAttributes(atts);
         return new Handlebars.SafeString(Template._autoForm(autoFormContext));
     });
     Handlebars.registerHelper("quickForm", function(options) {
@@ -45,6 +51,14 @@ if (typeof Handlebars !== 'undefined') {
             schema: hash.schema,
             formFields: _.keys(schemaObj.simpleSchema().schema())
         };
+        if ("doc" in hash) {
+            context.doc = hash.doc;
+            delete hash.doc;
+        }
+        if ("validation" in hash) {
+            context.validation = hash.validation;
+            delete hash.validation;
+        }
         if ("type" in hash) {
             if (hash.type === "insert") {
                 context.doInsert = true;
@@ -235,6 +249,7 @@ if (typeof Handlebars !== 'undefined') {
         },
         'click button[data-meteor-method]': function(event, template) {
             event.preventDefault();
+            var validationType = template.find('form').getAttribute('data-autoform-validation');
             var doc = formValues(template);
 
             //delete any properties that are null, undefined, or empty strings
@@ -251,13 +266,41 @@ if (typeof Handlebars !== 'undefined') {
             var cb = autoFormObj._callbacks && autoFormObj._callbacks[method] ? autoFormObj._callbacks[method] : function() {
             };
 
-            if (autoFormObj.validate(doc)) {
+            if (validationType === 'none') {
+                Meteor.call(method, doc, function(error, result) {
+                    if (!error) {
+                        template.find("form").reset();
+                    }
+                    cb(error, result, template);
+                });
+            } else if (autoFormObj.validate(doc)) {
                 Meteor.call("_autoFormCheckFirst", method, template.data.schema, doc, function(error, result) {
                     if (!error) {
                         template.find("form").reset();
                     }
                     cb(error, result, template);
                 });
+            }
+        },
+        'keyup [data-schema-key]': function(event, template) {
+            var validationType = template.find('form').getAttribute('data-autoform-validation');
+            var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup');
+            if ((validationType === 'keyup' || validationType === 'submitThenKeyup')) {
+                validateField(event.currentTarget, template, true, onlyIfAlreadyInvalid);
+            }
+        },
+        'blur [data-schema-key]': function(event, template) {
+            var validationType = template.find('form').getAttribute('data-autoform-validation');
+            var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
+            if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
+                validateField(event.currentTarget, template, false, onlyIfAlreadyInvalid);
+            }
+        },
+        'change [data-schema-key]': function(event, template) {
+            var validationType = template.find('form').getAttribute('data-autoform-validation');
+            var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
+            if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
+                validateField(event.currentTarget, template, false, onlyIfAlreadyInvalid);
             }
         },
         'click [type=reset]': function(event, template) {
@@ -731,4 +774,42 @@ var createLabelHtml = function(name, defs, hash) {
 
     var label = defs.label || name;
     return '<label' + objToAttributes(hash) + '>' + label + '</label>';
+};
+var _validateField = function(element, template, skipEmpty, onlyIfAlreadyInvalid) {
+    var doc = formValues(template);
+
+    //delete any properties that are null, undefined, or empty strings
+    doc = cleanNulls(doc);
+
+    var autoFormObj = window[template.data.schema];
+    var schema = autoFormObj.simpleSchema();
+    var key = element.getAttribute("data-schema-key");
+
+    if (skipEmpty && !(key in doc)) {
+        return; //skip validation
+    }
+
+    if (onlyIfAlreadyInvalid && schema.valid()) {
+        return;
+    }
+
+    //clean doc
+    doc = schema.filter(doc);
+    doc = schema.autoTypeConvert(doc);
+    //validate doc
+    schema.validateOne(doc, key);
+};
+//throttling function that calls out to _validateField
+var vok = true, tm;
+var validateField = function(element, template, skipEmpty, onlyIfAlreadyInvalid) {
+    if (vok === false) {
+        Meteor.clearTimeout(tm);
+        tm = Meteor.setTimeout(function() {
+            vok = true;
+            _validateField(element, template, skipEmpty, onlyIfAlreadyInvalid);
+        }, 300);
+        return;
+    }
+    vok = false;
+    _validateField(element, template, skipEmpty, onlyIfAlreadyInvalid);
 };
