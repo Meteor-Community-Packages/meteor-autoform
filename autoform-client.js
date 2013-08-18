@@ -260,6 +260,17 @@ if (typeof Handlebars !== 'undefined') {
                 });
             }
         },
+        'keypress form': function(event, template) {
+            if (window.autoformKeypressValidateTimeout) {
+              Meteor.clearTimeout(window.autoformKeypressValidateTimeout);
+              delete window.autoformKeypressValidateTimeout;
+            }
+            window.autoformKeypressValidateTimeout = Meteor.setTimeout(function inlineValidate() {
+              var doc = cleanNulls(formValues(template));
+              var autoFormObj = window[template.data.schema];
+              autoFormObj.validate(doc);
+            }, 300);
+        },
         'click [type=reset]': function(event, template) {
             var autoFormObj = window[template.data.schema];
             if (autoFormObj) {
