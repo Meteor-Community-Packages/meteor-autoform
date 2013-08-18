@@ -186,6 +186,9 @@ if (typeof Handlebars !== 'undefined') {
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.insert ? collection2Obj._callbacks.insert : null;
             collection2Obj.insert(doc, function(error, result) {
                 if (!error) {
+                    if (template.data.schema in autoformSelections) {
+                        delete autoformSelections[template.data.schema];
+                    }
                     template.find("form").reset();
                 }
                 if (cb) {
@@ -222,6 +225,12 @@ if (typeof Handlebars !== 'undefined') {
 
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.update ? collection2Obj._callbacks.update : null;
             collection2Obj.update(self._doc._id, updateObj, function(error) {
+                if (!error) {
+                    if (template.data.schema in autoformSelections) {
+                        delete autoformSelections[template.data.schema];
+                    }
+                    template.find("form").reset();
+                }
                 if (cb) {
                     cb(error, template);
                 }
@@ -237,11 +246,16 @@ if (typeof Handlebars !== 'undefined') {
                 if (!collection2Obj.beforeRemove(self._doc._id)) {
                     return;
                 }
-                ;
             }
 
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.remove ? collection2Obj._callbacks.remove : null;
             collection2Obj.remove(self._doc._id, function(error) {
+                if (!error) {
+                    if (template.data.schema in autoformSelections) {
+                        delete autoformSelections[template.data.schema];
+                    }
+                    template.find("form").reset();
+                }
                 if (cb) {
                     cb(error, template);
                 }
@@ -269,6 +283,9 @@ if (typeof Handlebars !== 'undefined') {
             if (validationType === 'none') {
                 Meteor.call(method, doc, function(error, result) {
                     if (!error) {
+                        if (template.data.schema in autoformSelections) {
+                            delete autoformSelections[template.data.schema];
+                        }
                         template.find("form").reset();
                     }
                     cb(error, result, template);
@@ -276,6 +293,9 @@ if (typeof Handlebars !== 'undefined') {
             } else if (autoFormObj.validate(doc)) {
                 Meteor.call("_autoFormCheckFirst", method, template.data.schema, doc, function(error, result) {
                     if (!error) {
+                        if (template.data.schema in autoformSelections) {
+                            delete autoformSelections[template.data.schema];
+                        }
                         template.find("form").reset();
                     }
                     cb(error, result, template);
@@ -297,6 +317,11 @@ if (typeof Handlebars !== 'undefined') {
             }
         },
         'change [data-schema-key]': function(event, template) {
+            if (event.currentTarget.nodeName.toLowerCase() === "select") {
+                //workaround for selection being lost on rerender
+                //store the selections in memory and reset in rendered
+                setSelections(event.currentTarget, template.data.schema);
+            }
             var validationType = template.find('form').getAttribute('data-autoform-validation');
             var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
             if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
@@ -308,6 +333,9 @@ if (typeof Handlebars !== 'undefined') {
             if (autoFormObj) {
                 autoFormObj.simpleSchema().resetValidation();
             }
+            if (template.data.schema in autoformSelections) {
+                delete autoformSelections[template.data.schema];
+            }
         }
     });
 
@@ -317,9 +345,20 @@ if (typeof Handlebars !== 'undefined') {
     //This means that selected is not updated properly even if the selected
     //attribute is on the element.
     Template._autoForm.rendered = function() {
-        _.each(this.findAll("option"), function(optionElement) {
-            if (optionElement.hasAttribute("selected")) {
-                optionElement.selected = true;
+        var schemaName = this.data.schema;
+        var selections = autoformSelections[schemaName];
+        if (!selections) {
+            return;
+        }
+        _.each(this.findAll("select"), function(selectElement) {
+            var key = selectElement.getAttribute('data-schema-key');
+            var selectedValues = selections[key];
+            if (selectedValues && selectedValues.length) {
+                _.each(selectElement.options, function(option) {
+                    if (_.contains(selectedValues, option.value)) {
+                        option.selected = true;
+                    }
+                });
             }
         });
     };
@@ -812,4 +851,23 @@ var validateField = function(element, template, skipEmpty, onlyIfAlreadyInvalid)
     }
     vok = false;
     _validateField(element, template, skipEmpty, onlyIfAlreadyInvalid);
+};
+
+var autoformSelections = {};
+var setSelections = function(select, schemaName) {
+    var key = select.getAttribute('data-schema-key');
+    if (!key) {
+        return;
+    }
+    var selections = [];
+    for (var i = 0, ln = select.length, opt; i < ln; i++) {
+        opt = select.options[i];
+        if (opt.selected) {
+            selections.push(opt.value);
+        }
+    }
+    if (!(schemaName in autoformSelections)) {
+        autoformSelections[schemaName] = {};
+    }
+    autoformSelections[schemaName][key] = selections;
 };

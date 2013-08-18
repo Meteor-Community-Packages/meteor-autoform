@@ -462,7 +462,7 @@ To control when fields should be validated, use the `validation` attribute on
 the `{{autoform}}` helper. Supported values are:
 * `none`: Do not validate any form fields at any time.
 * `submit`: Validate all form fields only when the form is submitted.
-* `keyup`: Validate each form field on every key press (throttled to run at most once every 300 milliseconds). Also validate all fields again when the form is submitted.
+* `keyup`: Validate each form field on every key press and when the user moves the cursor off it (throttled to run at most once every 300 milliseconds). Also validate all fields again when the form is submitted.
 * `blur`: Validate each form field when the user moves the cursor off it (throttled to run at most once every 300 milliseconds). Also validate all fields again when the form is submitted.
 * `submitThenKeyup`: At first acts like the `submit` option, but after the user attempts to submit the form and it fails validation, subsequently acts like `keyup`.
 * `submitThenBlur`: At first acts like the `submit` option, but after the user attempts to submit the form and it fails validation, subsequently acts like `blur`.
