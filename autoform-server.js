@@ -4,7 +4,7 @@ Meteor.methods({
         if (!obj) {
             throw new Error("No object exists on the server with that name.");
         }
-        check(doc, obj.simpleSchema());
+        checkSchema(doc, obj.simpleSchema());
         return Meteor.call(method, doc);
     }
 });
