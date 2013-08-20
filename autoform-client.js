@@ -296,15 +296,16 @@ if (typeof Handlebars !== 'undefined') {
         'keyup [data-schema-key]': function(event, template) {
             var validationType = template.find('form').getAttribute('data-autoform-validation');
             var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup');
+            var skipEmpty = !(event.keyCode === 8 || event.keyCode === 46); //if deleting or backspacing, don't skip empty
             if ((validationType === 'keyup' || validationType === 'submitThenKeyup')) {
-                validateField(event.currentTarget, template, true, onlyIfAlreadyInvalid);
+                validateField(event.currentTarget.getAttribute("data-schema-key"), template, skipEmpty, onlyIfAlreadyInvalid);
             }
         },
         'blur [data-schema-key]': function(event, template) {
             var validationType = template.find('form').getAttribute('data-autoform-validation');
             var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
             if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
-                validateField(event.currentTarget, template, false, onlyIfAlreadyInvalid);
+                validateField(event.currentTarget.getAttribute("data-schema-key"), template, false, onlyIfAlreadyInvalid);
             }
         },
         'change [data-schema-key]': function(event, template) {
@@ -316,7 +317,7 @@ if (typeof Handlebars !== 'undefined') {
             var validationType = template.find('form').getAttribute('data-autoform-validation');
             var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
             if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
-                validateField(event.currentTarget, template, false, onlyIfAlreadyInvalid);
+                validateField(event.currentTarget.getAttribute("data-schema-key"), template, false, onlyIfAlreadyInvalid);
             }
         },
         'click [type=reset]': function(event, template) {
@@ -824,7 +825,7 @@ var createLabelHtml = function(name, defs, hash) {
     var label = defs.label || name;
     return '<label' + objToAttributes(hash) + '>' + label + '</label>';
 };
-var _validateField = function(element, template, skipEmpty, onlyIfAlreadyInvalid) {
+var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
     var autoFormObj = window[template.data.schema];
     var doc = formValues(template, autoFormObj.formValuesOutTransform);
 
@@ -832,7 +833,6 @@ var _validateField = function(element, template, skipEmpty, onlyIfAlreadyInvalid
     doc = cleanNulls(doc);
 
     var schema = autoFormObj.simpleSchema();
-    var key = element.getAttribute("data-schema-key");
 
     if (skipEmpty && !(key in doc)) {
         return; //skip validation
@@ -849,18 +849,18 @@ var _validateField = function(element, template, skipEmpty, onlyIfAlreadyInvalid
     schema.validateOne(doc, key);
 };
 //throttling function that calls out to _validateField
-var vok = true, tm;
-var validateField = function(element, template, skipEmpty, onlyIfAlreadyInvalid) {
-    if (vok === false) {
-        Meteor.clearTimeout(tm);
-        tm = Meteor.setTimeout(function() {
-            vok = true;
-            _validateField(element, template, skipEmpty, onlyIfAlreadyInvalid);
+var vok = {}, tm = {};
+var validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
+    if (vok[key] === false) {
+        Meteor.clearTimeout(tm[key]);
+        tm[key] = Meteor.setTimeout(function() {
+            vok[key] = true;
+            _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
         }, 300);
         return;
     }
-    vok = false;
-    _validateField(element, template, skipEmpty, onlyIfAlreadyInvalid);
+    vok[key] = false;
+    _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
 };
 
 var autoformSelections = {};
