@@ -4,8 +4,8 @@ AutoForm
 AutoForm is a smart package for Meteor that adds handlebars helpers to easily create basic
 forms with automatic insert and update events, and automatic reactive validation. 
 This package requires and automatically installs the [simple-schema](https://github.com/aldeed/meteor-simple-schema) package.
-You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which
-must be added to your project before AutoForm.
+You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you
+have to add to your app yourself.
 
 ## Example
 
@@ -274,8 +274,9 @@ set its value to the name of any 'Meteor.method()' you have defined.
 
 If you do these three things, the form data will be gathered into a single object when
 the user clicks the submit button. Then that object will be cleaned and validated against the
-schema on both the client and the server before your method is ever called. This means
-you don't have to write any validation code whatsoever in your method!
+schema on the client and passed along to your method on the server. **You must
+validate it again in your method on the server, using `checkSchema()` in a manner
+similar to using `check()`.**
 
 ### An Example Contact Form
 
@@ -341,6 +342,7 @@ The Meteor method:
 ```js
 Meteor.methods({
     sendEmail: function(doc) {
+        checkSchema(doc, ContactForm.simpleSchema());
         var text = "Name: " + doc.name + "\n\n"
                 + "Email: " + doc.email + "\n\n\n\n"
                 + doc.message;
@@ -357,8 +359,9 @@ Meteor.methods({
 });
 ```
 
-To reiterate, you do not need to call `check()` in the method. The equivalent of this is done for you on
-both the client and the server. You might need to do authorization checks, but not validation checks.
+Note the call to `checkSchema()`, which will throw an error if doc doesn't
+match the schema. **To reiterate, you must call `checkSchema()` in the method or perform your
+own validation since a user could bypass the client side validation.**
 
 ## Callbacks
 

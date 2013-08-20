@@ -280,18 +280,8 @@ if (typeof Handlebars !== 'undefined') {
             var cb = autoFormObj._callbacks && autoFormObj._callbacks[method] ? autoFormObj._callbacks[method] : function() {
             };
 
-            if (validationType === 'none') {
+            if (validationType === 'none' || autoFormObj.validate(doc)) {
                 Meteor.call(method, doc, function(error, result) {
-                    if (!error) {
-                        if (template.data.schema in autoformSelections) {
-                            delete autoformSelections[template.data.schema];
-                        }
-                        template.find("form").reset();
-                    }
-                    cb(error, result, template);
-                });
-            } else if (autoFormObj.validate(doc)) {
-                Meteor.call("_autoFormCheckFirst", method, template.data.schema, doc, function(error, result) {
                     if (!error) {
                         if (template.data.schema in autoformSelections) {
                             delete autoformSelections[template.data.schema];
