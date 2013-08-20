@@ -14,6 +14,9 @@ if (typeof Handlebars !== 'undefined') {
         if (hash.doc) {
             schemaKeys = _.keys(schemaObj.simpleSchema().schema());
             flatDoc = collapseObj(hash.doc, schemaKeys);
+            if (typeof schemaObj.formValuesInTransform === "function") {
+                flatDoc = schemaObj.formValuesInTransform(flatDoc);
+            }
         } else {
             flatDoc = {};
         }
@@ -171,7 +174,7 @@ if (typeof Handlebars !== 'undefined') {
         'click .insert[type=submit]': function(event, template) {
             event.preventDefault();
             var collection2Obj = window[template.data.schema];
-            var doc = formValues(template, collection2Obj.formDataTransform);
+            var doc = formValues(template, collection2Obj.formValuesOutTransform);
 
             //for inserts, delete any properties that are null, undefined, or empty strings
             doc = cleanNulls(doc);
@@ -198,7 +201,7 @@ if (typeof Handlebars !== 'undefined') {
         'click .update[type=submit]': function(event, template) {
             event.preventDefault();
             var collection2Obj = window[template.data.schema];
-            var self = this, doc = formValues(template, collection2Obj.formDataTransform), nulls, updateObj = {}, docIsEmpty, nullsIsEmpty;
+            var self = this, doc = formValues(template, collection2Obj.formValuesOutTransform), nulls, updateObj = {}, docIsEmpty, nullsIsEmpty;
 
             //for updates, unset any properties that are null, undefined, or empty strings
             nulls = reportNulls(doc);
@@ -263,7 +266,7 @@ if (typeof Handlebars !== 'undefined') {
             event.preventDefault();
             var autoFormObj = window[template.data.schema];
             var validationType = template.find('form').getAttribute('data-autoform-validation');
-            var doc = formValues(template, autoFormObj.formDataTransform);
+            var doc = formValues(template, autoFormObj.formValuesOutTransform);
 
             //delete any properties that are null, undefined, or empty strings
             doc = cleanNulls(doc);
@@ -550,12 +553,24 @@ var getSelectValues = function(select) {
     return result;
 };
 var createInputHtml = function(name, autoform, defs, hash) {
-    var html, expectsArray = _.isArray(defs.type);
+    var html;
+    
+    //adjust expected type when type is overridden
+    var schemaType = defs.type;
+    var expectsArray = _.isArray(schemaType);
+    if (expectsArray && hash.type) {
+        //if the user overrides the type to anything,
+        //then we won't be using a select box and
+        //we won't be expecting an array for the current value
+        schemaType = schemaType[0]; //this, for example, changes [String] to String
+        expectsArray = false;
+    }
+    
 
     //get current value
     var value, arrayVal;
     if (expectsArray) {
-        if (defs.type[0] === Date) {
+        if (schemaType[0] === Date) {
             if (autoform._flatDoc && name in autoform._flatDoc) {
                 arrayVal = autoform._flatDoc[name];
                 value = [];
@@ -577,13 +592,13 @@ var createInputHtml = function(name, autoform, defs, hash) {
             }
         }
     } else {
-        if (defs.type === Date) {
+        if (schemaType === Date) {
             if (autoform._flatDoc && name in autoform._flatDoc) {
                 value = dateToFieldDateString(autoform._flatDoc[name]);
             } else {
                 value = "";
             }
-        } else if (defs.type === Boolean) {
+        } else if (schemaType === Boolean) {
             if (autoform._flatDoc && name in autoform._flatDoc) {
                 value = autoform._flatDoc[name];
             } else {
@@ -603,7 +618,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
 
     //handle boolean values
     var checked = "", checkedOpposite = "";
-    if (defs.type === Boolean && value) {
+    if (schemaType === Boolean && value) {
         checked = " checked";
     } else {
         checkedOpposite = " checked";
@@ -613,21 +628,25 @@ var createInputHtml = function(name, autoform, defs, hash) {
     var type = "text";
     if (hash.type) {
         type = hash.type;
-    } else if (defs.type === String && defs.regEx === SchemaRegEx.Email) {
+    } else if (schemaType === String && hash.rows) {
+        type = "textarea";
+    } else if (schemaType === String && defs.regEx === SchemaRegEx.Email) {
         type = "email";
-    } else if (defs.type === String && defs.regEx === SchemaRegEx.Url) {
+    } else if (schemaType === String && defs.regEx === SchemaRegEx.Url) {
         type = "url";
-    } else if (defs.type === Number) {
+    } else if (schemaType === Number) {
         type = "number";
-    } else if (defs.type === Date) {
+    } else if (schemaType === Date) {
         type = "date";
+    } else if (schemaType === Boolean) {
+        type = "boolean";
     }
 
     var label = defs.label || name;
 
     //get correct max/min attributes
     var max = "", min = "";
-    if (defs.type === String) {
+    if (schemaType === String) {
         if (defs.max) {
             max = ' maxlength="' + defs.max + '"';
         }
@@ -719,7 +738,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
     }
 
     if (selectOptions) {
-        //build anything that should be a select, which is anything with defs.options
+        //build anything that should be a select, which is anything with options
         var multiple = "", isMultiple;
         if (expectsArray) {
             multiple = " multiple";
@@ -771,9 +790,9 @@ var createInputHtml = function(name, autoform, defs, hash) {
             });
             html += '</select>';
         }
-    } else if (defs.type === String && hash.rows) {
+    } else if (type === "textarea") {
         html = '<textarea data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
-    } else if (defs.type === Boolean) {
+    } else if (type === "boolean") {
         if (radio) {
             html = '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + trueLabel + '</label></div>';
             html += '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="false"' + checkedOpposite + objToAttributes(hash) + req + ' /> ' + falseLabel + '</label></div>';
@@ -807,7 +826,7 @@ var createLabelHtml = function(name, defs, hash) {
 };
 var _validateField = function(element, template, skipEmpty, onlyIfAlreadyInvalid) {
     var autoFormObj = window[template.data.schema];
-    var doc = formValues(template, autoFormObj.formDataTransform);
+    var doc = formValues(template, autoFormObj.formValuesOutTransform);
 
     //delete any properties that are null, undefined, or empty strings
     doc = cleanNulls(doc);
