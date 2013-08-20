@@ -291,7 +291,6 @@ ContactForm = new AutoForm({
     email: {
         type: String,
         regEx: SchemaRegEx.Email,
-        regExMessage: "is not a valid e-mail address",
         label: "E-mail address"
     },
     message: {
@@ -601,7 +600,7 @@ But what if you want to pass additional attributes to the label element? Simply 
 Eventually the quickForm helper will have a few different built in styles you can choose from, like horizontal, vertical, and responsive,
 as well as the ability to put the labels in placeholder instead of label.
 
-## Using Block Helpers Within and AutoForm
+## Using Block Helpers Within an AutoForm
 
 Because of the way the `{{#autoForm}}` block helper keeps track of data, if you use a block helper
 within an autoForm and that block helper changes the context, things won't work correctly. Examples of
