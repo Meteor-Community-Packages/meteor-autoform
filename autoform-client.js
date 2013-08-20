@@ -170,13 +170,12 @@ if (typeof Handlebars !== 'undefined') {
     Template._autoForm.events({
         'click .insert[type=submit]': function(event, template) {
             event.preventDefault();
-            var doc = formValues(template);
+            var collection2Obj = window[template.data.schema];
+            var doc = formValues(template, collection2Obj.formDataTransform);
 
             //for inserts, delete any properties that are null, undefined, or empty strings
             doc = cleanNulls(doc);
             doc = expandObj(doc); //inserts should not use dot notation but rather actual subdocuments
-
-            var collection2Obj = window[template.data.schema];
 
             //call beforeInsert if present
             if (typeof collection2Obj.beforeInsert === "function") {
@@ -198,7 +197,8 @@ if (typeof Handlebars !== 'undefined') {
         },
         'click .update[type=submit]': function(event, template) {
             event.preventDefault();
-            var self = this, doc = formValues(template), nulls, updateObj = {}, docIsEmpty, nullsIsEmpty;
+            var collection2Obj = window[template.data.schema];
+            var self = this, doc = formValues(template, collection2Obj.formDataTransform), nulls, updateObj = {}, docIsEmpty, nullsIsEmpty;
 
             //for updates, unset any properties that are null, undefined, or empty strings
             nulls = reportNulls(doc);
@@ -215,8 +215,6 @@ if (typeof Handlebars !== 'undefined') {
             if (!nullsIsEmpty) {
                 updateObj.$unset = nulls;
             }
-
-            var collection2Obj = window[template.data.schema];
 
             //call beforeUpdate if present
             if (typeof collection2Obj.beforeUpdate === "function") {
@@ -263,13 +261,13 @@ if (typeof Handlebars !== 'undefined') {
         },
         'click button[data-meteor-method]': function(event, template) {
             event.preventDefault();
+            var autoFormObj = window[template.data.schema];
             var validationType = template.find('form').getAttribute('data-autoform-validation');
-            var doc = formValues(template);
+            var doc = formValues(template, autoFormObj.formDataTransform);
 
             //delete any properties that are null, undefined, or empty strings
             doc = cleanNulls(doc);
-
-            var autoFormObj = window[template.data.schema];
+            
             var method = event.currentTarget.getAttribute("data-meteor-method");
 
             //call beforeMethod if present
@@ -354,7 +352,7 @@ if (typeof Handlebars !== 'undefined') {
     };
 }
 
-var formValues = function(template) {
+var formValues = function(template, transform) {
     var fields = template.findAll("[data-schema-key]");
     var doc = {};
     _.each(fields, function(field) {
@@ -435,6 +433,9 @@ var formValues = function(template) {
         //handle all other inputs
         doc[name] = val;
     });
+    if (typeof transform === "function") {
+        doc = transform(doc);
+    }
     return doc;
 };
 var objToAttributes = function(obj) {
@@ -805,12 +806,12 @@ var createLabelHtml = function(name, defs, hash) {
     return '<label' + objToAttributes(hash) + '>' + label + '</label>';
 };
 var _validateField = function(element, template, skipEmpty, onlyIfAlreadyInvalid) {
-    var doc = formValues(template);
+    var autoFormObj = window[template.data.schema];
+    var doc = formValues(template, autoFormObj.formDataTransform);
 
     //delete any properties that are null, undefined, or empty strings
     doc = cleanNulls(doc);
 
-    var autoFormObj = window[template.data.schema];
     var schema = autoFormObj.simpleSchema();
     var key = element.getAttribute("data-schema-key");
 
