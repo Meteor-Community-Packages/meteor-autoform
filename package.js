@@ -8,13 +8,12 @@ Package.on_use(function(api) {
     api.use('templating', 'client');
     api.use('handlebars', 'client');
     api.use('collection2', ['client', 'server'], {weak: true});
-
+    api.use('simple-schema', ['client', 'server']);
+    
     if (typeof api.export !== 'undefined') {
         api.use('livedata', ['client', 'server']);
         api.imply('simple-schema', ['client', 'server']);
         api.export(['AutoForm'], ['client', 'server']);
-    } else {
-        api.use('simple-schema', ['client', 'server']);
     }
 
     api.add_files(['autoform-common.js'], ['client', 'server']);
