@@ -457,7 +457,7 @@ update, this is a mongo-style update object with `$set` and potentially `$unset`
 the object will be perfect for your needs. However, you might find that you want to modify the object in some way.
 For example, you might want to add the current user's ID to a document before it is inserted. To do this,
 you can define a function to be called after the form data is gathered into an object, but before the
-object is validated or submitted.
+object is validated and submitted.
 
 ### MyCollection2.beforeInsert
 
@@ -479,11 +479,56 @@ You can set `MyCollection2.beforeRemove` equal to a function the takes the ID of
 the document to be removed as its only argument and returns `false` to cancel the
 removal.
 
-### MyAutoForm.beforeMethod
+### MyAutoForm.beforeMethod or MyCollection2.beforeMethod
 
-You can set `MyAutoForm.beforeMethod` equal to a function the takes the object that will be passed to a method
+You can set `MyAutoForm.beforeMethod` or `MyCollection2.beforeMethod` equal to a function the takes the object that will be passed to a method
 as its first argument and the name of the method as its second argument. This function must return a modified copy
 of the object. Remember that whatever modifications you make must still pass SimpleSchema validation.
+
+### MyAutoForm.formToDoc, MyCollection2.formToDoc, MyAutoForm.docToForm, MyCollection2.docToForm
+
+Specify `formToDoc` and `docToForm` functions if you need form values in a different
+format in your form versus in the mongo document. They are mainly useful if you
+decide to override an input type.
+
+*Unlike document modifications made in `beforeInsert`,
+`beforeUpdate`, or `beforeMethod` functions, modifications made in the
+`formToDoc` and `docToForm` functions are made every time the form is validated, which could
+happen very often on the client. The others are run only right before the
+corresponding submission actions, as their names imply.*
+
+Here is an example where this feature is used to allow comma-delimited entry in
+a text field but store the values as an array:
+
+First specify `type: [String]` in the schema.
+
+*For the `afFieldInput` helper, don't supply options:*
+
+```html
+{{afFieldInput "tags"}}
+```
+
+When there are no options, a `<select>` element will not be generated.
+
+Then in client code:
+
+```js
+Posts.docToForm = function (doc) {
+    var str = "";
+    _.each(doc["tags"], function (val) {
+        str += val + ", "; 
+    });
+    //strip off the extra ", " here
+    doc["tags"] = str;
+    return doc;
+ };
+
+ Posts.formToDoc = function (doc) {
+    doc["tags"] = doc["tags"].split(",");
+    //loop through values and trim() or whatever else you want to do
+    return doc;
+ };
+```
 
 ## Fine Tuning Validation
 
