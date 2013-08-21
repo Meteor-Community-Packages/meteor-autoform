@@ -3,7 +3,11 @@
 //exported
 AutoForm = function(schema) {
     var self = this;
-    self._simpleSchema = new SimpleSchema(schema);
+    if (schema instanceof SimpleSchema) {
+        self._simpleSchema = schema;
+    } else {
+        self._simpleSchema = new SimpleSchema(schema);
+    }
 };
 
 AutoForm.prototype.validate = function(doc) {

@@ -46,47 +46,57 @@ Books = new Meteor.Collection2("books", {
 Creating an insert form with automatic validation and submission is now as simple as this:
 
 ```html
-{{#autoForm schema='Books'}}
-<fieldset>
-    <legend>Add a Book</legend>
-    <div class="form-group{{#if afFieldIsInvalid 'title'}} has-error{{/if}}">
-        {{afFieldLabel 'title'}}
-        {{afFieldInput 'title'}}
-        {{#if afFieldIsInvalid 'title'}}
-        <span class="help-block">{{afFieldMessage 'title'}}</span>
-        {{/if}}
-    </div>
-    <div class="form-group{{#if afFieldIsInvalid 'author'}} has-error{{/if}}">
-        {{afFieldLabel 'author'}}
-        {{afFieldInput 'author'}}
-        {{#if afFieldIsInvalid 'author'}}
-        <span class="help-block">{{afFieldMessage 'author'}}</span>
-        {{/if}}
-    </div>
-    <div class="form-group{{#if afFieldIsInvalid 'summary'}} has-error{{/if}}">
-        {{afFieldLabel 'summary'}}
-        {{afFieldInput 'summary'}}
-        {{#if afFieldIsInvalid 'summary'}}
-        <span class="help-block">{{afFieldMessage 'summary'}}</span>
-        {{/if}}
-    </div>
-    <div class="form-group{{#if afFieldIsInvalid 'copies'}} has-error{{/if}}">
-        {{afFieldLabel 'copies'}}
-        {{afFieldInput 'copies'}}
-        {{#if afFieldIsInvalid 'copies'}}
-        <span class="help-block">{{afFieldMessage 'copies'}}</span>
-        {{/if}}
-    </div>
-    <div class="form-group{{#if afFieldIsInvalid 'lastCheckedOut'}} has-error{{/if}}">
-        {{afFieldLabel 'lastCheckedOut'}}
-        {{afFieldInput 'lastCheckedOut'}}
-        {{#if afFieldIsInvalid 'lastCheckedOut'}}
-        <span class="help-block">{{afFieldMessage 'lastCheckedOut'}}</span>
-        {{/if}}
-    </div>
-</fieldset>
-<button type="submit" class="btn btn-primary insert">Insert</button>
-{{/autoForm}}
+<template name="insertBookForm">
+    {{#autoForm schema=booksCollection}}
+    <fieldset>
+        <legend>Add a Book</legend>
+        <div class="form-group{{#if afFieldIsInvalid 'title'}} has-error{{/if}}">
+            {{afFieldLabel 'title'}}
+            {{afFieldInput 'title'}}
+            {{#if afFieldIsInvalid 'title'}}
+            <span class="help-block">{{afFieldMessage 'title'}}</span>
+            {{/if}}
+        </div>
+        <div class="form-group{{#if afFieldIsInvalid 'author'}} has-error{{/if}}">
+            {{afFieldLabel 'author'}}
+            {{afFieldInput 'author'}}
+            {{#if afFieldIsInvalid 'author'}}
+            <span class="help-block">{{afFieldMessage 'author'}}</span>
+            {{/if}}
+        </div>
+        <div class="form-group{{#if afFieldIsInvalid 'summary'}} has-error{{/if}}">
+            {{afFieldLabel 'summary'}}
+            {{afFieldInput 'summary'}}
+            {{#if afFieldIsInvalid 'summary'}}
+            <span class="help-block">{{afFieldMessage 'summary'}}</span>
+            {{/if}}
+        </div>
+        <div class="form-group{{#if afFieldIsInvalid 'copies'}} has-error{{/if}}">
+            {{afFieldLabel 'copies'}}
+            {{afFieldInput 'copies'}}
+            {{#if afFieldIsInvalid 'copies'}}
+            <span class="help-block">{{afFieldMessage 'copies'}}</span>
+            {{/if}}
+        </div>
+        <div class="form-group{{#if afFieldIsInvalid 'lastCheckedOut'}} has-error{{/if}}">
+            {{afFieldLabel 'lastCheckedOut'}}
+            {{afFieldInput 'lastCheckedOut'}}
+            {{#if afFieldIsInvalid 'lastCheckedOut'}}
+            <span class="help-block">{{afFieldMessage 'lastCheckedOut'}}</span>
+            {{/if}}
+        </div>
+    </fieldset>
+    <button type="submit" class="btn btn-primary insert">Insert</button>
+    {{/autoForm}}
+</template>
+```
+
+And one client-side helper:
+
+```js
+Template.insertBookForm.booksCollection = function () {
+    return Books;
+};
 ```
 
 And that's it! You don't have to write any specific javascript functions to validate the data
@@ -105,47 +115,49 @@ helpers will reactively update.
 What about an update? It's pretty much the same:
 
 ```html
-{{#autoForm schema='Books' doc=selectedBook}}
-<fieldset>
-    <legend>Edit Book</legend>
-    <div class="form-group{{#if afFieldIsInvalid 'title'}} has-error{{/if}}">
-        {{afFieldLabel 'title'}}
-        {{afFieldInput 'title'}}
-        {{#if afFieldIsInvalid 'title'}}
-        <span class="help-block">{{afFieldMessage 'title'}}</span>
-        {{/if}}
-    </div>
-    <div class="form-group{{#if afFieldIsInvalid 'author'}} has-error{{/if}}">
-        {{afFieldLabel 'author'}}
-        {{afFieldInput 'author'}}
-        {{#if afFieldIsInvalid 'author'}}
-        <span class="help-block">{{afFieldMessage 'author'}}</span>
-        {{/if}}
-    </div>
-    <div class="form-group{{#if afFieldIsInvalid 'summary'}} has-error{{/if}}">
-        {{afFieldLabel 'summary'}}
-        {{afFieldInput 'summary'}}
-        {{#if afFieldIsInvalid 'summary'}}
-        <span class="help-block">{{afFieldMessage 'summary'}}</span>
-        {{/if}}
-    </div>
-    <div class="form-group{{#if afFieldIsInvalid 'copies'}} has-error{{/if}}">
-        {{afFieldLabel 'copies'}}
-        {{afFieldInput 'copies'}}
-        {{#if afFieldIsInvalid 'copies'}}
-        <span class="help-block">{{afFieldMessage 'copies'}}</span>
-        {{/if}}
-    </div>
-    <div class="form-group{{#if afFieldIsInvalid 'lastCheckedOut'}} has-error{{/if}}">
-        {{afFieldLabel 'lastCheckedOut'}}
-        {{afFieldInput 'lastCheckedOut'}}
-        {{#if afFieldIsInvalid 'lastCheckedOut'}}
-        <span class="help-block">{{afFieldMessage 'lastCheckedOut'}}</span>
-        {{/if}}
-    </div>
-</fieldset>
-<button type="submit" class="btn btn-primary update">Update</button>
-{{/autoForm}}
+<template name="updateBookForm">
+    {{#autoForm schema=booksCollection doc=selectedBook}}
+    <fieldset>
+        <legend>Edit Book</legend>
+        <div class="form-group{{#if afFieldIsInvalid 'title'}} has-error{{/if}}">
+            {{afFieldLabel 'title'}}
+            {{afFieldInput 'title'}}
+            {{#if afFieldIsInvalid 'title'}}
+            <span class="help-block">{{afFieldMessage 'title'}}</span>
+            {{/if}}
+        </div>
+        <div class="form-group{{#if afFieldIsInvalid 'author'}} has-error{{/if}}">
+            {{afFieldLabel 'author'}}
+            {{afFieldInput 'author'}}
+            {{#if afFieldIsInvalid 'author'}}
+            <span class="help-block">{{afFieldMessage 'author'}}</span>
+            {{/if}}
+        </div>
+        <div class="form-group{{#if afFieldIsInvalid 'summary'}} has-error{{/if}}">
+            {{afFieldLabel 'summary'}}
+            {{afFieldInput 'summary'}}
+            {{#if afFieldIsInvalid 'summary'}}
+            <span class="help-block">{{afFieldMessage 'summary'}}</span>
+            {{/if}}
+        </div>
+        <div class="form-group{{#if afFieldIsInvalid 'copies'}} has-error{{/if}}">
+            {{afFieldLabel 'copies'}}
+            {{afFieldInput 'copies'}}
+            {{#if afFieldIsInvalid 'copies'}}
+            <span class="help-block">{{afFieldMessage 'copies'}}</span>
+            {{/if}}
+        </div>
+        <div class="form-group{{#if afFieldIsInvalid 'lastCheckedOut'}} has-error{{/if}}">
+            {{afFieldLabel 'lastCheckedOut'}}
+            {{afFieldInput 'lastCheckedOut'}}
+            {{#if afFieldIsInvalid 'lastCheckedOut'}}
+            <span class="help-block">{{afFieldMessage 'lastCheckedOut'}}</span>
+            {{/if}}
+        </div>
+    </fieldset>
+    <button type="submit" class="btn btn-primary update">Update</button>
+    {{/autoForm}}
+</template>
 ```
 
 Notice the following:
@@ -162,7 +174,7 @@ pass in null or undefined to the `doc` attribute.
 And finally, how about an example of a remove form:
 
 ```html
-{{#autoForm schema='Books' doc=this}}
+{{#autoForm schema=booksCollection doc=this}}
   <button type="submit" class="btn btn-primary remove">Delete</button>
 {{/autoForm}}
 ```
@@ -275,15 +287,15 @@ set its value to the name of any 'Meteor.method()' you have defined.
 If you do these three things, the form data will be gathered into a single object when
 the user clicks the submit button. Then that object will be cleaned and validated against the
 schema on the client and passed along to your method on the server. **You must
-validate it again in your method on the server, using `checkSchema()` in a manner
-similar to using `check()`.**
+validate it again in your method on the server, using `check()` in combination
+with `myAutoFormSchema.match()`.**
 
 ### An Example Contact Form
 
-The AutoForm object:
+The schema, defined on in common js:
 
 ```js
-ContactForm = new AutoForm({
+Schema.contact = new SimpleSchema({
     name: {
         type: String,
         label: "Your name",
@@ -305,36 +317,49 @@ ContactForm = new AutoForm({
 The HTML:
 
 ```html
-{{#autoForm schema="ContactForm" id="contactForm"}}
-<fieldset>
-    <legend>Contact Us</legend>
-    <div class="form-group{{#if afFieldIsInvalid 'name'}} has-error{{/if}}">
-        {{afFieldLabel "name" class="control-label"}}
-        {{afFieldInput "name"}}
-        {{#if afFieldIsInvalid "name"}}
-        <span class="help-block">{{afFieldMessage "name"}}</span>
-        {{/if}}
-    </div>
-    <div class="form-group{{#if afFieldIsInvalid 'email'}} has-error{{/if}}">
-        {{afFieldLabel "email" class="control-label"}}
-        {{afFieldInput "email"}}
-        {{#if afFieldIsInvalid "email"}}
-        <span class="help-block">{{afFieldMessage "email"}}</span>
-        {{/if}}
-    </div>
-    <div class="form-group{{#if afFieldIsInvalid 'message'}} has-error{{/if}}">
-        {{afFieldLabel "message" class="control-label"}}
-        {{afFieldInput "message" rows="10"}}
-        {{#if afFieldIsInvalid "message"}}
-        <span class="help-block">{{afFieldMessage "message"}}</span>
-        {{/if}}
-    </div>
-    <div>
-        <button type="button" data-meteor-method="sendEmail" class="btn btn-primary">Submit</button>
-        <button type="reset" class="btn btn-default">Reset</button>
-    </div>
-</fieldset>
-{{/autoForm}}
+<template name="contactForm">
+    {{#autoForm schema=contactForm id="contactForm"}}
+    <fieldset>
+        <legend>Contact Us</legend>
+        <div class="form-group{{#if afFieldIsInvalid 'name'}} has-error{{/if}}">
+            {{afFieldLabel "name" class="control-label"}}
+            {{afFieldInput "name"}}
+            {{#if afFieldIsInvalid "name"}}
+            <span class="help-block">{{afFieldMessage "name"}}</span>
+            {{/if}}
+        </div>
+        <div class="form-group{{#if afFieldIsInvalid 'email'}} has-error{{/if}}">
+            {{afFieldLabel "email" class="control-label"}}
+            {{afFieldInput "email"}}
+            {{#if afFieldIsInvalid "email"}}
+            <span class="help-block">{{afFieldMessage "email"}}</span>
+            {{/if}}
+        </div>
+        <div class="form-group{{#if afFieldIsInvalid 'message'}} has-error{{/if}}">
+            {{afFieldLabel "message" class="control-label"}}
+            {{afFieldInput "message" rows="10"}}
+            {{#if afFieldIsInvalid "message"}}
+            <span class="help-block">{{afFieldMessage "message"}}</span>
+            {{/if}}
+        </div>
+        <div>
+            <button type="button" data-meteor-method="sendEmail" class="btn btn-primary">Submit</button>
+            <button type="reset" class="btn btn-default">Reset</button>
+        </div>
+    </fieldset>
+    {{/autoForm}}
+</template>
+```
+
+The client-side helper:
+
+```js
+var cForm = new AutoForm(Schema.contact);
+Template.contactForm.helpers({
+  contactForm: function() {
+    return cForm;
+  }
+});
 ```
 
 The Meteor method:
@@ -342,7 +367,7 @@ The Meteor method:
 ```js
 Meteor.methods({
     sendEmail: function(doc) {
-        checkSchema(doc, ContactForm.simpleSchema());
+        check(doc, Schema.contact.match());
         var text = "Name: " + doc.name + "\n\n"
                 + "Email: " + doc.email + "\n\n\n\n"
                 + doc.message;
@@ -359,9 +384,11 @@ Meteor.methods({
 });
 ```
 
-Note the call to `checkSchema()`, which will throw an error if doc doesn't
-match the schema. **To reiterate, you must call `checkSchema()` in the method or perform your
-own validation since a user could bypass the client side validation.**
+Note the call to `check()`, which will throw an error if doc doesn't
+match the schema. **To reiterate, you must call `check()` in the method or perform your
+own validation since a user could bypass the client side validation.** You do
+not have to do any of your own validation with Collection2 inserts or updates,
+but you do have to call `check()` on the server when submitting to a Meteor method.
 
 ## Callbacks
 
@@ -585,7 +612,7 @@ But what if you want to pass additional attributes to the label element? Simply 
 ### afQuickField Example
 
 ```html
-{{#autoForm schema="Documents" doc=selectedDoc}}
+{{#autoForm schema=docCollection doc=selectedDoc}}
     {{afQuickField 'firstField' autofocus='true'}}
     {{afQuickField 'weirdColors' style="color: orange" label-style="color: green"}}
     {{afQuickField "longString" rows="5"}}
@@ -616,7 +643,7 @@ the Handlebars "../" syntax.
 An example will be clearer:
 
 ```html
-{{#autoForm schema="Books" id="myBookForm"}}
+{{#autoForm schema=booksCollection id="myBookForm"}}
     {{#with "title"}}
         {{afQuickField this autoform=../this}}
     {{/with}}

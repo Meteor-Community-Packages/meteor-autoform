@@ -1,14 +1,32 @@
+AutoForm.prototype.resetForm = function(formID) {
+    this.simpleSchema().resetValidation();
+    clearSelections(formID);
+};
+
+//add callbacks() method to Meteor.Collection2
+if (typeof Meteor.Collection2 !== 'undefined') {
+    Meteor.Collection2.prototype.resetForm = function(formID) {
+        this.simpleSchema().resetValidation();
+        clearSelections(formID);
+    };
+}
+
 if (typeof Handlebars !== 'undefined') {
     Handlebars.registerHelper("autoForm", function(options) {
         if (!options) {
             return "";
         }
         var hash = options.hash || {};
-        if (!window || !window[hash.schema]) {
-            return options.fn(this);
+        var schemaObj;
+        if (typeof hash.schema === "string") {
+            if (!window || !window[hash.schema]) {
+                return options.fn(this);
+            }
+            schemaObj = window[hash.schema];
+        } else {
+            schemaObj = hash.schema;
         }
-
-        var schemaObj = window[hash.schema];
+        delete hash.schema;
 
         var flatDoc, schemaKeys;
         if (hash.doc) {
@@ -23,9 +41,10 @@ if (typeof Handlebars !== 'undefined') {
 
         var context = {_ss: schemaObj, _doc: hash.doc, _flatDoc: flatDoc};
         var autoFormContext = {
-            schema: hash.schema
+            schema: schemaObj
         };
-        delete hash.schema;
+        autoFormContext.content = options.fn(context);
+
         if ("doc" in hash) {
             delete hash.doc;
         }
@@ -33,8 +52,15 @@ if (typeof Handlebars !== 'undefined') {
         if ("validation" in hash) {
             delete hash.validation;
         }
-        autoFormContext.content = options.fn(context);
+
         var atts = hash.atts || hash;
+        //formID is used to track input selections so that they are retained
+        //when the form is rerendered. If the id attribute is not provided,
+        //we use a generic ID, which will usually still result in retension
+        //of values, but might not work properly if any forms have input
+        //elements (schema keys) with the same name
+        autoFormContext.formID = atts.id || "_afGenericID";
+
         atts['data-autoform-validation'] = vType;
         autoFormContext.atts = objToAttributes(atts);
         return new Handlebars.SafeString(Template._autoForm(autoFormContext));
@@ -44,14 +70,19 @@ if (typeof Handlebars !== 'undefined') {
             return "";
         }
         var hash = options.hash || {};
-        if (!window || !window[hash.schema]) {
-            return "";
+        var schemaObj;
+        if (typeof hash.schema === "string") {
+            if (!window || !window[hash.schema]) {
+                return "";
+            }
+            schemaObj = window[hash.schema];
+        } else {
+            schemaObj = hash.schema;
         }
-
-        var schemaObj = window[hash.schema];
+        delete hash.schema;
 
         var context = {
-            schema: hash.schema,
+            schema: schemaObj,
             formFields: _.keys(schemaObj.simpleSchema().schema())
         };
         if ("doc" in hash) {
@@ -86,7 +117,6 @@ if (typeof Handlebars !== 'undefined') {
         if ("buttonContent" in hash) {
             delete hash.buttonContent;
         }
-        delete hash.schema;
         context.atts = hash;
         return new Handlebars.SafeString(Template._quickForm(context));
     });
@@ -173,7 +203,7 @@ if (typeof Handlebars !== 'undefined') {
     Template._autoForm.events({
         'click .insert[type=submit]': function(event, template) {
             event.preventDefault();
-            var collection2Obj = window[template.data.schema];
+            var collection2Obj = template.data.schema;
             var doc = formValues(template, collection2Obj.formValuesOutTransform);
 
             //for inserts, delete any properties that are null, undefined, or empty strings
@@ -188,9 +218,6 @@ if (typeof Handlebars !== 'undefined') {
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.insert ? collection2Obj._callbacks.insert : null;
             collection2Obj.insert(doc, function(error, result) {
                 if (!error) {
-                    if (template.data.schema in autoformSelections) {
-                        delete autoformSelections[template.data.schema];
-                    }
                     template.find("form").reset();
                 }
                 if (cb) {
@@ -200,7 +227,7 @@ if (typeof Handlebars !== 'undefined') {
         },
         'click .update[type=submit]': function(event, template) {
             event.preventDefault();
-            var collection2Obj = window[template.data.schema];
+            var collection2Obj = template.data.schema;
             var self = this, doc = formValues(template, collection2Obj.formValuesOutTransform), nulls, updateObj = {}, docIsEmpty, nullsIsEmpty;
 
             //for updates, unset any properties that are null, undefined, or empty strings
@@ -226,12 +253,8 @@ if (typeof Handlebars !== 'undefined') {
 
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.update ? collection2Obj._callbacks.update : null;
             collection2Obj.update(self._doc._id, updateObj, function(error) {
-                if (!error) {
-                    if (template.data.schema in autoformSelections) {
-                        delete autoformSelections[template.data.schema];
-                    }
-                    template.find("form").reset();
-                }
+                //don't automatically reset the form for updates because we
+                //often won't want that
                 if (cb) {
                     cb(error, template);
                 }
@@ -240,7 +263,7 @@ if (typeof Handlebars !== 'undefined') {
         'click .remove[type=submit]': function(event, template) {
             event.preventDefault();
             var self = this;
-            var collection2Obj = window[template.data.schema];
+            var collection2Obj = template.data.schema;
 
             //call beforeUpdate if present
             if (typeof collection2Obj.beforeRemove === "function") {
@@ -251,12 +274,6 @@ if (typeof Handlebars !== 'undefined') {
 
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.remove ? collection2Obj._callbacks.remove : null;
             collection2Obj.remove(self._doc._id, function(error) {
-                if (!error) {
-                    if (template.data.schema in autoformSelections) {
-                        delete autoformSelections[template.data.schema];
-                    }
-                    template.find("form").reset();
-                }
                 if (cb) {
                     cb(error, template);
                 }
@@ -264,13 +281,13 @@ if (typeof Handlebars !== 'undefined') {
         },
         'click button[data-meteor-method]': function(event, template) {
             event.preventDefault();
-            var autoFormObj = window[template.data.schema];
+            var autoFormObj = template.data.schema;
             var validationType = template.find('form').getAttribute('data-autoform-validation');
             var doc = formValues(template, autoFormObj.formValuesOutTransform);
 
             //delete any properties that are null, undefined, or empty strings
             doc = cleanNulls(doc);
-            
+
             var method = event.currentTarget.getAttribute("data-meteor-method");
 
             //call beforeMethod if present
@@ -284,9 +301,6 @@ if (typeof Handlebars !== 'undefined') {
             if (validationType === 'none' || autoFormObj.validate(doc)) {
                 Meteor.call(method, doc, function(error, result) {
                     if (!error) {
-                        if (template.data.schema in autoformSelections) {
-                            delete autoformSelections[template.data.schema];
-                        }
                         template.find("form").reset();
                     }
                     cb(error, result, template);
@@ -312,7 +326,7 @@ if (typeof Handlebars !== 'undefined') {
             if (event.currentTarget.nodeName.toLowerCase() === "select") {
                 //workaround for selection being lost on rerender
                 //store the selections in memory and reset in rendered
-                setSelections(event.currentTarget, template.data.schema);
+                setSelections(event.currentTarget, template.data.formID);
             }
             var validationType = template.find('form').getAttribute('data-autoform-validation');
             var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
@@ -320,13 +334,10 @@ if (typeof Handlebars !== 'undefined') {
                 validateField(event.currentTarget.getAttribute("data-schema-key"), template, false, onlyIfAlreadyInvalid);
             }
         },
-        'click [type=reset]': function(event, template) {
-            var autoFormObj = window[template.data.schema];
+        'reset form': function(event, template) {
+            var autoFormObj = template.data.schema;
             if (autoFormObj) {
-                autoFormObj.simpleSchema().resetValidation();
-            }
-            if (template.data.schema in autoformSelections) {
-                delete autoformSelections[template.data.schema];
+                autoFormObj.resetForm(template.data.formID);
             }
         }
     });
@@ -337,12 +348,26 @@ if (typeof Handlebars !== 'undefined') {
     //This means that selected is not updated properly even if the selected
     //attribute is on the element.
     Template._autoForm.rendered = function() {
-        var schemaName = this.data.schema;
-        var selections = autoformSelections[schemaName];
+        //using autoformSelections is only necessary when the form is invalid, and will
+        //cause problems if done when the form is valid, but we still have
+        //to transfer the selected attribute to the selected property when
+        //the form is valid, to make sure current values show correctly for
+        //an update form
+        var self = this, formID = self.data.formID;
+        var selections = getSelections(formID);
+        if (!selections) {
+            _.each(self.findAll("select"), function(selectElement) {
+                _.each(selectElement.options, function(option) {
+                    option.selected = option.hasAttribute("selected"); //transfer att to prop
+                });
+                setSelections(selectElement, formID);
+            });
+            return;
+        }
         if (!selections) {
             return;
         }
-        _.each(this.findAll("select"), function(selectElement) {
+        _.each(self.findAll("select"), function(selectElement) {
             var key = selectElement.getAttribute('data-schema-key');
             var selectedValues = selections[key];
             if (selectedValues && selectedValues.length) {
@@ -555,7 +580,7 @@ var getSelectValues = function(select) {
 };
 var createInputHtml = function(name, autoform, defs, hash) {
     var html;
-    
+
     //adjust expected type when type is overridden
     var schemaType = defs.type;
     var expectsArray = _.isArray(schemaType);
@@ -566,7 +591,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
         schemaType = schemaType[0]; //this, for example, changes [String] to String
         expectsArray = false;
     }
-    
+
 
     //get current value
     var value, arrayVal;
@@ -826,7 +851,7 @@ var createLabelHtml = function(name, defs, hash) {
     return '<label' + objToAttributes(hash) + '>' + label + '</label>';
 };
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
-    var autoFormObj = window[template.data.schema];
+    var autoFormObj = template.data.schema;
     var doc = formValues(template, autoFormObj.formValuesOutTransform);
 
     //delete any properties that are null, undefined, or empty strings
@@ -864,7 +889,7 @@ var validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
 };
 
 var autoformSelections = {};
-var setSelections = function(select, schemaName) {
+var setSelections = function(select, formID) {
     var key = select.getAttribute('data-schema-key');
     if (!key) {
         return;
@@ -876,8 +901,19 @@ var setSelections = function(select, schemaName) {
             selections.push(opt.value);
         }
     }
-    if (!(schemaName in autoformSelections)) {
-        autoformSelections[schemaName] = {};
+    if (!(formID in autoformSelections)) {
+        autoformSelections[formID] = {};
     }
-    autoformSelections[schemaName][key] = selections;
+    autoformSelections[formID][key] = selections;
+};
+var clearSelections = function(formID) {
+    if (formID in autoformSelections) {
+        delete autoformSelections[formID];
+    }
+};
+var hasSelections = function(formID) {
+    return (formID in autoformSelections);
+};
+var getSelections = function(formID) {
+    return autoformSelections[formID];
 };
