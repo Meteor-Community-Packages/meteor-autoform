@@ -32,8 +32,8 @@ if (typeof Handlebars !== 'undefined') {
         if (hash.doc) {
             schemaKeys = _.keys(schemaObj.simpleSchema().schema());
             flatDoc = collapseObj(hash.doc, schemaKeys);
-            if (typeof schemaObj.formValuesInTransform === "function") {
-                flatDoc = schemaObj.formValuesInTransform(flatDoc);
+            if (typeof schemaObj.docToForm === "function") {
+                flatDoc = schemaObj.docToForm(flatDoc);
             }
         } else {
             flatDoc = {};
@@ -204,7 +204,7 @@ if (typeof Handlebars !== 'undefined') {
         'click .insert[type=submit]': function(event, template) {
             event.preventDefault();
             var collection2Obj = template.data.schema;
-            var doc = formValues(template, collection2Obj.formValuesOutTransform);
+            var doc = formValues(template, collection2Obj.formToDoc);
 
             //for inserts, delete any properties that are null, undefined, or empty strings
             doc = cleanNulls(doc);
@@ -228,7 +228,7 @@ if (typeof Handlebars !== 'undefined') {
         'click .update[type=submit]': function(event, template) {
             event.preventDefault();
             var collection2Obj = template.data.schema;
-            var self = this, doc = formValues(template, collection2Obj.formValuesOutTransform), nulls, updateObj = {}, docIsEmpty, nullsIsEmpty;
+            var self = this, doc = formValues(template, collection2Obj.formToDoc), nulls, updateObj = {}, docIsEmpty, nullsIsEmpty;
 
             //for updates, unset any properties that are null, undefined, or empty strings
             nulls = reportNulls(doc);
@@ -283,7 +283,7 @@ if (typeof Handlebars !== 'undefined') {
             event.preventDefault();
             var autoFormObj = template.data.schema;
             var validationType = template.find('form').getAttribute('data-autoform-validation');
-            var doc = formValues(template, autoFormObj.formValuesOutTransform);
+            var doc = formValues(template, autoFormObj.formToDoc);
 
             //delete any properties that are null, undefined, or empty strings
             doc = cleanNulls(doc);
@@ -852,7 +852,7 @@ var createLabelHtml = function(name, defs, hash) {
 };
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
     var autoFormObj = template.data.schema;
-    var doc = formValues(template, autoFormObj.formValuesOutTransform);
+    var doc = formValues(template, autoFormObj.formToDoc);
 
     //delete any properties that are null, undefined, or empty strings
     doc = cleanNulls(doc);
