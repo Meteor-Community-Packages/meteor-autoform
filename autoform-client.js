@@ -604,7 +604,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
                     value.push(dateToFieldDateString(v));
                 });
             } else {
-                value = [];
+                value = hash.value || [];
             }
         } else {
             if (autoform._flatDoc && name in autoform._flatDoc) {
@@ -614,7 +614,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
                     value.push(v.toString());
                 });
             } else {
-                value = [];
+                value = hash.value || [];
             }
         }
     } else {
@@ -622,19 +622,19 @@ var createInputHtml = function(name, autoform, defs, hash) {
             if (autoform._flatDoc && name in autoform._flatDoc) {
                 value = dateToFieldDateString(autoform._flatDoc[name]);
             } else {
-                value = "";
+                value = hash.value || "";
             }
         } else if (schemaType === Boolean) {
             if (autoform._flatDoc && name in autoform._flatDoc) {
                 value = autoform._flatDoc[name];
             } else {
-                value = false;
+                value = hash.value === "true" ? true : false;
             }
         } else {
             if (autoform._flatDoc && name in autoform._flatDoc) {
                 value = autoform._flatDoc[name].toString();
             } else {
-                value = "";
+                value = hash.value || "";
             }
         }
     }
