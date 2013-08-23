@@ -213,6 +213,9 @@ if (typeof Handlebars !== 'undefined') {
             //call beforeInsert if present
             if (typeof collection2Obj.beforeInsert === "function") {
                 doc = collection2Obj.beforeInsert(doc);
+                if (!_.isObject(doc)) {
+                    throw new Error("beforeInsert must return an object");
+                }
             }
 
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.insert ? collection2Obj._callbacks.insert : null;
@@ -249,6 +252,9 @@ if (typeof Handlebars !== 'undefined') {
             //call beforeUpdate if present
             if (typeof collection2Obj.beforeUpdate === "function") {
                 updateObj = collection2Obj.beforeUpdate(self._doc._id, updateObj);
+                if (!_.isObject(updateObj)) {
+                    throw new Error("beforeUpdate must return an object");
+                }
             }
 
             var cb = collection2Obj._callbacks && collection2Obj._callbacks.update ? collection2Obj._callbacks.update : null;
@@ -293,6 +299,9 @@ if (typeof Handlebars !== 'undefined') {
             //call beforeMethod if present
             if (typeof autoFormObj.beforeMethod === "function") {
                 doc = autoFormObj.beforeMethod(doc, method);
+                if (!_.isObject(doc)) {
+                    throw new Error("beforeMethod must return an object");
+                }
             }
 
             var cb = autoFormObj._callbacks && autoFormObj._callbacks[method] ? autoFormObj._callbacks[method] : function() {
