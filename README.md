@@ -514,12 +514,14 @@ Then in client code:
 
 ```js
 Posts.docToForm = function (doc) {
-    return doc.join(', ');
+    return doc.tags.join(', ');
  };
 
  Posts.formToDoc = function (doc) {
-    doc["tags"] = doc["tags"].split(",");
-    //loop through values and trim() or whatever else you want to do
+    if ('tags' in doc) {
+        doc.tags = doc.tags.split(",");
+        //loop through values and trim() or whatever else you want to do
+    }
     return doc;
  };
 ```
