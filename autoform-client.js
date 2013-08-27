@@ -17,6 +17,12 @@ if (typeof Handlebars !== 'undefined') {
             return "";
         }
         var hash = options.hash || {};
+        
+        //copy hash from quickForm if this is an autoForm created by the quickForm helper
+        if (hash.qfHash) {
+            hash = hash.qfHash;
+        }
+        
         var schemaObj;
         if (typeof hash.schema === "string") {
             if (!window || !window[hash.schema]) {
@@ -41,16 +47,27 @@ if (typeof Handlebars !== 'undefined') {
 
         var context = {_ss: schemaObj, _doc: hash.doc, _flatDoc: flatDoc};
         var autoFormContext = {
-            schema: schemaObj
+            schema: schemaObj,
+            _ss: schemaObj,
+            _doc: hash.doc,
+            _flatDoc: flatDoc
         };
         autoFormContext.content = options.fn(context);
 
         if ("doc" in hash) {
             delete hash.doc;
         }
-        var vType = hash.validation || "submitThenKeyup";
+
+        autoFormContext.validationType = hash.validation || "submitThenKeyup";
         if ("validation" in hash) {
             delete hash.validation;
+        }
+
+        if ("onSubmit" in hash) {
+            if (typeof hash.onSubmit === "function") {
+                autoFormContext.onSubmit = hash.onSubmit;
+            }
+            delete hash.onSubmit;
         }
 
         var atts = hash.atts || hash;
@@ -60,8 +77,6 @@ if (typeof Handlebars !== 'undefined') {
         //of values, but might not work properly if any forms have input
         //elements (schema keys) with the same name
         autoFormContext.formID = atts.id || "_afGenericID";
-
-        atts['data-autoform-validation'] = vType;
         autoFormContext.atts = objToAttributes(atts);
         return new Handlebars.SafeString(Template._autoForm(autoFormContext));
     });
@@ -73,26 +88,15 @@ if (typeof Handlebars !== 'undefined') {
         var schemaObj;
         if (typeof hash.schema === "string") {
             if (!window || !window[hash.schema]) {
-                return "";
+                return options.fn(this);
             }
-            schemaObj = window[hash.schema];
-        } else {
-            schemaObj = hash.schema;
+            hash.schema = window[hash.schema];
         }
-        delete hash.schema;
 
         var context = {
-            schema: schemaObj,
-            formFields: _.keys(schemaObj.simpleSchema().schema())
+            formFields: _.keys(hash.schema.simpleSchema().schema())
         };
-        if ("doc" in hash) {
-            context.doc = hash.doc;
-            delete hash.doc;
-        }
-        if ("validation" in hash) {
-            context.validation = hash.validation;
-            delete hash.validation;
-        }
+
         if ("type" in hash) {
             if (hash.type === "insert") {
                 context.doInsert = true;
@@ -106,18 +110,23 @@ if (typeof Handlebars !== 'undefined') {
             }
             delete hash.type;
         }
+        
         if ("method" in hash) {
             delete hash.method;
         }
+        
         if ("buttonClasses" in hash) {
             context.buttonClasses = hash.buttonClasses;
             delete hash.buttonClasses;
         }
+        
         context.buttonContent = hash.buttonContent || "Submit";
         if ("buttonContent" in hash) {
             delete hash.buttonContent;
         }
-        context.atts = hash;
+        
+        context.qfHash = hash;
+        
         return new Handlebars.SafeString(Template._quickForm(context));
     });
     Handlebars.registerHelper("afQuickField", function(name, options) {
@@ -201,123 +210,132 @@ if (typeof Handlebars !== 'undefined') {
         return new Handlebars.SafeString(html);
     });
     Template._autoForm.events({
-        'click .insert[type=submit]': function(event, template) {
+        'submit form': function(event, template) {
             event.preventDefault();
-            var collection2Obj = template.data.schema;
-            var doc = formValues(template, collection2Obj.formToDoc);
 
-            //for inserts, delete any properties that are null, undefined, or empty strings
-            doc = cleanNulls(doc);
-            doc = expandObj(doc); //inserts should not use dot notation but rather actual subdocuments
-
-            //call beforeInsert if present
-            if (typeof collection2Obj.beforeInsert === "function") {
-                doc = collection2Obj.beforeInsert(doc);
-                if (!_.isObject(doc)) {
-                    throw new Error("beforeInsert must return an object");
-                }
-            }
-
-            var cb = collection2Obj._callbacks && collection2Obj._callbacks.insert ? collection2Obj._callbacks.insert : null;
-            collection2Obj.insert(doc, function(error, result) {
-                if (!error) {
-                    template.find("form").reset();
-                }
-                if (cb) {
-                    cb(error, result, template);
-                }
-            });
-        },
-        'click .update[type=submit]': function(event, template) {
-            event.preventDefault();
-            var collection2Obj = template.data.schema;
-            var self = this, doc = formValues(template, collection2Obj.formToDoc), nulls, updateObj = {}, docIsEmpty, nullsIsEmpty;
-
-            //for updates, unset any properties that are null, undefined, or empty strings
-            nulls = reportNulls(doc);
-            doc = cleanNulls(doc);
-
-            docIsEmpty = _.isEmpty(doc);
-            nullsIsEmpty = _.isEmpty(nulls);
-            if (docIsEmpty && nullsIsEmpty) {
+            var submitButton = template.find("button[type=submit]");
+            if (!submitButton) {
                 return;
             }
-            if (!docIsEmpty) {
-                updateObj.$set = doc;
-            }
-            if (!nullsIsEmpty) {
-                updateObj.$unset = nulls;
-            }
 
-            //call beforeUpdate if present
-            if (typeof collection2Obj.beforeUpdate === "function") {
-                updateObj = collection2Obj.beforeUpdate(self._doc._id, updateObj);
-                if (!_.isObject(updateObj)) {
-                    throw new Error("beforeUpdate must return an object");
-                }
-            }
+            //determine what we want to do
+            var isInsert = hasClass(submitButton, "insert");
+            var isUpdate = hasClass(submitButton, "update");
+            var isRemove = hasClass(submitButton, "remove");
+            var method = submitButton.getAttribute("data-meteor-method");
+            var onSubmit = template.data.onSubmit;
 
-            var cb = collection2Obj._callbacks && collection2Obj._callbacks.update ? collection2Obj._callbacks.update : null;
-            collection2Obj.update(self._doc._id, updateObj, function(error) {
-                //don't automatically reset the form for updates because we
-                //often won't want that
-                if (cb) {
-                    cb(error, template);
-                }
-            });
-        },
-        'click .remove[type=submit]': function(event, template) {
-            event.preventDefault();
+            //init
             var self = this;
-            var collection2Obj = template.data.schema;
+            var validationType = template.data.validationType;
+            var afc2Obj = template.data.schema;
+            var currentDoc = self._doc || null;
+            var docId = currentDoc ? currentDoc._id : null;
+            var doc = formValues(template, afc2Obj.formToDoc);
 
-            //call beforeUpdate if present
-            if (typeof collection2Obj.beforeRemove === "function") {
-                if (!collection2Obj.beforeRemove(self._doc._id)) {
-                    return;
+            //for inserts, delete any properties that are null, undefined, or empty strings,
+            //and expand to use subdocuments instead of dot notation keys
+            var insertDoc = expandObj(cleanNulls(doc));
+            //for updates, convert to modifier object with $set and $unset
+            var updateDoc = docToModifier(doc);
+
+            //pass both types of doc to onSubmit
+            if (typeof onSubmit === "function") {
+                if (validationType === 'none' || afc2Obj.validate(insertDoc)) {
+                    var context = {
+                        resetForm: function() {
+                            template.find("form").reset();
+                        }
+                    };
+                    var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
+                    if (shouldContinue === false) {
+                        return;
+                    }
                 }
             }
 
-            var cb = collection2Obj._callbacks && collection2Obj._callbacks.remove ? collection2Obj._callbacks.remove : null;
-            collection2Obj.remove(self._doc._id, function(error) {
-                if (cb) {
-                    cb(error, template);
+            //do it
+            if (isInsert) {
+                //call beforeInsert if present
+                if (typeof afc2Obj.beforeInsert === "function") {
+                    insertDoc = afc2Obj.beforeInsert(insertDoc);
+                    if (!_.isObject(insertDoc)) {
+                        throw new Error("beforeInsert must return an object");
+                    }
                 }
-            });
-        },
-        'click button[data-meteor-method]': function(event, template) {
-            event.preventDefault();
-            var autoFormObj = template.data.schema;
-            var validationType = template.find('form').getAttribute('data-autoform-validation');
-            var doc = formValues(template, autoFormObj.formToDoc);
 
-            //delete any properties that are null, undefined, or empty strings
-            doc = cleanNulls(doc);
-
-            var method = event.currentTarget.getAttribute("data-meteor-method");
-
-            //call beforeMethod if present
-            if (typeof autoFormObj.beforeMethod === "function") {
-                doc = autoFormObj.beforeMethod(doc, method);
-                if (!_.isObject(doc)) {
-                    throw new Error("beforeMethod must return an object");
-                }
-            }
-
-            var cb = autoFormObj._callbacks && autoFormObj._callbacks[method] ? autoFormObj._callbacks[method] : function() {
-            };
-
-            if (validationType === 'none' || autoFormObj.validate(doc)) {
-                Meteor.call(method, doc, function(error, result) {
+                var cb = afc2Obj._callbacks && afc2Obj._callbacks.insert ? afc2Obj._callbacks.insert : null;
+                afc2Obj.insert(insertDoc, function(error, result) {
                     if (!error) {
                         template.find("form").reset();
                     }
-                    cb(error, result, template);
+                    if (cb) {
+                        cb(error, result, template);
+                    }
                 });
+            } else if (isUpdate) {
+                if (!_.isEmpty(updateDoc)) {
+                    //call beforeUpdate if present
+                    if (typeof afc2Obj.beforeUpdate === "function") {
+                        updateDoc = afc2Obj.beforeUpdate(docId, updateDoc);
+                        if (!_.isObject(updateDoc)) {
+                            throw new Error("beforeUpdate must return an object");
+                        }
+                    }
+
+                    var cb = afc2Obj._callbacks && afc2Obj._callbacks.update ? afc2Obj._callbacks.update : null;
+                    afc2Obj.update(docId, updateDoc, function(error) {
+                        //don't automatically reset the form for updates because we
+                        //often won't want that
+                        if (cb) {
+                            cb(error, template);
+                        }
+                    });
+                }
+            } else if (isRemove) {
+                //call beforeRemove if present
+                var stop = false;
+                if (typeof afc2Obj.beforeRemove === "function") {
+                    if (afc2Obj.beforeRemove(docId) === false) {
+                        stop = true;
+                    }
+                }
+                if (!stop) {
+                    var cb = afc2Obj._callbacks && afc2Obj._callbacks.remove ? afc2Obj._callbacks.remove : null;
+                    afc2Obj.remove(docId, function(error) {
+                        if (cb) {
+                            cb(error, template);
+                        }
+                    });
+                }
+            }
+
+            //we won't do an else here so that a method could be called in
+            //addition to another action on the same submit
+            if (method) {
+                //call beforeMethod if present
+                if (typeof afc2Obj.beforeMethod === "function") {
+                    insertDoc = afc2Obj.beforeMethod(insertDoc, method);
+                    if (!_.isObject(insertDoc)) {
+                        throw new Error("beforeMethod must return an object");
+                    }
+                }
+
+                var cb = afc2Obj._callbacks && afc2Obj._callbacks[method] ? afc2Obj._callbacks[method] : function() {
+                };
+
+                if (validationType === 'none' || afc2Obj.validate(insertDoc)) {
+                    Meteor.call(method, insertDoc, function(error, result) {
+                        if (!error) {
+                            template.find("form").reset();
+                        }
+                        cb(error, result, template);
+                    });
+                }
             }
         },
         'keyup [data-schema-key]': function(event, template) {
-            var validationType = template.find('form').getAttribute('data-autoform-validation');
+            var validationType = template.data.validationType;
             var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup');
             var skipEmpty = !(event.keyCode === 8 || event.keyCode === 46); //if deleting or backspacing, don't skip empty
             if ((validationType === 'keyup' || validationType === 'submitThenKeyup')) {
@@ -325,7 +343,7 @@ if (typeof Handlebars !== 'undefined') {
             }
         },
         'blur [data-schema-key]': function(event, template) {
-            var validationType = template.find('form').getAttribute('data-autoform-validation');
+            var validationType = template.data.validationType;
             var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
             if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
                 validateField(event.currentTarget.getAttribute("data-schema-key"), template, false, onlyIfAlreadyInvalid);
@@ -337,7 +355,7 @@ if (typeof Handlebars !== 'undefined') {
                 //store the selections in memory and reset in rendered
                 setSelections(event.currentTarget, template.data.formID);
             }
-            var validationType = template.find('form').getAttribute('data-autoform-validation');
+            var validationType = template.data.validationType;
             var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
             if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
                 validateField(event.currentTarget.getAttribute("data-schema-key"), template, false, onlyIfAlreadyInvalid);
@@ -765,13 +783,6 @@ var createInputHtml = function(name, autoform, defs, hash) {
         delete hash.options;
     }
 
-    //add bootstrap's control-label class to label element
-    if ("class" in hash) {
-        hash.class += " form-control";
-    } else {
-        hash.class = "form-control";
-    }
-
     if (selectOptions) {
         //build anything that should be a select, which is anything with options
         var multiple = "", isMultiple;
@@ -801,6 +812,12 @@ var createInputHtml = function(name, autoform, defs, hash) {
                 html += '<div class="' + inputType + '"><label><input type="' + inputType + '" data-schema-key="' + name + '" name="' + name + '" value="' + opt.value + '"' + checked + objToAttributes(hash) + ' /> ' + opt.label + '</label></div>';
             });
         } else {
+            //add bootstrap's form-control class to input elements
+            if ("class" in hash) {
+                hash.class += " form-control";
+            } else {
+                hash.class = "form-control";
+            }
             hash.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
             html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + multiple + '>';
             if (firstOption && !isMultiple) {
@@ -826,20 +843,39 @@ var createInputHtml = function(name, autoform, defs, hash) {
             html += '</select>';
         }
     } else if (type === "textarea") {
+        //add bootstrap's form-control class to input elements
+        if ("class" in hash) {
+            hash.class += " form-control";
+        } else {
+            hash.class = "form-control";
+        }
         html = '<textarea data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
     } else if (type === "boolean") {
         if (radio) {
             html = '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + trueLabel + '</label></div>';
             html += '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="false"' + checkedOpposite + objToAttributes(hash) + req + ' /> ' + falseLabel + '</label></div>';
         } else if (select) {
+            //add bootstrap's form-control class to input elements
+            if ("class" in hash) {
+                hash.class += " form-control";
+            } else {
+                hash.class = "form-control";
+            }
             html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + '>';
             html += '<option value="false"' + (!value ? ' selected' : '') + '>' + falseLabel + '</option>';
             html += '<option value="true"' + (value ? ' selected' : '') + '>' + trueLabel + '</option>';
             html += '</select>';
         } else {
-            html = '<div class="checkbox"><label for="' + name + '"><input type="checkbox" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + label + '</label></div>';
+            //don't add required attribute to this one because some browsers assume that to mean that it must be checked, which is not what we mean by "required"
+            html = '<div class="checkbox"><label for="' + name + '"><input type="checkbox" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + ' /> ' + label + '</label></div>';
         }
     } else {
+        //add bootstrap's form-control class to input elements
+        if ("class" in hash) {
+            hash.class += " form-control";
+        } else {
+            hash.class = "form-control";
+        }
         html = '<input type="' + type + '" data-schema-key="' + name + '" name="' + name + '" value="' + value + '"' + objToAttributes(hash) + req + max + min + step + ' />';
     }
     return html;
@@ -925,4 +961,22 @@ var hasSelections = function(formID) {
 };
 var getSelections = function(formID) {
     return autoformSelections[formID];
+};
+
+var hasClass = function(element, cls) {
+    return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+};
+
+var docToModifier = function(doc) {
+    var updateObj = {};
+    var nulls = reportNulls(doc);
+    doc = cleanNulls(doc);
+
+    if (!_.isEmpty(doc)) {
+        updateObj.$set = doc;
+    }
+    if (!_.isEmpty(nulls)) {
+        updateObj.$unset = nulls;
+    }
+    return updateObj;
 };

@@ -6,6 +6,11 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### vNext
+
+* Use `submit form` event handler instead of button click handlers
+* Add support for binding an `onSubmit` handler to an autoForm using the `onSubmit` helper attribute.
+
 ### 0.2.1
 
 Fix input helper to use value passed in `value` attribute if no doc is attached to the autoform.
