@@ -720,7 +720,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
         delete hash.options;
     }
 
-    //add bootstrap's control-label class to label element
+    //add bootstrap's form-control class to all input elements
     if ("class" in hash) {
         hash.class += " form-control";
     } else {
@@ -753,6 +753,8 @@ var createInputHtml = function(name, autoform, defs, hash) {
                         checked = '';
                     }
                 }
+                //Don't use form-control class on checkboxes and radio controls
+                hash.class = hash.class.replace('form-control','');
                 html += '<div class="' + inputType + '"><label><input type="' + inputType + '" data-schema-key="' + name + '" name="' + name + '" value="' + opt.value + '"' + checked + objToAttributes(hash) + ' /> ' + opt.label + '</label></div>';
             });
         } else {
@@ -784,6 +786,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
         html = '<textarea data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
     } else if (defs.type === Boolean) {
         if (radio) {
+            console
             html = '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + trueLabel + '</label></div>';
             html += '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="false"' + checkedOpposite + objToAttributes(hash) + req + ' /> ' + falseLabel + '</label></div>';
         } else if (select) {
