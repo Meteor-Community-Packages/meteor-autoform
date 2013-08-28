@@ -211,8 +211,6 @@ if (typeof Handlebars !== 'undefined') {
     });
     Template._autoForm.events({
         'submit form': function(event, template) {
-            event.preventDefault();
-
             var submitButton = template.find("button[type=submit]");
             if (!submitButton) {
                 return;
@@ -253,7 +251,18 @@ if (typeof Handlebars !== 'undefined') {
                     }
                 }
             }
-
+            
+            
+            //allow normal form submission
+            if (!isInsert && !isUpdate && !isRemove && !method) {
+                if (validationType !== 'none' && !afc2Obj.validate(insertDoc)) {
+                    event.preventDefault(); //don't submit the form if invalid
+                }
+                return;
+            }
+            
+            event.preventDefault(); //we are now sure we don't want the browser to submit the form
+            
             //do it
             if (isInsert) {
                 //call beforeInsert if present

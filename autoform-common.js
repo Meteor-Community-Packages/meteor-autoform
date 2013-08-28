@@ -47,4 +47,28 @@ if (typeof Meteor.Collection2 !== 'undefined') {
     Meteor.Collection2.prototype.callbacks = function(cb) {
         this._callbacks = cb;
     };
+
+    Meteor.Collection2.prototype.validate = function(doc) {
+        var self = this, schema = self._simpleSchema;
+
+        //clean doc
+        doc = schema.filter(doc);
+        doc = schema.autoTypeConvert(doc);
+        //validate doc
+        schema.validate(doc);
+
+        return schema.valid();
+    };
+
+    Meteor.Collection2.prototype.validateOne = function(doc, keyName) {
+        var self = this, schema = self._simpleSchema;
+
+        //clean doc
+        doc = schema.filter(doc);
+        doc = schema.autoTypeConvert(doc);
+        //validate doc
+        schema.validateOne(doc, keyName);
+
+        return !schema.keyIsInvalid(keyName);
+    };
 }
