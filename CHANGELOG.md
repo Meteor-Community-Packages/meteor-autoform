@@ -10,6 +10,7 @@ forms with automatic insert and update events, and automatic reactive validation
 
 * Use `submit form` event handler instead of button click handlers
 * Add support for binding an `onSubmit` handler to an autoForm using the `onSubmit` helper attribute.
+* Don't include `form-control` class on radio buttons and check boxes
 
 ### 0.2.1
 

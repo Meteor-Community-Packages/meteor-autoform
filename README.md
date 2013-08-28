@@ -539,6 +539,47 @@ the `{{autoform}}` helper. Supported values are:
 
 If you do not include the validation attribute, `submitThenKeyup` is used as the default validation method.
 
+## Doing Your Own Thing On Submit
+
+Submitting to a server method allows you to do anything you want with the form
+data on the server, but what if you want to do something with the form data on
+the client? For that, you can bind a submit event handler to the autoform using
+the `autoForm` helper's `onSubmit` attribute.
+
+```html
+<template name="contactForm">
+  {{#autoForm schema=ContactForm id="contactForm" onSubmit=onSubmit}}
+  {{/autoForm}}
+</template>
+```
+
+And define a helper that returns your function:
+
+```js
+Template.contactForm.onSubmit = function () {
+    return function (insertDoc, updateDoc, currentDoc) {
+        if (customHandler(insertDoc))
+          this.resetForm();
+        return false;
+    };
+};
+```
+
+The arguments passed to your function are as follows:
+
+* `insertDoc`: The form input values in an object suitable for use with insert()
+* `updateDoc`: The form input values in an object (modifier) suitable for use with update()
+* `currentDoc`: The object that's currently bound to the form through the doc attribute
+
+`this` provides a `resetForm` method, which you can call to reset the corresponding autoform if necessary.
+
+If you return false, no further submission will happen. This might be useful if
+you have, for example, the `insert` class on your submit button as well.
+
+Otherwise the onSubmit function acts pretty much like any other onSubmit function, except
+that insertDoc and updateDoc are validated before it is called. However, since
+this is client code, you should never assume that insertDoc and updateDoc are valid.
+
 ## Complex Controls
 
 If you need to have more complex form controls but still want to use an AutoForm, a good trick
