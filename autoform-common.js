@@ -8,30 +8,56 @@ AutoForm = function(schema) {
     } else {
         self._simpleSchema = new SimpleSchema(schema);
     }
+    self._validationContexts = {
+        default: self._simpleSchema.newContext()
+    };
+    //store a generic validation context
+    self._validationContext = "default";
 };
 
-AutoForm.prototype.validate = function(doc) {
+AutoForm.prototype.currentContext = function(name) {
+    var self = this;
+    if (name) {
+        //set current context, creating it first if necessary
+        self._validationContexts[name] = self._validationContexts[name] || self._simpleSchema.newContext();
+        self._validationContext = name;
+    } else {
+        //get current context
+        return self._validationContext;
+    }
+};
+
+AutoForm.prototype.namedContext = function(name) {
+    var self = this;
+    self._validationContexts[name] = self._validationContexts[name] || self._simpleSchema.newContext();
+    return self._validationContexts[name];
+};
+
+AutoForm.prototype.ensureContext = function(name) {
+    var self = this;
+    self._validationContexts[name] = self._validationContexts[name] || self._simpleSchema.newContext();
+};
+
+AutoForm.prototype.validate = function(doc, isModifier) {
     var self = this, schema = self._simpleSchema;
 
     //clean doc
-    doc = schema.filter(doc);
-    doc = schema.autoTypeConvert(doc);
+    doc = schema.clean(doc);
     //validate doc
-    schema.validate(doc);
+    self._validationContexts[self._validationContext].validate(doc, {modifier: isModifier});
 
-    return schema.valid();
+    return self._validationContexts[self._validationContext].isValid();
 };
 
-AutoForm.prototype.validateOne = function(doc, keyName) {
+AutoForm.prototype.validateOne = function(doc, keyName, isModifier) {
     var self = this, schema = self._simpleSchema;
 
     //clean doc
-    doc = schema.filter(doc);
-    doc = schema.autoTypeConvert(doc);
+    doc = schema.clean(doc);
     //validate doc
-    schema.validateOne(doc, keyName);
+    self._validationContexts[self._validationContext].validateOne(doc, keyName, {modifier: isModifier});
 
-    return !schema.keyIsInvalid(keyName);
+    return !self._validationContexts[self._validationContext].keyIsInvalid(keyName);
 };
 
 AutoForm.prototype.simpleSchema = function() {
@@ -46,29 +72,5 @@ AutoForm.prototype.callbacks = function(cb) {
 if (typeof Meteor.Collection2 !== 'undefined') {
     Meteor.Collection2.prototype.callbacks = function(cb) {
         this._callbacks = cb;
-    };
-
-    Meteor.Collection2.prototype.validate = function(doc) {
-        var self = this, schema = self._simpleSchema;
-
-        //clean doc
-        doc = schema.filter(doc);
-        doc = schema.autoTypeConvert(doc);
-        //validate doc
-        schema.validate(doc);
-
-        return schema.valid();
-    };
-
-    Meteor.Collection2.prototype.validateOne = function(doc, keyName) {
-        var self = this, schema = self._simpleSchema;
-
-        //clean doc
-        doc = schema.filter(doc);
-        doc = schema.autoTypeConvert(doc);
-        //validate doc
-        schema.validateOne(doc, keyName);
-
-        return !schema.keyIsInvalid(keyName);
     };
 }

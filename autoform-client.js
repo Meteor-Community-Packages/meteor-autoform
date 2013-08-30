@@ -1,12 +1,12 @@
-AutoForm.prototype.resetForm = function(formID) {
-    this.simpleSchema().resetValidation();
+AutoForm.prototype.resetForm = function(formID, context) {
+    context.resetValidation();
     clearSelections(formID);
 };
 
 //add callbacks() method to Meteor.Collection2
 if (typeof Meteor.Collection2 !== 'undefined') {
-    Meteor.Collection2.prototype.resetForm = function(formID) {
-        this.simpleSchema().resetValidation();
+    Meteor.Collection2.prototype.resetForm = function(formID, context) {
+        context.resetValidation();
         clearSelections(formID);
     };
 }
@@ -17,12 +17,12 @@ if (typeof Handlebars !== 'undefined') {
             return "";
         }
         var hash = options.hash || {};
-        
+
         //copy hash from quickForm if this is an autoForm created by the quickForm helper
         if (hash.qfHash) {
             hash = hash.qfHash;
         }
-        
+
         var schemaObj;
         if (typeof hash.schema === "string") {
             if (!window || !window[hash.schema]) {
@@ -44,15 +44,13 @@ if (typeof Handlebars !== 'undefined') {
         } else {
             flatDoc = {};
         }
-
-        var context = {_ss: schemaObj, _doc: hash.doc, _flatDoc: flatDoc};
+        
         var autoFormContext = {
             schema: schemaObj,
             _ss: schemaObj,
             _doc: hash.doc,
             _flatDoc: flatDoc
         };
-        autoFormContext.content = options.fn(context);
 
         if ("doc" in hash) {
             delete hash.doc;
@@ -77,6 +75,11 @@ if (typeof Handlebars !== 'undefined') {
         //of values, but might not work properly if any forms have input
         //elements (schema keys) with the same name
         autoFormContext.formID = atts.id || "_afGenericID";
+        
+        schemaObj.ensureContext(autoFormContext.formID);
+        
+        autoFormContext.content = options.fn({_ss: autoFormContext._ss, _doc: autoFormContext._doc, _flatDoc: autoFormContext._flatDoc, _formID: autoFormContext.formID});
+        
         autoFormContext.atts = objToAttributes(atts);
         return new Handlebars.SafeString(Template._autoForm(autoFormContext));
     });
@@ -85,7 +88,6 @@ if (typeof Handlebars !== 'undefined') {
             return "";
         }
         var hash = options.hash || {};
-        var schemaObj;
         if (typeof hash.schema === "string") {
             if (!window || !window[hash.schema]) {
                 return options.fn(this);
@@ -110,23 +112,23 @@ if (typeof Handlebars !== 'undefined') {
             }
             delete hash.type;
         }
-        
+
         if ("method" in hash) {
             delete hash.method;
         }
-        
+
         if ("buttonClasses" in hash) {
             context.buttonClasses = hash.buttonClasses;
             delete hash.buttonClasses;
         }
-        
+
         context.buttonContent = hash.buttonContent || "Submit";
         if ("buttonContent" in hash) {
             delete hash.buttonContent;
         }
-        
+
         context.qfHash = hash;
-        
+
         return new Handlebars.SafeString(Template._quickForm(context));
     });
     Handlebars.registerHelper("afQuickField", function(name, options) {
@@ -175,14 +177,14 @@ if (typeof Handlebars !== 'undefined') {
         if (!obj) {
             throw new Error("afFieldMessage helper must be used within an autoForm block helper");
         }
-        return obj.simpleSchema().keyErrorMessage(name);
+        return obj.namedContext(autoform._formID).keyErrorMessage(name);
     });
     Handlebars.registerHelper("afFieldIsInvalid", function(name, options) {
         var autoform = options.hash.autoform || this, obj = autoform._ss;
         if (!obj) {
             throw new Error("afFieldIsInvalid helper must be used within an autoForm block helper");
         }
-        return obj.simpleSchema().keyIsInvalid(name);
+        return obj.namedContext(autoform._formID).keyIsInvalid(name);
     });
     Handlebars.registerHelper("afFieldInput", function(name, options) {
         var autoform = options.hash.autoform || this, obj = autoform._ss;
@@ -237,9 +239,16 @@ if (typeof Handlebars !== 'undefined') {
             //for updates, convert to modifier object with $set and $unset
             var updateDoc = docToModifier(doc);
 
+            //set validation context
+            afc2Obj.currentContext(template.data.formID);
+            
+            if (isInsert || isUpdate || isRemove || method) {
+                event.preventDefault(); //prevent default here if we're planning to do our own thing
+            }
+
             //pass both types of doc to onSubmit
             if (typeof onSubmit === "function") {
-                if (validationType === 'none' || afc2Obj.validate(insertDoc)) {
+                if (validationType === 'none' || afc2Obj.validate(insertDoc, false)) {
                     var context = {
                         resetForm: function() {
                             template.find("form").reset();
@@ -247,22 +256,20 @@ if (typeof Handlebars !== 'undefined') {
                     };
                     var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
                     if (shouldContinue === false) {
+                        event.preventDefault();
                         return;
                     }
                 }
             }
-            
-            
+
             //allow normal form submission
             if (!isInsert && !isUpdate && !isRemove && !method) {
-                if (validationType !== 'none' && !afc2Obj.validate(insertDoc)) {
+                if (validationType !== 'none' && !afc2Obj.validate(insertDoc, false)) {
                     event.preventDefault(); //don't submit the form if invalid
                 }
                 return;
             }
-            
-            event.preventDefault(); //we are now sure we don't want the browser to submit the form
-            
+
             //do it
             if (isInsert) {
                 //call beforeInsert if present
@@ -333,7 +340,7 @@ if (typeof Handlebars !== 'undefined') {
                 var cb = afc2Obj._callbacks && afc2Obj._callbacks[method] ? afc2Obj._callbacks[method] : function() {
                 };
 
-                if (validationType === 'none' || afc2Obj.validate(insertDoc)) {
+                if (validationType === 'none' || afc2Obj.validate(insertDoc, false)) {
                     Meteor.call(method, insertDoc, function(error, result) {
                         if (!error) {
                             template.find("form").reset();
@@ -371,9 +378,9 @@ if (typeof Handlebars !== 'undefined') {
             }
         },
         'reset form': function(event, template) {
-            var autoFormObj = template.data.schema;
-            if (autoFormObj) {
-                autoFormObj.resetForm(template.data.formID);
+            var afc2Obj = template.data.schema;
+            if (afc2Obj) {
+                afc2Obj.resetForm(template.data.formID, template.data.schema.namedContext(template.data.formID));
             }
         }
     });
@@ -905,27 +912,25 @@ var createLabelHtml = function(name, defs, hash) {
     return '<label' + objToAttributes(hash) + '>' + label + '</label>';
 };
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
-    var autoFormObj = template.data.schema;
-    var doc = formValues(template, autoFormObj.formToDoc);
+    var afc2Obj = template.data.schema;
+    var doc = formValues(template, afc2Obj.formToDoc);
 
     //delete any properties that are null, undefined, or empty strings
     doc = cleanNulls(doc);
-
-    var schema = autoFormObj.simpleSchema();
 
     if (skipEmpty && !(key in doc)) {
         return; //skip validation
     }
 
-    if (onlyIfAlreadyInvalid && schema.valid()) {
+    if (onlyIfAlreadyInvalid && afc2Obj.namedContext(template.data.formID).isValid()) {
         return;
     }
 
-    //clean doc
-    doc = schema.filter(doc);
-    doc = schema.autoTypeConvert(doc);
-    //validate doc
-    schema.validateOne(doc, key);
+    //set validation context
+    afc2Obj.currentContext(template.data.formID);
+
+    //clean and validate doc
+    afc2Obj.validateOne(doc, key, false);
 };
 //throttling function that calls out to _validateField
 var vok = {}, tm = {};
