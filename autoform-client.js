@@ -1,12 +1,24 @@
-AutoForm.prototype.resetForm = function(formID, context) {
-    context.resetValidation();
+AutoForm.prototype.resetForm = function(formID) {
+    var self = this;
+
+    if (typeof formID !== "string") {
+        return;
+    }
+
+    self.namedContext(formID).resetValidation();
     clearSelections(formID);
 };
 
 //add callbacks() method to Meteor.Collection2
 if (typeof Meteor.Collection2 !== 'undefined') {
-    Meteor.Collection2.prototype.resetForm = function(formID, context) {
-        context.resetValidation();
+    Meteor.Collection2.prototype.resetForm = function(formID) {
+        var self = this;
+
+        if (typeof formID !== "string") {
+            return;
+        }
+
+        self.namedContext(formID).resetValidation();
         clearSelections(formID);
     };
 }
@@ -44,7 +56,7 @@ if (typeof Handlebars !== 'undefined') {
         } else {
             flatDoc = {};
         }
-        
+
         var autoFormContext = {
             schema: schemaObj,
             _ss: schemaObj,
@@ -75,11 +87,11 @@ if (typeof Handlebars !== 'undefined') {
         //of values, but might not work properly if any forms have input
         //elements (schema keys) with the same name
         autoFormContext.formID = atts.id || "_afGenericID";
-        
-        schemaObj.ensureContext(autoFormContext.formID);
-        
+
+        //schemaObj.ensureContext(autoFormContext.formID);
+
         autoFormContext.content = options.fn({_ss: autoFormContext._ss, _doc: autoFormContext._doc, _flatDoc: autoFormContext._flatDoc, _formID: autoFormContext.formID});
-        
+
         autoFormContext.atts = objToAttributes(atts);
         return new Handlebars.SafeString(Template._autoForm(autoFormContext));
     });
@@ -229,6 +241,7 @@ if (typeof Handlebars !== 'undefined') {
             var self = this;
             var validationType = template.data.validationType;
             var afc2Obj = template.data.schema;
+            var formId = template.data.formID;
             var currentDoc = self._doc || null;
             var docId = currentDoc ? currentDoc._id : null;
             var doc = formValues(template, afc2Obj.formToDoc);
@@ -239,16 +252,13 @@ if (typeof Handlebars !== 'undefined') {
             //for updates, convert to modifier object with $set and $unset
             var updateDoc = docToModifier(doc);
 
-            //set validation context
-            afc2Obj.currentContext(template.data.formID);
-            
             if (isInsert || isUpdate || isRemove || method) {
                 event.preventDefault(); //prevent default here if we're planning to do our own thing
             }
 
             //pass both types of doc to onSubmit
             if (typeof onSubmit === "function") {
-                if (validationType === 'none' || afc2Obj.validate(insertDoc, false)) {
+                if (validationType === 'none' || afc2Obj.validate(insertDoc, {validationContext: formId, modifier: false})) {
                     var context = {
                         resetForm: function() {
                             template.find("form").reset();
@@ -264,7 +274,7 @@ if (typeof Handlebars !== 'undefined') {
 
             //allow normal form submission
             if (!isInsert && !isUpdate && !isRemove && !method) {
-                if (validationType !== 'none' && !afc2Obj.validate(insertDoc, false)) {
+                if (validationType !== 'none' && !afc2Obj.validate(insertDoc, {validationContext: formId, modifier: false})) {
                     event.preventDefault(); //don't submit the form if invalid
                 }
                 return;
@@ -281,7 +291,7 @@ if (typeof Handlebars !== 'undefined') {
                 }
 
                 var cb = afc2Obj._callbacks && afc2Obj._callbacks.insert ? afc2Obj._callbacks.insert : null;
-                afc2Obj.insert(insertDoc, function(error, result) {
+                afc2Obj.insert(insertDoc, {validationContext: formId}, function(error, result) {
                     if (!error) {
                         template.find("form").reset();
                     }
@@ -300,7 +310,7 @@ if (typeof Handlebars !== 'undefined') {
                     }
 
                     var cb = afc2Obj._callbacks && afc2Obj._callbacks.update ? afc2Obj._callbacks.update : null;
-                    afc2Obj.update(docId, updateDoc, function(error) {
+                    afc2Obj.update(docId, updateDoc, {validationContext: formId}, function(error) {
                         //don't automatically reset the form for updates because we
                         //often won't want that
                         if (cb) {
@@ -340,7 +350,7 @@ if (typeof Handlebars !== 'undefined') {
                 var cb = afc2Obj._callbacks && afc2Obj._callbacks[method] ? afc2Obj._callbacks[method] : function() {
                 };
 
-                if (validationType === 'none' || afc2Obj.validate(insertDoc, false)) {
+                if (validationType === 'none' || afc2Obj.validate(insertDoc, {validationContext: formId, modifier: false})) {
                     Meteor.call(method, insertDoc, function(error, result) {
                         if (!error) {
                             template.find("form").reset();
@@ -379,8 +389,9 @@ if (typeof Handlebars !== 'undefined') {
         },
         'reset form': function(event, template) {
             var afc2Obj = template.data.schema;
-            if (afc2Obj) {
-                afc2Obj.resetForm(template.data.formID, template.data.schema.namedContext(template.data.formID));
+            var formId = template.data.formID;
+            if (afc2Obj && formId) {
+                afc2Obj.resetForm(formId);
             }
         }
     });
@@ -913,6 +924,7 @@ var createLabelHtml = function(name, defs, hash) {
 };
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
     var afc2Obj = template.data.schema;
+    var formId = template.data.formID;
     var doc = formValues(template, afc2Obj.formToDoc);
 
     //delete any properties that are null, undefined, or empty strings
@@ -922,15 +934,12 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
         return; //skip validation
     }
 
-    if (onlyIfAlreadyInvalid && afc2Obj.namedContext(template.data.formID).isValid()) {
+    if (onlyIfAlreadyInvalid && afc2Obj.namedContext(formId).isValid()) {
         return;
     }
 
-    //set validation context
-    afc2Obj.currentContext(template.data.formID);
-
     //clean and validate doc
-    afc2Obj.validateOne(doc, key, false);
+    afc2Obj.validateOne(doc, key, {validationContext: formId, modifier: false});
 };
 //throttling function that calls out to _validateField
 var vok = {}, tm = {};

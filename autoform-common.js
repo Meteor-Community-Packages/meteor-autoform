@@ -11,53 +11,42 @@ AutoForm = function(schema) {
     self._validationContexts = {
         default: self._simpleSchema.newContext()
     };
-    //store a generic validation context
-    self._validationContext = "default";
-};
-
-AutoForm.prototype.currentContext = function(name) {
-    var self = this;
-    if (name) {
-        //set current context, creating it first if necessary
-        self._validationContexts[name] = self._validationContexts[name] || self._simpleSchema.newContext();
-        self._validationContext = name;
-    } else {
-        //get current context
-        return self._validationContext;
-    }
 };
 
 AutoForm.prototype.namedContext = function(name) {
     var self = this;
-    self._validationContexts[name] = self._validationContexts[name] || self._simpleSchema.newContext();
+    ensureContext(self, name);
     return self._validationContexts[name];
 };
 
-AutoForm.prototype.ensureContext = function(name) {
-    var self = this;
-    self._validationContexts[name] = self._validationContexts[name] || self._simpleSchema.newContext();
-};
-
-AutoForm.prototype.validate = function(doc, isModifier) {
+AutoForm.prototype.validate = function(doc, options) {
     var self = this, schema = self._simpleSchema;
-
+    
+    //figure out the validation context name and make sure it exists
+    var context = _.isObject(options) && typeof options.validationContext === "string" ? options.validationContext : "default";
+    ensureContext(self, context);
+    
     //clean doc
     doc = schema.clean(doc);
     //validate doc
-    self._validationContexts[self._validationContext].validate(doc, {modifier: isModifier});
+    self._validationContexts[context].validate(doc, options);
 
-    return self._validationContexts[self._validationContext].isValid();
+    return self._validationContexts[context].isValid();
 };
 
-AutoForm.prototype.validateOne = function(doc, keyName, isModifier) {
+AutoForm.prototype.validateOne = function(doc, keyName, options) {
     var self = this, schema = self._simpleSchema;
-
+    
+    //figure out the validation context name and make sure it exists
+    var context = _.isObject(options) && typeof options.validationContext === "string" ? options.validationContext : "default";
+    ensureContext(self, context);
+    
     //clean doc
     doc = schema.clean(doc);
     //validate doc
-    self._validationContexts[self._validationContext].validateOne(doc, keyName, {modifier: isModifier});
+    self._validationContexts[context].validateOne(doc, keyName, options);
 
-    return !self._validationContexts[self._validationContext].keyIsInvalid(keyName);
+    return !self._validationContexts[context].keyIsInvalid(keyName);
 };
 
 AutoForm.prototype.simpleSchema = function() {
@@ -74,3 +63,9 @@ if (typeof Meteor.Collection2 !== 'undefined') {
         this._callbacks = cb;
     };
 }
+
+//Private Methods
+
+var ensureContext = function(af, name) {
+    af._validationContexts[name] = af._validationContexts[name] || af._simpleSchema.newContext();
+};
