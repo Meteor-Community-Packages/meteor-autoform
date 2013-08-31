@@ -43,11 +43,13 @@ Books = new Meteor.Collection2("books", {
 });
 ```
 
-Creating an insert form with automatic validation and submission is now as simple as this:
+### An Insert Form
+
+Creating an insert form with automatic validation and submission is as simple as this:
 
 ```html
 <template name="insertBookForm">
-    {{#autoForm schema=booksCollection}}
+    {{#autoForm schema=booksCollection id="insertBookForm"}}
     <fieldset>
         <legend>Add a Book</legend>
         <div class="form-group{{#if afFieldIsInvalid 'title'}} has-error{{/if}}">
@@ -99,6 +101,9 @@ Template.insertBookForm.booksCollection = function () {
 };
 ```
 
+(If `Books` is in the global/window scope, you could instead do `schema="Books"`
+on the `autoForm` helper and skip the `booksCollection` helper.)
+
 And that's it! You don't have to write any specific javascript functions to validate the data
 or perform the insert.
 
@@ -112,11 +117,13 @@ and will add all of them to the generated HTML element. So you can add class, id
 and insertion will happen automatically, and the `afFieldIsInvalid` and `afFieldMessage`
 helpers will reactively update.
 
-What about an update? It's pretty much the same:
+### An Update Form
+
+What about an update form? It's pretty much the same as an insert form:
 
 ```html
 <template name="updateBookForm">
-    {{#autoForm schema=booksCollection doc=selectedBook}}
+    {{#autoForm schema=booksCollection doc=selectedBook id="updateBookForm"}}
     <fieldset>
         <legend>Edit Book</legend>
         <div class="form-group{{#if afFieldIsInvalid 'title'}} has-error{{/if}}">
@@ -171,6 +178,8 @@ attribute, and that document will be updated when the user clicks the submit but
 and updates if you want. Just swap the class on the submit button, and for inserts,
 pass in null or undefined to the `doc` attribute.
 
+### A Remove Form
+
 And finally, how about an example of a remove form:
 
 ```html
@@ -194,8 +203,16 @@ Attributes:
 * `doc`: Required for update and remove actions. Pass the current document object. It's usually easiest to pass
 the name of a custom helper that returns the object by calling `findOne()`.
 * `validation`: Optional. See the "Fine Tuning Validation" section.
-* Any additional attributes are passed along to the `<form>` element, meaning that you can add classes, etc. It's a
-good idea to specify an `id` attribute if you want Meteor's input preservation to work.
+* Any additional attributes are passed along to the `<form>` element, meaning that you can add classes, etc.
+
+It's best to always include an `id` attribute on your `autoForm` helper. This helps
+ensure input preservation and also sets up form-specific validation contexts. A form-specific
+validation context means that you could have an insert and update form for the
+same schema on the same page, and typing something invalid in, for example, the
+"name" field in the insert form will turn that field red, but it won't turn the
+"name" field in the update form red. By contrast, if you forget to specify an
+`id` for the `autoForm`, both "name" fields would turn red even though the user
+has only entered invalid text in one of them.
 
 ### afFieldMessage "propertyName"
 
@@ -367,7 +384,7 @@ The Meteor method:
 ```js
 Meteor.methods({
     sendEmail: function(doc) {
-        check(doc, Schema.contact.match());
+        check(doc, Schema.contact);
         var text = "Name: " + doc.name + "\n\n"
                 + "Email: " + doc.email + "\n\n\n\n"
                 + doc.message;
@@ -465,6 +482,9 @@ You can set `MyCollection2.beforeInsert` equal to a function the takes the objec
 and returns a modified copy of the object. Remember that whatever modifications you make must still pass SimpleSchema
 validation.
 
+*This is run only on the client. Therefore, you should
+not assume that this will always run since a devious user could skip it.*
+
 ### MyCollection2.beforeUpdate
 
 You can set `MyCollection2.beforeUpdate` equal to a function the takes the ID of
@@ -473,17 +493,26 @@ and returns a modified copy of the update object. Remember that whatever modific
 validation. Keep in mind that the object this function receives will have the `$set` and potentially `$unset` keys
 at the first level.
 
+*This is run only on the client. Therefore, you should
+not assume that this will always run since a devious user could skip it.*
+
 ### MyCollection2.beforeRemove
 
 You can set `MyCollection2.beforeRemove` equal to a function the takes the ID of
 the document to be removed as its only argument and returns `false` to cancel the
 removal.
 
+*This is run only on the client. Therefore, you should
+not assume that this will always run since a devious user could skip it.*
+
 ### MyAutoForm.beforeMethod or MyCollection2.beforeMethod
 
 You can set `MyAutoForm.beforeMethod` or `MyCollection2.beforeMethod` equal to a function the takes the object that will be passed to a method
 as its first argument and the name of the method as its second argument. This function must return a modified copy
 of the object. Remember that whatever modifications you make must still pass SimpleSchema validation.
+
+*This is run only on the client. Therefore, you should
+not assume that this will always run since a devious user could skip it.*
 
 ### MyAutoForm.formToDoc, MyCollection2.formToDoc, MyAutoForm.docToForm, MyCollection2.docToForm
 
@@ -514,22 +543,23 @@ Then in client code:
 
 ```js
 Posts.docToForm = function (doc) {
-    return doc.tags.join(', ');
- };
+  return doc.tags.join(', ');
+};
 
- Posts.formToDoc = function (doc) {
-    if ('tags' in doc) {
-        doc.tags = doc.tags.split(",");
-        //loop through values and trim() or whatever else you want to do
-    }
-    return doc;
- };
+Posts.formToDoc = function (doc) {
+  if ('tags' in doc) {
+    doc.tags = doc.tags.split(",");
+    //loop through values and trim() or whatever else you want to do
+  }
+  return doc;
+};
 ```
 
 ## Fine Tuning Validation
 
 To control when fields should be validated, use the `validation` attribute on
 the `{{autoform}}` helper. Supported values are:
+
 * `none`: Do not validate any form fields at any time.
 * `submit`: Validate all form fields only when the form is submitted.
 * `keyup`: Validate each form field on every key press and when the user moves the cursor off it (throttled to run at most once every 300 milliseconds). Also validate all fields again when the form is submitted.
