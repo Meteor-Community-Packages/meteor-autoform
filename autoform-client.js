@@ -539,7 +539,7 @@ var collapseObj = function(doc, skip) {
             for (var i = 0, ln = obj.length; i < ln; i++) {
                 var value = obj[i];
                 var newKey = (current ? current + "." + i : i);  // joined index with dot
-                if (value && (typeof value === "object" || _.isArray(value)) && !_.contains(skip, newKey)) {
+                if ((_.isObject(value) || _.isArray(value)) && !_.contains(skip, newKey)) {
                     recurse(value, newKey);  // it's a nested object or array, so do it again
                 } else {
                     res[newKey] = value;  // it's not an object or array, so set the property
@@ -549,7 +549,7 @@ var collapseObj = function(doc, skip) {
             for (var key in obj) {
                 var value = obj[key];
                 var newKey = (current ? current + "." + key : key);  // joined key with dot
-                if (value && (typeof value === "object" || _.isArray(value)) && !_.contains(skip, newKey)) {
+                if ((_.isObject(value) || _.isArray(value)) && !_.contains(skip, newKey)) {
                     recurse(value, newKey);  // it's a nested object or array, so do it again
                 } else {
                     res[newKey] = value;  // it's not an object or array, so set the property
@@ -568,7 +568,7 @@ var expandObj = function(doc) {
         current = newDoc;
         for (var i = 0; i < subkeylen; i++) {
             subkey = subkeys[i];
-            if (current[subkey] && !_.isObject(current[subkey])) {
+            if (typeof current[subkey] !== "undefined" && !_.isObject(current[subkey])) {
                 break; //already set for some reason; leave it alone
             }
             if (i === subkeylen - 1) {
