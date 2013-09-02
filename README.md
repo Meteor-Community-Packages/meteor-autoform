@@ -7,6 +7,14 @@ This package requires and automatically installs the [simple-schema](https://git
 You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you
 have to add to your app yourself.
 
+## Installation
+
+Install using Meteorite. When in a Meteorite-managed app directory, enter:
+
+```
+$ mrt add autoform
+```
+
 ## Example
 
 Let's say you have the following definition of a Collection2 instance:
