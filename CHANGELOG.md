@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.2.3
+
+* Fix IE<10 issue
+
 ### 0.2.2
 
 * Use `submit form` event handler instead of button click handlers
