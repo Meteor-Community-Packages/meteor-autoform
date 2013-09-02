@@ -1,12 +1,24 @@
 AutoForm.prototype.resetForm = function(formID) {
-    this.simpleSchema().resetValidation();
+    var self = this;
+
+    if (typeof formID !== "string") {
+        return;
+    }
+
+    self.namedContext(formID).resetValidation();
     clearSelections(formID);
 };
 
 //add callbacks() method to Meteor.Collection2
 if (typeof Meteor.Collection2 !== 'undefined') {
     Meteor.Collection2.prototype.resetForm = function(formID) {
-        this.simpleSchema().resetValidation();
+        var self = this;
+
+        if (typeof formID !== "string") {
+            return;
+        }
+
+        self.namedContext(formID).resetValidation();
         clearSelections(formID);
     };
 }
@@ -17,12 +29,12 @@ if (typeof Handlebars !== 'undefined') {
             return "";
         }
         var hash = options.hash || {};
-        
+
         //copy hash from quickForm if this is an autoForm created by the quickForm helper
         if (hash.qfHash) {
             hash = hash.qfHash;
         }
-        
+
         var schemaObj;
         if (typeof hash.schema === "string") {
             if (!window || !window[hash.schema]) {
@@ -45,14 +57,12 @@ if (typeof Handlebars !== 'undefined') {
             flatDoc = {};
         }
 
-        var context = {_ss: schemaObj, _doc: hash.doc, _flatDoc: flatDoc};
         var autoFormContext = {
             schema: schemaObj,
             _ss: schemaObj,
             _doc: hash.doc,
             _flatDoc: flatDoc
         };
-        autoFormContext.content = options.fn(context);
 
         if ("doc" in hash) {
             delete hash.doc;
@@ -77,6 +87,11 @@ if (typeof Handlebars !== 'undefined') {
         //of values, but might not work properly if any forms have input
         //elements (schema keys) with the same name
         autoFormContext.formID = atts.id || "_afGenericID";
+
+        //schemaObj.ensureContext(autoFormContext.formID);
+
+        autoFormContext.content = options.fn({_ss: autoFormContext._ss, _doc: autoFormContext._doc, _flatDoc: autoFormContext._flatDoc, _formID: autoFormContext.formID});
+
         autoFormContext.atts = objToAttributes(atts);
         return new Handlebars.SafeString(Template._autoForm(autoFormContext));
     });
@@ -85,7 +100,6 @@ if (typeof Handlebars !== 'undefined') {
             return "";
         }
         var hash = options.hash || {};
-        var schemaObj;
         if (typeof hash.schema === "string") {
             if (!window || !window[hash.schema]) {
                 return options.fn(this);
@@ -110,23 +124,23 @@ if (typeof Handlebars !== 'undefined') {
             }
             delete hash.type;
         }
-        
+
         if ("method" in hash) {
             delete hash.method;
         }
-        
+
         if ("buttonClasses" in hash) {
             context.buttonClasses = hash.buttonClasses;
             delete hash.buttonClasses;
         }
-        
+
         context.buttonContent = hash.buttonContent || "Submit";
         if ("buttonContent" in hash) {
             delete hash.buttonContent;
         }
-        
+
         context.qfHash = hash;
-        
+
         return new Handlebars.SafeString(Template._quickForm(context));
     });
     Handlebars.registerHelper("afQuickField", function(name, options) {
@@ -175,14 +189,14 @@ if (typeof Handlebars !== 'undefined') {
         if (!obj) {
             throw new Error("afFieldMessage helper must be used within an autoForm block helper");
         }
-        return obj.simpleSchema().keyErrorMessage(name);
+        return obj.namedContext(autoform._formID).keyErrorMessage(name);
     });
     Handlebars.registerHelper("afFieldIsInvalid", function(name, options) {
         var autoform = options.hash.autoform || this, obj = autoform._ss;
         if (!obj) {
             throw new Error("afFieldIsInvalid helper must be used within an autoForm block helper");
         }
-        return obj.simpleSchema().keyIsInvalid(name);
+        return obj.namedContext(autoform._formID).keyIsInvalid(name);
     });
     Handlebars.registerHelper("afFieldInput", function(name, options) {
         var autoform = options.hash.autoform || this, obj = autoform._ss;
@@ -227,6 +241,7 @@ if (typeof Handlebars !== 'undefined') {
             var self = this;
             var validationType = template.data.validationType;
             var afc2Obj = template.data.schema;
+            var formId = template.data.formID;
             var currentDoc = self._doc || null;
             var docId = currentDoc ? currentDoc._id : null;
             var doc = formValues(template, afc2Obj.formToDoc);
@@ -237,9 +252,13 @@ if (typeof Handlebars !== 'undefined') {
             //for updates, convert to modifier object with $set and $unset
             var updateDoc = docToModifier(doc);
 
+            if (isInsert || isUpdate || isRemove || method) {
+                event.preventDefault(); //prevent default here if we're planning to do our own thing
+            }
+
             //pass both types of doc to onSubmit
             if (typeof onSubmit === "function") {
-                if (validationType === 'none' || afc2Obj.validate(insertDoc)) {
+                if (validationType === 'none' || afc2Obj.validate(insertDoc, {validationContext: formId, modifier: false})) {
                     var context = {
                         resetForm: function() {
                             template.find("form").reset();
@@ -247,22 +266,20 @@ if (typeof Handlebars !== 'undefined') {
                     };
                     var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
                     if (shouldContinue === false) {
+                        event.preventDefault();
                         return;
                     }
                 }
             }
-            
-            
+
             //allow normal form submission
             if (!isInsert && !isUpdate && !isRemove && !method) {
-                if (validationType !== 'none' && !afc2Obj.validate(insertDoc)) {
+                if (validationType !== 'none' && !afc2Obj.validate(insertDoc, {validationContext: formId, modifier: false})) {
                     event.preventDefault(); //don't submit the form if invalid
                 }
                 return;
             }
-            
-            event.preventDefault(); //we are now sure we don't want the browser to submit the form
-            
+
             //do it
             if (isInsert) {
                 //call beforeInsert if present
@@ -274,7 +291,7 @@ if (typeof Handlebars !== 'undefined') {
                 }
 
                 var cb = afc2Obj._callbacks && afc2Obj._callbacks.insert ? afc2Obj._callbacks.insert : null;
-                afc2Obj.insert(insertDoc, function(error, result) {
+                afc2Obj.insert(insertDoc, {validationContext: formId}, function(error, result) {
                     if (!error) {
                         template.find("form").reset();
                     }
@@ -293,7 +310,7 @@ if (typeof Handlebars !== 'undefined') {
                     }
 
                     var cb = afc2Obj._callbacks && afc2Obj._callbacks.update ? afc2Obj._callbacks.update : null;
-                    afc2Obj.update(docId, updateDoc, function(error) {
+                    afc2Obj.update(docId, updateDoc, {validationContext: formId}, function(error) {
                         //don't automatically reset the form for updates because we
                         //often won't want that
                         if (cb) {
@@ -333,7 +350,7 @@ if (typeof Handlebars !== 'undefined') {
                 var cb = afc2Obj._callbacks && afc2Obj._callbacks[method] ? afc2Obj._callbacks[method] : function() {
                 };
 
-                if (validationType === 'none' || afc2Obj.validate(insertDoc)) {
+                if (validationType === 'none' || afc2Obj.validate(insertDoc, {validationContext: formId, modifier: false})) {
                     Meteor.call(method, insertDoc, function(error, result) {
                         if (!error) {
                             template.find("form").reset();
@@ -371,9 +388,10 @@ if (typeof Handlebars !== 'undefined') {
             }
         },
         'reset form': function(event, template) {
-            var autoFormObj = template.data.schema;
-            if (autoFormObj) {
-                autoFormObj.resetForm(template.data.formID);
+            var afc2Obj = template.data.schema;
+            var formId = template.data.formID;
+            if (afc2Obj && formId) {
+                afc2Obj.resetForm(formId);
             }
         }
     });
@@ -521,7 +539,7 @@ var collapseObj = function(doc, skip) {
             for (var i = 0, ln = obj.length; i < ln; i++) {
                 var value = obj[i];
                 var newKey = (current ? current + "." + i : i);  // joined index with dot
-                if (value && (typeof value === "object" || _.isArray(value)) && !_.contains(skip, newKey)) {
+                if ((_.isObject(value) || _.isArray(value)) && !_.contains(skip, newKey)) {
                     recurse(value, newKey);  // it's a nested object or array, so do it again
                 } else {
                     res[newKey] = value;  // it's not an object or array, so set the property
@@ -531,7 +549,7 @@ var collapseObj = function(doc, skip) {
             for (var key in obj) {
                 var value = obj[key];
                 var newKey = (current ? current + "." + key : key);  // joined key with dot
-                if (value && (typeof value === "object" || _.isArray(value)) && !_.contains(skip, newKey)) {
+                if ((_.isObject(value) || _.isArray(value)) && !_.contains(skip, newKey)) {
                     recurse(value, newKey);  // it's a nested object or array, so do it again
                 } else {
                     res[newKey] = value;  // it's not an object or array, so set the property
@@ -550,7 +568,7 @@ var expandObj = function(doc) {
         current = newDoc;
         for (var i = 0; i < subkeylen; i++) {
             subkey = subkeys[i];
-            if (current[subkey] && !_.isObject(current[subkey])) {
+            if (typeof current[subkey] !== "undefined" && !_.isObject(current[subkey])) {
                 break; //already set for some reason; leave it alone
             }
             if (i === subkeylen - 1) {
@@ -823,9 +841,9 @@ var createInputHtml = function(name, autoform, defs, hash) {
         } else {
             //add bootstrap's form-control class to input elements
             if ("class" in hash) {
-                hash["class"] += " form-control"; //hash.class syntax errors in IE<10
+                hash["class"] += " form-control"; //IE<10 throws error if hash.class syntax is used
             } else {
-                hash["class"] = "form-control"; //hash.class syntax errors in IE<10
+                hash["class"] = "form-control"; //IE<10 throws error if hash.class syntax is used
             }
             hash.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
             html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + multiple + '>';
@@ -854,9 +872,9 @@ var createInputHtml = function(name, autoform, defs, hash) {
     } else if (type === "textarea") {
         //add bootstrap's form-control class to input elements
         if ("class" in hash) {
-            hash["class"] += " form-control"; //hash.class syntax errors in IE<10
+            hash["class"] += " form-control"; //IE<10 throws error if hash.class syntax is used
         } else {
-            hash["class"] = "form-control"; //hash.class syntax errors in IE<10
+            hash["class"] = "form-control"; //IE<10 throws error if hash.class syntax is used
         }
         html = '<textarea data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
     } else if (type === "boolean") {
@@ -866,9 +884,9 @@ var createInputHtml = function(name, autoform, defs, hash) {
         } else if (select) {
             //add bootstrap's form-control class to input elements
             if ("class" in hash) {
-                hash["class"] += " form-control"; //hash.class syntax errors in IE<10
+                hash["class"] += " form-control"; //IE<10 throws error if hash.class syntax is used
             } else {
-                hash["class"] = "form-control"; //hash.class syntax errors in IE<10
+                hash["class"] = "form-control"; //IE<10 throws error if hash.class syntax is used
             }
             html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + '>';
             html += '<option value="false"' + (!value ? ' selected' : '') + '>' + falseLabel + '</option>';
@@ -881,9 +899,9 @@ var createInputHtml = function(name, autoform, defs, hash) {
     } else {
         //add bootstrap's form-control class to input elements
         if ("class" in hash) {
-            hash["class"] += " form-control"; //hash.class syntax errors in IE<10
+            hash["class"] += " form-control"; //IE<10 throws error if hash.class syntax is used
         } else {
-            hash["class"] = "form-control"; //hash.class syntax errors in IE<10
+            hash["class"] = "form-control"; //IE<10 throws error if hash.class syntax is used
         }
         html = '<input type="' + type + '" data-schema-key="' + name + '" name="' + name + '" value="' + value + '"' + objToAttributes(hash) + req + max + min + step + ' />';
     }
@@ -896,36 +914,32 @@ var createLabelHtml = function(name, defs, hash) {
 
     //add bootstrap's control-label class to label element
     if ("class" in hash) {
-        hash["class"] += " control-label"; //hash.class syntax errors in IE<10
+        hash["class"] += " control-label"; //IE<10 throws error if hash.class syntax is used
     } else {
-        hash["class"] = "control-label"; //hash.class syntax errors in IE<10
+        hash["class"] = "control-label"; //IE<10 throws error if hash.class syntax is used
     }
 
     var label = defs.label || name;
     return '<label' + objToAttributes(hash) + '>' + label + '</label>';
 };
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
-    var autoFormObj = template.data.schema;
-    var doc = formValues(template, autoFormObj.formToDoc);
+    var afc2Obj = template.data.schema;
+    var formId = template.data.formID;
+    var doc = formValues(template, afc2Obj.formToDoc);
 
     //delete any properties that are null, undefined, or empty strings
     doc = cleanNulls(doc);
-
-    var schema = autoFormObj.simpleSchema();
 
     if (skipEmpty && !(key in doc)) {
         return; //skip validation
     }
 
-    if (onlyIfAlreadyInvalid && schema.valid()) {
+    if (onlyIfAlreadyInvalid && afc2Obj.namedContext(formId).isValid()) {
         return;
     }
 
-    //clean doc
-    doc = schema.filter(doc);
-    doc = schema.autoTypeConvert(doc);
-    //validate doc
-    schema.validateOne(doc, key);
+    //clean and validate doc
+    afc2Obj.validateOne(doc, key, {validationContext: formId, modifier: false});
 };
 //throttling function that calls out to _validateField
 var vok = {}, tm = {};

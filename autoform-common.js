@@ -8,30 +8,45 @@ AutoForm = function(schema) {
     } else {
         self._simpleSchema = new SimpleSchema(schema);
     }
+    self._validationContexts = {
+        default: self._simpleSchema.newContext()
+    };
 };
 
-AutoForm.prototype.validate = function(doc) {
-    var self = this, schema = self._simpleSchema;
-
-    //clean doc
-    doc = schema.filter(doc);
-    doc = schema.autoTypeConvert(doc);
-    //validate doc
-    schema.validate(doc);
-
-    return schema.valid();
+AutoForm.prototype.namedContext = function(name) {
+    var self = this;
+    ensureContext(self, name);
+    return self._validationContexts[name];
 };
 
-AutoForm.prototype.validateOne = function(doc, keyName) {
+AutoForm.prototype.validate = function(doc, options) {
     var self = this, schema = self._simpleSchema;
-
+    
+    //figure out the validation context name and make sure it exists
+    var context = _.isObject(options) && typeof options.validationContext === "string" ? options.validationContext : "default";
+    ensureContext(self, context);
+    
     //clean doc
-    doc = schema.filter(doc);
-    doc = schema.autoTypeConvert(doc);
+    doc = schema.clean(doc);
     //validate doc
-    schema.validateOne(doc, keyName);
+    self._validationContexts[context].validate(doc, options);
 
-    return !schema.keyIsInvalid(keyName);
+    return self._validationContexts[context].isValid();
+};
+
+AutoForm.prototype.validateOne = function(doc, keyName, options) {
+    var self = this, schema = self._simpleSchema;
+    
+    //figure out the validation context name and make sure it exists
+    var context = _.isObject(options) && typeof options.validationContext === "string" ? options.validationContext : "default";
+    ensureContext(self, context);
+    
+    //clean doc
+    doc = schema.clean(doc);
+    //validate doc
+    self._validationContexts[context].validateOne(doc, keyName, options);
+
+    return !self._validationContexts[context].keyIsInvalid(keyName);
 };
 
 AutoForm.prototype.simpleSchema = function() {
@@ -47,28 +62,10 @@ if (typeof Meteor.Collection2 !== 'undefined') {
     Meteor.Collection2.prototype.callbacks = function(cb) {
         this._callbacks = cb;
     };
-
-    Meteor.Collection2.prototype.validate = function(doc) {
-        var self = this, schema = self._simpleSchema;
-
-        //clean doc
-        doc = schema.filter(doc);
-        doc = schema.autoTypeConvert(doc);
-        //validate doc
-        schema.validate(doc);
-
-        return schema.valid();
-    };
-
-    Meteor.Collection2.prototype.validateOne = function(doc, keyName) {
-        var self = this, schema = self._simpleSchema;
-
-        //clean doc
-        doc = schema.filter(doc);
-        doc = schema.autoTypeConvert(doc);
-        //validate doc
-        schema.validateOne(doc, keyName);
-
-        return !schema.keyIsInvalid(keyName);
-    };
 }
+
+//Private Methods
+
+var ensureContext = function(af, name) {
+    af._validationContexts[name] = af._validationContexts[name] || af._simpleSchema.newContext();
+};
