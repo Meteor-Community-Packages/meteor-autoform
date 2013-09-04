@@ -506,7 +506,7 @@ var formValues = function(template, transform) {
                 var year = parseInt(datePieces[0], 10);
                 var month = parseInt(datePieces[1], 10) - 1;
                 var date = parseInt(datePieces[2], 10);
-                doc[name] = new Date(Date.UTC(year, month, date));
+                doc[name] = new Date(year, month, date);
             } else {
                 doc[name] = null;
             }
@@ -608,15 +608,15 @@ var reportNulls = function(doc) {
     return nulls;
 };
 var dateToFieldDateString = function(date) {
-    var m = (date.getUTCMonth() + 1);
+    var m = (date.getMonth() + 1);
     if (m < 10) {
         m = "0" + m;
     }
-    var d = date.getUTCDate();
+    var d = date.getDate();
     if (d < 10) {
         d = "0" + d;
     }
-    return date.getUTCFullYear() + '-' + m + '-' + d;
+    return date.getFullYear() + '-' + m + '-' + d;
 };
 var getSelectValues = function(select) {
     var result = [];
@@ -746,7 +746,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
             min = ' min="' + hash.min + '"';
         } else if (defs.min) {
             if (defs.min instanceof Date) {
-                min = ' min="' + defs.min.getUTCFullYear() + '-' + (defs.min.getUTCMonth() + 1) + '-' + defs.min.getUTCDate() + '"';
+                min = ' min="' + dateToFieldDateString(defs.min) + '"';
             } else {
                 min = ' min="' + defs.min + '"';
             }

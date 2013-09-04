@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.3.1
+
+Fixes to date inputs
+
 ### 0.3.0
 
 Updated to work with 0.2.0 versions of collection2 and simple-schema packages. The autoform features should be backwards-compatible, but the collection2 and simple-schema APIs have changed, so you may need to make changes. To make sure everything works as you expect, it's strongly recommended that you include a unique `id` attribute on every `autoForm` helper.
