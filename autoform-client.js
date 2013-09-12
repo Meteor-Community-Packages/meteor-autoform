@@ -550,7 +550,7 @@ var expandObj = function(doc) {
                 nextPiece = parseInt(nextPiece, 10);
                 if (isNaN(nextPiece) && !_.isObject(current[subkey])) {
                     current[subkey] = {};
-                } else if (!_.isArray(current[subkey])) {
+                } else if (!isNaN(nextPiece) && !_.isArray(current[subkey])) {
                     current[subkey] = [];
                 }
             }

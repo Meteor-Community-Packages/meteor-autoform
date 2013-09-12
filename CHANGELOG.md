@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.3.4
+
+Fix object expansion
+
 ### 0.3.3
 
 Improve object collapsing. Ensures that the values of keys with dot notation appear in the fields for edit forms.
