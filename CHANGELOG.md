@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.3.2
+
+Fix IE<10 errors
+
 ### 0.3.1
 
 Fixes to date inputs

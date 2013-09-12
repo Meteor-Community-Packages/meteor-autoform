@@ -9,7 +9,7 @@ AutoForm = function(schema) {
         self._simpleSchema = new SimpleSchema(schema);
     }
     self._validationContexts = {
-        default: self._simpleSchema.newContext()
+        "default": self._simpleSchema.newContext()
     };
 };
 
