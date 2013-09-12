@@ -46,10 +46,9 @@ if (typeof Handlebars !== 'undefined') {
         }
         delete hash.schema;
 
-        var flatDoc, schemaKeys;
+        var flatDoc;
         if (hash.doc) {
-            schemaKeys = _.keys(schemaObj.simpleSchema().schema());
-            flatDoc = collapseObj(hash.doc, schemaKeys);
+            flatDoc = schemaObj.simpleSchema().collapseObj(hash.doc);
             if (typeof schemaObj.docToForm === "function") {
                 flatDoc = schemaObj.docToForm(flatDoc);
             }
@@ -531,35 +530,6 @@ var objToAttributes = function(obj) {
     });
     return a;
 };
-//collapses object into one level, with dot notation following the mongo $set syntax
-var collapseObj = function(doc, skip) {
-    var res = {};
-    (function recurse(obj, current) {
-        if (_.isArray(obj)) {
-            for (var i = 0, ln = obj.length; i < ln; i++) {
-                var value = obj[i];
-                var newKey = (current ? current + "." + i : i);  // joined index with dot
-                if ((_.isObject(value) || _.isArray(value)) && !_.contains(skip, newKey)) {
-                    recurse(value, newKey);  // it's a nested object or array, so do it again
-                } else {
-                    res[newKey] = value;  // it's not an object or array, so set the property
-                }
-            }
-        } else {
-            for (var key in obj) {
-                var value = obj[key];
-                var newKey = (current ? current + "." + key : key);  // joined key with dot
-                if ((_.isObject(value) || _.isArray(value)) && !_.contains(skip, newKey)) {
-                    recurse(value, newKey);  // it's a nested object or array, so do it again
-                } else {
-                    res[newKey] = value;  // it's not an object or array, so set the property
-                }
-            }
-        }
-    })(doc);
-    return res;
-};
-//opposite of collapseObj
 var expandObj = function(doc) {
     var newDoc = {}, subkeys, subkey, subkeylen, nextPiece, current;
     _.each(doc, function(val, key) {
