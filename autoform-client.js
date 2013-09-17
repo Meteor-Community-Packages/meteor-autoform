@@ -432,6 +432,10 @@ if (typeof Handlebars !== 'undefined') {
             }
         });
     };
+    
+    Template._autoForm.destroyed = function() {
+        this._notInDOM = true;
+    };
 }
 
 var formValues = function(template, transform) {
@@ -893,6 +897,8 @@ var createLabelHtml = function(name, defs, hash) {
     return '<label' + objToAttributes(hash) + '>' + label + '</label>';
 };
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
+    if (!template || template._notInDOM) return;
+    
     var afc2Obj = template.data.schema;
     var formId = template.data.formID;
     var doc = formValues(template, afc2Obj.formToDoc);
