@@ -810,11 +810,9 @@ var createInputHtml = function(name, autoform, defs, hash) {
             });
         } else {
             //add bootstrap's form-control class to input elements
-            if ("class" in hash) {
-                hash["class"] += " form-control"; //IE<10 throws error if hash.class syntax is used
-            } else {
+            if (!("class" in hash)) {
                 hash["class"] = "form-control"; //IE<10 throws error if hash.class syntax is used
-            }
+            } 
             hash.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
             html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + multiple + '>';
             if (firstOption && !isMultiple) {
@@ -841,9 +839,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
         }
     } else if (type === "textarea") {
         //add bootstrap's form-control class to input elements
-        if ("class" in hash) {
-            hash["class"] += " form-control"; //IE<10 throws error if hash.class syntax is used
-        } else {
+        if (!("class" in hash)) {
             hash["class"] = "form-control"; //IE<10 throws error if hash.class syntax is used
         }
         html = '<textarea data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
@@ -853,9 +849,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
             html += '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="false"' + checkedOpposite + objToAttributes(hash) + req + ' /> ' + falseLabel + '</label></div>';
         } else if (select) {
             //add bootstrap's form-control class to input elements
-            if ("class" in hash) {
-                hash["class"] += " form-control"; //IE<10 throws error if hash.class syntax is used
-            } else {
+            if (!("class" in hash)) {
                 hash["class"] = "form-control"; //IE<10 throws error if hash.class syntax is used
             }
             html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + '>';
@@ -868,9 +862,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
         }
     } else {
         //add bootstrap's form-control class to input elements
-        if ("class" in hash) {
-            hash["class"] += " form-control"; //IE<10 throws error if hash.class syntax is used
-        } else {
+        if (!("class" in hash)) {
             hash["class"] = "form-control"; //IE<10 throws error if hash.class syntax is used
         }
         html = '<input type="' + type + '" data-schema-key="' + name + '" name="' + name + '" value="' + value + '"' + objToAttributes(hash) + req + max + min + step + ' />';
