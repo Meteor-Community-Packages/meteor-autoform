@@ -318,7 +318,7 @@ If you do these three things, the form data will be gathered into a single objec
 the user clicks the submit button. Then that object will be cleaned and validated against the
 schema on the client and passed along to your method on the server. **You must
 validate it again in your method on the server, using `check()` in combination
-with `myAutoFormSchema.match()`.**
+with `myAutoFormSchema`.**
 
 ### An Example Contact Form
 
