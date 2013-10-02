@@ -27,9 +27,17 @@
 </template>
 
 <template name="_afQuickField">
+    {{#if useFrameworkBootstrap3}}
     <div class="form-group{{#if afFieldIsInvalid name autoform=autoform}} has-error{{/if}}">
         {{{labelHtml}}}
         {{{inputHtml}}}
         <span class="help-block">{{afFieldMessage name autoform=autoform}}</span>
     </div>
+    {{else}}
+    <div>
+        {{{labelHtml}}}
+        {{{inputHtml}}}
+        <span>{{afFieldMessage name autoform=autoform}}</span>
+    </div>
+    {{/if}}
 </template>

@@ -1,3 +1,5 @@
+var defaultFramework = "bootstrap3";
+
 AutoForm.prototype.resetForm = function(formID) {
     var self = this;
 
@@ -66,6 +68,11 @@ if (typeof Handlebars !== 'undefined') {
         if ("doc" in hash) {
             delete hash.doc;
         }
+        
+        autoFormContext._framework = hash.framework || defaultFramework;
+        if ("framework" in hash) {
+            delete hash.framework;
+        }
 
         autoFormContext.validationType = hash.validation || "submitThenKeyup";
         if ("validation" in hash) {
@@ -87,9 +94,7 @@ if (typeof Handlebars !== 'undefined') {
         //elements (schema keys) with the same name
         autoFormContext.formID = atts.id || "_afGenericID";
 
-        //schemaObj.ensureContext(autoFormContext.formID);
-
-        autoFormContext.content = options.fn({_ss: autoFormContext._ss, _doc: autoFormContext._doc, _flatDoc: autoFormContext._flatDoc, _formID: autoFormContext.formID});
+        autoFormContext.content = options.fn({_ss: autoFormContext._ss, _doc: autoFormContext._doc, _flatDoc: autoFormContext._flatDoc, _formID: autoFormContext.formID, _framework: autoFormContext._framework});
 
         autoFormContext.atts = objToAttributes(atts);
         return new Handlebars.SafeString(Template._autoForm(autoFormContext));
@@ -167,15 +172,21 @@ if (typeof Handlebars !== 'undefined') {
                 inputHash[key] = val;
             }
         });
+        
+        var framework = inputHash["framework"] || autoform._framework || defaultFramework;
 
         //set up context for _afQuickField template
-        var context = {name: name, autoform: autoform};
+        var context = {
+          name: name,
+          autoform: autoform,
+          useFrameworkBootstrap3: (framework === "bootstrap3")
+        };
 
         //add label HTML to _afQuickField template context
         if (skipLabel) {
             context.labelHtml = "";
         } else {
-            context.labelHtml = createLabelHtml(name, defs, labelHash);
+            context.labelHtml = createLabelHtml(name, autoform, defs, labelHash);
         }
 
         //add input HTML to _afQuickField template context
@@ -219,7 +230,7 @@ if (typeof Handlebars !== 'undefined') {
             throw new Error("Invalid field name");
         }
 
-        var html = createLabelHtml(name, defs, options.hash);
+        var html = createLabelHtml(name, autoform, defs, options.hash);
         return new Handlebars.SafeString(html);
     });
     Template._autoForm.events({
@@ -620,7 +631,6 @@ var createInputHtml = function(name, autoform, defs, hash) {
         expectsArray = false;
     }
 
-
     //get current value
     var value, arrayVal;
     if (expectsArray) {
@@ -696,7 +706,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
         type = "boolean";
     }
 
-    var label = defs.label || name;
+    var label = defs.label;
 
     //get correct max/min attributes
     var max = "", min = "";
@@ -736,7 +746,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
     }
 
     //clean hash; we're adding these explicitly, so we don't want to have two
-    var firstOption, radio, select, trueLabel, falseLabel, selectOptions, noselect;
+    var firstOption, radio, select, trueLabel, falseLabel, selectOptions, noselect, framework;
     if ("name" in hash) {
         delete hash.name;
     }
@@ -783,6 +793,12 @@ var createInputHtml = function(name, autoform, defs, hash) {
         selectOptions = hash.options;
         delete hash.options;
     }
+    if ("framework" in hash) {
+        framework = hash.framework;
+        delete hash.framework;
+    } else {
+        framework = autoform._framework || defaultFramework;
+    }
 
     if (selectOptions) {
         //build anything that should be a select, which is anything with options
@@ -794,7 +810,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
         if (noselect) {
             html = "";
             _.each(selectOptions, function(opt) {
-                var checked, inputType;
+                var checked, inputType, cl = "";
                 if (isMultiple) {
                     inputType = "checkbox";
                     if (_.contains(value, opt.value.toString())) {
@@ -810,14 +826,14 @@ var createInputHtml = function(name, autoform, defs, hash) {
                         checked = '';
                     }
                 }
-                html += '<div class="' + inputType + '"><label><input type="' + inputType + '" data-schema-key="' + name + '" name="' + name + '" value="' + opt.value + '"' + checked + objToAttributes(hash) + ' /> ' + opt.label + '</label></div>';
+                if (framework === "bootstrap3")
+                    cl = inputType;
+                html += '<div class="' + cl + '"><label><input type="' + inputType + '" data-schema-key="' + name + '" name="' + name + '" value="' + opt.value + '"' + checked + objToAttributes(hash) + ' /> ' + opt.label + '</label></div>';
             });
         } else {
-            //add bootstrap's form-control class to input elements
-            if ("class" in hash) {
-                hash["class"] += " form-control"; //IE<10 throws error if hash.class syntax is used
-            } else {
-                hash["class"] = "form-control"; //IE<10 throws error if hash.class syntax is used
+            if (framework === "bootstrap3") {
+                //add bootstrap's form-control class to input elements
+                hash["class"] = hash["class"] ? hash["class"] + " form-control" : "form-control"; //IE<10 throws error if hash.class syntax is used
             }
             hash.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
             html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + multiple + '>';
@@ -844,11 +860,9 @@ var createInputHtml = function(name, autoform, defs, hash) {
             html += '</select>';
         }
     } else if (type === "textarea") {
-        //add bootstrap's form-control class to input elements
-        if ("class" in hash) {
-            hash["class"] += " form-control"; //IE<10 throws error if hash.class syntax is used
-        } else {
-            hash["class"] = "form-control"; //IE<10 throws error if hash.class syntax is used
+        if (framework === "bootstrap3") {
+            //add bootstrap's form-control class to input elements
+            hash["class"] = hash["class"] ? hash["class"] + " form-control" : "form-control"; //IE<10 throws error if hash.class syntax is used
         }
         html = '<textarea data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
     } else if (type === "boolean") {
@@ -856,11 +870,9 @@ var createInputHtml = function(name, autoform, defs, hash) {
             html = '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + trueLabel + '</label></div>';
             html += '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="false"' + checkedOpposite + objToAttributes(hash) + req + ' /> ' + falseLabel + '</label></div>';
         } else if (select) {
-            //add bootstrap's form-control class to input elements
-            if ("class" in hash) {
-                hash["class"] += " form-control"; //IE<10 throws error if hash.class syntax is used
-            } else {
-                hash["class"] = "form-control"; //IE<10 throws error if hash.class syntax is used
+            if (framework === "bootstrap3") {
+                //add bootstrap's form-control class to input elements
+                hash["class"] = hash["class"] ? hash["class"] + " form-control" : "form-control"; //IE<10 throws error if hash.class syntax is used
             }
             html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + '>';
             html += '<option value="false"' + (!value ? ' selected' : '') + '>' + falseLabel + '</option>';
@@ -871,29 +883,33 @@ var createInputHtml = function(name, autoform, defs, hash) {
             html = '<div class="checkbox"><label for="' + name + '"><input type="checkbox" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + ' /> ' + label + '</label></div>';
         }
     } else {
-        //add bootstrap's form-control class to input elements
-        if ("class" in hash) {
-            hash["class"] += " form-control"; //IE<10 throws error if hash.class syntax is used
-        } else {
-            hash["class"] = "form-control"; //IE<10 throws error if hash.class syntax is used
+        if (framework === "bootstrap3") {
+            //add bootstrap's form-control class to input elements
+            hash["class"] = hash["class"] ? hash["class"] + " form-control" : "form-control"; //IE<10 throws error if hash.class syntax is used
         }
         html = '<input type="' + type + '" data-schema-key="' + name + '" name="' + name + '" value="' + value + '"' + objToAttributes(hash) + req + max + min + step + ' />';
     }
     return html;
 };
-var createLabelHtml = function(name, defs, hash) {
+var createLabelHtml = function(name, autoform, defs, hash) {
     if ("autoform" in hash) {
         delete hash.autoform;
     }
 
-    //add bootstrap's control-label class to label element
-    if ("class" in hash) {
-        hash["class"] += " control-label"; //IE<10 throws error if hash.class syntax is used
+    var framework;
+    if ("framework" in hash) {
+        framework = hash.framework;
+        delete hash.framework;
     } else {
-        hash["class"] = "control-label"; //IE<10 throws error if hash.class syntax is used
+        framework = autoform._framework || defaultFramework;
+    }
+    
+    if (framework === "bootstrap3") {
+        //add bootstrap's control-label class to label element
+        hash["class"] = hash["class"] ? hash["class"] + " control-label" : "control-label"; //IE<10 throws error if hash.class syntax is used
     }
 
-    var label = defs.label || name;
+    var label = defs.label;
     return '<label' + objToAttributes(hash) + '>' + label + '</label>';
 };
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
