@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.3.6
+
+Support min/max functions
+
 ### 0.3.5
 
 Add framework override support; current usage is only to specify "none" to skip the bootstrap3 classes
