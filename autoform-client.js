@@ -710,29 +710,40 @@ var createInputHtml = function(name, autoform, defs, hash) {
 
   //get correct max/min attributes
   var max = "", min = "";
+  
+  //If min/max are functions, call them
+  var resolvedMin = defs.min;
+  var resolvedMax = defs.max;
+  if (typeof resolvedMin === "function") {
+    resolvedMin = resolvedMin();
+  }
+  if (typeof resolvedMax === "function") {
+    resolvedMax = resolvedMax();
+  }
+  
   if (schemaType === String) {
-    if (defs.max) {
-      max = ' maxlength="' + defs.max + '"';
+    if (resolvedMax) {
+      max = ' maxlength="' + resolvedMax + '"';
     }
   } else {
     //max
     if (hash.max) {
       max = ' max="' + hash.max + '"';
-    } else if (defs.max) {
-      if (defs.max instanceof Date) {
-        max = ' max="' + dateToFieldDateString(defs.max) + '"';
+    } else if (resolvedMax) {
+      if (resolvedMax instanceof Date) {
+        max = ' max="' + dateToFieldDateString(resolvedMax) + '"';
       } else {
-        max = ' max="' + defs.max + '"';
+        max = ' max="' + resolvedMax + '"';
       }
     }
     //min
     if (hash.min) {
       min = ' min="' + hash.min + '"';
-    } else if (defs.min) {
-      if (defs.min instanceof Date) {
-        min = ' min="' + dateToFieldDateString(defs.min) + '"';
+    } else if (resolvedMin) {
+      if (resolvedMin instanceof Date) {
+        min = ' min="' + dateToFieldDateString(resolvedMin) + '"';
       } else {
-        min = ' min="' + defs.min + '"';
+        min = ' min="' + resolvedMin + '"';
       }
     }
   }
