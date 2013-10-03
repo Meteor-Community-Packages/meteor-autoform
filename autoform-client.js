@@ -755,61 +755,19 @@ var createInputHtml = function(name, autoform, defs, hash) {
   } else if (defs.decimal) {
     step = ' step="0.01"';
   }
-
-  //clean hash; we're adding these explicitly, so we don't want to have two
-  var firstOption, radio, select, trueLabel, falseLabel, selectOptions, noselect, framework;
-  if ("name" in hash) {
-    delete hash.name;
-  }
-  if ("autoform" in hash) {
-    delete hash.autoform;
-  }
-  if ("type" in hash) {
-    delete hash.type;
-  }
-  if ("value" in hash) {
-    delete hash.value;
-  }
-  if ("step" in hash) {
-    delete hash.step;
-  }
-  if ("data-schema-key" in hash) {
-    delete hash["data-schema-key"];
-  }
-  if ("firstOption" in hash) {
-    firstOption = hash.firstOption;
-    delete hash.firstOption;
-  }
-  if ("radio" in hash) {
-    radio = hash.radio;
-    delete hash.radio;
-  }
-  if ("select" in hash) {
-    select = hash.select;
-    delete hash.select;
-  }
-  if ("noselect" in hash) {
-    noselect = hash.noselect;
-    delete hash.noselect;
-  }
-  if ("trueLabel" in hash) {
-    trueLabel = hash.trueLabel;
-    delete hash.trueLabel;
-  }
-  if ("falseLabel" in hash) {
-    falseLabel = hash.falseLabel;
-    delete hash.falseLabel;
-  }
-  if ("options" in hash) {
-    selectOptions = hash.options;
-    delete hash.options;
-  }
-  if ("framework" in hash) {
-    framework = hash.framework;
-    delete hash.framework;
-  } else {
-    framework = autoform._framework || defaultFramework;
-  }
+  
+  //extract settings from hash
+  var firstOption = hash.firstOption;
+  var radio = hash.radio;
+  var select = hash.select;
+  var noselect = hash.noselect;
+  var trueLabel = hash.trueLabel;
+  var falseLabel = hash.falseLabel;
+  var selectOptions = hash.options;
+  var framework = hash.framework || autoform._framework || defaultFramework;
+  
+  //clean hash so that we can add anything remaining as attributes
+  hash = cleanHash(hash);
 
   if (selectOptions) {
     //build anything that should be a select, which is anything with options
@@ -902,6 +860,53 @@ var createInputHtml = function(name, autoform, defs, hash) {
   }
   return html;
 };
+
+var cleanHash = function(hash) {
+  if ("name" in hash) {
+    delete hash.name;
+  }
+  if ("autoform" in hash) {
+    delete hash.autoform;
+  }
+  if ("type" in hash) {
+    delete hash.type;
+  }
+  if ("value" in hash) {
+    delete hash.value;
+  }
+  if ("step" in hash) {
+    delete hash.step;
+  }
+  if ("data-schema-key" in hash) {
+    delete hash["data-schema-key"];
+  }
+  if ("firstOption" in hash) {
+    delete hash.firstOption;
+  }
+  if ("radio" in hash) {
+    delete hash.radio;
+  }
+  if ("select" in hash) {
+    delete hash.select;
+  }
+  if ("noselect" in hash) {
+    delete hash.noselect;
+  }
+  if ("trueLabel" in hash) {
+    delete hash.trueLabel;
+  }
+  if ("falseLabel" in hash) {
+    delete hash.falseLabel;
+  }
+  if ("options" in hash) {
+    delete hash.options;
+  }
+  if ("framework" in hash) {
+    delete hash.framework;
+  }
+  return hash;
+};
+
 var createLabelHtml = function(name, autoform, defs, hash) {
   if ("autoform" in hash) {
     delete hash.autoform;
