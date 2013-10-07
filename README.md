@@ -121,7 +121,7 @@ with `<form>` and `</form>`, respectively. All of the helpers within expect to
 be within an autoForm block.
 * All of the helpers that generate HTML elements can take any attributes you want to supply,
 and will add all of them to the generated HTML element. So you can add class, id, etc.
-* As long as you use a button with type=submit and the "insert" class, validation
+* As long as you use a button with `type="submit"` and the "insert" class, validation
 and insertion will happen automatically, and the `afFieldIsInvalid` and `afFieldMessage`
 helpers will reactively update.
 
@@ -311,7 +311,7 @@ collection2 collection (for example, Meteor.users()), you can do that.
 
 1. Create an object that is an instance of AutoForm to define the schema.
 2. Specify the AutoForm instance for the `schema` attribute of the `autoForm` helper.
-3. Add one attribute, `data-meteor-method`, to the submit button of the form, and
+3. Add one attribute, `data-meteor-method`, to the submit button of the form (must be `type="submit"`), and
 set its value to the name of any 'Meteor.method()' you have defined.
 
 If you do these three things, the form data will be gathered into a single object when
@@ -373,7 +373,7 @@ The HTML:
             {{/if}}
         </div>
         <div>
-            <button type="button" data-meteor-method="sendEmail" class="btn btn-primary">Submit</button>
+            <button type="submit" data-meteor-method="sendEmail" class="btn btn-primary">Submit</button>
             <button type="reset" class="btn btn-default">Reset</button>
         </div>
     </fieldset>
@@ -779,6 +779,14 @@ An example will be clearer:
 {{/autoForm}}
 ```
 
+## Form Submission Details
+
+When the submit event fires, this initiates the insert, update, remove, or method call after form validation.
+Typically the default browser submission is prevented automatically for you, although it will submit like
+a normal form (to the `action` url) if you have not set up the submit button to do an insert, update,
+remove, or method call. This may be useful in some cases because it allows normal form submission after
+auto-validaiton.
+
 ## Frameworks
 
 By default, Bootstrap 3 classes are added to any generated elements. You may use
@@ -793,6 +801,11 @@ Submit an issue if you'd like to see another popular framework supported.
 ## More Examples
 
 A somewhat messy, work-in-progress example app is [here](https://github.com/aldeed/meteor-autoform-example).
+
+## Troubleshooting
+
+If nothing happens when you click the submit button for your form and there are
+no errors, make sure the button's type is `submit`.
 
 ## Contributing
 
