@@ -520,7 +520,7 @@ var formValues = function(template, transform) {
         var year = parseInt(datePieces[0], 10);
         var month = parseInt(datePieces[1], 10) - 1;
         var date = parseInt(datePieces[2], 10);
-        doc[name] = new Date(year, month, date);
+        doc[name] = new Date(Date.UTC(year, month, date));
       } else {
         doc[name] = null;
       }
