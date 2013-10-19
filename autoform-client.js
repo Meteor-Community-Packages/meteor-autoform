@@ -593,15 +593,15 @@ var reportNulls = function(doc) {
   return nulls;
 };
 var dateToFieldDateString = function(date) {
-  var m = (date.getMonth() + 1);
+  var m = (date.getUTCMonth() + 1);
   if (m < 10) {
     m = "0" + m;
   }
-  var d = date.getDate();
+  var d = date.getUTCDate();
   if (d < 10) {
     d = "0" + d;
   }
-  return date.getFullYear() + '-' + m + '-' + d;
+  return date.getUTCFullYear() + '-' + m + '-' + d;
 };
 var getSelectValues = function(select) {
   var result = [];
