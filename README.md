@@ -257,7 +257,10 @@ then simply add the `noselect` attribute (set to anything).
 * If optional is `false` or not set in the schema, the `required` attribute is added to the DOM element.
 * Specifying `max` when type is `String` causes the `maxlength` attribute to be added to the DOM element.
 * Specifying `min` or `max` dates when type is `Date` causes those dates to be added to the DOM element in
-`min` and `max` attributes.
+`min` and `max` attributes. For inputs of type `date` or `datetime-local`, which do not
+have a time zone component, the date and time in the UTC time zone is used as the minimum
+or maximum value. Pass an ISO-compliant string (e.g., "2013-12-12") into the `Date` constructor
+when defining your min/max values in SimpleSchema and it should work correctly.
 
 You can specify any additional attributes for the helper, and they will be transferred to the resulting DOM element. For example:
 
