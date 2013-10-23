@@ -592,7 +592,22 @@ var reportNulls = function(doc) {
   });
   return nulls;
 };
-var dateToFieldDateString = function(date) {
+
+//returns a "valid date string" representing the local date
+var dateToDateString = function(date) {
+  var m = (date.getMonth() + 1);
+  if (m < 10) {
+    m = "0" + m;
+  }
+  var d = date.getDate();
+  if (d < 10) {
+    d = "0" + d;
+  }
+  return date.getFullYear() + '-' + m + '-' + d;
+};
+
+//returns a "valid date string" representing the date converted to the UTC time zone
+var dateToDateStringUTC = function(date) {
   var m = (date.getUTCMonth() + 1);
   if (m < 10) {
     m = "0" + m;
@@ -603,6 +618,73 @@ var dateToFieldDateString = function(date) {
   }
   return date.getUTCFullYear() + '-' + m + '-' + d;
 };
+
+//returns a "valid normalized forced-UTC global date and time string" representing the time converted to the UTC time zone and expressed as the shortest possible string for the given time (e.g. omitting the seconds component entirely if the given time is zero seconds past the minute)
+//http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#date-and-time-state-(type=datetime)
+//http://www.whatwg.org/specs/web-apps/current-work/multipage/common-microsyntaxes.html#valid-normalized-forced-utc-global-date-and-time-string
+var dateToNormalizedForcedUtcGlobalDateAndTimeString = function(date) {
+  var dateString = dateToDateStringUTC(date);
+
+  var h = date.getUTCHours();
+  if (h < 10) {
+    h = "0" + h;
+  }
+
+  var m = date.getUTCMinutes();
+  if (m < 10) {
+    m = "0" + m;
+  }
+
+  var s = date.getUTCSeconds();
+  if (s < 10) {
+    s = "0" + s;
+  }
+
+  var ms = date.getUTCMilliseconds();
+
+  var timeString = h + ":" + m;
+  if (s !== "00" || ms !== 0) {
+    timeString += ":" + s;
+    if (ms !== 0) {
+      timeString += "." + ms;
+    }
+  }
+
+  return dateString + "T" + timeString + "Z";
+};
+
+//returns a "valid normalized local date and time string"
+var dateToNormalizedLocalDateAndTimeString = function(date) {
+  var dateString = dateToDateString(date);
+
+  var h = date.getHours();
+  if (h < 10) {
+    h = "0" + h;
+  }
+
+  var m = date.getMinutes();
+  if (m < 10) {
+    m = "0" + m;
+  }
+
+  var s = date.getSeconds();
+  if (s < 10) {
+    s = "0" + s;
+  }
+
+  var ms = date.getMilliseconds();
+
+  var timeString = h + ":" + m;
+  if (s !== "00" || ms !== 0) {
+    timeString += ":" + s;
+    if (ms !== 0) {
+      timeString += "." + ms;
+    }
+  }
+
+  return dateString + "T" + timeString;
+};
+
 var getSelectValues = function(select) {
   var result = [];
   var options = select && select.options;
@@ -617,6 +699,7 @@ var getSelectValues = function(select) {
   }
   return result;
 };
+
 var createInputHtml = function(name, autoform, defs, hash) {
   var html;
 
@@ -639,7 +722,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
         arrayVal = autoform._flatDoc[name];
         value = [];
         _.each(arrayVal, function(v) {
-          value.push(dateToFieldDateString(v));
+          value.push(dateToDateStringUTC(v));
         });
       } else {
         value = hash.value || [];
@@ -656,21 +739,18 @@ var createInputHtml = function(name, autoform, defs, hash) {
       }
     }
   } else {
-    if (schemaType === Date) {
-      if (autoform._flatDoc && name in autoform._flatDoc) {
-        value = dateToFieldDateString(autoform._flatDoc[name]);
-      } else {
-        value = hash.value || "";
-      }
-    } else if (schemaType === Boolean) {
+    if (schemaType === Boolean) {
       if (autoform._flatDoc && name in autoform._flatDoc) {
         value = autoform._flatDoc[name];
       } else {
-        value = hash.value === "true" ? true : false;
+
       }
     } else {
       if (autoform._flatDoc && name in autoform._flatDoc) {
-        value = autoform._flatDoc[name].toString();
+        value = autoform._flatDoc[name];
+        if (!(value instanceof Date)) { //we will convert dates to a string later, after we know what the field type will be
+          value = value.toString();
+        }
       } else {
         value = hash.value || "";
       }
@@ -679,14 +759,6 @@ var createInputHtml = function(name, autoform, defs, hash) {
 
   //required?
   var req = defs.optional ? "" : " required";
-
-  //handle boolean values
-  var checked = "", checkedOpposite = "";
-  if (schemaType === Boolean && value) {
-    checked = " checked";
-  } else {
-    checkedOpposite = " checked";
-  }
 
   //get type
   var type = "text";
@@ -706,11 +778,33 @@ var createInputHtml = function(name, autoform, defs, hash) {
     type = "boolean";
   }
 
+  //convert Date value to required string value based on field type
+  if (value instanceof Date) {
+    if (type === "date") {
+      value = dateToDateStringUTC(value);
+    } else if (type === "datetime") {
+      value = dateToNormalizedForcedUtcGlobalDateAndTimeString(value);
+    } else if (type === "datetime-local") {
+      value = dateToNormalizedLocalDateAndTimeString(value);
+    }
+  }
+
+  //adjust some variables for booleans
+  var checked = "", checkedOpposite = "";
+  if (type === "boolean") {
+    value = (value === "true") ? true : false;
+    if (value) {
+      checked = " checked";
+    } else {
+      checkedOpposite = " checked";
+    }
+  }
+
   var label = defs.label;
 
   //get correct max/min attributes
   var max = "", min = "";
-  
+
   //If min/max are functions, call them
   var resolvedMin = defs.min;
   var resolvedMax = defs.max;
@@ -720,7 +814,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   if (typeof resolvedMax === "function") {
     resolvedMax = resolvedMax();
   }
-  
+
   if (schemaType === String) {
     if (resolvedMax) {
       max = ' maxlength="' + resolvedMax + '"';
@@ -731,7 +825,13 @@ var createInputHtml = function(name, autoform, defs, hash) {
       max = ' max="' + hash.max + '"';
     } else if (resolvedMax) {
       if (resolvedMax instanceof Date) {
-        max = ' max="' + dateToFieldDateString(resolvedMax) + '"';
+        if (type === "date") {
+          max = ' max="' + dateToDateStringUTC(resolvedMax) + '"';
+        } else if (type === "datetime") {
+          max = ' max="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMax) + '"';
+        } else if (type === "datetime-local") {
+          max = ' max="' + dateToNormalizedLocalDateAndTimeString(resolvedMax) + '"';
+        }
       } else {
         max = ' max="' + resolvedMax + '"';
       }
@@ -741,7 +841,13 @@ var createInputHtml = function(name, autoform, defs, hash) {
       min = ' min="' + hash.min + '"';
     } else if (resolvedMin) {
       if (resolvedMin instanceof Date) {
-        min = ' min="' + dateToFieldDateString(resolvedMin) + '"';
+        if (type === "date") {
+          min = ' min="' + dateToDateStringUTC(resolvedMin) + '"';
+        } else if (type === "datetime") {
+          min = ' min="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMin) + '"';
+        } else if (type === "datetime-local") {
+          min = ' min="' + dateToNormalizedLocalDateAndTimeString(resolvedMin) + '"';
+        }
       } else {
         min = ' min="' + resolvedMin + '"';
       }
@@ -755,7 +861,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   } else if (defs.decimal) {
     step = ' step="0.01"';
   }
-  
+
   //extract settings from hash
   var firstOption = hash.firstOption;
   var radio = hash.radio;
@@ -765,7 +871,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   var falseLabel = hash.falseLabel;
   var selectOptions = hash.options;
   var framework = hash.framework || autoform._framework || defaultFramework;
-  
+
   //clean hash so that we can add anything remaining as attributes
   hash = cleanHash(hash);
 
