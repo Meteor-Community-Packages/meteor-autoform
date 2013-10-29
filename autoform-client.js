@@ -159,7 +159,7 @@ if (typeof Handlebars !== 'undefined') {
     }
 
     //boolean type renders a check box that already has a label, so don't generate another label
-    var skipLabel = (defs.type === Boolean && !("select" in hash) && !("radio" in hash));
+    var skipLabel = hash.label === false || (defs.type === Boolean && !("select" in hash) && !("radio" in hash));
 
     //separate label hash from input hash; label items begin with "label-"
     var labelHash = {};
@@ -874,6 +874,10 @@ var createInputHtml = function(name, autoform, defs, hash) {
 
   //clean hash so that we can add anything remaining as attributes
   hash = cleanHash(hash);
+  
+  //set placeholder to label from schema if requested
+  if (hash.placeholder === "schemaLabel")
+    hash.placeholder = label;
 
   if (selectOptions) {
     //build anything that should be a select, which is anything with options
