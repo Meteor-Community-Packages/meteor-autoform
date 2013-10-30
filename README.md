@@ -265,12 +265,11 @@ when defining your min/max values in SimpleSchema and it should work correctly.
 You can specify any additional attributes for the helper, and they will be transferred to the resulting DOM element. For example:
 
 ```html
-{{afFieldInput "firstName" autofocus="true" class="inputClass"}}
+{{afFieldInput "firstName" autofocus="" class="inputClass"}}
 ```
 
-For boolean attributes, such as autofocus, you must specify some value after the
-`=`, but the value makes no difference. The mere presence of the attribute will
-cause it to be added to the DOM element.
+For boolean attributes, such as autofocus, you must specify an empty string after the
+`=`.
 
 As mentioned, you must pass in `options` if you want a `<select>` control. The value of the
 options attribute must be an array of objects, where each object has a `label` key and a `value` key. For example:
@@ -745,7 +744,7 @@ framework for the label, use `label-framework`.
 
 ```html
 {{#autoForm schema=docCollection doc=selectedDoc}}
-    {{afQuickField 'firstField' autofocus='true'}}
+    {{afQuickField 'firstField' autofocus=''}}
     {{afQuickField 'weirdColors' style="color: orange" label-style="color: green"}}
     {{afQuickField "longString" rows="5"}}
     {{afQuickField "radioBoolean" radio="true" trueLabel="Yes" falseLabel="No"}}
