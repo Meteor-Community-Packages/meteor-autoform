@@ -515,12 +515,34 @@ var formValues = function(template, transform) {
 
     //handle date inputs
     if (type === "date") {
-      if (typeof val === "string" && val.length) {
-        var datePieces = val.split("-");
-        var year = parseInt(datePieces[0], 10);
-        var month = parseInt(datePieces[1], 10) - 1;
-        var date = parseInt(datePieces[2], 10);
-        doc[name] = new Date(Date.UTC(year, month, date));
+      if (isValidDateString(val)) {
+        //Date constructor will interpret val as UTC and create
+        //date at mignight in the morning of val date in UTC time zone
+        doc[name] = new Date(val);
+      } else {
+        doc[name] = null;
+      }
+      return;
+    }
+
+    //handle date inputs
+    if (type === "datetime") {
+      val = val.replace(/ /g, "T");
+      if (isValidNormalizedForcedUtcGlobalDateAndTimeString(val)) {
+        //Date constructor will interpret val as UTC due to ending "Z"
+        doc[name] = new Date(val);
+      } else {
+        doc[name] = null;
+      }
+      return;
+    }
+
+    //handle date inputs
+    if (type === "datetime-local") {
+      val = val.replace(/ /g, "T");
+      var offset = field.getAttribute("data-offset") || "Z";
+      if (isValidNormalizedLocalDateAndTimeString(val)) {
+        doc[name] = new Date(val + offset);
       } else {
         doc[name] = null;
       }
@@ -593,6 +615,23 @@ var reportNulls = function(doc) {
   return nulls;
 };
 
+//returns true if dateString is a "valid date string"
+var isValidDateString = function(dateString) {
+  var m = moment(dateString, 'YYYY-MM-DD', true);
+  return m && m.isValid();
+};
+
+//returns true if timeString is a "valid time string"
+var isValidTimeString = function(timeString) {
+  if (typeof timeString !== "string")
+    return false;
+
+  //this reg ex actually allows a few invalid hours/minutes/seconds, but
+  //we can catch that when parsing
+  var regEx = /^[0-2][0-9]:[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
+  return regEx.test(timeString);
+};
+
 //returns a "valid date string" representing the local date
 var dateToDateString = function(date) {
   var m = (date.getMonth() + 1);
@@ -623,66 +662,36 @@ var dateToDateStringUTC = function(date) {
 //http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#date-and-time-state-(type=datetime)
 //http://www.whatwg.org/specs/web-apps/current-work/multipage/common-microsyntaxes.html#valid-normalized-forced-utc-global-date-and-time-string
 var dateToNormalizedForcedUtcGlobalDateAndTimeString = function(date) {
-  var dateString = dateToDateStringUTC(date);
+  return moment(date).utc().format("YYYY-MM-DD[T]HH:mm:ss.SSS[Z]");
+};
 
-  var h = date.getUTCHours();
-  if (h < 10) {
-    h = "0" + h;
-  }
+//returns true if dateString is a "valid normalized forced-UTC global date and time string"
+var isValidNormalizedForcedUtcGlobalDateAndTimeString = function(dateString) {
+  if (typeof dateString !== "string")
+    return false;
 
-  var m = date.getUTCMinutes();
-  if (m < 10) {
-    m = "0" + m;
-  }
-
-  var s = date.getUTCSeconds();
-  if (s < 10) {
-    s = "0" + s;
-  }
-
-  var ms = date.getUTCMilliseconds();
-
-  var timeString = h + ":" + m;
-  if (s !== "00" || ms !== 0) {
-    timeString += ":" + s;
-    if (ms !== 0) {
-      timeString += "." + ms;
-    }
-  }
-
-  return dateString + "T" + timeString + "Z";
+  var datePart = dateString.substring(0, 10);
+  var tPart = dateString.substring(10, 11);
+  var timePart = dateString.substring(11, dateString.length - 1);
+  var zPart = dateString.substring(dateString.length - 1);
+  return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart) && zPart === "Z";
 };
 
 //returns a "valid normalized local date and time string"
-var dateToNormalizedLocalDateAndTimeString = function(date) {
-  var dateString = dateToDateString(date);
+var dateToNormalizedLocalDateAndTimeString = function(date, offset) {
+  var m = moment(date);
+  m.zone(offset);
+  return m.format("YYYY-MM-DD[T]hh:mm:ss.SSS");
+};
 
-  var h = date.getHours();
-  if (h < 10) {
-    h = "0" + h;
-  }
+var isValidNormalizedLocalDateAndTimeString = function(dtString) {
+  if (typeof dtString !== "string")
+    return false;
 
-  var m = date.getMinutes();
-  if (m < 10) {
-    m = "0" + m;
-  }
-
-  var s = date.getSeconds();
-  if (s < 10) {
-    s = "0" + s;
-  }
-
-  var ms = date.getMilliseconds();
-
-  var timeString = h + ":" + m;
-  if (s !== "00" || ms !== 0) {
-    timeString += ":" + s;
-    if (ms !== 0) {
-      timeString += "." + ms;
-    }
-  }
-
-  return dateString + "T" + timeString;
+  var datePart = dtString.substring(0, 10);
+  var tPart = dtString.substring(10, 11);
+  var timePart = dtString.substring(11, dtString.length);
+  return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart);
 };
 
 var getSelectValues = function(select) {
@@ -777,6 +786,11 @@ var createInputHtml = function(name, autoform, defs, hash) {
   } else if (schemaType === Boolean) {
     type = "boolean";
   }
+  
+  if (type === "datetime-local" && hash.offset) {
+    hash["data-offset"] = hash.offset || "Z";
+    delete hash.offset;
+  }
 
   //convert Date value to required string value based on field type
   if (value instanceof Date) {
@@ -785,7 +799,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
     } else if (type === "datetime") {
       value = dateToNormalizedForcedUtcGlobalDateAndTimeString(value);
     } else if (type === "datetime-local") {
-      value = dateToNormalizedLocalDateAndTimeString(value);
+      value = dateToNormalizedLocalDateAndTimeString(value, hash["data-offset"]);
     }
   }
 
@@ -830,7 +844,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
         } else if (type === "datetime") {
           max = ' max="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMax) + '"';
         } else if (type === "datetime-local") {
-          max = ' max="' + dateToNormalizedLocalDateAndTimeString(resolvedMax) + '"';
+          max = ' max="' + dateToNormalizedLocalDateAndTimeString(resolvedMax, hash["data-offset"]) + '"';
         }
       } else {
         max = ' max="' + resolvedMax + '"';
@@ -846,7 +860,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
         } else if (type === "datetime") {
           min = ' min="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMin) + '"';
         } else if (type === "datetime-local") {
-          min = ' min="' + dateToNormalizedLocalDateAndTimeString(resolvedMin) + '"';
+          min = ' min="' + dateToNormalizedLocalDateAndTimeString(resolvedMin, hash["data-offset"]) + '"';
         }
       } else {
         min = ' min="' + resolvedMin + '"';
@@ -874,7 +888,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
 
   //clean hash so that we can add anything remaining as attributes
   hash = cleanHash(hash);
-  
+
   //set placeholder to label from schema if requested
   if (hash.placeholder === "schemaLabel")
     hash.placeholder = label;

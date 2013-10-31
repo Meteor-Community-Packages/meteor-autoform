@@ -272,6 +272,9 @@ For boolean attributes, such as autofocus, you must specify some value after the
 `=`, but the value makes no difference. The mere presence of the attribute will
 cause it to be added to the DOM element.
 
+To use the field label defined in the schema as the input's placeholder value,
+add the attribute `placeholder="schemaLabel"`.
+
 As mentioned, you must pass in `options` if you want a `<select>` control. The value of the
 options attribute must be an array of objects, where each object has a `label` key and a `value` key. For example:
 
@@ -738,6 +741,10 @@ pass in options to create a select control.
 But what if you want to pass additional attributes to the label element? Simply prepend any attribute with
 "label-" and it will be passed along to `{{afFieldLabel}}` instead of `{{afFieldInput}}`.
 
+To omit the label element, use `label=false`. You can combine this with `placeholder="My Label"`
+to get a placeholder label instead of a label element. Use the special `placeholder="schemaLabel"`
+attribute value to automatically use the label from the schema.
+
 The `framework` attribute can be used with this helper as well. See the "Frameworks" section. To set the 
 framework for the label, use `label-framework`.
 
@@ -759,8 +766,7 @@ framework for the label, use `label-framework`.
 
 ### Future QuickForm Features
 
-Eventually the quickForm helper will have a few different built in styles you can choose from, like horizontal, vertical, and responsive,
-as well as the ability to put the labels in placeholder instead of label.
+Eventually the quickForm helper will have a few different built in styles you can choose from, like horizontal, vertical, and responsive.
 
 ## Using Block Helpers Within an AutoForm
 
@@ -781,6 +787,80 @@ An example will be clearer:
     {{/with}}
 {{/autoForm}}
 ```
+
+## Dates
+
+Dealing with dates and time zones can be tricky, so here are some tips for using
+JavaScript `Date` objects with autoforms:
+
+
+*Consider using the [moment and moment-timezone](http://momentjs.com/) libraries to make this easy.*
+
+
+### type=date
+
+* **Saving:** The user-entered value must be of the format `YYYY-MM-DD`,
+and it will be saved as a `Date` object representing that
+exact datetime in the UTC time zone. (Chrome and some mobile browsers provide
+date pickers that set the input value to a string in this format automatically,
+but users of other browsers will have to manually enter the date in the correct
+format.)
+* **Loading:** If you are binding an object containing `Date` objects to an update autoform
+and using them in an input with `type="date"`, the date that will be used as
+the value of the input is the date represented by the `Date` object
+in the UTC time zone, with the time portion ignored.
+* **Displaying:** To make sure that the date format you use matches what the user
+expects, you should construct your display strings based on the `Date` object
+in the UTC time zone. Using the `moment` library, you might do something
+like this: `moment.utc(myDate).format("LL")`
+* **Min/Max:** When specifying min or max values in your schema, use a `Date`
+object that represents midnight on the morning of the minimum or maximum date
+in the UTC time zone.
+
+### type=datetime
+
+*Note: Using this type of input requires that the user do all the work to convert
+from the applicable time zone to the UTC time zone since the entered time is
+assumed to be UTC. It's generally better to use datetime-local.*
+
+* **Saving:** The user-entered value must be of the format `date string + "T" + 
+time string + "Z"`, and it will be saved as a `Date` object representing that
+exact datetime in the UTC time zone.
+* **Loading:** If you are binding an object containing `Date` objects to an update autoform
+and using them in an input with `type="datetime"`, the date that will be used as
+the value of the input is the date and time represented by the `Date` object
+in the UTC time zone.
+* **Displaying:** To make sure that the date format you use matches what the user
+expects, you should construct your display strings based on the `Date` object
+in the UTC time zone, or indicate on screen which time zone you are displaying.
+Using the `moment` library, you might do something like this: `moment.utc(myDate).format("LLLL")`
+* **Min/Max:** When specifying min or max values in your schema, use a `Date`
+object that represents the exact minimum or maximum date and time
+in the UTC time zone.
+
+### type=datetime-local
+
+* **Saving:** If you use an input with `type="datetime-local"`, you should also
+specify an `offset` attribute on the `afFieldInput` or `afQuickField` helper.
+Set this attribute to a UTC offset string such as "+05:00" or "-0300" or "Z". This
+offset string will be appended to the user-entered date string to create the `Date`
+object that will be saved. For example, if you use an input with `type="datetime-local"` in a form
+in which a user is setting up a meeting, you would need to previously determine
+the time zone in which the meeting will take place. When generating the autoform
+field, set the `offset` attribute to the UTC offset for this time zone.
+* **Loading:** If you are binding an object containing `Date` objects to an update autoform
+and using them in an input with `type="datetime-local"`, be sure to set the
+`offset` attribute on the helper to the time zone offset that applies. This will
+ensure that the date and time you expect are shown in the input element.
+* **Displaying:** Before displaying the saved date, determine the equivalent
+date and time in the corresponding time zone. The easiest way to do this is
+using `var m = moment(myDate).zone(myDesiredTimeZoneOffset); var displayString = m.format();`
+from the `moment` package/library. (`zone` setting is available starting with
+version 2.1.0 of Moment.)
+* **Min/Max:** When specifying min or max values in your schema, use a `Date`
+object that represents the exact minimum or maximum date and time
+in the corresponding time zone. This may mean returning the min or max value
+from a function based on a time zone name or offset you are storing elsewhere.
 
 ## Form Submission Details
 

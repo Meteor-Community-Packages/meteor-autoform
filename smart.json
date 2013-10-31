@@ -6,6 +6,7 @@
   "version": "0.3.6",
   "git": "https://github.com/aldeed/meteor-autoform.git",
   "packages": {
-    "simple-schema": {}
+    "simple-schema": {},
+    "moment": {}
   }
 }
