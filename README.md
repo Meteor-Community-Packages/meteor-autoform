@@ -792,9 +792,7 @@ An example will be clearer:
 Dealing with dates and time zones can be tricky, so here are some tips for using
 JavaScript `Date` objects with autoforms:
 
-
 *Consider using the [moment and moment-timezone](http://momentjs.com/) libraries to make this easy.*
-
 
 ### type=date
 
