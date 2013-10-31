@@ -6,6 +6,17 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.0
+
+Backwards-compatibility break! Handling of `Date` fields was limited and saved
+`Date` objects were not correct. If you have previously saved `Date` objects
+from an autoform `date` input, you will have to manually convert the saved values
+to correct them after upgrading to this release. If it is only the date you care
+about and not the time, all dates in your mongo collections must represent
+midnight in the UTC time zone on the morning of the correct date. Refer to the
+[Dates](https://github.com/aldeed/meteor-autoform#dates) section of the README
+for details about how date inputs work now.
+
 ### 0.3.6
 
 Support min/max functions
