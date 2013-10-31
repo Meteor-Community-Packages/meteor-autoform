@@ -789,8 +789,10 @@ An example will be clearer:
 
 ## Dates
 
-Dealing with dates and time zones can be tricky, so here are some tips for using
-JavaScript `Date` objects with autoforms:
+By default, a schema field with `type: Date` will generate an input element with
+`type=date`. You can override the type on each `afFieldInput` or `afQuickField`
+helper if you want to use a `datetime` or `datetime-local` input instead. Here
+are some tips for using each input type.
 
 *Consider using the [moment and moment-timezone](http://momentjs.com/) libraries to make this easy.*
 
@@ -845,6 +847,10 @@ object that will be saved. For example, if you use an input with `type="datetime
 in which a user is setting up a meeting, you would need to previously determine
 the time zone in which the meeting will take place. When generating the autoform
 field, set the `offset` attribute to the UTC offset for this time zone.
+(Chrome and some mobile browsers provide
+datetime pickers that set the input value to a string in the expected format automatically,
+but users of other browsers will have to manually enter the datetime in the correct
+format, which is `date string + "T" + time string`.)
 * **Loading:** If you are binding an object containing `Date` objects to an update autoform
 and using them in an input with `type="datetime-local"`, be sure to set the
 `offset` attribute on the helper to the time zone offset that applies. This will
