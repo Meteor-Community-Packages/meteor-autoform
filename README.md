@@ -587,6 +587,13 @@ the `{{autoform}}` helper. Supported values are:
 
 If you do not include the validation attribute, `submitThenKeyup` is used as the default validation method.
 
+__Note:__
+If you choose `keyup` validation, there is sometimes a bug in Safari where
+the autofill mechanism will cause the text in the input to be selected after
+each keypress.  This has the effect of making it near impossible to
+actually type anything because you keep "overwriting" your input. To fix this,
+simply add the `autocomplete="off"` attribute to your input fields.
+
 ## Doing Your Own Thing On Submit
 
 Submitting to a server method allows you to do anything you want with the form
