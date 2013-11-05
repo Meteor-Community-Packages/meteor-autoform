@@ -6,6 +6,11 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.1
+
+Improve handling of key names that use dot notation to indicate a property of
+an object in an array, for example, `friends.0.name`.
+
 ### 0.4.0
 
 Backwards-compatibility break! Handling of `Date` fields was limited and saved

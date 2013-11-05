@@ -99,6 +99,7 @@ if (typeof Handlebars !== 'undefined') {
     autoFormContext.atts = objToAttributes(atts);
     return new Handlebars.SafeString(Template._autoForm(autoFormContext));
   });
+
   Handlebars.registerHelper("quickForm", function(options) {
     if (!options) {
       return "";
@@ -147,14 +148,17 @@ if (typeof Handlebars !== 'undefined') {
 
     return new Handlebars.SafeString(Template._quickForm(context));
   });
+
   Handlebars.registerHelper("afQuickField", function(name, options) {
-    var hash = options.hash, autoform = hash.autoform || this;
-    var obj = autoform._ss;
+    var hash = options.hash,
+            autoform = hash.autoform || this,
+            obj = autoform._ss;
     if (!obj) {
       throw new Error("afQuickField helper must be used within an autoForm block");
     }
-    var defs = obj.simpleSchema().schema(name);
-    if (!defs) {
+    var genericName = makeGeneric(name);
+    var defs = obj.simpleSchema().schema(genericName);
+    if (!genericName || !defs) {
       throw new Error("Invalid field name");
     }
 
@@ -194,6 +198,7 @@ if (typeof Handlebars !== 'undefined') {
 
     return new Handlebars.SafeString(Template._afQuickField(context));
   });
+
   Handlebars.registerHelper("afFieldMessage", function(name, options) {
     var autoform = options.hash.autoform || this, obj = autoform._ss;
     if (!obj) {
@@ -201,6 +206,7 @@ if (typeof Handlebars !== 'undefined') {
     }
     return obj.namedContext(autoform._formID).keyErrorMessage(name);
   });
+
   Handlebars.registerHelper("afFieldIsInvalid", function(name, options) {
     var autoform = options.hash.autoform || this, obj = autoform._ss;
     if (!obj) {
@@ -208,31 +214,36 @@ if (typeof Handlebars !== 'undefined') {
     }
     return obj.namedContext(autoform._formID).keyIsInvalid(name);
   });
+
   Handlebars.registerHelper("afFieldInput", function(name, options) {
     var autoform = options.hash.autoform || this, obj = autoform._ss;
     if (!obj) {
       throw new Error("afFieldInput helper must be used within an autoForm block helper");
     }
-    var defs = obj.simpleSchema().schema(name);
-    if (!defs) {
+    var genericName = makeGeneric(name);
+    var defs = obj.simpleSchema().schema(genericName);
+    if (!genericName || !defs) {
       throw new Error("Invalid field name");
     }
     var html = createInputHtml(name, autoform, defs, options.hash);
     return new Handlebars.SafeString(html);
   });
+
   Handlebars.registerHelper("afFieldLabel", function(name, options) {
     var autoform = options.hash.autoform || this, obj = autoform._ss;
     if (!obj) {
       throw new Error("afFieldLabel helper must be used within an autoForm block helper");
     }
-    var defs = obj.simpleSchema().schema(name);
-    if (!defs) {
+    var genericName = makeGeneric(name);
+    var defs = obj.simpleSchema().schema(genericName);
+    if (!genericName || !defs) {
       throw new Error("Invalid field name");
     }
 
     var html = createLabelHtml(name, autoform, defs, options.hash);
     return new Handlebars.SafeString(html);
   });
+
   Template._autoForm.events({
     'submit form': function(event, template) {
       var submitButton = template.find("button[type=submit]");
@@ -265,7 +276,7 @@ if (typeof Handlebars !== 'undefined') {
       if (isInsert || isUpdate || isRemove || method) {
         event.preventDefault(); //prevent default here if we're planning to do our own thing
       }
-
+      
       //pass both types of doc to onSubmit
       if (typeof onSubmit === "function") {
         if (validationType === 'none' || afc2Obj.validate(insertDoc, {validationContext: formId, modifier: false})) {
@@ -786,7 +797,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   } else if (schemaType === Boolean) {
     type = "boolean";
   }
-  
+
   if (type === "datetime-local" && hash.offset) {
     hash["data-offset"] = hash.offset || "Z";
     delete hash.offset;
@@ -986,47 +997,26 @@ var createInputHtml = function(name, autoform, defs, hash) {
 };
 
 var cleanHash = function(hash) {
-  if ("name" in hash) {
-    delete hash.name;
-  }
-  if ("autoform" in hash) {
-    delete hash.autoform;
-  }
-  if ("type" in hash) {
-    delete hash.type;
-  }
-  if ("value" in hash) {
-    delete hash.value;
-  }
-  if ("step" in hash) {
-    delete hash.step;
-  }
-  if ("data-schema-key" in hash) {
-    delete hash["data-schema-key"];
-  }
-  if ("firstOption" in hash) {
-    delete hash.firstOption;
-  }
-  if ("radio" in hash) {
-    delete hash.radio;
-  }
-  if ("select" in hash) {
-    delete hash.select;
-  }
-  if ("noselect" in hash) {
-    delete hash.noselect;
-  }
-  if ("trueLabel" in hash) {
-    delete hash.trueLabel;
-  }
-  if ("falseLabel" in hash) {
-    delete hash.falseLabel;
-  }
-  if ("options" in hash) {
-    delete hash.options;
-  }
-  if ("framework" in hash) {
-    delete hash.framework;
+  var props = [
+    "name",
+    "autoform",
+    "type",
+    "value",
+    "step",
+    "data-schema-key",
+    "firstOption",
+    "radio",
+    "select",
+    "noselect",
+    "trueLabel",
+    "falseLabel",
+    "options",
+    "framework"
+  ], prop;
+  for (var i = 0, ln = props.length; i < ln; i++) {
+    prop = props[i];
+    if (prop in hash)
+      delete hash[prop];
   }
   return hash;
 };
@@ -1059,10 +1049,13 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   var afc2Obj = template.data.schema;
   var formId = template.data.formID;
   var doc = formValues(template, afc2Obj.formToDoc);
+  var isUpdate = !!template.find("button.update");
 
   //delete any properties that are null, undefined, or empty strings
-  doc = cleanNulls(doc);
-
+  if (!isUpdate) {
+    doc = cleanNulls(doc);
+  }
+  
   if (skipEmpty && !(key in doc)) {
     return; //skip validation
   }
@@ -1072,7 +1065,11 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   }
 
   //clean and validate doc
-  afc2Obj.validateOne(doc, key, {validationContext: formId, modifier: false});
+  if (isUpdate) {
+    afc2Obj.validateOne(docToModifier(doc), key, {validationContext: formId, modifier: true});
+  } else {
+    afc2Obj.validateOne(expandObj(doc), key, {validationContext: formId, modifier: false});
+  }
 };
 //throttling function that calls out to _validateField
 var vok = {}, tm = {};
@@ -1135,4 +1132,11 @@ var docToModifier = function(doc) {
     updateObj.$unset = nulls;
   }
   return updateObj;
+};
+
+var makeGeneric = function(name) {
+  if (typeof name !== "string")
+    return null;
+
+  return name.replace(/\.[0-9]+\./g, '.$.').replace(/\.[0-9]+/g, '.$');
 };

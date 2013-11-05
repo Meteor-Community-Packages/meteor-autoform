@@ -698,14 +698,10 @@ will be an empty string, and bestTimes is required.
 
 ## Complex Schemas
 
-If your schema contains any keys with basic object dot notation, they will work fine with
-AutoForm. For example, you can do `{{afFieldInput 'address.street'}}` and everything
-will work properly. Whatever is entered in the field would be assigned to `doc.address.street`
-as you would expect.
+You can use mongo dot notation to map an input to a subdocument. For example:
 
-Assigning to an object in an array might also work, but this has not been thoroughly tested yet. For example,
-`{{afFieldInput 'addresses.1.street'}}` should correctly pull existing values from and save
-new values to `doc.addresses[1].street`. This probably doesn't work 100% yet, though. (Pull request welcome.)
+* If you use `{{afFieldInput 'address.street'}}`, whatever is entered in the field will be assigned to `doc.address.street`.
+* If you use `{{afFieldInput 'addresses.1.street'}}`, whatever is entered in the field will be assigned to the `street` property of the object at index 1 in the `doc.addresses` array.
 
 ## QuickForm
 
