@@ -635,6 +635,28 @@ Otherwise the onSubmit function acts pretty much like any other onSubmit functio
 that insertDoc and updateDoc are validated before it is called. However, since
 this is client code, you should never assume that insertDoc and updateDoc are valid.
 
+## Resetting Validation
+
+After a successful submission, validation is reset, ensuring that any error messages disappear
+and form input values are correct. However, you may need to reset validation for other reasons,
+such as when you reuse an edit form to edit a different document. To do this, call the `resetForm`
+method on the Collection2 or AutoForm instance, passing the form's `id` attribute as the only argument:
+
+```js
+Template.example.events({
+  'click .docSelect': function(e, t) {
+    e.preventDefault();
+    Documents.resetForm("docForm");
+    Session.set("selectedDoc", this._id);
+  },
+  'click .docClear': function(e, t) {
+    e.preventDefault();
+    Documents.resetForm("docForm");
+    Session.set("selectedDoc", null);
+  }
+});
+```
+
 ## Complex Controls
 
 If you need to have more complex form controls but still want to use an AutoForm, a good trick
