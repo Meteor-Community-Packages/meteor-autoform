@@ -1,13 +1,13 @@
 <template name="_autoForm">
-  <form{{{atts}}}>
-    {{{content}}}
+  <form>
+    {{> content data=context}}
   </form>
 </template>
 
 <template name="_quickForm">
   {{#autoForm qfHash=qfHash}}
   {{#each ../formFields}}
-  {{afQuickField this autoform=../this}}
+  {{> afQuickField this autoform=../this}}
   {{/each}}
   <div>
     {{#if ../doInsert}}
@@ -28,16 +28,24 @@
 
 <template name="_afQuickField">
   {{#if useFrameworkBootstrap3}}
-  <div class="form-group{{#if afFieldIsInvalid name autoform=autoform}} has-error{{/if}}">
+  <div class="form-group {{afHasError name autoform=./af}}">
     {{{labelHtml}}}
     {{{inputHtml}}}
-    <span class="help-block">{{afFieldMessage name autoform=autoform}}</span>
+    <span class="help-block">{{afFieldMessage name autoform=./af}}</span>
   </div>
   {{else}}
   <div>
     {{{labelHtml}}}
     {{{inputHtml}}}
-    <span>{{afFieldMessage name autoform=autoform}}</span>
+    <span>{{afFieldMessage name autoform=./af}}</span>
   </div>
   {{/if}}
+</template>
+
+<template name="_afInput">
+  {{{html}}}
+</template>
+
+<template name="_afLabel">
+  {{{html}}}
 </template>
