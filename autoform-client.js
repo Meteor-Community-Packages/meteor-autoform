@@ -94,7 +94,7 @@ if (typeof Handlebars !== 'undefined') {
     //elements (schema keys) with the same name
     autoFormContext.formID = atts.id || "_afGenericID";
 
-    autoFormContext.content = options.fn({_ss: autoFormContext._ss, _doc: autoFormContext._doc, _flatDoc: autoFormContext._flatDoc, _formID: autoFormContext.formID, _framework: autoFormContext._framework});
+    autoFormContext.content = options.fn({_ss: autoFormContext._ss, _doc: autoFormContext._doc, _flatDoc: autoFormContext._flatDoc, _formID: autoFormContext.formID, _framework: autoFormContext._framework, _templateData: this});
 
     autoFormContext.atts = objToAttributes(atts);
     return new Handlebars.SafeString(Template._autoForm(autoFormContext));
