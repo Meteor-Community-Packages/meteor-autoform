@@ -207,7 +207,11 @@ Use this block helper instead of `<form>` elements to wrap your form and gain al
 helpers must be used within an `autoForm` block.
 
 Attributes:
-* `schema`: Required. Pass either the name of a Collection2 instance or the name of an AutoForm instance.
+* `schema`: Required. Pass one of the following:
+    * An instance of `AutoForm` (recommended)
+    * An instance of `Meteor.Collection2` (fine if you don't need any hooks on the form)
+    * A string name of an `AutoForm` instance that is in the `window` scope.
+    * A string name of an `Meteor.Collection2` instance that is in the `window` scope.
 * `doc`: Required for update and remove actions. Pass the current document object. It's usually easiest to pass
 the name of a custom helper that returns the object by calling `findOne()`.
 * `validation`: Optional. See the "Fine Tuning Validation" section.
@@ -314,20 +318,21 @@ If you want to use an AutoForm for a form that does not relate to a collection (
 contact form that sends an e-mail), or for a form that relates to a collection that is not a
 collection2 collection (for example, Meteor.users()), you can do that.
 
-1. Create an object that is an instance of AutoForm to define the schema.
-2. Specify the AutoForm instance for the `schema` attribute of the `autoForm` helper.
-3. Add one attribute, `data-meteor-method`, to the submit button of the form (must be `type="submit"`), and
-set its value to the name of any 'Meteor.method()' you have defined.
+1. In client+server code, create a `SimpleSchema` instance to define the form's schema.
+2. On the client only, create an instance of `AutoForm`, passing in your `SimpleSchema` instance.
+3. Pass the AutoForm instance as the `schema` attribute of the `autoForm` helper.
+4. Add one attribute, `data-meteor-method`, to the submit button of the form (must be `type="submit"`), and
+set its value to the name of any 'Meteor.method()' you have defined in server code.
 
-If you do these three things, the form data will be gathered into a single object when
+If you do these things, the form data will be gathered into a single object when
 the user clicks the submit button. Then that object will be cleaned and validated against the
 schema on the client and passed along to your method on the server. **You must
 validate it again in your method on the server, using `check()` in combination
-with `myAutoFormSchema`.**
+with `myAutoFormSchema`. This is why we create the `SimpleSchema` instance in client+server code.**
 
 ### An Example Contact Form
 
-The schema, defined on in common js:
+*common.js:*
 
 ```js
 Schema.contact = new SimpleSchema({
@@ -349,7 +354,7 @@ Schema.contact = new SimpleSchema({
 });
 ```
 
-The HTML:
+*html:*
 
 ```html
 <template name="contactForm">
@@ -386,7 +391,7 @@ The HTML:
 </template>
 ```
 
-The client-side helper:
+*client.js*
 
 ```js
 var cForm = new AutoForm(Schema.contact);
@@ -397,7 +402,7 @@ Template.contactForm.helpers({
 });
 ```
 
-The Meteor method:
+*server.js*
 
 ```js
 Meteor.methods({
@@ -425,129 +430,78 @@ own validation since a user could bypass the client side validation.** You do
 not have to do any of your own validation with Collection2 inserts or updates,
 but you do have to call `check()` on the server when submitting to a Meteor method.
 
-## Callbacks
-
-In the example contact form above, any validation error messages will display automatically,
-but what if you wanted to display a message to the user telling him that his message was sent successfully.
-For this, the autoform package adds a `callbacks()` method to Collection2 and AutoForm objects. This 
-method is only available on the client, and allows you to specify callbacks for the inserts, updates, removes,
-and method calls.
-
-An example of callbacks for a Collection2 object:
-
-```js
-Documents.callbacks({
-    insert: function(error, result) {
-        if (error) {
-            console.log("Insert Error:", error);
-        } else {
-            alert("Inserted!");
-            console.log("Insert Result:", result);
-        }
-    },
-    update: function(error) {
-        if (error) {
-            console.log("Update Error:", error);
-        } else {
-            alert("Updated!");
-        }
-    },
-    remove: function(error) {
-        if (error) {
-            console.log("Remove Error:", error);
-        }
-    }
-});
-```
-
-These callbacks are the same as those you would normally specify as the last
-argument of the insert, update, and remove methods on a Meteor.Collection.
-
-An example of callbacks for an AutoForm object, such as for the previous contact form example:
-
-```js
-ContactForm.callbacks({
-    "sendEmail": function(error, result, template) {
-        if (!error) {
-            alert("Your message was sent.");
-        } else {
-            alert("There was a problem sending your message. Please verify your entries in all fields.");
-        }
-    }
-});
-```
-
-In this case, the name of the callback is the name of the method. The callback is very similar
-to the normal callback you supply when calling Meteor.call(), except that the AutoForm template
-object is additionally passed as the third parameter. One use for the template object
-might be so that you can call `find()` or `findAll()` to clean up certain form fields if the result was successful
-or show additional error-related elements if not. This should be rarely needed unless
-you have complex custom controls in your form.
-
-## Modifying the Form Object
+## The Form Document
 
 When the user submits an AutoForm, an object that contains all of the form data is automatically generated. If
 the submission action is insert or a method call, this is a normal document object. If the submission action is
-update, this is a mongo-style update object with `$set` and potentially `$unset` objects. In most cases,
+update, this is a mongo modifier with `$set` and potentially `$unset` objects. In most cases,
 the object will be perfect for your needs. However, you might find that you want to modify the object in some way.
 For example, you might want to add the current user's ID to a document before it is inserted. To do this,
-you can define a function to be called after the form data is gathered into an object, but before the
-object is validated and submitted.
+use "before hooks".
 
-### MyCollection2.beforeInsert
+## Callbacks/Hooks
 
-You can set `MyCollection2.beforeInsert` equal to a function the takes the object to be inserted as its only argument
-and returns a modified copy of the object. Remember that whatever modifications you make must still pass SimpleSchema
-validation.
+To add hooks and callbacks for an `AutoForm` instance, use the `hooks` method. 
+Here's an overview of all the possible hooks:
 
-*This is run only on the client. Therefore, you should
-not assume that this will always run since a devious user could skip it.*
+```js
+myAutoForm.hooks({
+  before: {
+    insert: function(doc) {},
+    update: function(modifier) {},
+    remove: function(docId) {},
+    "methodName": function(doc) {}
+  },
+  after: {
+    insert: function(error, result, template) {},
+    update: function(error, template) {},
+    remove: function(error, template) {},
+    "methodName": function(error, result, template) {}
+  },
+  onSubmit: function(error, result, template) {},
+  formToDoc: function(doc) {},
+  docToForm: function(doc) {}
+});
+```
 
-### MyCollection2.beforeUpdate
+Notes:
 
-You can set `MyCollection2.beforeUpdate` equal to a function the takes the ID of
-the document to be updated as it's first argument and the update object as its second argument
-and returns a modified copy of the update object. Remember that whatever modifications you make must still pass SimpleSchema
-validation. Keep in mind that the object this function receives will have the `$set` and potentially `$unset` keys
-at the first level.
+* The before hooks are called just before the insert, update, remove, or method
+call. The `insert`, `update`, and `"methodName"` functions are passed the document or
+modifier as gathered from the form fields. They must return this same object,
+optionally modifying it first. Remember that whatever modifications you make
+must still pass SimpleSchema validation. *Also, this is run only on the client.
+Therefore, you should not assume that this will always run since a devious user
+could skip it.*
+* The `remove` before function is passed the ID of the document to be removed, and
+you can return `false` to cancel the removal.
+* The after hooks are the same as those you would normally specify as the last
+argument of the insert, update, or remove methods on a Meteor.Collection or the
+Meteor.call method. Notice, though, that they are passed one additional final
+argument, which is the template object. One use for the template object
+might be so that you can call `find()` or `findAll()` to clean up certain form fields if the result was successful
+or show additional error-related elements if not. This should be rarely needed unless
+you have complex custom controls in your form.
+* Refer to "Doing Your Own Thing On Submit" for details about the `onSubmit` hook.
+* Refer to the next section for details about `formToDoc` and `docToForm` hooks.
 
-*This is run only on the client. Therefore, you should
-not assume that this will always run since a devious user could skip it.*
+### Adjusting Form Field Values
 
-### MyCollection2.beforeRemove
-
-You can set `MyCollection2.beforeRemove` equal to a function the takes the ID of
-the document to be removed as its only argument and returns `false` to cancel the
-removal.
-
-*This is run only on the client. Therefore, you should
-not assume that this will always run since a devious user could skip it.*
-
-### MyAutoForm.beforeMethod or MyCollection2.beforeMethod
-
-You can set `MyAutoForm.beforeMethod` or `MyCollection2.beforeMethod` equal to a function the takes the object that will be passed to a method
-as its first argument and the name of the method as its second argument. This function must return a modified copy
-of the object. Remember that whatever modifications you make must still pass SimpleSchema validation.
-
-*This is run only on the client. Therefore, you should
-not assume that this will always run since a devious user could skip it.*
-
-### MyAutoForm.formToDoc, MyCollection2.formToDoc, MyAutoForm.docToForm, MyCollection2.docToForm
-
-Specify `formToDoc` and `docToForm` functions if you need form values in a different
+Specify `formToDoc` and `docToForm` hooks if you need form values in a different
 format in your form versus in the mongo document. They are mainly useful if you
 decide to override an input type.
 
-*Unlike document modifications made in `beforeInsert`,
-`beforeUpdate`, or `beforeMethod` functions, modifications made in the
-`formToDoc` and `docToForm` functions are made every time the form is validated, which could
-happen very often on the client. The others are run only right before the
-corresponding submission actions, as their names imply.*
+*Unlike document modifications made in "before hooks", modifications made in the
+`formToDoc` and `docToForm` hooks are made every time the form is validated, which could
+happen a couple times per second on the client, depending on validation mode.
+The other hooks are run only right before the corresponding submission actions,
+as their names imply.*
 
 Here is an example where this feature is used to allow comma-delimited entry in
-a text field but store the values as an array:
+a text field but store (and validate) the values as an array:
 
-First specify `type: [String]` in the schema.
+First specify `type: [String]` in the schema. The schema should reflect what you
+are actually storing.
 
 *For the `afFieldInput` helper, don't supply options:*
 
@@ -560,17 +514,18 @@ When there are no options, a `<select>` element will not be generated.
 Then in client code:
 
 ```js
-Posts.docToForm = function (doc) {
-  return doc.tags.join(', ');
-};
-
-Posts.formToDoc = function (doc) {
-  if ('tags' in doc) {
-    doc.tags = doc.tags.split(",");
-    //loop through values and trim() or whatever else you want to do
+PostsForm.hooks({
+  docToForm: function (doc) {
+    return doc.tags.join(', ');
+  },
+  formToDoc: function (doc) {
+    if (typeof doc.tags === "string") {
+      doc.tags = doc.tags.split(",");
+      //loop through values and trim() or whatever else you want to do
+    }
+    return doc;
   }
-  return doc;
-};
+});
 ```
 
 ## Fine Tuning Validation
@@ -598,42 +553,33 @@ simply add the `autocomplete="off"` attribute to your input fields.
 
 Submitting to a server method allows you to do anything you want with the form
 data on the server, but what if you want to do something with the form data on
-the client? For that, you can bind a submit event handler to the autoform using
-the `autoForm` helper's `onSubmit` attribute.
-
-```html
-<template name="contactForm">
-  {{#autoForm schema=ContactForm id="contactForm" onSubmit=onSubmit}}
-  {{/autoForm}}
-</template>
-```
-
-And define a helper that returns your function:
+the client? For that, you can specify an `onSubmit` hook.
 
 ```js
-Template.contactForm.onSubmit = function () {
-    return function (insertDoc, updateDoc, currentDoc) {
-        if (customHandler(insertDoc))
-          this.resetForm();
-        return false;
-    };
-};
+ContactForm.hooks({
+  onSubmit: function (insertDoc, updateDoc, currentDoc) {
+    if (customHandler(insertDoc))
+      this.resetForm();
+    return false;
+  }
+});
 ```
 
 The arguments passed to your function are as follows:
 
-* `insertDoc`: The form input values in an object suitable for use with insert()
-* `updateDoc`: The form input values in an object (modifier) suitable for use with update()
+* `insertDoc`: The form input values in a document, suitable for use with insert()
+* `updateDoc`: The form input values in a modifier, suitable for use with update()
 * `currentDoc`: The object that's currently bound to the form through the doc attribute
 
 `this` provides a `resetForm` method, which you can call to reset the corresponding autoform if necessary.
 
-If you return false, no further submission will happen. This might be useful if
-you have, for example, the `insert` class on your submit button as well.
+If you return false, no further submission will happen. This allows you to use an
+`onSubmit` hook in combination with other submission methods.
 
 Otherwise the onSubmit function acts pretty much like any other onSubmit function, except
 that insertDoc and updateDoc are validated before it is called. However, since
-this is client code, you should never assume that insertDoc and updateDoc are valid.
+this is client code, you should never assume that insertDoc and updateDoc are valid
+from a security perspective.
 
 ## Complex Controls
 
@@ -719,7 +665,7 @@ with fields, labels, and error messages based on the corresponding SimpleSchema.
 Syntax:
 
 ```html
-{{quickForm schema="MyAutoFormOrCollection2ObjectName" type="typeOfForm" method="methodName" buttonClasses="class1 class2" buttonContent="Insert" anotherFormAttribute="value"}}
+{{quickForm schema=myAutoForm type="typeOfForm" method="methodName" buttonClasses="class1 class2" buttonContent="Insert" anotherFormAttribute="value"}}
 ```
 
 * `type`: Must be supplied and must be "insert", "update", "remove", or "method".
@@ -874,7 +820,7 @@ When the submit event fires, this initiates the insert, update, remove, or metho
 Typically the default browser submission is prevented automatically for you, although it will submit like
 a normal form (to the `action` url) if you have not set up the submit button to do an insert, update,
 remove, or method call. This may be useful in some cases because it allows normal form submission after
-auto-validaiton.
+auto-validation.
 
 ## Frameworks
 
