@@ -4,9 +4,23 @@ AutoForm = function(schema) {
   var self = this;
   if (schema instanceof SimpleSchema) {
     self._simpleSchema = schema;
+  } else if ("Collection2" in Meteor && schema instanceof Meteor.Collection2) {
+    self._collection = schema;
   } else {
     self._simpleSchema = new SimpleSchema(schema);
   }
+
+  self._hooks = {
+    before: {
+      //insert, update, remove, "methodName"
+    },
+    after: {
+      //insert, update, remove, "methodName"
+    },
+    formToDoc: null,
+    docToForm: null,
+    onSubmit: null
+  };
 };
 
 //DEPRECATED; Use myAutoForm.simpleSchema().namedContext() instead
@@ -32,15 +46,24 @@ AutoForm.prototype.validateOne = function(doc, keyName, options) {
 };
 
 AutoForm.prototype.simpleSchema = function() {
-  return this._simpleSchema;
+  var self = this;
+  return (typeof self._collection === "undefined") ? self._simpleSchema : self._collection.simpleSchema();
+};
+
+// The hooks() method should be used in place of callbacks, before___, and
+// formToDoc/docToForm going forward.
+AutoForm.prototype.hooks = function(hooks) {
+  _.extend(this._hooks, hooks);
 };
 
 AutoForm.prototype.callbacks = function(cb) {
+  console.warn("myAutoForm.callbacks is deprecated; use myAutoForm.hooks");
   this._callbacks = cb;
 };
 
 if (typeof Meteor.Collection2 !== 'undefined') {
   Meteor.Collection2.prototype.callbacks = function(cb) {
+    console.warn("myCollection2.callbacks is deprecated; use myAutoForm.hooks");
     this._callbacks = cb;
   };
 }
@@ -57,7 +80,7 @@ AutoForm.resetForm = function(formID, simpleSchema) {
 // DEPRECATED
 AutoForm.prototype.resetForm = function(formID) {
   var self = this;
-  
+
   console.warn("myAutoForm.resetForm(formID) is deprecated; use AutoForm.resetForm(formID, simpleSchema)");
 
   if (typeof formID !== "string") {
@@ -72,7 +95,7 @@ AutoForm.prototype.resetForm = function(formID) {
 if (typeof Meteor.Collection2 !== 'undefined') {
   Meteor.Collection2.prototype.resetForm = function(formID) {
     var self = this;
-    
+
     console.warn("myCollection2.resetForm(formID) is deprecated; use AutoForm.resetForm(formID, simpleSchema)");
 
     if (typeof formID !== "string") {
@@ -141,6 +164,7 @@ if (typeof Handlebars !== 'undefined') {
     if ("onSubmit" in hash) {
       if (typeof hash.onSubmit === "function") {
         autoFormContext.onSubmit = hash.onSubmit;
+        console.warn("The onSubmit helper attribute is deprecated; use myAutoForm.hooks");
       }
       delete hash.onSubmit;
     }
@@ -315,16 +339,21 @@ if (typeof Handlebars !== 'undefined') {
       var isUpdate = hasClass(submitButton, "update");
       var isRemove = hasClass(submitButton, "remove");
       var method = submitButton.getAttribute("data-meteor-method");
-      var onSubmit = template.data.onSubmit;
 
       //init
       var self = this;
       var validationType = template.data.validationType;
-      var afc2Obj = template.data.schema;
+      var afObj = template.data.schema;
+      if ("Collection2" in Meteor && afObj instanceof Meteor.Collection2) {
+        afObj = new AutoForm(afObj);
+      }
+      var hooks = afObj._hooks;
       var formId = template.data.formID;
       var currentDoc = self._doc || null;
       var docId = currentDoc ? currentDoc._id : null;
-      var doc = formValues(template, afc2Obj.formToDoc);
+      var doc = formValues(template, hooks.formToDoc || afObj.formToDoc);
+      var onSubmit = hooks.onSubmit || template.data.onSubmit;
+      var ss = afObj.simpleSchema();
 
       //for inserts, delete any properties that are null, undefined, or empty strings,
       //and expand to use subdocuments instead of dot notation keys
@@ -335,10 +364,10 @@ if (typeof Handlebars !== 'undefined') {
       if (isInsert || isUpdate || isRemove || method) {
         event.preventDefault(); //prevent default here if we're planning to do our own thing
       }
-      
+
       //pass both types of doc to onSubmit
       if (typeof onSubmit === "function") {
-        if (validationType === 'none' || afc2Obj.validate(insertDoc, {validationContext: formId, modifier: false})) {
+        if (validationType === 'none' || ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
           var context = {
             resetForm: function() {
               template.find("form").reset();
@@ -354,63 +383,77 @@ if (typeof Handlebars !== 'undefined') {
 
       //allow normal form submission
       if (!isInsert && !isUpdate && !isRemove && !method) {
-        if (validationType !== 'none' && !afc2Obj.validate(insertDoc, {validationContext: formId, modifier: false})) {
+        if (validationType !== 'none' && !ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
           event.preventDefault(); //don't submit the form if invalid
         }
         return;
       }
 
+      // Gather hooks, falling back to the deprecated API
+      // TODO eventually remove support for old API
+      var beforeInsert = hooks.before.insert || afObj.beforeInsert;
+      var beforeUpdate = hooks.before.update || afObj.beforeUpdate;
+      var beforeRemove = hooks.before.remove || afObj.beforeRemove;
+      var beforeMethod = method && hooks.before[method];
+      beforeMethod = beforeMethod || afObj.beforeMethod;
+      var afterInsert = hooks.before.insert || afObj.beforeInsert;
+      var afterUpdate = hooks.before.update || afObj.beforeUpdate;
+      var afterRemove = hooks.before.remove || afObj.beforeRemove;
+      var afterMethod;
+      if (method) {
+        if (!afterMethod && afObj._callbacks) {
+          afterMethod = afObj._callbacks[method];
+        }
+      }
+
       //do it
       if (isInsert) {
         //call beforeInsert if present
-        if (typeof afc2Obj.beforeInsert === "function") {
-          insertDoc = afc2Obj.beforeInsert(insertDoc);
+        if (typeof beforeInsert === "function") {
+          insertDoc = beforeInsert(insertDoc);
           if (!_.isObject(insertDoc)) {
             throw new Error("beforeInsert must return an object");
           }
         }
 
-        var cb = afc2Obj._callbacks && afc2Obj._callbacks.insert ? afc2Obj._callbacks.insert : null;
-        afc2Obj.insert(insertDoc, {validationContext: formId}, function(error, result) {
+        afObj._collection && afObj._collection.insert(insertDoc, {validationContext: formId}, function(error, result) {
           if (!error) {
             template.find("form").reset();
           }
-          if (cb) {
-            cb(error, result, template);
+          if (typeof afterInsert === "function") {
+            afterInsert(error, result, template);
           }
         });
       } else if (isUpdate) {
         if (!_.isEmpty(updateDoc)) {
           //call beforeUpdate if present
-          if (typeof afc2Obj.beforeUpdate === "function") {
-            updateDoc = afc2Obj.beforeUpdate(docId, updateDoc);
+          if (typeof beforeUpdate === "function") {
+            updateDoc = beforeUpdate(docId, updateDoc);
             if (!_.isObject(updateDoc)) {
               throw new Error("beforeUpdate must return an object");
             }
           }
 
-          var cb = afc2Obj._callbacks && afc2Obj._callbacks.update ? afc2Obj._callbacks.update : null;
-          afc2Obj.update(docId, updateDoc, {validationContext: formId}, function(error) {
+          afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error) {
             //don't automatically reset the form for updates because we
             //often won't want that
-            if (cb) {
-              cb(error, template);
+            if (typeof afterUpdate === "function") {
+              afterUpdate(error, template);
             }
           });
         }
       } else if (isRemove) {
         //call beforeRemove if present
         var stop = false;
-        if (typeof afc2Obj.beforeRemove === "function") {
-          if (afc2Obj.beforeRemove(docId) === false) {
+        if (typeof beforeRemove === "function") {
+          if (beforeRemove(docId) === false) {
             stop = true;
           }
         }
         if (!stop) {
-          var cb = afc2Obj._callbacks && afc2Obj._callbacks.remove ? afc2Obj._callbacks.remove : null;
-          afc2Obj.remove(docId, function(error) {
-            if (cb) {
-              cb(error, template);
+          afObj._collection && afObj._collection.remove(docId, function(error) {
+            if (typeof afterRemove === "function") {
+              afterRemove(error, template);
             }
           });
         }
@@ -420,22 +463,23 @@ if (typeof Handlebars !== 'undefined') {
       //addition to another action on the same submit
       if (method) {
         //call beforeMethod if present
-        if (typeof afc2Obj.beforeMethod === "function") {
-          insertDoc = afc2Obj.beforeMethod(insertDoc, method);
+        if (typeof beforeMethod === "function") {
+          // TODO: passing the method name as second argument was necessary for
+          // the old API only. Eventually can stop doing that.
+          insertDoc = beforeMethod(insertDoc, method);
           if (!_.isObject(insertDoc)) {
             throw new Error("beforeMethod must return an object");
           }
         }
 
-        var cb = afc2Obj._callbacks && afc2Obj._callbacks[method] ? afc2Obj._callbacks[method] : function() {
-        };
-
-        if (validationType === 'none' || afc2Obj.validate(insertDoc, {validationContext: formId, modifier: false})) {
+        if (validationType === 'none' || afObj.simpleSchema().namedContext(formId).validate(insertDoc, {modifier: false})) {
           Meteor.call(method, insertDoc, function(error, result) {
             if (!error) {
               template.find("form").reset();
             }
-            cb(error, result, template);
+            if (typeof afterMethod === "function") {
+              afterMethod(error, result, template);
+            }
           });
         }
       }
@@ -1105,29 +1149,32 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   if (!template || template._notInDOM)
     return;
 
-  var afc2Obj = template.data.schema;
+  var afObj = template.data.schema;
+  if ("Collection2" in Meteor && afObj instanceof Meteor.Collection2) {
+    afObj = new AutoForm(afObj);
+  }
   var formId = template.data.formID;
-  var doc = formValues(template, afc2Obj.formToDoc);
+  var doc = formValues(template, afObj._hooks.formToDoc || afObj.formToDoc);
   var isUpdate = !!template.find("button.update");
 
   //delete any properties that are null, undefined, or empty strings
   if (!isUpdate) {
     doc = cleanNulls(doc);
   }
-  
+
   if (skipEmpty && !(key in doc)) {
     return; //skip validation
   }
 
-  if (onlyIfAlreadyInvalid && afc2Obj.namedContext(formId).isValid()) {
+  if (onlyIfAlreadyInvalid && afObj.simpleSchema().namedContext(formId).isValid()) {
     return;
   }
 
   //clean and validate doc
   if (isUpdate) {
-    afc2Obj.validateOne(docToModifier(doc), key, {validationContext: formId, modifier: true});
+    afObj.simpleSchema().namedContext(formId).validateOne(docToModifier(doc), key, {modifier: true});
   } else {
-    afc2Obj.validateOne(expandObj(doc), key, {validationContext: formId, modifier: false});
+    afObj.simpleSchema().namedContext(formId).validateOne(expandObj(doc), key, {modifier: false});
   }
 };
 //throttling function that calls out to _validateField
