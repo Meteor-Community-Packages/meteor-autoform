@@ -1,7 +1,64 @@
 var defaultFramework = "bootstrap3";
 
+AutoForm = function(schema) {
+  var self = this;
+  if (schema instanceof SimpleSchema) {
+    self._simpleSchema = schema;
+  } else {
+    self._simpleSchema = new SimpleSchema(schema);
+  }
+};
+
+//DEPRECATED; Use myAutoForm.simpleSchema().namedContext() instead
+AutoForm.prototype.namedContext = function(name) {
+  console.warn("myAutoForm.namedContext() is deprecated; use myAutoForm.simpleSchema().namedContext() instead");
+  return this._simpleSchema.namedContext(name);
+};
+
+//DEPRECATED; Use myAutoForm.simpleSchema().namedContext().validate() instead
+AutoForm.prototype.validate = function(doc, options) {
+  options = options || {};
+  console.warn("myAutoForm.validate() is deprecated; use myAutoForm.simpleSchema().namedContext().validate() instead");
+  // Validate doc and return validity
+  return this._simpleSchema.namedContext(options.validationContext).validate(doc, options);
+};
+
+//DEPRECATED; Use myAutoForm.simpleSchema().namedContext().validateOne() instead
+AutoForm.prototype.validateOne = function(doc, keyName, options) {
+  options = options || {};
+  console.warn("myAutoForm.validateOne() is deprecated; use myAutoForm.simpleSchema().namedContext().validateOne() instead");
+  // Validate doc and return validity
+  return this._simpleSchema.namedContext(options.validationContext).validateOne(doc, keyName, options);
+};
+
+AutoForm.prototype.simpleSchema = function() {
+  return this._simpleSchema;
+};
+
+AutoForm.prototype.callbacks = function(cb) {
+  this._callbacks = cb;
+};
+
+if (typeof Meteor.Collection2 !== 'undefined') {
+  Meteor.Collection2.prototype.callbacks = function(cb) {
+    this._callbacks = cb;
+  };
+}
+
+AutoForm.resetForm = function(formID, simpleSchema) {
+  if (typeof formID !== "string") {
+    return;
+  }
+
+  simpleSchema && simpleSchema.namedContext(formID).resetValidation();
+  clearSelections(formID);
+};
+
+// DEPRECATED
 AutoForm.prototype.resetForm = function(formID) {
   var self = this;
+  
+  console.warn("myAutoForm.resetForm(formID) is deprecated; use AutoForm.resetForm(formID, simpleSchema)");
 
   if (typeof formID !== "string") {
     return;
@@ -11,10 +68,12 @@ AutoForm.prototype.resetForm = function(formID) {
   clearSelections(formID);
 };
 
-//add callbacks() method to Meteor.Collection2
+// DEPRECATED
 if (typeof Meteor.Collection2 !== 'undefined') {
   Meteor.Collection2.prototype.resetForm = function(formID) {
     var self = this;
+    
+    console.warn("myCollection2.resetForm(formID) is deprecated; use AutoForm.resetForm(formID, simpleSchema)");
 
     if (typeof formID !== "string") {
       return;
@@ -412,7 +471,7 @@ if (typeof Handlebars !== 'undefined') {
       var afc2Obj = template.data.schema;
       var formId = template.data.formID;
       if (afc2Obj && formId) {
-        afc2Obj.resetForm(formId);
+        AutoForm.resetForm(formId, afc2Obj.simpleSchema());
       }
     }
   });
