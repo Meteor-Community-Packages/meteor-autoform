@@ -1020,6 +1020,18 @@ var createInputHtml = function(name, autoform, defs, hash) {
   var selectOptions = hash.options;
   var framework = hash.framework || autoform._framework || defaultFramework;
 
+  //handle options="allowed"
+  if(selectOptions === "allowed") {
+    selectOptions = _.map(defs.allowedValues, function(v) {
+        var label = v;
+        if(hash.capitalize && v.length > 0 && (schemaType === String || (expectsArray && schemaType[0] === String))) {
+          label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+        }
+        
+        return {label: label, value: v};
+    });
+  }
+
   //clean hash so that we can add anything remaining as attributes
   hash = cleanHash(hash);
 
