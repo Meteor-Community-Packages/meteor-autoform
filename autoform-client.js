@@ -21,7 +21,7 @@ AutoForm = function(schema) {
     docToForm: null,
     onSubmit: null
   };
-  
+
   // DEPRECATED TODO: remove everything after this point
   self._callbacks = {};
   if (self._collection) {
@@ -1021,14 +1021,14 @@ var createInputHtml = function(name, autoform, defs, hash) {
   var framework = hash.framework || autoform._framework || defaultFramework;
 
   //handle options="allowed"
-  if(selectOptions === "allowed") {
+  if (selectOptions === "allowed") {
     selectOptions = _.map(defs.allowedValues, function(v) {
-        var label = v;
-        if(hash.capitalize && v.length > 0 && (schemaType === String || (expectsArray && schemaType[0] === String))) {
-          label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
-        }
-        
-        return {label: label, value: v};
+      var label = v;
+      if (hash.capitalize && v.length > 0 && (schemaType === String || (expectsArray && schemaType[0] === String))) {
+        label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+      }
+
+      return {label: label, value: v};
     });
   }
 

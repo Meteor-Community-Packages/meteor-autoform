@@ -302,6 +302,10 @@ html would look like this:
 {{afFieldInput "year" options=yearOptions noselect="true"}}
 ```
 
+To use the `allowedValues` from the schema as the options, set
+`options="allowed"`. To capitalize the labels, additionally set
+`capitalize="true"`.
+
 The `framework` attribute can be used with this helper as well. See the "Frameworks" section.
 
 ### afFieldLabel "propertyName" [options]
@@ -583,21 +587,22 @@ from a security perspective.
 
 ## Resetting Validation
 
-After a successful submission, validation is reset, ensuring that any error messages disappear
-and form input values are correct. However, you may need to reset validation for other reasons,
-such as when you reuse an edit form to edit a different document. To do this, call the `resetForm`
-method on the Collection2 or AutoForm instance, passing the form's `id` attribute as the only argument:
+After a successful submission, validation is reset, ensuring that any error
+messages disappear and form input values are correct. However, you may need
+to reset validation for other reasons, such as when you reuse an edit form to
+edit a different document. To do this, call `AutoForm.resetForm()`, passing
+the form's `id` attribute and the SimpleSchema instance:
 
 ```js
 Template.example.events({
   'click .docSelect': function(e, t) {
     e.preventDefault();
-    Documents.resetForm("docForm");
+    AutoForm.resetForm("docForm", Documents.simpleSchema());
     Session.set("selectedDoc", this._id);
   },
   'click .docClear': function(e, t) {
     e.preventDefault();
-    Documents.resetForm("docForm");
+    AutoForm.resetForm("docForm", Documents.simpleSchema());
     Session.set("selectedDoc", null);
   }
 });
