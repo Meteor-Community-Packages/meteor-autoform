@@ -155,7 +155,9 @@ if (typeof Handlebars !== 'undefined') {
 
     var flatDoc;
     if (hash.doc) {
-      flatDoc = schemaObj.simpleSchema().collapseObj(hash.doc);
+      var mDoc = new MongoObject(hash.doc);
+      flatDoc = mDoc.getFlatObject();
+      mDoc = null;
       if (typeof schemaObj.docToForm === "function") {
         flatDoc = schemaObj.docToForm(flatDoc);
       }

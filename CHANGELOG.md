@@ -6,6 +6,11 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.3
+
+Update to use MongoObject to create flatDoc. Fixes an issue caused by recent
+SimpleSchema API changes.
+
 ### 0.4.2
 
 * New API. The old API is deprecated but continues to work for now with warning
