@@ -452,7 +452,7 @@ Here's an overview of all the possible hooks:
 myAutoForm.hooks({
   before: {
     insert: function(doc) {},
-    update: function(modifier) {},
+    update: function(docId, modifier) {},
     remove: function(docId) {},
     "methodName": function(doc) {}
   },
