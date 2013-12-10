@@ -221,8 +221,16 @@ if (typeof Handlebars !== 'undefined') {
     }
 
     var context = {
-      formFields: _.keys(hash.schema.simpleSchema().schema())
+      formFields: []
     };
+    
+    _.each(hash.schema.simpleSchema().schema(), function (fieldDefs, field) {
+      var info = {name: field};
+      if (_.isArray(fieldDefs.allowedValues)) {
+        info.options = "allowed";
+      }
+      context.formFields.push(info);
+    });
 
     if ("type" in hash) {
       if (hash.type === "insert") {
@@ -234,6 +242,10 @@ if (typeof Handlebars !== 'undefined') {
       } else if (hash.type === "method") {
         context.doMethod = true;
         context.method = hash.method;
+      } else if (hash.type === "readonly") {
+        context.isReadOnly = true;
+      } else if (hash.type === "disabled") {
+        context.isDisabled = true;
       }
       delete hash.type;
     }

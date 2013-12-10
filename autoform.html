@@ -7,7 +7,15 @@
 <template name="_quickForm">
   {{#autoForm qfHash=qfHash}}
   {{#each ../formFields}}
-  {{afQuickField this autoform=../this}}
+  {{#if ../../isReadOnly}}
+  {{afQuickField ../this.name autoform=../../this options=../this.options readonly=""}}
+  {{else}}
+  {{#if ../../../isDisabled}}
+  {{afQuickField ../../this.name autoform=../../../this options=../../this.options disabled=""}}
+  {{else}}
+  {{afQuickField ../../this.name autoform=../../../this options=../../this.options}}
+  {{/if}}
+  {{/if}}
   {{/each}}
   <div>
     {{#if ../doInsert}}
