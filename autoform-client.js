@@ -158,7 +158,7 @@ if (typeof Handlebars !== 'undefined') {
       var mDoc = new MongoObject(hash.doc);
       flatDoc = mDoc.getFlatObject();
       mDoc = null;
-      
+
       if (typeof schemaObj.docToForm === "function") {
         flatDoc = schemaObj.docToForm(flatDoc);
       }
@@ -261,14 +261,11 @@ if (typeof Handlebars !== 'undefined') {
     var hash = options.hash,
             autoform = hash.autoform || this,
             ss = autoform._ss;
-    if (!ss) {
+    
+    if (!ss)
       throw new Error("afQuickField helper must be used within an autoForm block");
-    }
-    var genericName = makeGeneric(name);
-    var defs = ss.schema(genericName);
-    if (!genericName || !defs) {
-      throw new Error("Invalid field name");
-    }
+    
+    var defs = getDefs(ss, name); //defs will not be undefined
 
     //boolean type renders a check box that already has a label, so don't generate another label
     var skipLabel = hash.label === false || (defs.type === Boolean && !("select" in hash) && !("radio" in hash));
@@ -309,45 +306,38 @@ if (typeof Handlebars !== 'undefined') {
 
   Handlebars.registerHelper("afFieldMessage", function(name, options) {
     var autoform = options.hash.autoform || this, ss = autoform._ss;
-    if (!ss) {
-      throw new Error("afFieldMessage helper must be used within an autoForm block helper");
-    }
+    if (!ss)
+      throw new Error("afFieldMessage helper must be used within an autoForm block");
+    getDefs(ss, name); //for side effect of throwing errors when name is not in schema
     return ss.namedContext(autoform._formID).keyErrorMessage(name);
   });
 
   Handlebars.registerHelper("afFieldIsInvalid", function(name, options) {
     var autoform = options.hash.autoform || this, ss = autoform._ss;
-    if (!ss) {
-      throw new Error("afFieldIsInvalid helper must be used within an autoForm block helper");
-    }
+    if (!ss)
+      throw new Error("afFieldIsInvalid helper must be used within an autoForm block");
+    getDefs(ss, name); //for side effect of throwing errors when name is not in schema
     return ss.namedContext(autoform._formID).keyIsInvalid(name);
   });
 
   Handlebars.registerHelper("afFieldInput", function(name, options) {
     var autoform = options.hash.autoform || this, ss = autoform._ss;
-    if (!ss) {
-      throw new Error("afFieldInput helper must be used within an autoForm block helper");
-    }
-    var genericName = makeGeneric(name);
-    var defs = ss.schema(genericName);
-    if (!genericName || !defs) {
-      throw new Error("Invalid field name");
-    }
+    
+    if (!ss)
+      throw new Error("afFieldInput helper must be used within an autoForm block");
+    
+    var defs = getDefs(ss, name); //defs will not be undefined
     var html = createInputHtml(name, autoform, defs, options.hash);
     return new Handlebars.SafeString(html);
   });
 
   Handlebars.registerHelper("afFieldLabel", function(name, options) {
     var autoform = options.hash.autoform || this, ss = autoform._ss;
-    if (!ss) {
-      throw new Error("afFieldLabel helper must be used within an autoForm block helper");
-    }
-    var genericName = makeGeneric(name);
-    var defs = ss.schema(genericName);
-    if (!genericName || !defs) {
-      throw new Error("Invalid field name");
-    }
-
+    
+    if (!ss)
+      throw new Error("afFieldInput helper must be used within an autoForm block");
+    
+    var defs = getDefs(ss, name); //defs will not be undefined
     var html = createLabelHtml(name, autoform, defs, options.hash);
     return new Handlebars.SafeString(html);
   });
@@ -864,19 +854,19 @@ var createInputHtml = function(name, autoform, defs, hash) {
     schemaType = schemaType[0]; //this, for example, changes [String] to String
     expectsArray = false;
   }
-  
+
   var flatDoc = autoform._flatDoc;
 
   //get current value
   var value, arrayVal;
   if (expectsArray) {
-    
+
     // For arrays, we need the flatDoc value as an array
     // rather than as separate array values, so we'll do
     // that adjustment here.
     // For example, if we have "numbers.0" = 1 and "numbers.1" = 2,
     // we will create "numbers" = [1,2]
-    _.each(flatDoc, function (flatVal, flatKey) {
+    _.each(flatDoc, function(flatVal, flatKey) {
       var l = name.length;
       if (flatKey.slice(0, l + 1) === name + ".") {
         var end = flatKey.slice(l + 1);
@@ -887,7 +877,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
         }
       }
     });
-    
+
     if (schemaType[0] === Date) {
       if (flatDoc && name in flatDoc) {
         arrayVal = flatDoc[name];
@@ -1214,10 +1204,10 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
           afObj.simpleSchema().namedContext(formId).isValid()) {
     return;
   }
-  
+
   // Create a document based on all the values of all the inputs on the form
   var doc = formValues(template, afObj._hooks.formToDoc || afObj.formToDoc);
-  
+
   // Determine whether we're validating for an insert or an update
   var isUpdate = !!template.find("button.update");
 
@@ -1308,4 +1298,15 @@ var makeGeneric = function(name) {
     return null;
 
   return name.replace(/\.[0-9]+\./g, '.$.').replace(/\.[0-9]+/g, '.$');
+};
+
+var getDefs = function(ss, name) {
+  if (typeof name !== "string") {
+    throw new Error("Invalid field name");
+  }
+  
+  var defs = ss.schema(makeGeneric(name));
+  if (!defs)
+    throw new Error("Invalid field name");
+  return defs;
 };
