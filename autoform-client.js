@@ -158,6 +158,7 @@ if (typeof Handlebars !== 'undefined') {
       var mDoc = new MongoObject(hash.doc);
       flatDoc = mDoc.getFlatObject();
       mDoc = null;
+      
       if (typeof schemaObj.docToForm === "function") {
         flatDoc = schemaObj.docToForm(flatDoc);
       }
@@ -585,6 +586,16 @@ if (typeof Handlebars !== 'undefined') {
   };
 }
 
+var maybeNum = function(val) {
+  // Convert val to a number if possible; otherwise, just use the value
+  var floatVal = parseFloat(val);
+  if (!isNaN(floatVal)) {
+    return floatVal;
+  } else {
+    return val;
+  }
+};
+
 var formValues = function(template, transform) {
   var fields = template.findAll("[data-schema-key]");
   var doc = {};
@@ -596,34 +607,7 @@ var formValues = function(template, transform) {
     var tagName = field.tagName || "";
     tagName = tagName.toLowerCase();
 
-    //handle checkbox
-    if (type === "checkbox") {
-      if (val === "true") { //boolean checkbox
-        doc[name] = field.checked;
-      } else if (field.checked) { //array checkbox
-        if (!_.isArray(doc[name])) {
-          doc[name] = [];
-        }
-        doc[name].push(val);
-      }
-      return;
-    }
-
-    //handle radio
-    if (type === "radio") {
-      if (field.checked) {
-        if (val === "true") { //boolean radio
-          doc[name] = true;
-        } else if (val === "false") { //boolean radio
-          doc[name] = false;
-        } else {
-          doc[name] = val;
-        }
-      }
-      return;
-    }
-
-    //handle select
+    // Handle select
     if (tagName === "select") {
       if (val === "true") { //boolean select
         doc[name] = true;
@@ -638,18 +622,40 @@ var formValues = function(template, transform) {
       return;
     }
 
-    //handle number inputs
-    if (type === "number") {
-      var floatVal = parseFloat(val);
-      if (!isNaN(floatVal)) {
-        doc[name] = floatVal;
-      } else {
-        doc[name] = val; //set to string so will fail validation
+    // Handle checkbox
+    if (type === "checkbox") {
+      if (val === "true") { //boolean checkbox
+        doc[name] = field.checked;
+      } else if (field.checked) { //array checkbox
+        if (!_.isArray(doc[name])) {
+          doc[name] = [];
+        }
+        doc[name].push(val);
       }
       return;
     }
 
-    //handle date inputs
+    // Handle radio
+    if (type === "radio") {
+      if (field.checked) {
+        if (val === "true") { //boolean radio
+          doc[name] = true;
+        } else if (val === "false") { //boolean radio
+          doc[name] = false;
+        } else {
+          doc[name] = val;
+        }
+      }
+      return;
+    }
+
+    // Handle number
+    if (type === "select") {
+      doc[name] = maybeNum(val);
+      return;
+    }
+
+    // Handle date inputs
     if (type === "date") {
       if (isValidDateString(val)) {
         //Date constructor will interpret val as UTC and create
@@ -661,7 +667,7 @@ var formValues = function(template, transform) {
       return;
     }
 
-    //handle date inputs
+    // Handle date inputs
     if (type === "datetime") {
       val = val.replace(/ /g, "T");
       if (isValidNormalizedForcedUtcGlobalDateAndTimeString(val)) {
@@ -673,7 +679,7 @@ var formValues = function(template, transform) {
       return;
     }
 
-    //handle date inputs
+    // Handle date inputs
     if (type === "datetime-local") {
       val = val.replace(/ /g, "T");
       var offset = field.getAttribute("data-offset") || "Z";
@@ -685,7 +691,7 @@ var formValues = function(template, transform) {
       return;
     }
 
-    //handle all other inputs
+    // Handle all other inputs
     doc[name] = val;
   });
   if (typeof transform === "function") {
@@ -858,13 +864,33 @@ var createInputHtml = function(name, autoform, defs, hash) {
     schemaType = schemaType[0]; //this, for example, changes [String] to String
     expectsArray = false;
   }
+  
+  var flatDoc = autoform._flatDoc;
 
   //get current value
   var value, arrayVal;
   if (expectsArray) {
+    
+    // For arrays, we need the flatDoc value as an array
+    // rather than as separate array values, so we'll do
+    // that adjustment here.
+    // For example, if we have "numbers.0" = 1 and "numbers.1" = 2,
+    // we will create "numbers" = [1,2]
+    _.each(flatDoc, function (flatVal, flatKey) {
+      var l = name.length;
+      if (flatKey.slice(0, l + 1) === name + ".") {
+        var end = flatKey.slice(l + 1);
+        var intEnd = parseInt(end, 10);
+        if (!isNaN(intEnd)) {
+          flatDoc[name] = flatDoc[name] || [];
+          flatDoc[name][intEnd] = flatVal;
+        }
+      }
+    });
+    
     if (schemaType[0] === Date) {
-      if (autoform._flatDoc && name in autoform._flatDoc) {
-        arrayVal = autoform._flatDoc[name];
+      if (flatDoc && name in flatDoc) {
+        arrayVal = flatDoc[name];
         value = [];
         _.each(arrayVal, function(v) {
           value.push(dateToDateStringUTC(v));
@@ -873,8 +899,8 @@ var createInputHtml = function(name, autoform, defs, hash) {
         value = hash.value || [];
       }
     } else {
-      if (autoform._flatDoc && name in autoform._flatDoc) {
-        arrayVal = autoform._flatDoc[name];
+      if (flatDoc && name in flatDoc) {
+        arrayVal = flatDoc[name];
         value = [];
         _.each(arrayVal, function(v) {
           value.push(v.toString());
@@ -884,21 +910,13 @@ var createInputHtml = function(name, autoform, defs, hash) {
       }
     }
   } else {
-    if (schemaType === Boolean) {
-      if (autoform._flatDoc && name in autoform._flatDoc) {
-        value = autoform._flatDoc[name];
-      } else {
-
+    if (flatDoc && name in flatDoc) {
+      value = flatDoc[name];
+      if (!(value instanceof Date)) { //we will convert dates to a string later, after we know what the field type will be
+        value = value.toString();
       }
     } else {
-      if (autoform._flatDoc && name in autoform._flatDoc) {
-        value = autoform._flatDoc[name];
-        if (!(value instanceof Date)) { //we will convert dates to a string later, after we know what the field type will be
-          value = value.toString();
-        }
-      } else {
-        value = hash.value || "";
-      }
+      value = hash.value || "";
     }
   }
 
@@ -1061,7 +1079,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
           }
         } else {
           inputType = "radio";
-          if (opt.value.toString() === value) {
+          if (opt.value.toString() === value.toString()) {
             checked = ' checked';
           } else {
             checked = '';
@@ -1090,7 +1108,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
             selected = '';
           }
         } else {
-          if (opt.value.toString() === value) {
+          if (opt.value.toString() === value.toString()) {
             selected = ' selected';
           } else {
             selected = '';
@@ -1180,31 +1198,42 @@ var createLabelHtml = function(name, autoform, defs, hash) {
   return '<label' + objToAttributes(hash) + '>' + label + '</label>';
 };
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
-  if (!template || template._notInDOM)
+  if (!template || template._notInDOM) {
     return;
+  }
 
+  var formId = template.data.formID;
   var afObj = template.data.schema;
+
+  //XXX for speed, should get rid of this transformation eventually
   if ("Collection2" in Meteor && afObj instanceof Meteor.Collection2) {
     afObj = new AutoForm(afObj);
   }
-  var formId = template.data.formID;
+
+  if (onlyIfAlreadyInvalid &&
+          afObj.simpleSchema().namedContext(formId).isValid()) {
+    return;
+  }
+  
+  // Create a document based on all the values of all the inputs on the form
   var doc = formValues(template, afObj._hooks.formToDoc || afObj.formToDoc);
+  
+  // Determine whether we're validating for an insert or an update
   var isUpdate = !!template.find("button.update");
 
-  //delete any properties that are null, undefined, or empty strings
+  // If validating for an insert, delete any properties that are
+  // null, undefined, or empty strings
   if (!isUpdate) {
     doc = cleanNulls(doc);
   }
 
+  // Skip validation if skipEmpty is true and the field we're validating
+  // has no value.
   if (skipEmpty && !(key in doc)) {
     return; //skip validation
   }
 
-  if (onlyIfAlreadyInvalid && afObj.simpleSchema().namedContext(formId).isValid()) {
-    return;
-  }
-
-  //clean and validate doc
+  // Clean and validate doc
   if (isUpdate) {
     afObj.simpleSchema().namedContext(formId).validateOne(docToModifier(doc), key, {modifier: true});
   } else {
