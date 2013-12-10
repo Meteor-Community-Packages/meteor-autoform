@@ -6,6 +6,17 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.4
+
+* Fix issues, introduced by 0.4.3, where select, checkbox, and radio form values
+were not always correct.
+* Throw errors in afFieldMessage and afFieldIsInvalid helpers when the field
+name used doesn't exist in the schema. (Other helpers already did this.)
+* Add two new "type" options for quickForms: "readonly" and "disabled". See
+README.
+* When displaying a quickForm, use the allowedValues from the schema as the
+options.
+
 ### 0.4.3
 
 Update to use MongoObject to create flatDoc. Fixes an issue caused by recent

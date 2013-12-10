@@ -695,7 +695,7 @@ Syntax:
 {{quickForm schema=myAutoForm type="typeOfForm" method="methodName" buttonClasses="class1 class2" buttonContent="Insert" anotherFormAttribute="value"}}
 ```
 
-* `type`: Must be supplied and must be "insert", "update", "remove", or "method".
+* `type`: Must be supplied and must be "insert", "update", "remove", "method", "readonly", or "disabled".
 * `method`: If type="method", specify the name of the method to call (for the data-meteor-method attribute on the submit button).
 * `buttonClasses`: class attribute for the submit button.
 * `buttonContent`: The submit button content. If you don't set this, "Submit" is used.
