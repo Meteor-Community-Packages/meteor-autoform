@@ -1302,11 +1302,11 @@ var makeGeneric = function(name) {
 
 var getDefs = function(ss, name) {
   if (typeof name !== "string") {
-    throw new Error("Invalid field name");
+    throw new Error("Invalid field name: (not a string)");
   }
   
   var defs = ss.schema(makeGeneric(name));
   if (!defs)
-    throw new Error("Invalid field name");
+    throw new Error("Invalid field name: " + name);
   return defs;
 };
