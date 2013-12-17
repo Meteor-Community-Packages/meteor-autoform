@@ -231,8 +231,8 @@ has only entered invalid text in one of them.
 
 Outputs the user-friendly invalid reason message for the specified property, or
 an empty string if the property is valid. This value updates reactively whenever
-validation is performed. Currently messages are in English and there is no way
-to override them.
+validation is performed. Refer to [the SimpleSchema documentation](https://github.com/aldeed/meteor-simple-schema#customizing-validation-messages) for information
+on customizing the messages.
 
 ### afFieldIsInvalid "propertyName"
 
