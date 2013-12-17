@@ -223,7 +223,7 @@ if (typeof Handlebars !== 'undefined') {
     var context = {
       formFields: []
     };
-    
+
     _.each(hash.schema.simpleSchema().schema(), function (fieldDefs, field) {
       var info = {name: field};
       if (_.isArray(fieldDefs.allowedValues)) {
@@ -273,10 +273,10 @@ if (typeof Handlebars !== 'undefined') {
     var hash = options.hash,
             autoform = hash.autoform || this,
             ss = autoform._ss;
-    
+
     if (!ss)
       throw new Error("afQuickField helper must be used within an autoForm block");
-    
+
     var defs = getDefs(ss, name); //defs will not be undefined
 
     //boolean type renders a check box that already has a label, so don't generate another label
@@ -334,10 +334,10 @@ if (typeof Handlebars !== 'undefined') {
 
   Handlebars.registerHelper("afFieldInput", function(name, options) {
     var autoform = options.hash.autoform || this, ss = autoform._ss;
-    
+
     if (!ss)
       throw new Error("afFieldInput helper must be used within an autoForm block");
-    
+
     var defs = getDefs(ss, name); //defs will not be undefined
     var html = createInputHtml(name, autoform, defs, options.hash);
     return new Handlebars.SafeString(html);
@@ -345,13 +345,18 @@ if (typeof Handlebars !== 'undefined') {
 
   Handlebars.registerHelper("afFieldLabel", function(name, options) {
     var autoform = options.hash.autoform || this, ss = autoform._ss;
-    
+
     if (!ss)
       throw new Error("afFieldInput helper must be used within an autoForm block");
-    
+
     var defs = getDefs(ss, name); //defs will not be undefined
     var html = createLabelHtml(name, autoform, defs, options.hash);
     return new Handlebars.SafeString(html);
+  });
+
+  Handlebars.registerHelper('afNestedField',function(fieldKey){
+    var nestedFieldNames = getNestedFieldNames(fieldKey, this);
+    return nestedFieldNames;
   });
 
   Template._autoForm.events({
@@ -1316,9 +1321,37 @@ var getDefs = function(ss, name) {
   if (typeof name !== "string") {
     throw new Error("Invalid field name: (not a string)");
   }
-  
+
   var defs = ss.schema(makeGeneric(name));
   if (!defs)
     throw new Error("Invalid field name: " + name);
   return defs;
+};
+
+var getNestedFieldNames = function (fieldKey, schema) {
+
+  var fieldNames = [],
+    fields = [],
+    doc = schema._doc,
+    schemaKeys = schema._ss._schemaKeys,
+    count = 0;
+
+  for (var key in schemaKeys) {
+    if (schemaKeys[key].indexOf(fieldKey + '.$.') !== -1)
+      fields.push(schemaKeys[key].replace(fieldKey + '.$.', ''));
+  }
+
+  if (fields && doc && doc[fieldKey]) {
+    count = (doc[fieldKey].length > 0) ? doc[fieldKey].length-1 : 1;
+  }
+
+  for(var i = 0; i <= count; i++){
+    var row = [];
+    for (var field in fields) {
+      row[fields[field]] = fieldKey + '.' + i + '.' + fields[field];
+    }
+    fieldNames.push(row);
+  }
+
+  return fieldNames;
 };
