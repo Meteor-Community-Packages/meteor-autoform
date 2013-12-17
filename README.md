@@ -2,7 +2,7 @@ AutoForm
 =========================
 
 AutoForm is a smart package for Meteor that adds handlebars helpers to easily create basic
-forms with automatic insert and update events, and automatic reactive validation. 
+forms with automatic insert and update events, and automatic reactive validation.
 This package requires and automatically installs the [simple-schema](https://github.com/aldeed/meteor-simple-schema) package.
 You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you
 have to add to your app yourself.
@@ -445,7 +445,7 @@ use "before hooks".
 
 ## Callbacks/Hooks
 
-To add hooks and callbacks for an `AutoForm` instance, use the `hooks` method. 
+To add hooks and callbacks for an `AutoForm` instance, use the `hooks` method.
 Here's an overview of all the possible hooks:
 
 ```js
@@ -683,6 +683,28 @@ You can use mongo dot notation to map an input to a subdocument. For example:
 * If you use `{{afFieldInput 'address.street'}}`, whatever is entered in the field will be assigned to `doc.address.street`.
 * If you use `{{afFieldInput 'addresses.1.street'}}`, whatever is entered in the field will be assigned to the `street` property of the object at index 1 in the `doc.addresses` array.
 
+## Nested Fields
+
+You can use nested field schemas by using afNestedField. For example:
+
+```html
+{{#autoForm schema="branchForm" id="contactForm"}}
+<!-- other fields -->
+<div>
+  {{afFieldInput 'name'}}
+  <hr/>
+  {{#each afNestedField 'locations'}}
+    <div class="row">
+      <div class="col-md-4">{{afFieldInput this.name autoform=../this class="some-class"}}</div>
+      <div class="col-md-4">{{afFieldInput this.address autoform=../this options=someOptionsHelper}}</div>
+      <div class="col-md-4">{{afFieldInput this.additional autoform=../this}}</div>
+    </div>
+  {{/each}}
+</div>
+{{/autoForm}}
+```
+
+
 ## QuickForm
 
 If your goal is to quickly develop a form that allows you to insert, update, remove, or call a method with validation,
@@ -720,7 +742,7 @@ To omit the label element, use `label=false`. You can combine this with `placeho
 to get a placeholder label instead of a label element. Use the special `placeholder="schemaLabel"`
 attribute value to automatically use the label from the schema.
 
-The `framework` attribute can be used with this helper as well. See the "Frameworks" section. To set the 
+The `framework` attribute can be used with this helper as well. See the "Frameworks" section. To set the
 framework for the label, use `label-framework`.
 
 ### afQuickField Example
@@ -798,7 +820,7 @@ in the UTC time zone.
 from the applicable time zone to the UTC time zone since the entered time is
 assumed to be UTC. It's generally better to use datetime-local.*
 
-* **Saving:** The user-entered value must be of the format `date string + "T" + 
+* **Saving:** The user-entered value must be of the format `date string + "T" +
 time string + "Z"`, and it will be saved as a `Date` object representing that
 exact datetime in the UTC time zone.
 * **Loading:** If you are binding an object containing `Date` objects to an update autoform
