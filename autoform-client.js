@@ -19,7 +19,9 @@ AutoForm = function(schema) {
     },
     formToDoc: null,
     docToForm: null,
-    onSubmit: null
+    onSubmit: null,
+    onSuccess: null,
+    onError: null
   };
 
   // DEPRECATED TODO: remove everything after this point
@@ -421,20 +423,17 @@ if (typeof Handlebars !== 'undefined') {
       var beforeInsert = hooks.before.insert || afObj.beforeInsert;
       var beforeUpdate = hooks.before.update || afObj.beforeUpdate;
       var beforeRemove = hooks.before.remove || afObj.beforeRemove;
-      var beforeMethod = method && hooks.before[method];
-      beforeMethod = beforeMethod || afObj.beforeMethod;
+      var beforeMethod = method && (hooks.before[method] || afObj.beforeMethod);
       var afterInsert = hooks.after.insert || afObj._callbacks.insert;
       var afterUpdate = hooks.after.update || afObj._callbacks.update;
       var afterRemove = hooks.after.remove || afObj._callbacks.remove;
-      var afterMethod;
-      if (method) {
-        afterMethod = hooks.after[method] || afObj._callbacks[method];
-      }
+      var afterMethod = method && (hooks.after[method] || afObj._callbacks[method]);
+      var onSuccess = hooks.onSuccess;
+      var onError = hooks.onError;
 
       //do it
       if (isInsert) {
-        //call beforeInsert if present
-        if (typeof beforeInsert === "function") {
+        if (beforeInsert) {
           insertDoc = beforeInsert(insertDoc);
           if (!_.isObject(insertDoc)) {
             throw new Error("beforeInsert must return an object");
@@ -442,44 +441,46 @@ if (typeof Handlebars !== 'undefined') {
         }
 
         afObj._collection && afObj._collection.insert(insertDoc, {validationContext: formId}, function(error, result) {
-          if (!error) {
+          if (error) {
+            onError && onError('insert', error, template);
+          } else {
             template.find("form").reset();
+            onSuccess && onSuccess('insert', result, template);
           }
-          if (typeof afterInsert === "function") {
-            afterInsert(error, result, template);
-          }
+          afterInsert && afterInsert(error, result, template);
         });
       } else if (isUpdate) {
         if (!_.isEmpty(updateDoc)) {
-          //call beforeUpdate if present
-          if (typeof beforeUpdate === "function") {
+          if (beforeUpdate) {
             updateDoc = beforeUpdate(docId, updateDoc);
             if (!_.isObject(updateDoc)) {
               throw new Error("beforeUpdate must return an object");
             }
           }
 
-          afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error) {
+          afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error, result) {
             //don't automatically reset the form for updates because we
             //often won't want that
-            if (typeof afterUpdate === "function") {
-              afterUpdate(error, template);
+            if (error) {
+              onError && onError('update', error, template);
+            } else {
+              onSuccess && onSuccess('update', result, template);
             }
+            afterUpdate && afterUpdate(error, result, template);
           });
         }
       } else if (isRemove) {
-        //call beforeRemove if present
-        var stop = false;
-        if (typeof beforeRemove === "function") {
-          if (beforeRemove(docId) === false) {
-            stop = true;
-          }
-        }
-        if (!stop) {
-          afObj._collection && afObj._collection.remove(docId, function(error) {
-            if (typeof afterRemove === "function") {
-              afterRemove(error, template);
+        //call beforeRemove if present, and stop if it's false
+        if (beforeRemove && beforeRemove(docId) === false) {
+          //stopped
+        } else {
+          afObj._collection && afObj._collection.remove(docId, function(error, result) {
+            if (error) {
+              onError && onError('remove', error, template);
+            } else {
+              onSuccess && onSuccess('remove', result, template);
             }
+            afterRemove && afterRemove(error, result, template);
           });
         }
       }
@@ -487,10 +488,9 @@ if (typeof Handlebars !== 'undefined') {
       //we won't do an else here so that a method could be called in
       //addition to another action on the same submit
       if (method) {
-        //call beforeMethod if present
-        if (typeof beforeMethod === "function") {
-          // TODO: passing the method name as second argument was necessary for
-          // the old API only. Eventually can stop doing that.
+        // TODO: passing the method name as second argument was necessary for
+        // the old API only. Eventually can stop doing that.
+        if (beforeMethod) {
           insertDoc = beforeMethod(insertDoc, method);
           if (!_.isObject(insertDoc)) {
             throw new Error("beforeMethod must return an object");
@@ -499,12 +499,13 @@ if (typeof Handlebars !== 'undefined') {
 
         if (validationType === 'none' || ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
           Meteor.call(method, insertDoc, function(error, result) {
-            if (!error) {
+            if (error) {
+              onError && onError(method, error, template);
+            } else {
               template.find("form").reset();
+              onSuccess && onSuccess(method, result, template);
             }
-            if (typeof afterMethod === "function") {
-              afterMethod(error, result, template);
-            }
+            afterMethod && afterMethod(error, result, template);
           });
         }
       }
