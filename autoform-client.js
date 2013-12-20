@@ -132,23 +132,26 @@ if (typeof Meteor.Collection2 !== 'undefined') {
 
 if (typeof Handlebars !== 'undefined') {
   Handlebars.registerHelper("autoForm", function(options) {
-    options = options || {};
+    var hash = (options || {}).hash || {};
 
     //copy hash from quickForm if this is an autoForm created by the quickForm helper
-    if (options.qfHash) {
-      options = options.qfHash;
+    if (hash.qfHash) {
+      hash = hash.qfHash;
     }
 
     var schemaObj;
-    if (typeof options.schema === "string") {
-      if (!window || !window[options.schema]) {
-        throw new Error("autoForm schema " + options.schema + " is not in the window scope");
+    if (typeof hash.schema === "string") {
+      if (!window || !window[hash.schema]) {
+        throw new Error("autoForm schema " + hash.schema + " is not in the window scope");
       }
-      schemaObj = window[options.schema];
+      schemaObj = window[hash.schema];
     } else {
-      schemaObj = options.schema;
+      schemaObj = hash.schema;
     }
-    delete options.schema;
+    delete hash.schema;
+    
+    if (typeof schemaObj.simpleSchema !== "function")
+      throw new Error('autoForm schema must be an object with a "simpleSchema" method');
 
     var flatDoc;
     if (hash.doc) {
@@ -164,34 +167,42 @@ if (typeof Handlebars !== 'undefined') {
     }
 
     var autoFormContext = {
-      schema: schemaObj,
-      _doc: hash.doc,
-      _flatDoc: flatDoc
+      context: {
+        _afObj: schemaObj,
+        _ss: schemaObj.simpleSchema(),
+        _doc: hash.doc,
+        _flatDoc: flatDoc
+      }
     };
 
-    if ("doc" in options) {
-      delete options.doc;
+    if ("doc" in hash) {
+      delete hash.doc;
     }
 
-    autoFormContext.context._framework = options.framework || defaultFramework;
-    if ("framework" in options) {
-      delete options.framework;
+    autoFormContext.context._framework = hash.framework || defaultFramework;
+    if ("framework" in hash) {
+      delete hash.framework;
     }
 
-    autoFormContext.context._validationType = options.validation || "submitThenKeyup";
-    if ("validation" in options) {
-      delete options.validation;
+    autoFormContext.context._validationType = hash.validation || "submitThenKeyup";
+    if ("validation" in hash) {
+      delete hash.validation;
     }
 
     if ("onSubmit" in hash) {
       if (typeof hash.onSubmit === "function") {
-        autoFormContext.onSubmit = hash.onSubmit;
+        autoFormContext.context.onSubmit = hash.onSubmit;
         console.warn("The onSubmit helper attribute is deprecated; use myAutoForm.hooks");
       }
-      delete options.onSubmit;
+      delete hash.onSubmit;
+    }
+    
+    // This is automatically present, but we don't want it as an attribute
+    if ("__content" in hash) {
+      delete hash.__content;
     }
 
-    autoFormContext.atts = options.atts || options;
+    autoFormContext.atts = hash.atts || hash;
     //formID is used to track input selections so that they are retained
     //when the form is rerendered. If the id attribute is not provided,
     //we use a generic ID, which will usually still result in retension
@@ -199,30 +210,31 @@ if (typeof Handlebars !== 'undefined') {
     //elements (schema keys) with the same name
     autoFormContext.context._formID = autoFormContext.atts.id || "_afGenericID";
 
-    autoFormContext.content = options.fn({_ss: autoFormContext.schema.simpleSchema(), _doc: autoFormContext._doc, _flatDoc: autoFormContext._flatDoc, _formID: autoFormContext.formID, _framework: autoFormContext._framework, _templateData: this});
-
-    autoFormContext.atts = objToAttributes(atts);
-    return new Handlebars.SafeString(Template._autoForm(autoFormContext));
+    return Template._autoForm.withData(autoFormContext);
   });
 
   Handlebars.registerHelper("quickForm", function(options) {
-    options = options || {};
-    if (typeof options.schema === "string") {
-      if (!window || !window[options.schema]) {
-        throw new Error("quickForm schema " + options.schema + " is not in the window scope");
+    var hash = (options || {}).hash || {};
+
+    var schemaObj;
+    if (typeof hash.schema === "string") {
+      if (!window || !window[hash.schema]) {
+        throw new Error("quickForm schema " + hash.schema + " is not in the window scope");
       }
-      options.schema = window[options.schema];
+      schemaObj = window[hash.schema];
+    } else {
+      schemaObj = hash.schema;
     }
+    delete hash.schema;
     
-    if (!(options.schema instanceof AutoForm) && !(options.schema instanceof Meteor.Collection2)) {
-      throw new Error("quickForm schema must be an instance of AutoForm or Meteor.Collection2");
-    }
+    if (typeof schemaObj.simpleSchema !== "function")
+      throw new Error('quickForm schema must be an object with a "simpleSchema" method');
 
     var context = {
       formFields: []
     };
-    
-    _.each(hash.schema.simpleSchema().schema(), function (fieldDefs, field) {
+
+    _.each(schemaObj.simpleSchema().schema(), function(fieldDefs, field) {
       var info = {name: field};
       if (_.isArray(fieldDefs.allowedValues)) {
         info.options = "allowed";
@@ -233,11 +245,11 @@ if (typeof Handlebars !== 'undefined') {
     if ("type" in hash) {
       if (hash.type === "insert") {
         context.doInsert = true;
-      } else if (options.type === "update") {
+      } else if (hash.type === "update") {
         context.doUpdate = true;
-      } else if (options.type === "remove") {
+      } else if (hash.type === "remove") {
         context.doRemove = true;
-      } else if (options.type === "method") {
+      } else if (hash.type === "method") {
         context.doMethod = true;
         context.method = hash.method;
       } else if (hash.type === "readonly") {
@@ -245,45 +257,44 @@ if (typeof Handlebars !== 'undefined') {
       } else if (hash.type === "disabled") {
         context.isDisabled = true;
       }
-      delete options.type;
+      delete hash.type;
     }
 
-    if ("method" in options) {
-      delete options.method;
+    if ("method" in hash) {
+      delete hash.method;
     }
 
-    if ("buttonClasses" in options) {
-      context.buttonClasses = options.buttonClasses;
-      delete options.buttonClasses;
+    if ("buttonClasses" in hash) {
+      context.buttonClasses = hash.buttonClasses;
+      delete hash.buttonClasses;
     }
 
-    context.buttonContent = options.buttonContent || "Submit";
-    if ("buttonContent" in options) {
-      delete options.buttonContent;
+    context.buttonContent = hash.buttonContent || "Submit";
+    if ("buttonContent" in hash) {
+      delete hash.buttonContent;
     }
 
-    context.qfHash = options;
+    context.qfHash = hash;
+    console.log("hash", context.qfHash);
 
     return Template._quickForm.withData(context);
   });
 
-  Handlebars.registerHelper("afQuickField", function(name, options) {
-    var hash = options.hash,
-            autoform = hash.autoform || this,
-            ss = autoform._ss;
-    
+  Template._autoForm.afQuickField = function(name, options) {
+    var hash = (options || {}).hash || {};
+    var autoform = hash.autoform || this, ss = autoform._ss;
     if (!ss)
       throw new Error("afQuickField helper must be used within an autoForm block");
-    
+
     var defs = getDefs(ss, name); //defs will not be undefined
 
     //boolean type renders a check box that already has a label, so don't generate another label
-    var skipLabel = options.label === false || (defs.type === Boolean && !("select" in options) && !("radio" in options));
+    var skipLabel = hash.label === false || (defs.type === Boolean && !("select" in hash) && !("radio" in hash));
 
     //separate label options from input options; label items begin with "label-"
     var labelHash = {};
     var inputHash = {};
-    _.each(options, function(val, key) {
+    _.each(hash, function(val, key) {
       if (key.indexOf("label-") === 0) {
         key = key.substring(6);
         labelHash[key] = val;
@@ -298,66 +309,69 @@ if (typeof Handlebars !== 'undefined') {
     var context = {
       name: name,
       af: autoform,
-      useFrameworkBootstrap3: (framework === "bootstrap3")
+      skipLabel: skipLabel
     };
-
-    //add label HTML to _afQuickField template context
-    if (skipLabel) {
-      context.labelHtml = "";
-    } else {
-      context.labelHtml = createLabelHtml(name, autoform, defs, labelHash);
+    
+    console.log("af", context.af);
+    
+    switch (framework) {
+      case "bootstrap3":
+        return Template._afQuickField_Bootstrap3.withData(context);
+        
+      default:
+        return Template._afQuickField_Plain.withData(context);
     }
+  };
 
-    //add input HTML to _afQuickField template context
-    context.inputHtml = createInputHtml(name, autoform, defs, inputHash);
-
-    return new Handlebars.SafeString(Template._afQuickField(context));
-  });
-
-  Handlebars.registerHelper("afFieldMessage", function(name, options) {
-    var autoform = options.hash.autoform || this, ss = autoform._ss;
+  Template._autoForm.afFieldMessage = function(name, options) {
+    var hash = (options || {}).hash || {};
+    console.log("message", options, hash.autoform);
+    var autoform = hash.autoform || this, ss = autoform._ss;
     if (!ss)
       throw new Error("afFieldMessage helper must be used within an autoForm block");
+
     getDefs(ss, name); //for side effect of throwing errors when name is not in schema
     return ss.namedContext(autoform._formID).keyErrorMessage(name);
-  });
+  };
 
-  Handlebars.registerHelper("afFieldIsInvalid", function(name, options) {
-    var autoform = options.hash.autoform || this, ss = autoform._ss;
+  Template._autoForm.afFieldIsInvalid = function(name, options) {
+    var hash = (options || {}).hash || {};
+    console.log("isinvalid", options, hash.autoform);
+    var autoform = hash.autoform || this, ss = autoform._ss;
     if (!ss)
       throw new Error("afFieldIsInvalid helper must be used within an autoForm block");
+
     getDefs(ss, name); //for side effect of throwing errors when name is not in schema
     return ss.namedContext(autoform._formID).keyIsInvalid(name);
-  });
+  };
 
-  Handlebars.registerHelper("afFieldInput", function(name, options) {
-    var autoform = options.hash.autoform || this, ss = autoform._ss;
-    
+  Template._autoForm.afFieldInput = function(name, options) {
+    var hash = (options || {}).hash || {};
+    var autoform = hash.autoform || this, ss = autoform._ss;
     if (!ss)
       throw new Error("afFieldInput helper must be used within an autoForm block");
-    
-    var defs = getDefs(ss, name); //defs will not be undefined
-    var html = createInputHtml(name, autoform, defs, options.hash);
-    return new Handlebars.SafeString(html);
-  });
 
-  Handlebars.registerHelper("afFieldLabel", function(name, options) {
-    var autoform = options.hash.autoform || this, ss = autoform._ss;
-    
-    if (!ss)
-      throw new Error("afFieldInput helper must be used within an autoForm block");
-    
     var defs = getDefs(ss, name); //defs will not be undefined
-    var html = createLabelHtml(name, autoform, defs, options.hash);
-    return new Handlebars.SafeString(html);
-  });
+    var html = createInputHtml(name, autoform, defs, hash);
+    return Template._afInput.withData({html: html});
+  };
+
+  Template._autoForm.afFieldLabel = function(name, options) {
+    var hash = (options || {}).hash || {};
+    var autoform = hash.autoform || this, ss = autoform._ss;
+    if (!ss)
+      throw new Error("afFieldLabel helper must be used within an autoForm block");
+
+    var defs = getDefs(ss, name); //defs will not be undefined
+    var html = createLabelHtml(name, autoform, defs, hash);
+    return Template._afLabel.withData({html: html});
+  };
 
   Template._autoForm.events({
     'submit form': function(event, template) {
       var submitButton = template.find("button[type=submit]");
-      if (!submitButton) {
+      if (!submitButton)
         return;
-      }
 
       //determine what we want to do
       var isInsert = hasClass(submitButton, "insert");
@@ -366,19 +380,19 @@ if (typeof Handlebars !== 'undefined') {
       var method = submitButton.getAttribute("data-meteor-method");
 
       //init
-      var self = this;
-      var validationType = template.data.validationType;
-      var afObj = template.data.schema;
+      var self = this, context = self.context;
+      var validationType = context._validationType;
+      var afObj = context._afObj;
       if ("Collection2" in Meteor && afObj instanceof Meteor.Collection2) {
         afObj = new AutoForm(afObj);
       }
       var hooks = afObj._hooks;
-      var formId = template.data.formID;
-      var currentDoc = self._doc || null;
+      var formId = context._formID;
+      var currentDoc = context._doc || null;
       var docId = currentDoc ? currentDoc._id : null;
       var doc = formValues(template, hooks.formToDoc || afObj.formToDoc);
-      var onSubmit = hooks.onSubmit || template.data.onSubmit;
-      var ss = afObj.simpleSchema();
+      var onSubmit = hooks.onSubmit || context.onSubmit;
+      var ss = context._ss;
 
       //for inserts, delete any properties that are null, undefined, or empty strings,
       //and expand to use subdocuments instead of dot notation keys
@@ -393,12 +407,12 @@ if (typeof Handlebars !== 'undefined') {
       //pass both types of doc to onSubmit
       if (typeof onSubmit === "function") {
         if (validationType === 'none' || ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
-          var context = {
+          var onSubmitContext = {
             resetForm: function() {
               template.find("form").reset();
             }
           };
-          var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
+          var shouldContinue = onSubmit.call(onSubmitContext, insertDoc, updateDoc, currentDoc);
           if (shouldContinue === false) {
             event.preventDefault();
             return;
@@ -534,11 +548,10 @@ if (typeof Handlebars !== 'undefined') {
         validateField(event.currentTarget.getAttribute("data-schema-key"), template, false, onlyIfAlreadyInvalid);
       }
     },
-    'reset form': function(event, template) {
-      var afc2Obj = template.data.context._afc2Obj;
-      var formId = template.data.context._formID;
-      if (afc2Obj && formId) {
-        AutoForm.resetForm(formId, afc2Obj.simpleSchema());
+    'reset form': function() {
+      var self = this, context = self.context, ss = context._ss, formId = context._formID;
+      if (ss && formId) {
+        AutoForm.resetForm(formId, ss);
       }
     }
   });
@@ -1202,8 +1215,8 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
     return;
   }
 
-  var formId = template.data.formID;
-  var afObj = template.data.schema;
+  var formId = template.data.context._formID;
+  var afObj = template.data.context._afObj;
 
   //XXX for speed, should get rid of this transformation eventually
   if ("Collection2" in Meteor && afObj instanceof Meteor.Collection2) {
@@ -1314,7 +1327,7 @@ var getDefs = function(ss, name) {
   if (typeof name !== "string") {
     throw new Error("Invalid field name: (not a string)");
   }
-  
+
   var defs = ss.schema(makeGeneric(name));
   if (!defs)
     throw new Error("Invalid field name: " + name);

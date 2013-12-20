@@ -1,5 +1,5 @@
 <template name="_autoForm">
-  <form>
+  <form {{atts}}>
     {{> content data=context}}
   </form>
 </template>
@@ -8,12 +8,12 @@
   {{#autoForm qfHash=qfHash}}
   {{#each ../formFields}}
   {{#if ../../isReadOnly}}
-  {{afQuickField ../this.name autoform=../../this options=../this.options readonly=""}}
+  {{> afQuickField ../this.name autoform=../../this options=../this.options readonly=""}}
   {{else}}
   {{#if ../../../isDisabled}}
-  {{afQuickField ../../this.name autoform=../../../this options=../../this.options disabled=""}}
+  {{> afQuickField ../../this.name autoform=../../../this options=../../this.options disabled=""}}
   {{else}}
-  {{afQuickField ../../this.name autoform=../../../this options=../../this.options}}
+  {{> afQuickField ../../this.name autoform=../../../this options=../../this.options}}
   {{/if}}
   {{/if}}
   {{/each}}
@@ -34,20 +34,25 @@
   {{/autoForm}}
 </template>
 
-<template name="_afQuickField">
-  {{#if useFrameworkBootstrap3}}
-  <div class="form-group {{afHasError name autoform=./af}}">
-    {{{labelHtml}}}
-    {{{inputHtml}}}
-    <span class="help-block">{{{afFieldMessage name autoform=autoform}}}</span>
+<template name="_afQuickField_Bootstrap3">
+  <div class="form-group {{#if afFieldIsInvalid name autoform=af}}has-error{{/if}}">
+    {{#if afFieldIsInvalid name autoform=af}}has-error{{/if}}
+    {{#unless skipLabel}}
+    {{> afFieldLabel name autoform=af}}
+    {{/unless}}
+    {{> afFieldInput name autoform=af}}
+    <span class="help-block">{{{afFieldMessage name autoform=af}}}</span>
   </div>
-  {{else}}
+</template>
+
+<template name="_afQuickField_Plain">
   <div>
-    {{{labelHtml}}}
-    {{{inputHtml}}}
-    <span>{{{afFieldMessage name autoform=autoform}}}</span>
+    {{#unless skipLabel}}
+    {{> afFieldLabel name autoform=af}}
+    {{/unless}}
+    {{> afFieldInput name autoform=af}}
+    <span>{{{afFieldMessage name autoform=af}}}</span>
   </div>
-  {{/if}}
 </template>
 
 <template name="_afInput">
