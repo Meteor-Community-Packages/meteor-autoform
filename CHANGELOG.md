@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.5
+
+* Add onSuccess and onError hooks
+
 ### 0.4.4
 
 * Fix issues, introduced by 0.4.3, where select, checkbox, and radio form values
