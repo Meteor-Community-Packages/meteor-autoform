@@ -463,6 +463,14 @@ myAutoForm.hooks({
     "methodName": function(error, result, template) {}
   },
   onSubmit: function(error, result, template) {},
+
+  //called when any operation succeeds, where operation will be
+  //"insert", "update", "remove", or the method name.
+  onSuccess: function(operation, result, template) {}, 
+
+  //called when any operation fails, where operation will be
+  //"insert", "update", "remove", or the method name.
+  onError: function(operation, error, template) {},
   formToDoc: function(doc) {},
   docToForm: function(doc) {}
 });
