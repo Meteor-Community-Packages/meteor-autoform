@@ -458,8 +458,8 @@ myAutoForm.hooks({
   },
   after: {
     insert: function(error, result, template) {},
-    update: function(error, template) {},
-    remove: function(error, template) {},
+    update: function(error, result, template) {},
+    remove: function(error, result, template) {},
     "methodName": function(error, result, template) {}
   },
   onSubmit: function(error, result, template) {},
