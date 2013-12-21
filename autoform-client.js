@@ -228,6 +228,11 @@ if (typeof Handlebars !== 'undefined') {
     
     _.each(hash.schema.simpleSchema().schema(), function (fieldDefs, field) {
       var info = {name: field};
+
+      if ((fieldDefs.denyInsert && hash.type === "insert") || 
+          (fieldDefs.denyUpdate && hash.type === "update")) {
+        return;
+      }
       if (_.isArray(fieldDefs.allowedValues)) {
         info.options = "allowed";
       }
