@@ -160,9 +160,10 @@ if (typeof Handlebars !== 'undefined') {
       var mDoc = new MongoObject(hash.doc);
       flatDoc = mDoc.getFlatObject();
       mDoc = null;
+      var docToForm = schemaObj._hooks.docToForm || schemaObj.docToForm;
 
-      if (typeof schemaObj.docToForm === "function") {
-        flatDoc = schemaObj.docToForm(flatDoc);
+      if (typeof docToForm === "function") {
+        flatDoc = docToForm(flatDoc);
       }
     } else {
       flatDoc = {};
