@@ -6,9 +6,13 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.6
+
+Ensure docToForm hook is called
+
 ### 0.4.5
 
-* Add onSuccess and onError hooks
+Add onSuccess and onError hooks
 
 ### 0.4.4
 
