@@ -354,12 +354,89 @@ if (typeof Handlebars !== 'undefined') {
     return new Handlebars.SafeString(html);
   });
 
-  Handlebars.registerHelper('afNestedField',function(fieldKey){
-    var nestedFieldNames = getNestedFieldNames(fieldKey, this);
-    return nestedFieldNames;
+  Handlebars.registerHelper("eachNestedFieldButton", function(name, options) {
+    var autoform = options.hash.autoform || this, ss = autoform._ss;
+    var text = 'button';
+
+    if (!ss)
+      throw new Error("afFieldInput helper must be used within an autoForm block");
+
+    var html = createButtonHtml(name, autoform, text, options.hash);
+    return new Handlebars.SafeString(html);
+  });
+
+  Handlebars.registerHelper("eachNestedField", function(name, options) {
+
+    var sessionName = 'autoform-'+this._formID+'-'+name;
+    var fn =  options.fn, inverse = options.inverse;
+    var ret = "", nfs = {}, result = [], labels;
+    var subFields = getFieldNestedFields(name, this._ss);
+
+    result = Session.get(sessionName) || result;
+    if(!result || result.length === 0)
+      result = (this._doc && this._doc[name]) ? this._doc[name] : [];
+
+    // Rebuild flatDoc.
+    if(this._flatDoc){
+      this._flatDoc = rebuildFlatDoc(this._flatDoc, name, result);
+    }
+
+    if(this._doc && this._doc[name]){
+      this._doc[name] = result;
+    }
+
+    if(!_.isEqual(this._nestedFields, result)){
+      Session.set(sessionName, result);
+      this._nestedFields = result;
+    }
+
+    for(var i=0; i < result.length; i++) {
+      labels = {};
+      for (var idx in subFields){
+        labels[subFields[idx]] = name + '.' + i + '.' + subFields[idx];
+      }
+      labels._data = {
+        item: result[i],
+        formID: this._formID,
+        field: name,
+        idx: i
+      };
+      ret = ret + fn(labels);
+    }
+
+    return ret;
   });
 
   Template._autoForm.events({
+    'click button[data-nested-schema-op="remove"]': function(event, template) {
+      event.preventDefault();
+
+      var sessionName = 'autoform-'+this._data.formID+'-'+this._data.field;
+      var nfs = Session.get(sessionName);
+
+      nfs.splice(this._data.idx,1);
+
+      Session.set(sessionName, nfs);
+    },
+    'click button[data-nested-schema-op="create"]': function(event, template) {
+      event.preventDefault();
+
+      var name = event.target.getAttribute('data-nested-schema');
+      var sessionName = 'autoform-'+this._formID+'-'+name;
+      var nfs = Session.get(sessionName);
+      var subFields = getFieldNestedFields(name, this._ss);
+
+      var result = {};
+      for(var idx in subFields){
+        var prev = template.find("[name='"+name + '.' + (nfs.length-1) + '.' + subFields[idx]+"']");
+        if(prev)
+          nfs[nfs.length-1][subFields[idx]] = prev.value;
+        result[subFields[idx]] = "";
+      }
+
+      nfs.push(result);
+      Session.set(sessionName, nfs);
+    },
     'submit form': function(event, template) {
       var submitButton = template.find("button[type=submit]");
       if (!submitButton) {
@@ -456,6 +533,7 @@ if (typeof Handlebars !== 'undefined') {
         });
       } else if (isUpdate) {
         if (!_.isEmpty(updateDoc)) {
+
           //call beforeUpdate if present
           if (typeof beforeUpdate === "function") {
             updateDoc = beforeUpdate(docId, updateDoc);
@@ -464,7 +542,7 @@ if (typeof Handlebars !== 'undefined') {
             }
           }
 
-          afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error) {
+          afObj._collection && afObj._collection.update({_id: docId}, updateDoc, {validationContext: formId}, function(error) {
             //don't automatically reset the form for updates because we
             //often won't want that
             if (typeof afterUpdate === "function") {
@@ -590,6 +668,7 @@ if (typeof Handlebars !== 'undefined') {
 
   Template._autoForm.destroyed = function() {
     this._notInDOM = true;
+    console.log('destroy all nested fields sessions.');
   };
 }
 
@@ -1204,6 +1283,41 @@ var createLabelHtml = function(name, autoform, defs, hash) {
   var label = defs.label;
   return '<label' + objToAttributes(hash) + '>' + label + '</label>';
 };
+
+var createButtonHtml = function(name, autoform, text, hash) {
+  if ("autoform" in hash) {
+    delete hash.autoform;
+  }
+
+  var framework;
+  if ("framework" in hash) {
+    framework = hash.framework;
+    delete hash.framework;
+  } else {
+    framework = autoform._framework || defaultFramework;
+  }
+
+  if (framework === "bootstrap3") {
+    //add bootstrap's control-label class to label element
+    hash["class"] = hash["class"] ? hash["class"] + " control-label" : "control-label"; //IE<10 throws error if hash.class syntax is used
+  }
+
+  if(hash.text)
+    text = hash.text;
+
+  if(!hash.op)
+    return '';
+
+  if(hash.op === 'remove'){
+    sessionName = 'autoform-'+autoform._formID+'-'+name;
+    items = Session.get(sessionName) || [];
+    if(items.length === 1)
+      return '';
+  }
+
+  return '<button' + objToAttributes(hash) + ' data-nested-schema-op="'+hash.op+'" data-nested-schema="' + name + '">' + text + '</button>';
+};
+
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   if (!template || template._notInDOM) {
     return;
@@ -1302,7 +1416,7 @@ var docToModifier = function(doc) {
   doc = cleanNulls(doc);
 
   if (!_.isEmpty(doc)) {
-    updateObj.$set = doc;
+    updateObj.$set = mongoFlatToObject(doc);
   }
   if (!_.isEmpty(nulls)) {
     updateObj.$unset = nulls;
@@ -1328,30 +1442,48 @@ var getDefs = function(ss, name) {
   return defs;
 };
 
-var getNestedFieldNames = function (fieldKey, schema) {
+var mongoFlatToObject = function(doc){
+  var result = {};
 
-  var fieldNames = [],
-    fields = [],
-    doc = schema._doc,
-    schemaKeys = schema._ss._schemaKeys,
-    count = 0;
+  _.each(doc, function(value, key){
+    var segments = key.split('.');
 
-  for (var key in schemaKeys) {
-    if (schemaKeys[key].indexOf(fieldKey + '.$.') !== -1)
-      fields.push(schemaKeys[key].replace(fieldKey + '.$.', ''));
-  }
-
-  if (fields && doc && doc[fieldKey]) {
-    count = (doc[fieldKey].length > 0) ? doc[fieldKey].length-1 : 1;
-  }
-
-  for(var i = 0; i <= count; i++){
-    var row = [];
-    for (var field in fields) {
-      row[fields[field]] = fieldKey + '.' + i + '.' + fields[field];
+    if(segments.length === 1){
+      result[key] = value;
+    }else{
+      result[segments[0]] = result[segments[0]] || [];
+      result[segments[0]][segments[1]] = result[segments[0]][segments[1]] || {};
+      result[segments[0]][segments[1]][segments[2]] = value;
     }
-    fieldNames.push(row);
+  });
+
+  return result;
+};
+
+var getFieldNestedFields = function(fieldKey, schema){
+  var fields = [];
+  for (var key in schema._schemaKeys) {
+    if (schema._schemaKeys[key].indexOf(fieldKey + '.$.') !== -1)
+      fields.push(schema._schemaKeys[key].replace(fieldKey + '.$.', ''));
+  }
+  return fields;
+};
+
+var rebuildFlatDoc = function(flatDoc, fieldKey, items){
+  var omit = [];
+  for (var key in flatDoc){
+    if(key.indexOf(fieldKey+'.') !== -1)
+      omit.push(key);
   }
 
-  return fieldNames;
+  var nfUpdated = {};
+  nfUpdated[fieldKey] = items;
+
+  var mDoc = new MongoObject(nfUpdated);
+  var newFlatDoc = mDoc.getFlatObject();
+  mDoc = null;
+
+  var updatedDoc = _.extend(_.omit(flatDoc, omit), newFlatDoc);
+
+  return updatedDoc;
 };
