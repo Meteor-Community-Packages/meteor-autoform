@@ -155,6 +155,11 @@ if (typeof Handlebars !== 'undefined') {
     }
     delete hash.schema;
 
+    // Allow passing a Collection2 as the schema, but wrap in AutoForm
+    if ("Collection2" in Meteor && schemaObj instanceof Meteor.Collection2) {
+      schemaObj = new AutoForm(schemaObj);
+    }
+
     var flatDoc;
     if (hash.doc) {
       var mDoc = new MongoObject(hash.doc);
@@ -226,8 +231,8 @@ if (typeof Handlebars !== 'undefined') {
     var context = {
       formFields: []
     };
-    
-    _.each(hash.schema.simpleSchema().schema(), function (fieldDefs, field) {
+
+    _.each(hash.schema.simpleSchema().schema(), function(fieldDefs, field) {
       var info = {name: field};
       if (_.isArray(fieldDefs.allowedValues)) {
         info.options = "allowed";
@@ -276,10 +281,10 @@ if (typeof Handlebars !== 'undefined') {
     var hash = options.hash,
             autoform = hash.autoform || this,
             ss = autoform._ss;
-    
+
     if (!ss)
       throw new Error("afQuickField helper must be used within an autoForm block");
-    
+
     var defs = getDefs(ss, name); //defs will not be undefined
 
     //boolean type renders a check box that already has a label, so don't generate another label
@@ -337,10 +342,10 @@ if (typeof Handlebars !== 'undefined') {
 
   Handlebars.registerHelper("afFieldInput", function(name, options) {
     var autoform = options.hash.autoform || this, ss = autoform._ss;
-    
+
     if (!ss)
       throw new Error("afFieldInput helper must be used within an autoForm block");
-    
+
     var defs = getDefs(ss, name); //defs will not be undefined
     var html = createInputHtml(name, autoform, defs, options.hash);
     return new Handlebars.SafeString(html);
@@ -348,10 +353,10 @@ if (typeof Handlebars !== 'undefined') {
 
   Handlebars.registerHelper("afFieldLabel", function(name, options) {
     var autoform = options.hash.autoform || this, ss = autoform._ss;
-    
+
     if (!ss)
       throw new Error("afFieldInput helper must be used within an autoForm block");
-    
+
     var defs = getDefs(ss, name); //defs will not be undefined
     var html = createLabelHtml(name, autoform, defs, options.hash);
     return new Handlebars.SafeString(html);
@@ -374,9 +379,6 @@ if (typeof Handlebars !== 'undefined') {
       var self = this;
       var validationType = template.data.validationType;
       var afObj = template.data.schema;
-      if ("Collection2" in Meteor && afObj instanceof Meteor.Collection2) {
-        afObj = new AutoForm(afObj);
-      }
       var hooks = afObj._hooks;
       var formId = template.data.formID;
       var currentDoc = self._doc || null;
@@ -1318,7 +1320,7 @@ var getDefs = function(ss, name) {
   if (typeof name !== "string") {
     throw new Error("Invalid field name: (not a string)");
   }
-  
+
   var defs = ss.schema(makeGeneric(name));
   if (!defs)
     throw new Error("Invalid field name: " + name);
