@@ -6,6 +6,14 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.7
+
+* quickForm no longer displays fields for denyInsert or denyUpdate keys when
+building an insert or update form, respectively.
+* Fix an issue with being able to pass a Collection2 as the autoForm schema.
+(This is not recommended anyway.)
+* Automatically disable the submit button while submitting an autoform.
+
 ### 0.4.6
 
 Ensure docToForm hook is called
