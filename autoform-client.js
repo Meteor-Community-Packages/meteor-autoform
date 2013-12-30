@@ -373,6 +373,8 @@ if (typeof Handlebars !== 'undefined') {
       if (!submitButton) {
         return;
       }
+      
+      submitButton.disabled = true;
 
       //determine what we want to do
       var isInsert = hasClass(submitButton, "insert");
@@ -413,6 +415,7 @@ if (typeof Handlebars !== 'undefined') {
           var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
           if (shouldContinue === false) {
             event.preventDefault();
+            submitButton.disabled = false;
             return;
           }
         }
@@ -423,6 +426,7 @@ if (typeof Handlebars !== 'undefined') {
         if (validationType !== 'none' && !ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
           event.preventDefault(); //don't submit the form if invalid
         }
+        submitButton.disabled = false;
         return;
       }
 
@@ -456,6 +460,7 @@ if (typeof Handlebars !== 'undefined') {
             onSuccess && onSuccess('insert', result, template);
           }
           afterInsert && afterInsert(error, result, template);
+          submitButton.disabled = false;
         });
       } else if (isUpdate) {
         if (!_.isEmpty(updateDoc)) {
@@ -475,12 +480,14 @@ if (typeof Handlebars !== 'undefined') {
               onSuccess && onSuccess('update', result, template);
             }
             afterUpdate && afterUpdate(error, result, template);
+            submitButton.disabled = false;
           });
         }
       } else if (isRemove) {
         //call beforeRemove if present, and stop if it's false
         if (beforeRemove && beforeRemove(docId) === false) {
           //stopped
+          submitButton.disabled = false;
         } else {
           afObj._collection && afObj._collection.remove(docId, function(error, result) {
             if (error) {
@@ -489,6 +496,7 @@ if (typeof Handlebars !== 'undefined') {
               onSuccess && onSuccess('remove', result, template);
             }
             afterRemove && afterRemove(error, result, template);
+            submitButton.disabled = false;
           });
         }
       }
@@ -514,7 +522,10 @@ if (typeof Handlebars !== 'undefined') {
               onSuccess && onSuccess(method, result, template);
             }
             afterMethod && afterMethod(error, result, template);
+            submitButton.disabled = false;
           });
+        } else {
+          submitButton.disabled = false;
         }
       }
     },
