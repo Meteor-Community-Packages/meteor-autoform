@@ -351,12 +351,12 @@ if (typeof Handlebars !== 'undefined') {
     if (!ss)
       throw new Error("afFieldInput helper must be used within an autoForm block");
 
-    if(this._values && this._values[name])
-      options.hash.value = this._values[name];
-
     //@todo: do this recursively.
     if(name.indexOf('.$.') !== -1)
       name = name.replace('$', this._index);
+
+    if(this._values && this._values[name])
+      options.hash.value = this._values[name];
 
     var defs = getDefs(ss, name); //defs will not be undefined
     var html = createInputHtml(name, autoform, defs, options.hash);
@@ -403,7 +403,7 @@ if (typeof Handlebars !== 'undefined') {
       nestedFields[name]._values = (autoform._doc && autoform._doc[name]) ? autoform._doc[name] : [];
 
     if(autoform._doc && nestedFields[name]){
-      autoform._doc[name] = (_.isArray(nestedFields[name]._values)) ? nestedFields[name]._values : [];
+      autoform._doc[name] = _.isArray(nestedFields[name]._values) ? nestedFields[name]._values : [];
 
       mDoc = new MongoObject(autoform._doc);
       autoform._flatDoc = mDoc.getFlatObject();
@@ -439,16 +439,7 @@ if (typeof Handlebars !== 'undefined') {
       var hooks = afObj._hooks;
       var doc = formValues(template, hooks.formToDoc || afObj.formToDoc);
       var self = this;
-
-      //This is a workaround extension for what seems to be a
-      //Meteor issue for select elements.
-      if(autoformSelections[template.data.formID]){
-        var selectKeys = _.keys(autoformSelections[template.data.formID]);
-        var selectKeysFiltered = _.filter(selectKeys, function(selectKey){ return selectKey.indexOf(self._target) !== -1; });
-        _.each(selectKeysFiltered, function(k){
-          delete autoformSelections[template.data.formID][k];
-        });
-      }
+      var deletedKey = '';
 
       doc = expandObj(doc);
 
@@ -456,6 +447,23 @@ if (typeof Handlebars !== 'undefined') {
         doc[name] = [];
 
       doc[name].splice(this._index, 1);
+
+      if(autoformSelections[template.data.formID]){
+        var selectKeys = _.keys(autoformSelections[template.data.formID]);
+        var selectKeysFiltered = _.filter(selectKeys, function(selectKey){ return selectKey.indexOf(self._target) !== -1; });
+        var removeSelected = _.difference(selectKeys, selectKeysFiltered);
+        var selectNestedFields = {};
+
+        _.each(doc[name], function(field, i){
+          _.each(field, function(v, k){
+            var key = name+'.'+i+'.'+k;
+            if(_.indexOf(selectKeysFiltered, key) !== -1)
+              selectNestedFields[key] = field[k];
+          });
+        });
+        autoformSelections[template.data.formID] = _.pick(autoformSelections[template.data.formID], removeSelected);
+        autoformSelections[template.data.formID] = _.extend(autoformSelections[template.data.formID], selectNestedFields);
+      }
 
       nestedFields[name]._values = (doc[name].length) ? doc[name] : -1;
       nestedFields[name]._deps.changed();
@@ -686,32 +694,12 @@ if (typeof Handlebars !== 'undefined') {
   //This means that selected is not updated properly even if the selected
   //attribute is on the element.
   Template._autoForm.rendered = function() {
-    //using autoformSelections is only necessary when the form is invalid, and will
-    //cause problems if done when the form is valid, but we still have
-    //to transfer the selected attribute to the selected property when
-    //the form is valid, to make sure current values show correctly for
-    //an update form
-    var self = this, formID = self.data.formID;
-    var selections = getSelections(formID);
-
-    _.each(self.findAll("select"), function(selectElement) {
-      var key = selectElement.getAttribute('data-schema-key');
-
-      if(selectElement.getAttribute('multiple') !== null){
-        _.each(selectElement.options, function(option, i) {
-          option.selected = option.hasAttribute("selected");
-          if(selections){
-            if (selections[key] && selections[key].length) {
-              option.selected = _.contains(selections[key], option.value);
-            }
-          }
-        });
-        setSelections(selectElement, formID);
-      }
-    });
+    setSelected(this);
   };
 
   Template._autoForm.destroyed = function() {
+    nestedFields = {};
+    autoformSelections = {};
     this._notInDOM = true;
   };
 }
@@ -1386,6 +1374,35 @@ var validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
 };
 
 var autoformSelections = {};
+
+//using autoformSelections is only necessary when the form is invalid, and will
+//cause problems if done when the form is valid, but we still have
+//to transfer the selected attribute to the selected property when
+//the form is valid, to make sure current values show correctly for
+//an update form
+// var self = this, formID = self.data.formID;
+// var selections = getSelections(formID);
+var setSelected = function(template){
+    var self = template, formID = self.data.formID;
+    var selections = getSelections(formID);
+
+  _.each(self.findAll("select"), function(selectElement) {
+    var key = selectElement.getAttribute('data-schema-key');
+
+    if(selectElement.getAttribute('multiple') !== null){
+      _.each(selectElement.options, function(option, i) {
+        option.selected = option.hasAttribute("selected");
+        if(selections){
+          if (selections[key] && selections[key].length) {
+            option.selected = _.contains(selections[key], option.value) ? true : false;
+          }
+        }
+      });
+      setSelections(selectElement, formID);
+    }
+  });
+};
+
 var setSelections = function(select, formID) {
   var key = select.getAttribute('data-schema-key');
   if (!key) {
