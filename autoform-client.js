@@ -19,7 +19,9 @@ AutoForm = function(schema) {
     },
     formToDoc: null,
     docToForm: null,
-    onSubmit: null
+    onSubmit: null,
+    onSuccess: null,
+    onError: null
   };
 
   // DEPRECATED TODO: remove everything after this point
@@ -153,14 +155,20 @@ if (typeof Handlebars !== 'undefined') {
     }
     delete hash.schema;
 
+    // Allow passing a Collection2 as the schema, but wrap in AutoForm
+    if ("Collection2" in Meteor && schemaObj instanceof Meteor.Collection2) {
+      schemaObj = new AutoForm(schemaObj);
+    }
+
     var flatDoc;
     if (hash.doc) {
       var mDoc = new MongoObject(hash.doc);
       flatDoc = mDoc.getFlatObject();
       mDoc = null;
+      var docToForm = schemaObj._hooks.docToForm || schemaObj.docToForm;
 
-      if (typeof schemaObj.docToForm === "function") {
-        flatDoc = schemaObj.docToForm(flatDoc);
+      if (typeof docToForm === "function") {
+        flatDoc = docToForm(flatDoc);
       }
     } else {
       flatDoc = {};
@@ -224,8 +232,13 @@ if (typeof Handlebars !== 'undefined') {
       formFields: []
     };
 
-    _.each(hash.schema.simpleSchema().schema(), function (fieldDefs, field) {
+    _.each(hash.schema.simpleSchema().schema(), function(fieldDefs, field) {
       var info = {name: field};
+
+      if ((fieldDefs.denyInsert && hash.type === "insert") ||
+          (fieldDefs.denyUpdate && hash.type === "update")) {
+        return;
+      }
       if (_.isArray(fieldDefs.allowedValues)) {
         info.options = "allowed";
       }
@@ -338,6 +351,13 @@ if (typeof Handlebars !== 'undefined') {
     if (!ss)
       throw new Error("afFieldInput helper must be used within an autoForm block");
 
+    if(this._values && this._values[name])
+      options.hash.value = this._values[name];
+
+    //@todo: do this recursively.
+    if(name.indexOf('.$.') !== -1)
+      name = name.replace('$', this._index);
+
     var defs = getDefs(ss, name); //defs will not be undefined
     var html = createInputHtml(name, autoform, defs, options.hash);
     return new Handlebars.SafeString(html);
@@ -354,94 +374,117 @@ if (typeof Handlebars !== 'undefined') {
     return new Handlebars.SafeString(html);
   });
 
-  Handlebars.registerHelper("eachNestedFieldButton", function(name, options) {
+
+  Handlebars.registerHelper("eachNestedField", function(name, options, c) {
     var autoform = options.hash.autoform || this, ss = autoform._ss;
-    var text = 'button';
+    var fn =  options.fn, inverse = options.inverse;
+    var defs, ret = "", rows = [], field = {}, data = {};
 
     if (!ss)
-      throw new Error("afFieldInput helper must be used within an autoForm block");
+      throw new Error("eachNestedField helper must be used within an autoForm block");
 
-    var html = createButtonHtml(name, autoform, text, options.hash);
-    return new Handlebars.SafeString(html);
-  });
+    defs = getDefs(ss, name); //defs will not be undefined
+    if(!_.isArray(defs.type))
+      throw new Error("eachNestedField helper must be used for fields with nested schemas");
 
-  Handlebars.registerHelper("eachNestedField", function(name, options) {
+    if(!nestedFields[name])
+      nestedFields[name] = {};
 
-    var sessionName = 'autoform-'+this._formID+'-'+name;
-    var fn =  options.fn, inverse = options.inverse;
-    var ret = "", nfs = {}, result = [], labels;
-    var subFields = getFieldNestedFields(name, this._ss);
-
-    result = Session.get(sessionName) || result;
-    if(!result || result.length === 0)
-      result = (this._doc && this._doc[name]) ? this._doc[name] : [];
-
-    // Rebuild flatDoc.
-    if(this._flatDoc){
-      this._flatDoc = rebuildFlatDoc(this._flatDoc, name, result);
+    if(!nestedFields[name]._deps){
+      nestedFields[name]._deps = new Deps.Dependency();
     }
 
-    if(this._doc && this._doc[name]){
-      this._doc[name] = result;
+    Deps.depend(nestedFields[name]._deps);
+
+    if(!nestedFields[name]._values)
+       nestedFields[name]._values = [];
+
+    if(nestedFields[name]._values.length === 0)
+      nestedFields[name]._values = (autoform._doc && autoform._doc[name]) ? autoform._doc[name] : [];
+
+    if(autoform._doc && nestedFields[name]){
+      autoform._doc[name] = (_.isArray(nestedFields[name]._values)) ? nestedFields[name]._values : [];
+
+      mDoc = new MongoObject(autoform._doc);
+      autoform._flatDoc = mDoc.getFlatObject();
     }
 
-    if(!_.isEqual(this._nestedFields, result)){
-      Session.set(sessionName, result);
-      this._nestedFields = result;
-    }
+    if(_.isArray(nestedFields[name]._values)){
+      _.each(nestedFields[name]._values, function(value, i){
 
-    for(var i=0; i < result.length; i++) {
-      labels = {};
-      for (var idx in subFields){
-        labels[subFields[idx]] = name + '.' + i + '.' + subFields[idx];
-      }
-      labels._data = {
-        item: result[i],
-        formID: this._formID,
-        field: name,
-        idx: i
-      };
-      ret = ret + fn(labels);
+        rows[i] = _.extend(_.omit(autoform, '_templateData'), {
+          _index: i,
+          _target: name,
+          _values: {},
+        });
+
+        for (var idx in nestedFields[name]._values[i]){
+          var key = name + "." + i + "." + idx;
+          rows[i]._values[key] = nestedFields[name]._values[i][idx];
+        }
+
+        ret = ret + fn(rows[i]);
+      });
     }
 
     return ret;
   });
 
   Template._autoForm.events({
-    'click button[data-nested-schema-op="remove"]': function(event, template) {
+    'click button.nf-remove': function(event, template) {
       event.preventDefault();
 
-      var sessionName = 'autoform-'+this._data.formID+'-'+this._data.field;
-      var nfs = Session.get(sessionName);
+      var name = this._target;
+      var afObj = template.data.schema;
+      var hooks = afObj._hooks;
+      var doc = formValues(template, hooks.formToDoc || afObj.formToDoc);
+      var self = this;
 
-      nfs.splice(this._data.idx,1);
-
-      Session.set(sessionName, nfs);
-    },
-    'click button[data-nested-schema-op="create"]': function(event, template) {
-      event.preventDefault();
-
-      var name = event.target.getAttribute('data-nested-schema');
-      var sessionName = 'autoform-'+this._formID+'-'+name;
-      var nfs = Session.get(sessionName);
-      var subFields = getFieldNestedFields(name, this._ss);
-
-      var result = {};
-      for(var idx in subFields){
-        var prev = template.find("[name='"+name + '.' + (nfs.length-1) + '.' + subFields[idx]+"']");
-        if(prev)
-          nfs[nfs.length-1][subFields[idx]] = prev.value;
-        result[subFields[idx]] = "";
+      //This is a workaround extension for what seems to be a
+      //Meteor issue for select elements.
+      if(autoformSelections[template.data.formID]){
+        var selectKeys = _.keys(autoformSelections[template.data.formID]);
+        var selectKeysFiltered = _.filter(selectKeys, function(selectKey){ return selectKey.indexOf(self._target) !== -1; });
+        _.each(selectKeysFiltered, function(k){
+          delete autoformSelections[template.data.formID][k];
+        });
       }
 
-      nfs.push(result);
-      Session.set(sessionName, nfs);
+      doc = expandObj(doc);
+
+      if(!doc[name])
+        doc[name] = [];
+
+      doc[name].splice(this._index, 1);
+
+      nestedFields[name]._values = (doc[name].length) ? doc[name] : -1;
+      nestedFields[name]._deps.changed();
+    },
+    'click button.nf-add': function(event, template) {
+      event.preventDefault();
+
+      var name = event.target.getAttribute('data-nf');
+      var afObj = template.data.schema;
+      var hooks = afObj._hooks;
+      var doc = formValues(template, hooks.formToDoc || afObj.formToDoc);
+
+      doc = expandObj(doc);
+
+      if(!doc[name])
+        doc[name] = [];
+
+      doc[name].push(getEmptyObject(name, this._ss._schemaKeys));
+
+      nestedFields[name]._values = doc[name];
+      nestedFields[name]._deps.changed();
     },
     'submit form': function(event, template) {
       var submitButton = template.find("button[type=submit]");
       if (!submitButton) {
         return;
       }
+
+      submitButton.disabled = true;
 
       //determine what we want to do
       var isInsert = hasClass(submitButton, "insert");
@@ -453,9 +496,6 @@ if (typeof Handlebars !== 'undefined') {
       var self = this;
       var validationType = template.data.validationType;
       var afObj = template.data.schema;
-      if ("Collection2" in Meteor && afObj instanceof Meteor.Collection2) {
-        afObj = new AutoForm(afObj);
-      }
       var hooks = afObj._hooks;
       var formId = template.data.formID;
       var currentDoc = self._doc || null;
@@ -468,7 +508,14 @@ if (typeof Handlebars !== 'undefined') {
       //and expand to use subdocuments instead of dot notation keys
       var insertDoc = expandObj(cleanNulls(doc));
       //for updates, convert to modifier object with $set and $unset
-      var updateDoc = docToModifier(doc);
+      var updateDoc = expandObj(doc);
+      if(nestedFields){
+        _.each(nestedFields, function(v, k){
+          if(!_.isArray(v._values) || v._values.length === 0)
+            updateDoc[k] = [];
+        });
+      }
+      updateDoc = docToModifier(updateDoc);
 
       if (isInsert || isUpdate || isRemove || method) {
         event.preventDefault(); //prevent default here if we're planning to do our own thing
@@ -485,6 +532,7 @@ if (typeof Handlebars !== 'undefined') {
           var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
           if (shouldContinue === false) {
             event.preventDefault();
+            submitButton.disabled = false;
             return;
           }
         }
@@ -495,6 +543,7 @@ if (typeof Handlebars !== 'undefined') {
         if (validationType !== 'none' && !ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
           event.preventDefault(); //don't submit the form if invalid
         }
+        submitButton.disabled = false;
         return;
       }
 
@@ -503,66 +552,66 @@ if (typeof Handlebars !== 'undefined') {
       var beforeInsert = hooks.before.insert || afObj.beforeInsert;
       var beforeUpdate = hooks.before.update || afObj.beforeUpdate;
       var beforeRemove = hooks.before.remove || afObj.beforeRemove;
-      var beforeMethod = method && hooks.before[method];
-      beforeMethod = beforeMethod || afObj.beforeMethod;
+      var beforeMethod = method && (hooks.before[method] || afObj.beforeMethod);
       var afterInsert = hooks.after.insert || afObj._callbacks.insert;
       var afterUpdate = hooks.after.update || afObj._callbacks.update;
       var afterRemove = hooks.after.remove || afObj._callbacks.remove;
-      var afterMethod;
-      if (method) {
-        afterMethod = hooks.after[method] || afObj._callbacks[method];
-      }
+      var afterMethod = method && (hooks.after[method] || afObj._callbacks[method]);
+      var onSuccess = hooks.onSuccess;
+      var onError = hooks.onError;
 
       //do it
       if (isInsert) {
-        //call beforeInsert if present
-        if (typeof beforeInsert === "function") {
+        if (beforeInsert) {
           insertDoc = beforeInsert(insertDoc);
           if (!_.isObject(insertDoc)) {
             throw new Error("beforeInsert must return an object");
           }
         }
-
         afObj._collection && afObj._collection.insert(insertDoc, {validationContext: formId}, function(error, result) {
-          if (!error) {
+          if (error) {
+            onError && onError('insert', error, template);
+          } else {
             template.find("form").reset();
+            onSuccess && onSuccess('insert', result, template);
           }
-          if (typeof afterInsert === "function") {
-            afterInsert(error, result, template);
-          }
+          afterInsert && afterInsert(error, result, template);
+          submitButton.disabled = false;
         });
       } else if (isUpdate) {
         if (!_.isEmpty(updateDoc)) {
-
-          //call beforeUpdate if present
-          if (typeof beforeUpdate === "function") {
+          if (beforeUpdate) {
             updateDoc = beforeUpdate(docId, updateDoc);
             if (!_.isObject(updateDoc)) {
               throw new Error("beforeUpdate must return an object");
             }
           }
-
-          afObj._collection && afObj._collection.update({_id: docId}, updateDoc, {validationContext: formId}, function(error) {
+          afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error, result) {
             //don't automatically reset the form for updates because we
             //often won't want that
-            if (typeof afterUpdate === "function") {
-              afterUpdate(error, template);
+            if (error) {
+              onError && onError('update', error, template);
+            } else {
+              onSuccess && onSuccess('update', result, template);
             }
+            afterUpdate && afterUpdate(error, result, template);
+            submitButton.disabled = false;
           });
         }
       } else if (isRemove) {
-        //call beforeRemove if present
-        var stop = false;
-        if (typeof beforeRemove === "function") {
-          if (beforeRemove(docId) === false) {
-            stop = true;
-          }
-        }
-        if (!stop) {
-          afObj._collection && afObj._collection.remove(docId, function(error) {
-            if (typeof afterRemove === "function") {
-              afterRemove(error, template);
+        //call beforeRemove if present, and stop if it's false
+        if (beforeRemove && beforeRemove(docId) === false) {
+          //stopped
+          submitButton.disabled = false;
+        } else {
+          afObj._collection && afObj._collection.remove(docId, function(error, result) {
+            if (error) {
+              onError && onError('remove', error, template);
+            } else {
+              onSuccess && onSuccess('remove', result, template);
             }
+            afterRemove && afterRemove(error, result, template);
+            submitButton.disabled = false;
           });
         }
       }
@@ -570,10 +619,9 @@ if (typeof Handlebars !== 'undefined') {
       //we won't do an else here so that a method could be called in
       //addition to another action on the same submit
       if (method) {
-        //call beforeMethod if present
-        if (typeof beforeMethod === "function") {
-          // TODO: passing the method name as second argument was necessary for
-          // the old API only. Eventually can stop doing that.
+        // TODO: passing the method name as second argument was necessary for
+        // the old API only. Eventually can stop doing that.
+        if (beforeMethod) {
           insertDoc = beforeMethod(insertDoc, method);
           if (!_.isObject(insertDoc)) {
             throw new Error("beforeMethod must return an object");
@@ -582,13 +630,17 @@ if (typeof Handlebars !== 'undefined') {
 
         if (validationType === 'none' || ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
           Meteor.call(method, insertDoc, function(error, result) {
-            if (!error) {
+            if (error) {
+              onError && onError(method, error, template);
+            } else {
               template.find("form").reset();
+              onSuccess && onSuccess(method, result, template);
             }
-            if (typeof afterMethod === "function") {
-              afterMethod(error, result, template);
-            }
+            afterMethod && afterMethod(error, result, template);
+            submitButton.disabled = false;
           });
+        } else {
+          submitButton.disabled = false;
         }
       }
     },
@@ -641,34 +693,26 @@ if (typeof Handlebars !== 'undefined') {
     //an update form
     var self = this, formID = self.data.formID;
     var selections = getSelections(formID);
-    if (!selections) {
-      _.each(self.findAll("select"), function(selectElement) {
-        _.each(selectElement.options, function(option) {
-          option.selected = option.hasAttribute("selected"); //transfer att to prop
-        });
-        setSelections(selectElement, formID);
-      });
-      return;
-    }
-    if (!selections) {
-      return;
-    }
+
     _.each(self.findAll("select"), function(selectElement) {
       var key = selectElement.getAttribute('data-schema-key');
-      var selectedValues = selections[key];
-      if (selectedValues && selectedValues.length) {
-        _.each(selectElement.options, function(option) {
-          if (_.contains(selectedValues, option.value)) {
-            option.selected = true;
+
+      if(selectElement.getAttribute('multiple') !== null){
+        _.each(selectElement.options, function(option, i) {
+          option.selected = option.hasAttribute("selected");
+          if(selections){
+            if (selections[key] && selections[key].length) {
+              option.selected = _.contains(selections[key], option.value);
+            }
           }
         });
+        setSelections(selectElement, formID);
       }
     });
   };
 
   Template._autoForm.destroyed = function() {
     this._notInDOM = true;
-    console.log('destroy all nested fields sessions.');
   };
 }
 
@@ -1283,41 +1327,6 @@ var createLabelHtml = function(name, autoform, defs, hash) {
   var label = defs.label;
   return '<label' + objToAttributes(hash) + '>' + label + '</label>';
 };
-
-var createButtonHtml = function(name, autoform, text, hash) {
-  if ("autoform" in hash) {
-    delete hash.autoform;
-  }
-
-  var framework;
-  if ("framework" in hash) {
-    framework = hash.framework;
-    delete hash.framework;
-  } else {
-    framework = autoform._framework || defaultFramework;
-  }
-
-  if (framework === "bootstrap3") {
-    //add bootstrap's control-label class to label element
-    hash["class"] = hash["class"] ? hash["class"] + " control-label" : "control-label"; //IE<10 throws error if hash.class syntax is used
-  }
-
-  if(hash.text)
-    text = hash.text;
-
-  if(!hash.op)
-    return '';
-
-  if(hash.op === 'remove'){
-    sessionName = 'autoform-'+autoform._formID+'-'+name;
-    items = Session.get(sessionName) || [];
-    if(items.length === 1)
-      return '';
-  }
-
-  return '<button' + objToAttributes(hash) + ' data-nested-schema-op="'+hash.op+'" data-nested-schema="' + name + '">' + text + '</button>';
-};
-
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   if (!template || template._notInDOM) {
     return;
@@ -1416,7 +1425,7 @@ var docToModifier = function(doc) {
   doc = cleanNulls(doc);
 
   if (!_.isEmpty(doc)) {
-    updateObj.$set = mongoFlatToObject(doc);
+    updateObj.$set = doc;
   }
   if (!_.isEmpty(nulls)) {
     updateObj.$unset = nulls;
@@ -1442,48 +1451,17 @@ var getDefs = function(ss, name) {
   return defs;
 };
 
-var mongoFlatToObject = function(doc){
-  var result = {};
-
-  _.each(doc, function(value, key){
-    var segments = key.split('.');
-
-    if(segments.length === 1){
-      result[key] = value;
-    }else{
-      result[segments[0]] = result[segments[0]] || [];
-      result[segments[0]][segments[1]] = result[segments[0]][segments[1]] || {};
-      result[segments[0]][segments[1]][segments[2]] = value;
-    }
-  });
-
-  return result;
+var getEmptyObject = function(name, schemaKeys){
+    var result = {};
+    _.each(schemaKeys, function(key, i){
+      if(key.indexOf(name+'.$.') !== -1){
+        var segments = key.split('.$.');
+        if(segments.length === 2){
+          result[segments[1]] = '';
+        }
+      }
+    });
+    return result;
 };
 
-var getFieldNestedFields = function(fieldKey, schema){
-  var fields = [];
-  for (var key in schema._schemaKeys) {
-    if (schema._schemaKeys[key].indexOf(fieldKey + '.$.') !== -1)
-      fields.push(schema._schemaKeys[key].replace(fieldKey + '.$.', ''));
-  }
-  return fields;
-};
-
-var rebuildFlatDoc = function(flatDoc, fieldKey, items){
-  var omit = [];
-  for (var key in flatDoc){
-    if(key.indexOf(fieldKey+'.') !== -1)
-      omit.push(key);
-  }
-
-  var nfUpdated = {};
-  nfUpdated[fieldKey] = items;
-
-  var mDoc = new MongoObject(nfUpdated);
-  var newFlatDoc = mDoc.getFlatObject();
-  mDoc = null;
-
-  var updatedDoc = _.extend(_.omit(flatDoc, omit), newFlatDoc);
-
-  return updatedDoc;
-};
+var nestedFields = {};
