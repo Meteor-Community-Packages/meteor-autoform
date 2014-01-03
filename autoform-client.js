@@ -19,7 +19,9 @@ AutoForm = function(schema) {
     },
     formToDoc: null,
     docToForm: null,
-    onSubmit: null
+    onSubmit: null,
+    onSuccess: null,
+    onError: null
   };
 
   // DEPRECATED TODO: remove everything after this point
@@ -149,7 +151,12 @@ if (typeof Handlebars !== 'undefined') {
       schemaObj = hash.schema;
     }
     delete hash.schema;
-    
+
+    // Allow passing a Collection2 as the schema, but wrap in AutoForm
+    if ("Collection2" in Meteor && schemaObj instanceof Meteor.Collection2) {
+      schemaObj = new AutoForm(schemaObj);
+    }
+
     if (typeof schemaObj.simpleSchema !== "function")
       throw new Error('autoForm schema must be an object with a "simpleSchema" method');
 
@@ -158,9 +165,10 @@ if (typeof Handlebars !== 'undefined') {
       var mDoc = new MongoObject(hash.doc);
       flatDoc = mDoc.getFlatObject();
       mDoc = null;
+      var docToForm = schemaObj._hooks.docToForm || schemaObj.docToForm;
 
-      if (typeof schemaObj.docToForm === "function") {
-        flatDoc = schemaObj.docToForm(flatDoc);
+      if (typeof docToForm === "function") {
+        flatDoc = docToForm(flatDoc);
       }
     } else {
       flatDoc = {};
@@ -196,7 +204,7 @@ if (typeof Handlebars !== 'undefined') {
       }
       delete hash.onSubmit;
     }
-    
+
     // This is automatically present, but we don't want it as an attribute
     if ("__content" in hash) {
       delete hash.__content;
@@ -226,7 +234,7 @@ if (typeof Handlebars !== 'undefined') {
       schemaObj = hash.schema;
     }
     delete hash.schema;
-    
+
     if (typeof schemaObj.simpleSchema !== "function")
       throw new Error('quickForm schema must be an object with a "simpleSchema" method');
 
@@ -236,6 +244,11 @@ if (typeof Handlebars !== 'undefined') {
 
     _.each(schemaObj.simpleSchema().schema(), function(fieldDefs, field) {
       var info = {name: field};
+
+      if ((fieldDefs.denyInsert && hash.type === "insert") ||
+              (fieldDefs.denyUpdate && hash.type === "update")) {
+        return;
+      }
       if (_.isArray(fieldDefs.allowedValues)) {
         info.options = "allowed";
       }
@@ -275,7 +288,6 @@ if (typeof Handlebars !== 'undefined') {
     }
 
     context.qfHash = hash;
-    console.log("hash", context.qfHash);
 
     return Template._quickForm.withData(context);
   });
@@ -311,13 +323,11 @@ if (typeof Handlebars !== 'undefined') {
       af: autoform,
       skipLabel: skipLabel
     };
-    
-    console.log("af", context.af);
-    
+
     switch (framework) {
       case "bootstrap3":
         return Template._afQuickField_Bootstrap3.withData(context);
-        
+
       default:
         return Template._afQuickField_Plain.withData(context);
     }
@@ -370,8 +380,11 @@ if (typeof Handlebars !== 'undefined') {
   Template._autoForm.events({
     'submit form': function(event, template) {
       var submitButton = template.find("button[type=submit]");
-      if (!submitButton)
+      if (!submitButton) {
         return;
+      }
+
+      submitButton.disabled = true;
 
       //determine what we want to do
       var isInsert = hasClass(submitButton, "insert");
@@ -383,9 +396,6 @@ if (typeof Handlebars !== 'undefined') {
       var self = this, context = self.context;
       var validationType = context._validationType;
       var afObj = context._afObj;
-      if ("Collection2" in Meteor && afObj instanceof Meteor.Collection2) {
-        afObj = new AutoForm(afObj);
-      }
       var hooks = afObj._hooks;
       var formId = context._formID;
       var currentDoc = context._doc || null;
@@ -415,6 +425,7 @@ if (typeof Handlebars !== 'undefined') {
           var shouldContinue = onSubmit.call(onSubmitContext, insertDoc, updateDoc, currentDoc);
           if (shouldContinue === false) {
             event.preventDefault();
+            submitButton.disabled = false;
             return;
           }
         }
@@ -425,6 +436,7 @@ if (typeof Handlebars !== 'undefined') {
         if (validationType !== 'none' && !ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
           event.preventDefault(); //don't submit the form if invalid
         }
+        submitButton.disabled = false;
         return;
       }
 
@@ -433,20 +445,17 @@ if (typeof Handlebars !== 'undefined') {
       var beforeInsert = hooks.before.insert || afObj.beforeInsert;
       var beforeUpdate = hooks.before.update || afObj.beforeUpdate;
       var beforeRemove = hooks.before.remove || afObj.beforeRemove;
-      var beforeMethod = method && hooks.before[method];
-      beforeMethod = beforeMethod || afObj.beforeMethod;
+      var beforeMethod = method && (hooks.before[method] || afObj.beforeMethod);
       var afterInsert = hooks.after.insert || afObj._callbacks.insert;
       var afterUpdate = hooks.after.update || afObj._callbacks.update;
       var afterRemove = hooks.after.remove || afObj._callbacks.remove;
-      var afterMethod;
-      if (method) {
-        afterMethod = hooks.after[method] || afObj._callbacks[method];
-      }
+      var afterMethod = method && (hooks.after[method] || afObj._callbacks[method]);
+      var onSuccess = hooks.onSuccess;
+      var onError = hooks.onError;
 
       //do it
       if (isInsert) {
-        //call beforeInsert if present
-        if (typeof beforeInsert === "function") {
+        if (beforeInsert) {
           insertDoc = beforeInsert(insertDoc);
           if (!_.isObject(insertDoc)) {
             throw new Error("beforeInsert must return an object");
@@ -454,44 +463,50 @@ if (typeof Handlebars !== 'undefined') {
         }
 
         afObj._collection && afObj._collection.insert(insertDoc, {validationContext: formId}, function(error, result) {
-          if (!error) {
+          if (error) {
+            onError && onError('insert', error, template);
+          } else {
             template.find("form").reset();
+            onSuccess && onSuccess('insert', result, template);
           }
-          if (typeof afterInsert === "function") {
-            afterInsert(error, result, template);
-          }
+          afterInsert && afterInsert(error, result, template);
+          submitButton.disabled = false;
         });
       } else if (isUpdate) {
         if (!_.isEmpty(updateDoc)) {
-          //call beforeUpdate if present
-          if (typeof beforeUpdate === "function") {
+          if (beforeUpdate) {
             updateDoc = beforeUpdate(docId, updateDoc);
             if (!_.isObject(updateDoc)) {
               throw new Error("beforeUpdate must return an object");
             }
           }
 
-          afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error) {
+          afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error, result) {
             //don't automatically reset the form for updates because we
             //often won't want that
-            if (typeof afterUpdate === "function") {
-              afterUpdate(error, template);
+            if (error) {
+              onError && onError('update', error, template);
+            } else {
+              onSuccess && onSuccess('update', result, template);
             }
+            afterUpdate && afterUpdate(error, result, template);
+            submitButton.disabled = false;
           });
         }
       } else if (isRemove) {
-        //call beforeRemove if present
-        var stop = false;
-        if (typeof beforeRemove === "function") {
-          if (beforeRemove(docId) === false) {
-            stop = true;
-          }
-        }
-        if (!stop) {
-          afObj._collection && afObj._collection.remove(docId, function(error) {
-            if (typeof afterRemove === "function") {
-              afterRemove(error, template);
+        //call beforeRemove if present, and stop if it's false
+        if (beforeRemove && beforeRemove(docId) === false) {
+          //stopped
+          submitButton.disabled = false;
+        } else {
+          afObj._collection && afObj._collection.remove(docId, function(error, result) {
+            if (error) {
+              onError && onError('remove', error, template);
+            } else {
+              onSuccess && onSuccess('remove', result, template);
             }
+            afterRemove && afterRemove(error, result, template);
+            submitButton.disabled = false;
           });
         }
       }
@@ -499,10 +514,9 @@ if (typeof Handlebars !== 'undefined') {
       //we won't do an else here so that a method could be called in
       //addition to another action on the same submit
       if (method) {
-        //call beforeMethod if present
-        if (typeof beforeMethod === "function") {
-          // TODO: passing the method name as second argument was necessary for
-          // the old API only. Eventually can stop doing that.
+        // TODO: passing the method name as second argument was necessary for
+        // the old API only. Eventually can stop doing that.
+        if (beforeMethod) {
           insertDoc = beforeMethod(insertDoc, method);
           if (!_.isObject(insertDoc)) {
             throw new Error("beforeMethod must return an object");
@@ -511,13 +525,17 @@ if (typeof Handlebars !== 'undefined') {
 
         if (validationType === 'none' || ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
           Meteor.call(method, insertDoc, function(error, result) {
-            if (!error) {
+            if (error) {
+              onError && onError(method, error, template);
+            } else {
               template.find("form").reset();
+              onSuccess && onSuccess(method, result, template);
             }
-            if (typeof afterMethod === "function") {
-              afterMethod(error, result, template);
-            }
+            afterMethod && afterMethod(error, result, template);
+            submitButton.disabled = false;
           });
+        } else {
+          submitButton.disabled = false;
         }
       }
     },
@@ -869,13 +887,15 @@ var createInputHtml = function(name, autoform, defs, hash) {
 
   //adjust expected type when type is overridden
   var schemaType = defs.type;
-  var expectsArray = _.isArray(schemaType);
-  if (expectsArray && hash.type) {
+  var expectsArray = false;
+  if (schemaType === Array) {
+    defs = autoform._ss.schema(name + ".$");
+    schemaType = defs.type;
+
     //if the user overrides the type to anything,
     //then we won't be using a select box and
     //we won't be expecting an array for the current value
-    schemaType = schemaType[0]; //this, for example, changes [String] to String
-    expectsArray = false;
+    expectsArray = !hash.type;
   }
 
   var flatDoc = autoform._flatDoc;
@@ -901,7 +921,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
       }
     });
 
-    if (schemaType[0] === Date) {
+    if (schemaType === Date) {
       if (flatDoc && name in flatDoc) {
         arrayVal = flatDoc[name];
         value = [];
@@ -996,51 +1016,49 @@ var createInputHtml = function(name, autoform, defs, hash) {
     resolvedMax = resolvedMax();
   }
 
-  if (schemaType === String) {
-    if (resolvedMax) {
-      max = ' maxlength="' + resolvedMax + '"';
-    }
-  } else {
-    //max
-    if (hash.max) {
-      max = ' max="' + hash.max + '"';
-    } else if (resolvedMax) {
-      if (resolvedMax instanceof Date) {
-        if (type === "date") {
-          max = ' max="' + dateToDateStringUTC(resolvedMax) + '"';
-        } else if (type === "datetime") {
-          max = ' max="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMax) + '"';
-        } else if (type === "datetime-local") {
-          max = ' max="' + dateToNormalizedLocalDateAndTimeString(resolvedMax, hash["data-offset"]) + '"';
-        }
-      } else {
-        max = ' max="' + resolvedMax + '"';
-      }
-    }
-    //min
-    if (hash.min) {
-      min = ' min="' + hash.min + '"';
-    } else if (resolvedMin) {
-      if (resolvedMin instanceof Date) {
-        if (type === "date") {
-          min = ' min="' + dateToDateStringUTC(resolvedMin) + '"';
-        } else if (type === "datetime") {
-          min = ' min="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMin) + '"';
-        } else if (type === "datetime-local") {
-          min = ' min="' + dateToNormalizedLocalDateAndTimeString(resolvedMin, hash["data-offset"]) + '"';
-        }
-      } else {
-        min = ' min="' + resolvedMin + '"';
-      }
-    }
+  // Max text entry length
+  if (resolvedMax && _.contains(["text", "textarea", "email", "url"], type)) {
+    max = ' maxlength="' + resolvedMax + '"';
   }
 
-  //get step value
+  // Number or Date minimums
+  if (hash.max && _.contains(["number", "date", "datetime", "datetime-local"], type)) {
+    max = ' max="' + hash.max + '"';
+  } else if (resolvedMax instanceof Date) {
+    if (type === "date") {
+      max = ' max="' + dateToDateStringUTC(resolvedMax) + '"';
+    } else if (type === "datetime") {
+      max = ' max="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMax) + '"';
+    } else if (type === "datetime-local") {
+      max = ' max="' + dateToNormalizedLocalDateAndTimeString(resolvedMax, hash["data-offset"]) + '"';
+    }
+  } else if (typeof resolvedMax === "number" && type === "number") {
+    max = ' max="' + resolvedMax + '"';
+  }
+
+  // Number or Date maximums
+  if (hash.min && _.contains(["number", "date", "datetime", "datetime-local"], type)) {
+    min = ' min="' + hash.min + '"';
+  } else if (resolvedMin instanceof Date) {
+    if (type === "date") {
+      min = ' min="' + dateToDateStringUTC(resolvedMin) + '"';
+    } else if (type === "datetime") {
+      min = ' min="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMin) + '"';
+    } else if (type === "datetime-local") {
+      min = ' min="' + dateToNormalizedLocalDateAndTimeString(resolvedMin, hash["data-offset"]) + '"';
+    }
+  } else if (typeof resolvedMin === "number" && type === "number") {
+    min = ' min="' + resolvedMin + '"';
+  }
+
+  // Step value
   var step = "";
-  if (hash.step) {
-    step = ' step="' + hash.step + '"';
-  } else if (defs.decimal) {
-    step = ' step="0.01"';
+  if (type === "number") {
+    if (hash.step) {
+      step = ' step="' + hash.step + '"';
+    } else if (defs.decimal) {
+      step = ' step="0.01"';
+    }
   }
 
   //extract settings from hash
@@ -1057,7 +1075,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   if (selectOptions === "allowed") {
     selectOptions = _.map(defs.allowedValues, function(v) {
       var label = v;
-      if (hash.capitalize && v.length > 0 && (schemaType === String || (expectsArray && schemaType[0] === String))) {
+      if (hash.capitalize && v.length > 0 && schemaType === String) {
         label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
       }
 
