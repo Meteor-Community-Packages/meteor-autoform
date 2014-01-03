@@ -6,6 +6,7 @@ AutoForm = function(schema) {
     self._simpleSchema = schema;
   } else if ("Collection2" in Meteor && schema instanceof Meteor.Collection2) {
     self._collection = schema;
+    self._simpleSchema = self._collection.simpleSchema();
   } else {
     self._simpleSchema = new SimpleSchema(schema);
   }
@@ -23,75 +24,15 @@ AutoForm = function(schema) {
     onSuccess: null,
     onError: null
   };
-
-  // DEPRECATED TODO: remove everything after this point
-  self._callbacks = {};
-  if (self._collection) {
-    self._callbacks = self._collection._callbacks || {};
-    self.beforeInsert = self._collection.beforeInsert;
-    self.beforeUpdate = self._collection.beforeUpdate;
-    self.beforeRemove = self._collection.beforeRemove;
-    self.beforeMethod = self._collection.beforeMethod;
-    self.formToDoc = self._collection.formToDoc;
-    self.docToForm = self._collection.docToForm;
-  }
-};
-
-//DEPRECATED; Use myAutoForm.simpleSchema().namedContext() instead
-AutoForm.prototype.namedContext = function(name) {
-  console.warn("myAutoForm.namedContext() is deprecated; use myAutoForm.simpleSchema().namedContext() instead");
-  if (this._collection) {
-    return this._collection.simpleSchema().namedContext(name);
-  }
-  return this._simpleSchema.namedContext(name);
-};
-
-//DEPRECATED; Use myAutoForm.simpleSchema().namedContext().validate() instead
-AutoForm.prototype.validate = function(doc, options) {
-  options = options || {};
-  console.warn("myAutoForm.validate() is deprecated; use myAutoForm.simpleSchema().namedContext().validate() instead");
-  if (this._collection) {
-    // Validate doc and return validity
-    return this._collection.simpleSchema().namedContext(options.validationContext).validate(doc, options);
-  }
-  // Validate doc and return validity
-  return this._simpleSchema.namedContext(options.validationContext).validate(doc, options);
-};
-
-//DEPRECATED; Use myAutoForm.simpleSchema().namedContext().validateOne() instead
-AutoForm.prototype.validateOne = function(doc, keyName, options) {
-  options = options || {};
-  console.warn("myAutoForm.validateOne() is deprecated; use myAutoForm.simpleSchema().namedContext().validateOne() instead");
-  if (this._collection) {
-    // Validate doc and return validity
-    return this._collection.simpleSchema().namedContext(options.validationContext).validateOne(doc, keyName, options);
-  }
-  // Validate doc and return validity
-  return this._simpleSchema.namedContext(options.validationContext).validateOne(doc, keyName, options);
 };
 
 AutoForm.prototype.simpleSchema = function() {
-  var self = this;
-  return (typeof self._collection === "undefined") ? self._simpleSchema : self._collection.simpleSchema();
+  return this._simpleSchema;
 };
 
-// The hooks() method should be used in place of callbacks, before___, and
-// formToDoc/docToForm going forward.
 AutoForm.prototype.hooks = function(hooks) {
   _.extend(this._hooks, hooks);
 };
-
-AutoForm.prototype.callbacks = function(cb) {
-  console.warn("myAutoForm.callbacks is deprecated; use myAutoForm.hooks");
-  this._callbacks = cb;
-};
-
-if (typeof Meteor.Collection2 !== 'undefined') {
-  Meteor.Collection2.prototype.callbacks = function(cb) {
-    console.warn("myCollection2.callbacks is deprecated; use myCollection2.hooks");
-    this._callbacks = cb;
-  };
-}
 
 AutoForm.resetForm = function(formID, simpleSchema) {
   if (typeof formID !== "string") {
@@ -101,36 +42,6 @@ AutoForm.resetForm = function(formID, simpleSchema) {
   simpleSchema && simpleSchema.namedContext(formID).resetValidation();
   clearSelections(formID);
 };
-
-// DEPRECATED
-AutoForm.prototype.resetForm = function(formID) {
-  var self = this;
-
-  console.warn("myAutoForm.resetForm(formID) is deprecated; use AutoForm.resetForm(formID, simpleSchema)");
-
-  if (typeof formID !== "string") {
-    return;
-  }
-
-  self.simpleSchema().namedContext(formID).resetValidation();
-  clearSelections(formID);
-};
-
-// DEPRECATED
-if (typeof Meteor.Collection2 !== 'undefined') {
-  Meteor.Collection2.prototype.resetForm = function(formID) {
-    var self = this;
-
-    console.warn("myCollection2.resetForm(formID) is deprecated; use AutoForm.resetForm(formID, simpleSchema)");
-
-    if (typeof formID !== "string") {
-      return;
-    }
-
-    self.simpleSchema().namedContext(formID).resetValidation();
-    clearSelections(formID);
-  };
-}
 
 if (typeof Handlebars !== 'undefined') {
   Handlebars.registerHelper("autoForm", function(options) {
@@ -195,14 +106,6 @@ if (typeof Handlebars !== 'undefined') {
     autoFormContext.context._validationType = hash.validation || "submitThenKeyup";
     if ("validation" in hash) {
       delete hash.validation;
-    }
-
-    if ("onSubmit" in hash) {
-      if (typeof hash.onSubmit === "function") {
-        autoFormContext.context.onSubmit = hash.onSubmit;
-        console.warn("The onSubmit helper attribute is deprecated; use myAutoForm.hooks");
-      }
-      delete hash.onSubmit;
     }
 
     // This is automatically present, but we don't want it as an attribute
@@ -337,8 +240,9 @@ if (typeof Handlebars !== 'undefined') {
     var hash = (options || {}).hash || {};
     console.log("message", options, hash.autoform);
     var autoform = hash.autoform || this, ss = autoform._ss;
-    if (!ss)
+    if (!ss) {
       throw new Error("afFieldMessage helper must be used within an autoForm block");
+    }
 
     getDefs(ss, name); //for side effect of throwing errors when name is not in schema
     return ss.namedContext(autoform._formID).keyErrorMessage(name);
@@ -348,8 +252,9 @@ if (typeof Handlebars !== 'undefined') {
     var hash = (options || {}).hash || {};
     console.log("isinvalid", options, hash.autoform);
     var autoform = hash.autoform || this, ss = autoform._ss;
-    if (!ss)
+    if (!ss) {
       throw new Error("afFieldIsInvalid helper must be used within an autoForm block");
+    }
 
     getDefs(ss, name); //for side effect of throwing errors when name is not in schema
     return ss.namedContext(autoform._formID).keyIsInvalid(name);
@@ -358,8 +263,9 @@ if (typeof Handlebars !== 'undefined') {
   Template._autoForm.afFieldInput = function(name, options) {
     var hash = (options || {}).hash || {};
     var autoform = hash.autoform || this, ss = autoform._ss;
-    if (!ss)
+    if (!ss) {
       throw new Error("afFieldInput helper must be used within an autoForm block");
+    }
 
     var defs = getDefs(ss, name); //defs will not be undefined
     var html = createInputHtml(name, autoform, defs, hash);
@@ -369,8 +275,9 @@ if (typeof Handlebars !== 'undefined') {
   Template._autoForm.afFieldLabel = function(name, options) {
     var hash = (options || {}).hash || {};
     var autoform = hash.autoform || this, ss = autoform._ss;
-    if (!ss)
+    if (!ss) {
       throw new Error("afFieldLabel helper must be used within an autoForm block");
+    }
 
     var defs = getDefs(ss, name); //defs will not be undefined
     var html = createLabelHtml(name, autoform, defs, hash);
@@ -400,7 +307,7 @@ if (typeof Handlebars !== 'undefined') {
       var formId = context._formID;
       var currentDoc = context._doc || null;
       var docId = currentDoc ? currentDoc._id : null;
-      var doc = formValues(template, hooks.formToDoc || afObj.formToDoc);
+      var doc = formValues(template, hooks.formToDoc);
       var onSubmit = hooks.onSubmit || context.onSubmit;
       var ss = context._ss;
 
@@ -440,16 +347,15 @@ if (typeof Handlebars !== 'undefined') {
         return;
       }
 
-      // Gather hooks, falling back to the deprecated API
-      // TODO eventually remove support for old API
-      var beforeInsert = hooks.before.insert || afObj.beforeInsert;
-      var beforeUpdate = hooks.before.update || afObj.beforeUpdate;
-      var beforeRemove = hooks.before.remove || afObj.beforeRemove;
-      var beforeMethod = method && (hooks.before[method] || afObj.beforeMethod);
-      var afterInsert = hooks.after.insert || afObj._callbacks.insert;
-      var afterUpdate = hooks.after.update || afObj._callbacks.update;
-      var afterRemove = hooks.after.remove || afObj._callbacks.remove;
-      var afterMethod = method && (hooks.after[method] || afObj._callbacks[method]);
+      // Gather hooks
+      var beforeInsert = hooks.before.insert;
+      var beforeUpdate = hooks.before.update;
+      var beforeRemove = hooks.before.remove;
+      var beforeMethod = method && hooks.before[method];
+      var afterInsert = hooks.after.insert;
+      var afterUpdate = hooks.after.update;
+      var afterRemove = hooks.after.remove;
+      var afterMethod = method && hooks.after[method];
       var onSuccess = hooks.onSuccess;
       var onError = hooks.onError;
 
@@ -514,10 +420,8 @@ if (typeof Handlebars !== 'undefined') {
       //we won't do an else here so that a method could be called in
       //addition to another action on the same submit
       if (method) {
-        // TODO: passing the method name as second argument was necessary for
-        // the old API only. Eventually can stop doing that.
         if (beforeMethod) {
-          insertDoc = beforeMethod(insertDoc, method);
+          insertDoc = beforeMethod(insertDoc);
           if (!_.isObject(insertDoc)) {
             throw new Error("beforeMethod must return an object");
           }
@@ -1236,18 +1140,12 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   var formId = template.data.context._formID;
   var afObj = template.data.context._afObj;
 
-  //XXX for speed, should get rid of this transformation eventually
-  if ("Collection2" in Meteor && afObj instanceof Meteor.Collection2) {
-    afObj = new AutoForm(afObj);
-  }
-
-  if (onlyIfAlreadyInvalid &&
-          afObj.simpleSchema().namedContext(formId).isValid()) {
+  if (onlyIfAlreadyInvalid && afObj.simpleSchema().namedContext(formId).isValid()) {
     return;
   }
 
   // Create a document based on all the values of all the inputs on the form
-  var doc = formValues(template, afObj._hooks.formToDoc || afObj.formToDoc);
+  var doc = formValues(template, afObj._hooks.formToDoc);
 
   // Determine whether we're validating for an insert or an update
   var isUpdate = !!template.find("button.update");
