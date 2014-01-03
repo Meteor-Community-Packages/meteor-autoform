@@ -6,6 +6,11 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.8
+
+Minor internal change to adjust for changes made to the internal schema in the
+SimpleSchema package.
+
 ### 0.4.7
 
 * quickForm no longer displays fields for denyInsert or denyUpdate keys when
