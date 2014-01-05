@@ -1,64 +1,139 @@
 <template name="_autoForm">
   <form {{atts}}>
-    {{> content data=context}}
+    {{#with context}}
+    {{> content}}
+    {{/with}}
   </form>
 </template>
 
 <template name="_quickForm">
   {{#autoForm qfHash=qfHash}}
-  {{#each ../formFields}}
-  {{#if ../../isReadOnly}}
-  {{> afQuickField ../this.name autoform=../../this options=../this.options readonly=""}}
+  {{#each formFields}}
+  {{#if ../isReadOnly}}
+  {{> afQuickField name autoform=.. options=options readonly=""}}
   {{else}}
-  {{#if ../../../isDisabled}}
-  {{> afQuickField ../../this.name autoform=../../../this options=../../this.options disabled=""}}
+  {{#if ../isDisabled}}
+  {{> afQuickField name autoform=.. options=options disabled=""}}
   {{else}}
-  {{> afQuickField ../../this.name autoform=../../../this options=../../this.options}}
+  {{> afQuickField name autoform=.. options=options}}
   {{/if}}
   {{/if}}
   {{/each}}
+  {{#if needsButton}}
   <div>
-    {{#if ../doInsert}}
-    <button type="submit" class="{{../../buttonClasses}} insert">{{../../buttonContent}}</button>
-    {{/if}}
-    {{#if ../doUpdate}}
-    <button type="submit" class="{{../../buttonClasses}} update">{{../../buttonContent}}</button>
-    {{/if}}
-    {{#if ../doRemove}}
-    <button type="submit" class="{{../../buttonClasses}} remove">{{../../buttonContent}}</button>
-    {{/if}}
-    {{#if ../doMethod}}
-    <button type="submit" data-meteor-method="{{../../method}}" class="{{../../buttonClasses}}">{{../../buttonContent}}</button>
+    {{#if method}}
+    <button type="submit" data-meteor-method="{{method}}" class="{{buttonClasses}}">{{buttonContent}}</button>
+    {{else}}
+    <button type="submit" class="{{buttonClasses}}">{{buttonContent}}</button>
     {{/if}}
   </div>
+  {{/if}}
   {{/autoForm}}
 </template>
 
 <template name="_afQuickField_Bootstrap3">
-  <div class="form-group {{#if afFieldIsInvalid name autoform=af}}has-error{{/if}}">
-    {{#if afFieldIsInvalid name autoform=af}}has-error{{/if}}
+  <div class="form-group {{#if afFieldIsInvalid name}}has-error{{/if}}">
+    {{#if afFieldIsInvalid name}}has-error{{/if}}
     {{#unless skipLabel}}
-    {{> afFieldLabel name autoform=af}}
+    {{> afFieldLabel name qfHash=labelHash}}
     {{/unless}}
-    {{> afFieldInput name autoform=af}}
-    <span class="help-block">{{{afFieldMessage name autoform=af}}}</span>
+    {{> afFieldInput name qfHash=inputHash}}
+    <span class="help-block">{{{afFieldMessage name}}}</span>
   </div>
 </template>
 
 <template name="_afQuickField_Plain">
   <div>
     {{#unless skipLabel}}
-    {{> afFieldLabel name autoform=af}}
+    {{> afFieldLabel name qfHash=labelHash framework="none"}}
     {{/unless}}
-    {{> afFieldInput name autoform=af}}
-    <span>{{{afFieldMessage name autoform=af}}}</span>
+    {{> afFieldInput name qfHash=inputHash framework="none"}}
+    <span>{{{afFieldMessage name}}}</span>
   </div>
 </template>
 
-<template name="_afInput">
-  {{{html}}}
+<template name="_afLabel_Bootstrap3">
+  <label class="{{cls}} control-label" {{atts}}>{{label}}</label>
 </template>
 
-<template name="_afLabel">
-  {{{html}}}
+<template name="_afLabel_Plain">
+  <label class="{{cls}}" {{atts}}>{{label}}</label>
+</template>
+
+<template name="_afCheckbox_Bootstrap3">
+  <div class="checkbox"><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+</template>
+
+<template name="_afCheckbox_Plain">
+  <div><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+</template>
+
+<template name="_afCheckboxGroup_Bootstrap3">
+  {{#each items}}
+    {{> _afCheckbox_Bootstrap3}}
+  {{/each}}
+</template>
+
+<template name="_afCheckboxGroup_Plain">
+  {{#each items}}
+    {{> _afCheckbox_Plain}}
+  {{/each}}
+</template>
+
+<template name="_afRadio_Bootstrap3">
+  <div class="radio"><label for="{{name}}"><input type="radio" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+</template>
+
+<template name="_afRadio_Plain">
+  <div><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+</template>
+
+<template name="_afRadioGroup_Bootstrap3">
+  {{#each items}}
+    {{> _afRadio_Bootstrap3}}
+  {{/each}}
+</template>
+
+<template name="_afRadioGroup_Plain">
+  {{#each items}}
+    {{> _afRadio_Plain}}
+  {{/each}}
+</template>
+
+<template name="_afSelect_Bootstrap3">
+  <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" {{atts}}>
+    {{#if firstOption}}
+    <option value="">{{firstOption}}</option>
+    {{/if}}
+    {{#each items}}
+      <option value="{{value}}" {{selected}}>{{label}}</option>
+    {{/each}}
+  </select>
+</template>
+
+<template name="_afSelect_Plain">
+  <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" {{atts}}>
+    {{#if firstOption}}
+    <option value="">{{firstOption}}</option>
+    {{/if}}
+    {{#each items}}
+      <option value="{{value}}" {{selected}}>{{label}}</option>
+    {{/each}}
+  </select>
+</template>
+
+<template name="_afTextarea_Bootstrap3">
+  <textarea data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" {{atts}}>{{value}}</textarea>
+</template>
+
+<template name="_afTextarea_Plain">
+  <textarea data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" {{atts}}>{{value}}</textarea>
+</template>
+
+<template name="_afInput_Bootstrap3">
+  <input type="{{type}}" data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" value="{{value}}" {{atts}}/>
+</template>
+
+<template name="_afInput_Plain">
+  <input type="{{type}}" data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" value="{{value}}" {{atts}}/>
 </template>

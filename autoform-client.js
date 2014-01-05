@@ -52,32 +52,15 @@ if (typeof Handlebars !== 'undefined') {
       hash = hash.qfHash;
     }
 
-    var schemaObj;
-    if (typeof hash.schema === "string") {
-      if (!window || !window[hash.schema]) {
-        throw new Error("autoForm schema " + hash.schema + " is not in the window scope");
-      }
-      schemaObj = window[hash.schema];
-    } else {
-      schemaObj = hash.schema;
-    }
-    delete hash.schema;
-
-    // Allow passing a Collection2 as the schema, but wrap in AutoForm
-    if ("Collection2" in Meteor && schemaObj instanceof Meteor.Collection2) {
-      schemaObj = new AutoForm(schemaObj);
-    }
-
-    if (typeof schemaObj.simpleSchema !== "function")
-      throw new Error('autoForm schema must be an object with a "simpleSchema" method');
+    var schemaObj = getAutoForm(hash.schema);
 
     var flatDoc;
     if (hash.doc) {
       var mDoc = new MongoObject(hash.doc);
       flatDoc = mDoc.getFlatObject();
       mDoc = null;
-      var docToForm = schemaObj._hooks.docToForm || schemaObj.docToForm;
 
+      var docToForm = schemaObj._hooks.docToForm || schemaObj.docToForm;
       if (typeof docToForm === "function") {
         flatDoc = docToForm(flatDoc);
       }
@@ -85,33 +68,20 @@ if (typeof Handlebars !== 'undefined') {
       flatDoc = {};
     }
 
-    var autoFormContext = {
-      context: {
-        _afObj: schemaObj,
-        _ss: schemaObj.simpleSchema(),
-        _doc: hash.doc,
-        _flatDoc: flatDoc
-      }
-    };
+    // Set up the context to be used for everything within the autoform
+    var autoFormContext = {};
 
-    if ("doc" in hash) {
-      delete hash.doc;
-    }
-
+    // If a custom context was supplied, keep it
+    autoFormContext.context = (this instanceof Window) ? {} : _.clone(this);
+    autoFormContext.context._afObj = schemaObj;
+    autoFormContext.context._ss = schemaObj.simpleSchema();
+    autoFormContext.context._doc = hash.doc;
+    autoFormContext.context._flatDoc = flatDoc;
     autoFormContext.context._framework = hash.framework || defaultFramework;
-    if ("framework" in hash) {
-      delete hash.framework;
-    }
-
     autoFormContext.context._validationType = hash.validation || "submitThenKeyup";
-    if ("validation" in hash) {
-      delete hash.validation;
-    }
 
-    // This is automatically present, but we don't want it as an attribute
-    if ("__content" in hash) {
-      delete hash.__content;
-    }
+    // Remove from hash everything that we don't want as a form attribute
+    hash = cleanObj(hash, ["__content", "schema", "validation", "framework", "doc", "qfHash"]);
 
     autoFormContext.atts = hash.atts || hash;
     //formID is used to track input selections so that they are retained
@@ -127,25 +97,15 @@ if (typeof Handlebars !== 'undefined') {
   Handlebars.registerHelper("quickForm", function(options) {
     var hash = (options || {}).hash || {};
 
-    var schemaObj;
-    if (typeof hash.schema === "string") {
-      if (!window || !window[hash.schema]) {
-        throw new Error("quickForm schema " + hash.schema + " is not in the window scope");
-      }
-      schemaObj = window[hash.schema];
-    } else {
-      schemaObj = hash.schema;
-    }
-    delete hash.schema;
-
-    if (typeof schemaObj.simpleSchema !== "function")
-      throw new Error('quickForm schema must be an object with a "simpleSchema" method');
+    var autoForm = getAutoForm(hash.schema);
 
     var context = {
       formFields: []
     };
 
-    _.each(schemaObj.simpleSchema().schema(), function(fieldDefs, field) {
+    // Look through all fields defined in the schema, and make
+    // a list of those that should be on the form.
+    _.each(autoForm.simpleSchema().schema(), function(fieldDefs, field) {
       var info = {name: field};
 
       if ((fieldDefs.denyInsert && hash.type === "insert") ||
@@ -158,38 +118,42 @@ if (typeof Handlebars !== 'undefined') {
       context.formFields.push(info);
     });
 
-    if ("type" in hash) {
-      if (hash.type === "insert") {
-        context.doInsert = true;
-      } else if (hash.type === "update") {
-        context.doUpdate = true;
-      } else if (hash.type === "remove") {
-        context.doRemove = true;
-      } else if (hash.type === "method") {
-        context.doMethod = true;
-        context.method = hash.method;
-      } else if (hash.type === "readonly") {
-        context.isReadOnly = true;
-      } else if (hash.type === "disabled") {
-        context.isDisabled = true;
-      }
-      delete hash.type;
-    }
-
-    if ("method" in hash) {
-      delete hash.method;
-    }
-
-    if ("buttonClasses" in hash) {
-      context.buttonClasses = hash.buttonClasses;
-      delete hash.buttonClasses;
-    }
-
+    // Prepare additional form customizations
+    context.buttonClasses = hash.buttonClasses || "";
     context.buttonContent = hash.buttonContent || "Submit";
-    if ("buttonContent" in hash) {
-      delete hash.buttonContent;
+    context.needsButton = true;
+
+    // Determine what type of form to create
+    switch (hash.type) {
+      case "insert":
+      case "update":
+      case "remove":
+        context.buttonClasses += " " + hash.type;
+        break;
+
+      case "method":
+        context.method = hash.method;
+        break;
+
+      case "readonly":
+        context.isReadOnly = true;
+        context.needsButton = false;
+        break;
+
+      case "disabled":
+        context.isDisabled = true;
+        context.needsButton = false;
+        break;
+
+      default:
+
+        break;
     }
 
+    // Remove from hash everything that we don't want passed along to autoform
+    hash = cleanObj(hash, ["__content", "buttonContent", "buttonClasses", "method", "type"]);
+
+    // Store the hash for the autoForm helper to use
     context.qfHash = hash;
 
     return Template._quickForm.withData(context);
@@ -197,7 +161,7 @@ if (typeof Handlebars !== 'undefined') {
 
   Template._autoForm.afQuickField = function(name, options) {
     var hash = (options || {}).hash || {};
-    var autoform = hash.autoform || this, ss = autoform._ss;
+    var afContext = hash.autoform || this, ss = afContext._ss;
     if (!ss)
       throw new Error("afQuickField helper must be used within an autoForm block");
 
@@ -205,6 +169,12 @@ if (typeof Handlebars !== 'undefined') {
 
     //boolean type renders a check box that already has a label, so don't generate another label
     var skipLabel = hash.label === false || (defs.type === Boolean && !("select" in hash) && !("radio" in hash));
+
+    // Figure out the desired framework
+    var framework = hash.framework || afContext._framework || defaultFramework;
+
+    // Remove unwanted props from the hash
+    hash = cleanObj(hash, ["framework", "label"]);
 
     //separate label options from input options; label items begin with "label-"
     var labelHash = {};
@@ -218,27 +188,24 @@ if (typeof Handlebars !== 'undefined') {
       }
     });
 
-    var framework = inputHash["framework"] || autoform._framework || defaultFramework;
-
     //set up context for _afQuickField template
-    var context = {
-      name: name,
-      af: autoform,
-      skipLabel: skipLabel
-    };
+    var qfContext = afContext || {};
+    qfContext.name = name;
+    qfContext.skipLabel = skipLabel;
+    qfContext.labelHash = labelHash;
+    qfContext.inputHash = inputHash;
 
     switch (framework) {
       case "bootstrap3":
-        return Template._afQuickField_Bootstrap3.withData(context);
+        return Template._afQuickField_Bootstrap3.withData(qfContext);
 
       default:
-        return Template._afQuickField_Plain.withData(context);
+        return Template._afQuickField_Plain.withData(qfContext);
     }
   };
 
   Template._autoForm.afFieldMessage = function(name, options) {
     var hash = (options || {}).hash || {};
-    console.log("message", options, hash.autoform);
     var autoform = hash.autoform || this, ss = autoform._ss;
     if (!ss) {
       throw new Error("afFieldMessage helper must be used within an autoForm block");
@@ -250,7 +217,6 @@ if (typeof Handlebars !== 'undefined') {
 
   Template._autoForm.afFieldIsInvalid = function(name, options) {
     var hash = (options || {}).hash || {};
-    console.log("isinvalid", options, hash.autoform);
     var autoform = hash.autoform || this, ss = autoform._ss;
     if (!ss) {
       throw new Error("afFieldIsInvalid helper must be used within an autoForm block");
@@ -262,26 +228,53 @@ if (typeof Handlebars !== 'undefined') {
 
   Template._autoForm.afFieldInput = function(name, options) {
     var hash = (options || {}).hash || {};
-    var autoform = hash.autoform || this, ss = autoform._ss;
+
+    //copy hash from quickField if this is an input created by the quickField helper
+    if (hash.qfHash) {
+      hash = hash.qfHash;
+    }
+
+    var afContext = hash.autoform || this, ss = afContext._ss;
     if (!ss) {
       throw new Error("afFieldInput helper must be used within an autoForm block");
     }
 
     var defs = getDefs(ss, name); //defs will not be undefined
-    var html = createInputHtml(name, autoform, defs, hash);
-    return Template._afInput.withData({html: html});
+    return getInputTemplate(name, afContext, defs, hash);
   };
 
   Template._autoForm.afFieldLabel = function(name, options) {
     var hash = (options || {}).hash || {};
-    var autoform = hash.autoform || this, ss = autoform._ss;
+
+    //copy hash from quickField if this is a label created by the quickField helper
+    if (hash.qfHash) {
+      hash = hash.qfHash;
+    }
+
+    var afContext = hash.autoform || this, ss = afContext._ss;
     if (!ss) {
       throw new Error("afFieldLabel helper must be used within an autoForm block");
     }
 
     var defs = getDefs(ss, name); //defs will not be undefined
-    var html = createLabelHtml(name, autoform, defs, hash);
-    return Template._afLabel.withData({html: html});
+    var framework = hash.framework || afContext._framework || defaultFramework;
+    var cls = hash["class"] || "";
+
+    hash = cleanObj(hash, ["autoform", "framework", "class"]);
+
+    var lblContext = {
+      label: defs.label,
+      cls: cls,
+      atts: hash
+    };
+
+    switch (framework) {
+      case "bootstrap3":
+        return Template._afLabel_Bootstrap3.withData(lblContext);
+
+      default:
+        return Template._afLabel_Plain.withData(lblContext);
+    }
   };
 
   Template._autoForm.events({
@@ -316,6 +309,21 @@ if (typeof Handlebars !== 'undefined') {
       var insertDoc = expandObj(cleanNulls(doc));
       //for updates, convert to modifier object with $set and $unset
       var updateDoc = docToModifier(doc);
+      
+      // Function to select the focus the first field with an error
+      function selectFirstInvalidField() {
+        if (! ss.namedContext(formId).isValid()) {
+          var ctx = ss.namedContext(formId);
+          _.every(template.findAll('[data-schema-key]'), function (input) {
+            if (ctx.keyIsInvalid(input.getAttribute('data-schema-key'))) {
+              input.focus();
+              return false;
+            } else {
+              return true;
+            }
+          });
+        }
+      }
 
       if (isInsert || isUpdate || isRemove || method) {
         event.preventDefault(); //prevent default here if we're planning to do our own thing
@@ -327,6 +335,8 @@ if (typeof Handlebars !== 'undefined') {
           var onSubmitContext = {
             resetForm: function() {
               template.find("form").reset();
+              var focusInput = template.find("[autofocus]");
+              focusInput && focusInput.focus();
             }
           };
           var shouldContinue = onSubmit.call(onSubmitContext, insertDoc, updateDoc, currentDoc);
@@ -335,6 +345,8 @@ if (typeof Handlebars !== 'undefined') {
             submitButton.disabled = false;
             return;
           }
+        } else {
+          selectFirstInvalidField();
         }
       }
 
@@ -342,6 +354,7 @@ if (typeof Handlebars !== 'undefined') {
       if (!isInsert && !isUpdate && !isRemove && !method) {
         if (validationType !== 'none' && !ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
           event.preventDefault(); //don't submit the form if invalid
+          selectFirstInvalidField();
         }
         submitButton.disabled = false;
         return;
@@ -367,12 +380,15 @@ if (typeof Handlebars !== 'undefined') {
             throw new Error("beforeInsert must return an object");
           }
         }
-
+        
         afObj._collection && afObj._collection.insert(insertDoc, {validationContext: formId}, function(error, result) {
           if (error) {
+            selectFirstInvalidField();
             onError && onError('insert', error, template);
           } else {
             template.find("form").reset();
+            var focusInput = template.find("[autofocus]");
+            focusInput && focusInput.focus();
             onSuccess && onSuccess('insert', result, template);
           }
           afterInsert && afterInsert(error, result, template);
@@ -391,6 +407,7 @@ if (typeof Handlebars !== 'undefined') {
             //don't automatically reset the form for updates because we
             //often won't want that
             if (error) {
+              selectFirstInvalidField();
               onError && onError('update', error, template);
             } else {
               onSuccess && onSuccess('update', result, template);
@@ -407,6 +424,7 @@ if (typeof Handlebars !== 'undefined') {
         } else {
           afObj._collection && afObj._collection.remove(docId, function(error, result) {
             if (error) {
+              selectFirstInvalidField();
               onError && onError('remove', error, template);
             } else {
               onSuccess && onSuccess('remove', result, template);
@@ -430,9 +448,12 @@ if (typeof Handlebars !== 'undefined') {
         if (validationType === 'none' || ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
           Meteor.call(method, insertDoc, function(error, result) {
             if (error) {
+              selectFirstInvalidField();
               onError && onError(method, error, template);
             } else {
               template.find("form").reset();
+              var focusInput = template.find("[autofocus]");
+              focusInput && focusInput.focus();
               onSuccess && onSuccess(method, result, template);
             }
             afterMethod && afterMethod(error, result, template);
@@ -634,16 +655,7 @@ var formValues = function(template, transform) {
   }
   return doc;
 };
-var objToAttributes = function(obj) {
-  if (!obj) {
-    return "";
-  }
-  var a = "";
-  _.each(obj, function(value, key) {
-    a += ' ' + key + '="' + value + '"';
-  });
-  return a;
-};
+
 var expandObj = function(doc) {
   var newDoc = {}, subkeys, subkey, subkeylen, nextPiece, current;
   _.each(doc, function(val, key) {
@@ -673,6 +685,7 @@ var expandObj = function(doc) {
   });
   return newDoc;
 };
+
 var cleanNulls = function(doc) {
   var newDoc = {};
   _.each(doc, function(val, key) {
@@ -682,6 +695,7 @@ var cleanNulls = function(doc) {
   });
   return newDoc;
 };
+
 var reportNulls = function(doc) {
   var nulls = {};
   _.each(doc, function(val, key) {
@@ -786,11 +800,11 @@ var getSelectValues = function(select) {
   return result;
 };
 
-var createInputHtml = function(name, autoform, defs, hash) {
-  var html;
 
-  //adjust expected type when type is overridden
+var getInputTemplate = function(name, autoform, defs, hash) {
   var schemaType = defs.type;
+
+  // Adjust for array fields if necessary
   var expectsArray = false;
   if (schemaType === Array) {
     defs = autoform._ss.schema(name + ".$");
@@ -802,63 +816,65 @@ var createInputHtml = function(name, autoform, defs, hash) {
     expectsArray = !hash.type;
   }
 
-  var flatDoc = autoform._flatDoc;
+  // Determine what the current value is, if any
+  var value;
+  if (typeof hash.value === "undefined") {
+    var flatDoc = autoform._flatDoc, arrayVal;
+    if (expectsArray) {
 
-  //get current value
-  var value, arrayVal;
-  if (expectsArray) {
+      // For arrays, we need the flatDoc value as an array
+      // rather than as separate array values, so we'll do
+      // that adjustment here.
+      // For example, if we have "numbers.0" = 1 and "numbers.1" = 2,
+      // we will create "numbers" = [1,2]
+      _.each(flatDoc, function(flatVal, flatKey) {
+        var l = name.length;
+        if (flatKey.slice(0, l + 1) === name + ".") {
+          var end = flatKey.slice(l + 1);
+          var intEnd = parseInt(end, 10);
+          if (!isNaN(intEnd)) {
+            flatDoc[name] = flatDoc[name] || [];
+            flatDoc[name][intEnd] = flatVal;
+          }
+        }
+      });
 
-    // For arrays, we need the flatDoc value as an array
-    // rather than as separate array values, so we'll do
-    // that adjustment here.
-    // For example, if we have "numbers.0" = 1 and "numbers.1" = 2,
-    // we will create "numbers" = [1,2]
-    _.each(flatDoc, function(flatVal, flatKey) {
-      var l = name.length;
-      if (flatKey.slice(0, l + 1) === name + ".") {
-        var end = flatKey.slice(l + 1);
-        var intEnd = parseInt(end, 10);
-        if (!isNaN(intEnd)) {
-          flatDoc[name] = flatDoc[name] || [];
-          flatDoc[name][intEnd] = flatVal;
+      if (schemaType === Date) {
+        value = [];
+        if (flatDoc && name in flatDoc) {
+          arrayVal = flatDoc[name];
+          _.each(arrayVal, function(v) {
+            value.push(dateToDateStringUTC(v));
+          });
+        }
+      } else {
+        value = [];
+        if (flatDoc && name in flatDoc) {
+          arrayVal = flatDoc[name];
+          _.each(arrayVal, function(v) {
+            value.push(v.toString());
+          });
         }
       }
-    });
+    }
 
-    if (schemaType === Date) {
+    // If not array
+    else {
       if (flatDoc && name in flatDoc) {
-        arrayVal = flatDoc[name];
-        value = [];
-        _.each(arrayVal, function(v) {
-          value.push(dateToDateStringUTC(v));
-        });
+        value = flatDoc[name];
+        if (!(value instanceof Date)) { //we will convert dates to a string later, after we know what the field type will be
+          value = value.toString();
+        }
       } else {
-        value = hash.value || [];
-      }
-    } else {
-      if (flatDoc && name in flatDoc) {
-        arrayVal = flatDoc[name];
-        value = [];
-        _.each(arrayVal, function(v) {
-          value.push(v.toString());
-        });
-      } else {
-        value = hash.value || [];
+        value = "";
       }
     }
   } else {
-    if (flatDoc && name in flatDoc) {
-      value = flatDoc[name];
-      if (!(value instanceof Date)) { //we will convert dates to a string later, after we know what the field type will be
-        value = value.toString();
-      }
-    } else {
-      value = hash.value || "";
+    value = hash.value;
+    if (expectsArray && ! (value instanceof Array)) {
+      value = [value];
     }
   }
-
-  //required?
-  var req = defs.optional ? "" : " required";
 
   //get type
   var type = "text";
@@ -878,9 +894,8 @@ var createInputHtml = function(name, autoform, defs, hash) {
     type = "boolean";
   }
 
-  if (type === "datetime-local" && hash.offset) {
+  if (type === "datetime-local") {
     hash["data-offset"] = hash.offset || "Z";
-    delete hash.offset;
   }
 
   //convert Date value to required string value based on field type
@@ -894,78 +909,19 @@ var createInputHtml = function(name, autoform, defs, hash) {
     }
   }
 
-  //adjust some variables for booleans
-  var checked = "", checkedOpposite = "";
-  if (type === "boolean") {
-    value = (value === "true") ? true : false;
-    if (value) {
-      checked = " checked";
-    } else {
-      checkedOpposite = " checked";
-    }
-  }
-
   var label = defs.label;
+  var min = defs.min;
+  var max = defs.max;
 
-  //get correct max/min attributes
-  var max = "", min = "";
-
-  //If min/max are functions, call them
-  var resolvedMin = defs.min;
-  var resolvedMax = defs.max;
-  if (typeof resolvedMin === "function") {
-    resolvedMin = resolvedMin();
+  // If min/max are functions, call them
+  if (typeof min === "function") {
+    min = min();
   }
-  if (typeof resolvedMax === "function") {
-    resolvedMax = resolvedMax();
+  if (typeof max === "function") {
+    max = max();
   }
 
-  // Max text entry length
-  if (resolvedMax && _.contains(["text", "textarea", "email", "url"], type)) {
-    max = ' maxlength="' + resolvedMax + '"';
-  }
-
-  // Number or Date minimums
-  if (hash.max && _.contains(["number", "date", "datetime", "datetime-local"], type)) {
-    max = ' max="' + hash.max + '"';
-  } else if (resolvedMax instanceof Date) {
-    if (type === "date") {
-      max = ' max="' + dateToDateStringUTC(resolvedMax) + '"';
-    } else if (type === "datetime") {
-      max = ' max="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMax) + '"';
-    } else if (type === "datetime-local") {
-      max = ' max="' + dateToNormalizedLocalDateAndTimeString(resolvedMax, hash["data-offset"]) + '"';
-    }
-  } else if (typeof resolvedMax === "number" && type === "number") {
-    max = ' max="' + resolvedMax + '"';
-  }
-
-  // Number or Date maximums
-  if (hash.min && _.contains(["number", "date", "datetime", "datetime-local"], type)) {
-    min = ' min="' + hash.min + '"';
-  } else if (resolvedMin instanceof Date) {
-    if (type === "date") {
-      min = ' min="' + dateToDateStringUTC(resolvedMin) + '"';
-    } else if (type === "datetime") {
-      min = ' min="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMin) + '"';
-    } else if (type === "datetime-local") {
-      min = ' min="' + dateToNormalizedLocalDateAndTimeString(resolvedMin, hash["data-offset"]) + '"';
-    }
-  } else if (typeof resolvedMin === "number" && type === "number") {
-    min = ' min="' + resolvedMin + '"';
-  }
-
-  // Step value
-  var step = "";
-  if (type === "number") {
-    if (hash.step) {
-      step = ' step="' + hash.step + '"';
-    } else if (defs.decimal) {
-      step = ' step="0.01"';
-    }
-  }
-
-  //extract settings from hash
+  // Extract settings from hash
   var firstOption = hash.firstOption;
   var radio = hash.radio;
   var select = hash.select;
@@ -975,7 +931,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   var selectOptions = hash.options;
   var framework = hash.framework || autoform._framework || defaultFramework;
 
-  //handle options="allowed"
+  // Handle options="allowed"
   if (selectOptions === "allowed") {
     selectOptions = _.map(defs.allowedValues, function(v) {
       var label = v;
@@ -987,112 +943,16 @@ var createInputHtml = function(name, autoform, defs, hash) {
     });
   }
 
-  //clean hash so that we can add anything remaining as attributes
-  hash = cleanHash(hash);
-
-  //set placeholder to label from schema if requested
-  if (hash.placeholder === "schemaLabel")
+  // Set placeholder to label from schema if requested
+  if (hash.placeholder === "schemaLabel") {
     hash.placeholder = label;
-
-  if (selectOptions) {
-    //build anything that should be a select, which is anything with options
-    var multiple = "", isMultiple;
-    if (expectsArray) {
-      multiple = " multiple";
-      isMultiple = true;
-    }
-    if (noselect) {
-      html = "";
-      _.each(selectOptions, function(opt) {
-        var checked, inputType, cl = "";
-        if (isMultiple) {
-          inputType = "checkbox";
-          if (_.contains(value, opt.value.toString())) {
-            checked = ' checked';
-          } else {
-            checked = '';
-          }
-        } else {
-          inputType = "radio";
-          if (opt.value.toString() === value.toString()) {
-            checked = ' checked';
-          } else {
-            checked = '';
-          }
-        }
-        if (framework === "bootstrap3")
-          cl = inputType;
-        html += '<div class="' + cl + '"><label><input type="' + inputType + '" data-schema-key="' + name + '" name="' + name + '" value="' + opt.value + '"' + checked + objToAttributes(hash) + ' /> ' + opt.label + '</label></div>';
-      });
-    } else {
-      if (framework === "bootstrap3") {
-        //add bootstrap's form-control class to input elements
-        hash["class"] = hash["class"] ? hash["class"] + " form-control" : "form-control"; //IE<10 throws error if hash.class syntax is used
-      }
-      hash.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
-      html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + multiple + '>';
-      if (firstOption && !isMultiple) {
-        html += '<option value="">' + firstOption + '</option>';
-      }
-      _.each(selectOptions, function(opt) {
-        var selected;
-        if (isMultiple) {
-          if (_.contains(value, opt.value.toString())) {
-            selected = ' selected';
-          } else {
-            selected = '';
-          }
-        } else {
-          if (opt.value.toString() === value.toString()) {
-            selected = ' selected';
-          } else {
-            selected = '';
-          }
-        }
-        html += '<option value="' + opt.value + '"' + selected + '>' + opt.label + '</option>';
-      });
-      html += '</select>';
-    }
-  } else if (type === "textarea") {
-    if (framework === "bootstrap3") {
-      //add bootstrap's form-control class to input elements
-      hash["class"] = hash["class"] ? hash["class"] + " form-control" : "form-control"; //IE<10 throws error if hash.class syntax is used
-    }
-    html = '<textarea data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
-  } else if (type === "boolean") {
-    if (radio) {
-      html = '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + trueLabel + '</label></div>';
-      html += '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="false"' + checkedOpposite + objToAttributes(hash) + req + ' /> ' + falseLabel + '</label></div>';
-    } else if (select) {
-      if (framework === "bootstrap3") {
-        //add bootstrap's form-control class to input elements
-        hash["class"] = hash["class"] ? hash["class"] + " form-control" : "form-control"; //IE<10 throws error if hash.class syntax is used
-      }
-      html = '<select data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + '>';
-      html += '<option value="false"' + (!value ? ' selected' : '') + '>' + falseLabel + '</option>';
-      html += '<option value="true"' + (value ? ' selected' : '') + '>' + trueLabel + '</option>';
-      html += '</select>';
-    } else {
-      //don't add required attribute to this one because some browsers assume that to mean that it must be checked, which is not what we mean by "required"
-      html = '<div class="checkbox"><label for="' + name + '"><input type="checkbox" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + ' /> ' + label + '</label></div>';
-    }
-  } else {
-    if (framework === "bootstrap3") {
-      //add bootstrap's form-control class to input elements
-      hash["class"] = hash["class"] ? hash["class"] + " form-control" : "form-control"; //IE<10 throws error if hash.class syntax is used
-    }
-    html = '<input type="' + type + '" data-schema-key="' + name + '" name="' + name + '" value="' + value + '"' + objToAttributes(hash) + req + max + min + step + ' />';
   }
-  return html;
-};
 
-var cleanHash = function(hash) {
-  var props = [
+  // Clean hash so that we can add anything remaining as attributes
+  hash = cleanObj(hash, [
     "name",
     "autoform",
-    "type",
     "value",
-    "step",
     "data-schema-key",
     "firstOption",
     "radio",
@@ -1101,37 +961,169 @@ var cleanHash = function(hash) {
     "trueLabel",
     "falseLabel",
     "options",
-    "framework"
-  ], prop;
-  for (var i = 0, ln = props.length; i < ln; i++) {
-    prop = props[i];
-    if (prop in hash)
-      delete hash[prop];
+    "framework",
+    "offset"
+  ]);
+
+
+  // Determine which template to render and what options to use
+  var template, data = {};
+  hash.required = hash.required || !defs.optional;
+  data.name = name;
+  if (selectOptions) {
+    // Build anything that should be a select, which is anything with options
+    data.items = [];
+    _.each(selectOptions, function(opt) {
+      var selected = expectsArray ? _.contains(value, opt.value.toString()) : (opt.value.toString() === value.toString());
+      data.items.push({
+        name: name,
+        label: opt.label,
+        value: opt.value,
+        checked: selected ? "checked" : "",
+        selected: selected ? "selected" : "",
+        atts: hash
+      });
+    });
+    if (noselect) {
+      if (expectsArray) {
+        template = "_afCheckboxGroup";
+      } else {
+        template = "_afRadioGroup";
+      }
+    } else {
+      hash.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
+      if (expectsArray) {
+        hash.multiple = "";
+      }
+      data.firstOption = (firstOption && !expectsArray) ? firstOption : "";
+      data.cls = hash["class"] || "";
+      hash = cleanObj(hash, ["class"]);
+      data.atts = hash;
+      template = "_afSelect";
+    }
+  } else if (type === "textarea") {
+    if (typeof hash.maxlength === "undefined" && typeof max === "number") {
+      hash.maxlength = max;
+    }
+    data.cls = hash["class"] || "";
+    hash = cleanObj(hash, ["class"]);
+    data.atts = hash;
+    template = "_afTextarea";
+  } else if (type === "boolean") {
+    value = (value === "true") ? true : false;
+    var items = [
+      {
+        name: name,
+        value: "false",
+        checked: !value ? "checked" : "",
+        selected: !value ? "selected" : "",
+        label: falseLabel
+      },
+      {
+        name: name,
+        value: "true",
+        checked: value ? "checked" : "",
+        selected: value ? "selected" : "",
+        label: trueLabel
+      }
+    ];
+    if (radio) {
+      data.items = items;
+      data.items[0].atts = hash;
+      data.items[1].atts = hash;
+      template = "_afRadioGroup";
+    } else if (select) {
+      data.items = items;
+      data.cls = hash["class"] || "";
+      hash = cleanObj(hash, ["class"]);
+      data.atts = hash;
+      template = "_afSelect";
+    } else {
+      //don't add required attribute to this one because some browsers assume that to mean that it must be checked, which is not what we mean by "required"
+      delete hash.required;
+      data.label = label;
+      data.value = "true";
+      data.checked = value ? "checked" : "";
+      data.atts = hash;
+      template = "_afCheckbox";
+    }
+  } else {
+    // All other input types
+    switch (type) {
+      case "number":
+        if (typeof hash.max === "undefined" && typeof max === "number") {
+          hash.max = max;
+        }
+        if (typeof hash.min === "undefined" && typeof min === "number") {
+          hash.min = min;
+        }
+        if (typeof hash.step === "undefined" && defs.decimal) {
+          hash.step = '0.01';
+        }
+        break;
+      case "date":
+        if (typeof hash.max === "undefined" && max instanceof Date) {
+          hash.max = dateToDateStringUTC(max);
+        }
+        if (typeof hash.min === "undefined" && min instanceof Date) {
+          hash.min = dateToDateStringUTC(min);
+        }
+        break;
+      case "datetime":
+        if (typeof hash.max === "undefined" && max instanceof Date) {
+          hash.max = dateToNormalizedForcedUtcGlobalDateAndTimeString(max);
+        }
+        if (typeof hash.min === "undefined" && min instanceof Date) {
+          hash.min = dateToNormalizedForcedUtcGlobalDateAndTimeString(min);
+        }
+        break;
+      case "datetime-local":
+        if (typeof hash.max === "undefined" && max instanceof Date) {
+          hash.max = dateToNormalizedLocalDateAndTimeString(max, hash["data-offset"]);
+        }
+        if (typeof hash.min === "undefined" && min instanceof Date) {
+          hash.min = dateToNormalizedLocalDateAndTimeString(min, hash["data-offset"]);
+        }
+        break;
+    }
+
+    if (typeof hash.maxlength === "undefined"
+            && typeof max === "number"
+            && _.contains(["text", "email", "search", "password", "tel", "url"], type)
+            ) {
+      hash.maxlength = max;
+    }
+
+    data.type = type;
+    data.value = value;
+    data.cls = hash["class"] || "";
+    hash = cleanObj(hash, ["class"]);
+    data.atts = hash;
+    template = "_afInput";
   }
+
+  // Return the correct template
+  switch (framework) {
+    case "bootstrap3":
+      template += "_Bootstrap3";
+      break;
+    default:
+      template += "_Plain";
+      break;
+  }
+  return Template[template].withData(data);
+};
+
+var cleanObj = function(hash, props) {
+  _.each(props, function(prop) {
+    if (prop in hash) {
+      delete hash[prop];
+    }
+  });
+
   return hash;
 };
 
-var createLabelHtml = function(name, autoform, defs, hash) {
-  if ("autoform" in hash) {
-    delete hash.autoform;
-  }
-
-  var framework;
-  if ("framework" in hash) {
-    framework = hash.framework;
-    delete hash.framework;
-  } else {
-    framework = autoform._framework || defaultFramework;
-  }
-
-  if (framework === "bootstrap3") {
-    //add bootstrap's control-label class to label element
-    hash["class"] = hash["class"] ? hash["class"] + " control-label" : "control-label"; //IE<10 throws error if hash.class syntax is used
-  }
-
-  var label = defs.label;
-  return '<label' + objToAttributes(hash) + '>' + label + '</label>';
-};
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   if (!template || template._notInDOM) {
     return;
@@ -1248,4 +1240,24 @@ var getDefs = function(ss, name) {
   if (!defs)
     throw new Error("Invalid field name: " + name);
   return defs;
+};
+
+var getAutoForm = function(autoform) {
+  if (typeof autoform === "string") {
+    if (!window || !window[autoform]) {
+      throw new Error("autoForm schema " + autoform + " is not in the window scope");
+    }
+    autoform = window[autoform];
+  }
+
+  // Allow passing a Collection2 as the schema, but wrap in AutoForm
+  if ("Collection2" in Meteor && autoform instanceof Meteor.Collection2) {
+    autoform = new AutoForm(autoform);
+  }
+
+  if (typeof autoform.simpleSchema !== "function") {
+    throw new Error('autoForm schema must be an object with a "simpleSchema" method');
+  }
+
+  return autoform;
 };
