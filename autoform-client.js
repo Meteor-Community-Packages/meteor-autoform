@@ -54,13 +54,30 @@ if (typeof Handlebars !== 'undefined') {
 
     var schemaObj = getAutoForm(hash.schema);
 
+    // Set up the context to be used for everything within the autoform
+    var autoFormContext = {};
+    autoFormContext.context = (this instanceof Window) ? {} : _.clone(this);
+    
+    //formID is used to track input selections so that they are retained
+    //when the form is rerendered. If the id attribute is not provided,
+    //we use a generic ID, which will usually still result in retension
+    //of values, but might not work properly if any forms have input
+    //elements (schema keys) with the same name
+    autoFormContext.context._formID = autoFormContext.atts.id || "_afGenericID";
+
+    // Migration: get the doc after "hot code push"
+    if (Package.reload) {
+      var migrationId = 'autoform_' + autoFormContext.context._formID;
+      hash.doc = Package.reload.Reload._migrationData(migrationId).doc;
+    }
+
     var flatDoc;
     if (hash.doc) {
       var mDoc = new MongoObject(hash.doc);
       flatDoc = mDoc.getFlatObject();
       mDoc = null;
 
-      var docToForm = schemaObj._hooks.docToForm || schemaObj.docToForm;
+      var docToForm = schemaObj._hooks.docToForm;
       if (typeof docToForm === "function") {
         flatDoc = docToForm(flatDoc);
       }
@@ -68,11 +85,7 @@ if (typeof Handlebars !== 'undefined') {
       flatDoc = {};
     }
 
-    // Set up the context to be used for everything within the autoform
-    var autoFormContext = {};
-
     // If a custom context was supplied, keep it
-    autoFormContext.context = (this instanceof Window) ? {} : _.clone(this);
     autoFormContext.context._afObj = schemaObj;
     autoFormContext.context._ss = schemaObj.simpleSchema();
     autoFormContext.context._doc = hash.doc;
@@ -84,14 +97,17 @@ if (typeof Handlebars !== 'undefined') {
     hash = cleanObj(hash, ["__content", "schema", "validation", "framework", "doc", "qfHash"]);
 
     autoFormContext.atts = hash.atts || hash;
-    //formID is used to track input selections so that they are retained
-    //when the form is rerendered. If the id attribute is not provided,
-    //we use a generic ID, which will usually still result in retension
-    //of values, but might not work properly if any forms have input
-    //elements (schema keys) with the same name
-    autoFormContext.context._formID = autoFormContext.atts.id || "_afGenericID";
 
-    return Template._autoForm.withData(autoFormContext);
+    var template = Template._autoForm.withData(autoFormContext);
+
+    // Migration: save the doc before "hode code push"
+    if (Package.reload) {
+      Package.reload.Reload._onMigrate(migrationId, function () {
+        return [true, {doc: formValues(template, schemaObj._hooks.formToDoc)}];
+      });
+    }
+
+    return template;
   });
 
   Handlebars.registerHelper("quickForm", function(options) {
@@ -158,6 +174,16 @@ if (typeof Handlebars !== 'undefined') {
 
     return Template._quickForm.withData(context);
   });
+
+  Template._autoForm.destroyed = function () {
+    var self = this;
+    if (Package.reload) {
+      formId = self.firstNode.id;
+      // We need to unset the migration data here. Something like:
+      // Package.reload.Reload._onMigrate('autoform_' + formId, null);
+      // Meteor core Pull Request?
+    }
+  };
 
   Template._autoForm.afQuickField = function(name, options) {
     var hash = (options || {}).hash || {};
