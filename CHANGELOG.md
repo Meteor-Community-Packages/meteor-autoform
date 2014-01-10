@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.9
+
+Fix error when a source doc has null values
+
 ### 0.4.8
 
 Minor internal change to adjust for changes made to the internal schema in the
