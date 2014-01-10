@@ -6,7 +6,7 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
-### 0.4.9
+### 0.4.9 & 0.4.10
 
 Fix error when a source doc has null values
 
