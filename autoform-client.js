@@ -914,7 +914,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
 
     if (schemaType === Date) {
       if (flatDoc && name in flatDoc) {
-        arrayVal = flatDoc[name];
+        arrayVal = flatDoc[name] || [];
         value = [];
         _.each(arrayVal, function(v) {
           value.push(dateToDateStringUTC(v));
@@ -924,7 +924,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
       }
     } else {
       if (flatDoc && name in flatDoc) {
-        arrayVal = flatDoc[name];
+        arrayVal = flatDoc[name] || [];
         value = [];
         _.each(arrayVal, function(v) {
           value.push(v.toString());
@@ -935,7 +935,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
     }
   } else {
     if (flatDoc && name in flatDoc) {
-      value = flatDoc[name];
+      value = flatDoc[name] || "";
       if (!(value instanceof Date)) { //we will convert dates to a string later, after we know what the field type will be
         value = value.toString();
       }
