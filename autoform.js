@@ -58,6 +58,7 @@ if (typeof Handlebars !== 'undefined') {
     // Set up the context to be used for everything within the autoform
     var autoFormContext = {};
     autoFormContext.context = (this instanceof Window) ? {} : _.clone(this);
+    autoFormContext.atts = hash.atts || hash;
     
     //formID is used to track input selections so that they are retained
     //when the form is rerendered. If the id attribute is not provided,
@@ -65,12 +66,11 @@ if (typeof Handlebars !== 'undefined') {
     //of values, but might not work properly if any forms have input
     //elements (schema keys) with the same name
     var formID = autoFormContext.atts.id || "_afGenericID";
-    autoFormContext.context._formID = formId;
+    autoFormContext.context._formID = formID;
 
-    // Migration: get the doc after "hot code push"
-    if (! hash.doc) {
-      hash.doc = migration.getDocument(formID);
-    }
+    // Migration: retrieve doc after "hot code push"
+    var retrievedDoc = migration.getDocument(formID);
+    if (retrievedDoc !== false) hash.doc = retrievedDoc;
 
     var flatDoc;
     if (hash.doc) {
@@ -92,13 +92,10 @@ if (typeof Handlebars !== 'undefined') {
     autoFormContext.context._doc = hash.doc;
     autoFormContext.context._flatDoc = flatDoc;
     autoFormContext.context._framework = hash.framework || defaultFramework;
-    autoFormContext.context._preserve = hash.preserve || true;
     autoFormContext.context._validationType = hash.validation || "submitThenKeyup";
 
     // Remove from hash everything that we don't want as a form attribute
     hash = cleanObj(hash, ["__content", "schema", "validation", "framework", "doc", "qfHash"]);
-
-    autoFormContext.atts = hash.atts || hash;
 
     var template = Template._autoForm.withData(autoFormContext);
 
@@ -177,11 +174,9 @@ if (typeof Handlebars !== 'undefined') {
 
   Template._autoForm.destroyed = function () {
     var self = this;
-    // TODO: Retrieve context, formId and func
-    if (context.preserve)
-      migration.saveDocument(formId, formValues(this, func))
-    else
-      migration.unregisterForm(formId);
+    var preserve = this.firstNode.className.split(' ').indexOf('preserve') !== -1;
+    if (preserve) migration.saveDocument(formId);
+    migration.unregisterForm(formId);
   };
 
   Template._autoForm.afQuickField = function(name, options) {

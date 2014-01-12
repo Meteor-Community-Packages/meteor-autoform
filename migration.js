@@ -3,14 +3,14 @@
 
 Migration = function(migrationName) {
   var self = this;
-  if (_.isUndefined(migrationName))
-    throw Error("You must define an unique migration name");
-  self.migrationName = migrationName;
+  if (! _.isString(migrationName))
+    throw Error("You must define an unique migration name of type String");
   self.registerForms = {};
   self.retrievedDocuments = {};
   if (Package.reload) {
-    self.retrievedDocuments = Reload._migrationData(self.migrationName);
-    Reload._onMigrate(self.migrationName, function () { 
+    var Reload = Package.reload.Reload;
+    self.retrievedDocuments = Reload._migrationData(migrationName) || {};
+    Reload._onMigrate(migrationName, function () { 
       return [true, self._retrieveRegisteredDocuments()];
     });
   }
@@ -19,13 +19,13 @@ Migration = function(migrationName) {
 Migration.prototype.getDocument = function (formId) {
   var self = this;
   if (! _.has(self.retrievedDocuments, formId))
-    return {}; 
+    return false; 
   else
     return self.retrievedDocuments[formId];
 };
 
-Migration.prototype.saveDocument = function (formId, doc) {
-  this.retrievedDocuments[formId] = doc;
+Migration.prototype.saveDocument = function (formId) {
+  this.retrievedDocuments[formId] = this.registerForms[formId]();
 }
 
 Migration.prototype.registerForm = function (formId, retrieveFunc) {
