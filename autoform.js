@@ -1,4 +1,5 @@
 var defaultFramework = "bootstrap3";
+var migration = new Migration("autoforms");
 
 AutoForm = function(schema) {
   var self = this;
@@ -63,12 +64,12 @@ if (typeof Handlebars !== 'undefined') {
     //we use a generic ID, which will usually still result in retension
     //of values, but might not work properly if any forms have input
     //elements (schema keys) with the same name
-    autoFormContext.context._formID = autoFormContext.atts.id || "_afGenericID";
+    var formID = autoFormContext.atts.id || "_afGenericID";
+    autoFormContext.context._formID = formId;
 
     // Migration: get the doc after "hot code push"
-    if (Package.reload) {
-      var migrationId = 'autoform_' + autoFormContext.context._formID;
-      hash.doc = Package.reload.Reload._migrationData(migrationId).doc;
+    if (! hash.doc) {
+      hash.doc = migration.getDocument(formID);
     }
 
     var flatDoc;
@@ -91,6 +92,7 @@ if (typeof Handlebars !== 'undefined') {
     autoFormContext.context._doc = hash.doc;
     autoFormContext.context._flatDoc = flatDoc;
     autoFormContext.context._framework = hash.framework || defaultFramework;
+    autoFormContext.context._preserve = hash.preserve || true;
     autoFormContext.context._validationType = hash.validation || "submitThenKeyup";
 
     // Remove from hash everything that we don't want as a form attribute
@@ -101,11 +103,9 @@ if (typeof Handlebars !== 'undefined') {
     var template = Template._autoForm.withData(autoFormContext);
 
     // Migration: save the doc before "hode code push"
-    if (Package.reload) {
-      Package.reload.Reload._onMigrate(migrationId, function () {
-        return [true, {doc: formValues(template, schemaObj._hooks.formToDoc)}];
-      });
-    }
+    migration.registerForm(formID, function () {
+      return formValues(template, schemaObj._hooks.formToDoc);
+    })
 
     return template;
   });
@@ -177,12 +177,11 @@ if (typeof Handlebars !== 'undefined') {
 
   Template._autoForm.destroyed = function () {
     var self = this;
-    if (Package.reload) {
-      formId = self.firstNode.id;
-      // We need to unset the migration data here. Something like:
-      // Package.reload.Reload._onMigrate('autoform_' + formId, null);
-      // Meteor core Pull Request?
-    }
+    // TODO: Retrieve context, formId and func
+    if (context.preserve)
+      migration.saveDocument(formId, formValues(this, func))
+    else
+      migration.unregisterForm(formId);
   };
 
   Template._autoForm.afQuickField = function(name, options) {
@@ -489,6 +488,8 @@ if (typeof Handlebars !== 'undefined') {
           submitButton.disabled = false;
         }
       }
+
+      migration.unregisterForm(formId);
     },
     'keyup [data-schema-key]': function(event, template) {
       var validationType = template.data.context._validationType;
@@ -521,6 +522,7 @@ if (typeof Handlebars !== 'undefined') {
       var self = this, context = self.context, ss = context._ss, formId = context._formID;
       if (ss && formId) {
         AutoForm.resetForm(formId, ss);
+        migration.unregisterForm(formId);
       }
     }
   });
