@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.10
+
+Add explicit cleaning since SimpleSchema validation does not do it anymore
+
 ### 0.4.9
 
 Fix error when a source doc has null values
