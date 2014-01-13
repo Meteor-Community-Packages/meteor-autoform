@@ -397,8 +397,12 @@ if (typeof Handlebars !== 'undefined') {
       //for inserts, delete any properties that are null, undefined, or empty strings,
       //and expand to use subdocuments instead of dot notation keys
       var insertDoc = expandObj(cleanNulls(doc));
+      //then clean
+      insertDoc = ss.clean(insertDoc);
+      
       //for updates, convert to modifier object with $set and $unset
       var updateDoc = docToModifier(doc);
+      //no need to clean updateDoc now because the update method will do it
 
       if (isInsert || isUpdate || isRemove || method) {
         event.preventDefault(); //prevent default here if we're planning to do our own thing
@@ -1257,9 +1261,13 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
 
   // Clean and validate doc
   if (isUpdate) {
-    afObj.simpleSchema().namedContext(formId).validateOne(docToModifier(doc), key, {modifier: true});
+    var updateDoc = docToModifier(doc);
+    updateDoc = afObj.simpleSchema().clean(updateDoc);
+    afObj.simpleSchema().namedContext(formId).validateOne(updateDoc, key, {modifier: true});
   } else {
-    afObj.simpleSchema().namedContext(formId).validateOne(expandObj(doc), key, {modifier: false});
+    var insertDoc = expandObj(doc);
+    insertDoc = afObj.simpleSchema().clean(insertDoc);
+    afObj.simpleSchema().namedContext(formId).validateOne(insertDoc, key, {modifier: false});
   }
 };
 //throttling function that calls out to _validateField
