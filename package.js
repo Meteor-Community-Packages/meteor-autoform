@@ -5,7 +5,7 @@ Package.describe({
 Package.on_use(function(api) {
   api.use(['underscore', 'deps', 'templating', 'handlebars', 'moment'], 'client');
   api.use('reload', 'client', {weak: true});
-  // api.use('collection2', ['client', 'server'], {weak: true});
+  api.use('collection2', ['client', 'server'], {weak: true});
   api.use('simple-schema', ['client', 'server']);
 
   if (typeof api.export !== 'undefined') {

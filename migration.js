@@ -37,7 +37,9 @@ Migration.prototype.unregisterForm = function (formId) {
 };
 
 Migration.prototype._retrieveRegisteredDocuments = function () {
-  return _.map(this.registerForms, function (retrieveFunc) {
-    return retrieveFunc();
+  res = {};
+  _.each(this.registerForms, function (retrieveFunc, formId) {
+    res[formId] = retrieveFunc();
   });
+  return res;
 };
