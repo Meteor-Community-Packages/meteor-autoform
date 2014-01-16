@@ -392,7 +392,9 @@ if (typeof Handlebars !== 'undefined') {
       var docId = currentDoc ? currentDoc._id : null;
       var doc = formValues(template, hooks.formToDoc || afObj.formToDoc);
       var onSubmit = hooks.onSubmit || template.data.onSubmit;
+      var hasOnSubmit = (typeof onSubmit === "function");
       var ss = afObj.simpleSchema();
+      
 
       //for inserts, delete any properties that are null, undefined, or empty strings,
       //and expand to use subdocuments instead of dot notation keys
@@ -400,16 +402,19 @@ if (typeof Handlebars !== 'undefined') {
       //then clean
       insertDoc = ss.clean(insertDoc);
       
-      //for updates, convert to modifier object with $set and $unset
-      var updateDoc = docToModifier(doc);
-      //no need to clean updateDoc now because the update method will do it
+      var updateDoc;
+      if (isUpdate || hasOnSubmit) {
+        //for updates, convert to modifier object with $set and $unset
+        updateDoc = docToModifier(doc);
+        //no need to clean updateDoc now because the update method will do it
+      }
 
       if (isInsert || isUpdate || isRemove || method) {
         event.preventDefault(); //prevent default here if we're planning to do our own thing
       }
 
       //pass both types of doc to onSubmit
-      if (typeof onSubmit === "function") {
+      if (hasOnSubmit) {
         if (validationType === 'none' || ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
           var context = {
             resetForm: function() {
