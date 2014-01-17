@@ -1,11 +1,11 @@
-// Intern `Migration` object helper to preserve form inputs across Hot 
+// Intern `FormPreserve` object helper to preserve form inputs across Hot 
 // Code Push and across "pages" navigation if the option is enabled.
 
-Migration = function(migrationName) {
+FormPreserve = function(migrationName) {
   var self = this;
   if (! _.isString(migrationName))
     throw Error("You must define an unique migration name of type String");
-  self.registerForms = {};
+  self.registeredForms = {};
   self.retrievedDocuments = {};
   if (Package.reload) {
     var Reload = Package.reload.Reload;
@@ -16,7 +16,7 @@ Migration = function(migrationName) {
   }
 };
 
-Migration.prototype.getDocument = function (formId) {
+FormPreserve.prototype.getDocument = function (formId) {
   var self = this;
   if (! _.has(self.retrievedDocuments, formId))
     return false; 
@@ -24,21 +24,21 @@ Migration.prototype.getDocument = function (formId) {
     return self.retrievedDocuments[formId];
 };
 
-Migration.prototype.saveDocument = function (formId) {
-  this.retrievedDocuments[formId] = this.registerForms[formId]();
+FormPreserve.prototype.saveDocument = function (formId) {
+  this.retrievedDocuments[formId] = this.registeredForms[formId]();
 }
 
-Migration.prototype.registerForm = function (formId, retrieveFunc) {
-  this.registerForms[formId] = retrieveFunc;
+FormPreserve.prototype.registerForm = function (formId, retrieveFunc) {
+  this.registeredForms[formId] = retrieveFunc;
 };
 
-Migration.prototype.unregisterForm = function (formId) {
-  delete this.registerForms[formId];
+FormPreserve.prototype.unregisterForm = function (formId) {
+  delete this.registeredForms[formId];
 };
 
-Migration.prototype._retrieveRegisteredDocuments = function () {
+FormPreserve.prototype._retrieveRegisteredDocuments = function () {
   res = {};
-  _.each(this.registerForms, function (retrieveFunc, formId) {
+  _.each(this.registeredForms, function (retrieveFunc, formId) {
     res[formId] = retrieveFunc();
   });
   return res;

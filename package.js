@@ -14,5 +14,5 @@ Package.on_use(function(api) {
     api.export('AutoForm', 'client');
   }
 
-  api.add_files(['autoform.html', 'migration.js', 'autoform.js'], 'client');
+  api.add_files(['autoform.html', 'form-preserve.js', 'autoform.js'], 'client');
 });

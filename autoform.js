@@ -1,5 +1,5 @@
 var defaultFramework = "bootstrap3";
-var migration = new Migration("autoforms");
+var formPreserve = new FormPreserve("autoforms");
 
 AutoForm = function(schema) {
   var self = this;
@@ -68,8 +68,8 @@ if (typeof Handlebars !== 'undefined') {
     var formId = autoFormContext.atts.id || "_afGenericID";
     autoFormContext.context._formId = formId;
 
-    // Migration: retrieve doc after "hot code push"
-    var retrievedDoc = migration.getDocument(formId);
+    // formPreserve: retrieve doc after "hot code push"
+    var retrievedDoc = formPreserve.getDocument(formId);
     if (retrievedDoc !== false) hash.doc = retrievedDoc;
 
     var flatDoc;
@@ -91,7 +91,6 @@ if (typeof Handlebars !== 'undefined') {
     autoFormContext.context._ss = schemaObj.simpleSchema();
     autoFormContext.context._doc = hash.doc;
     autoFormContext.context._flatDoc = flatDoc;
-    autoFormContext.context._preserve = hash.preserve || true;
     autoFormContext.context._framework = hash.framework || defaultFramework;
     autoFormContext.context._validationType = hash.validation || "submitThenKeyup";
 
@@ -169,7 +168,7 @@ if (typeof Handlebars !== 'undefined') {
   Template._autoForm.created = function() {
     var self = this;
     var formId = self.data.atts.id;
-    migration.registerForm(formId, function () {
+    formPreserve.registerForm(formId, function () {
       return formValues(self, self.data.context._afObj._hooks.formToDoc);
     });
   };
@@ -178,15 +177,7 @@ if (typeof Handlebars !== 'undefined') {
     var self = this;
     self._notInDOM = true;
     var formId = self.data.atts.id;
-    if (self.data.context._preserve) {
-      // TODO/BUG: The formValues function use the `.findAll()` method of a template intance
-      // to retreive input values. But it's not possible to use this method in this `destroyed`
-      // callback. It raises the following error:
-      // Error: Can't select in removed DomRange
-      
-      // migration.saveDocument(formId);
-    }
-    migration.unregisterForm(formId);
+    formPreserve.unregisterForm(formId);
   };
 
   Template._autoForm.afQuickField = function(name, options) {
@@ -494,7 +485,7 @@ if (typeof Handlebars !== 'undefined') {
         }
       }
 
-      migration.unregisterForm(formId);
+      formPreserve.unregisterForm(formId);
     },
     'keyup [data-schema-key]': function(event, template) {
       var validationType = template.data.context._validationType;
@@ -527,7 +518,7 @@ if (typeof Handlebars !== 'undefined') {
       var self = this, context = self.context, ss = context._ss, formId = context._formId;
       if (ss && formId) {
         AutoForm.resetForm(formId, ss);
-        migration.unregisterForm(formId);
+        formPreserve.unregisterForm(formId);
       }
     }
   });
