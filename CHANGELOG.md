@@ -6,6 +6,14 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### Next
+
+* Don't include fields in quickForms if their name contains "$"
+* Use `textarea` instead of `input[type=text]` if the schema type is `String`,
+no specific type attribute is specified, and the current value of the doc
+contains line break characters.
+* Within an `onSubmit` function, you can now access `this.event` and `this.template`.
+
 ### 0.4.10
 
 Add explicit cleaning since SimpleSchema validation does not do it anymore

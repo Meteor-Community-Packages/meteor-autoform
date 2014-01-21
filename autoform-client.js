@@ -233,15 +233,22 @@ if (typeof Handlebars !== 'undefined') {
     };
 
     _.each(hash.schema.simpleSchema().schema(), function(fieldDefs, field) {
+      // Don't include fields with denyInsert=true when it's an insert form
+      if (fieldDefs.denyInsert && hash.type === "insert") return;
+      
+      // Don't include fields with denyUpdate=true when it's an update form
+      if (fieldDefs.denyUpdate && hash.type === "update") return;
+      
+      // Don't include fields with array placeholders
+      if (field.indexOf("$") !== -1) return;
+      
       var info = {name: field};
-
-      if ((fieldDefs.denyInsert && hash.type === "insert") ||
-              (fieldDefs.denyUpdate && hash.type === "update")) {
-        return;
-      }
+      
+      // If there are allowedValues defined, use them as select element options
       if (_.isArray(fieldDefs.allowedValues)) {
         info.options = "allowed";
       }
+      
       context.formFields.push(info);
     });
 
@@ -417,6 +424,8 @@ if (typeof Handlebars !== 'undefined') {
       if (hasOnSubmit) {
         if (validationType === 'none' || ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
           var context = {
+            event: event,
+            template: template,
             resetForm: function() {
               template.find("form").reset();
             }
@@ -424,6 +433,7 @@ if (typeof Handlebars !== 'undefined') {
           var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
           if (shouldContinue === false) {
             event.preventDefault();
+            event.stopPropagation();
             submitButton.disabled = false;
             return;
           }
@@ -952,6 +962,8 @@ var createInputHtml = function(name, autoform, defs, hash) {
       value = hash.value || "";
     }
   }
+  
+  var valHasLineBreaks = (value.indexOf("\n") !== -1);
 
   //required?
   var req = defs.optional ? "" : " required";
@@ -960,7 +972,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   var type = "text";
   if (hash.type) {
     type = hash.type;
-  } else if (schemaType === String && hash.rows) {
+  } else if (schemaType === String && (hash.rows || valHasLineBreaks)) {
     type = "textarea";
   } else if (schemaType === String && defs.regEx === SchemaRegEx.Email) {
     type = "email";
