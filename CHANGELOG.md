@@ -13,6 +13,8 @@ forms with automatic insert and update events, and automatic reactive validation
 no specific type attribute is specified, and the current value of the doc
 contains line break characters.
 * Within an `onSubmit` function, you can now access `this.event` and `this.template`.
+* Specify `element="none"` or `element="span"` on afFieldLabel to get just
+the text or to use a `<span>` element, respectively.
 
 ### 0.4.10
 

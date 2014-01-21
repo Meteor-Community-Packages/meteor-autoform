@@ -1238,7 +1238,20 @@ var createLabelHtml = function(name, autoform, defs, hash) {
   }
 
   var label = defs.label;
-  return '<label' + objToAttributes(hash) + '>' + label + '</label>';
+  
+  var element = "label";
+  if (hash.element) {
+    element = hash.element;
+    delete hash.element;
+  }
+  
+  if (element === "none") {
+    return label;
+  } else if (element === "span") {
+    return '<span' + objToAttributes(hash) + '>' + label + '</span>';
+  } else {
+    return '<label' + objToAttributes(hash) + '>' + label + '</label>';
+  }
 };
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   if (!template || template._notInDOM) {
