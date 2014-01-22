@@ -857,6 +857,11 @@ a normal form (to the `action` url) if you have not set up the submit button to 
 remove, or method call. This may be useful in some cases because it allows normal form submission after
 auto-validation.
 
+In most cases, the form is automatically reset for you after a successful
+submission action. For update forms, the form is *not* automatically reset. You
+can alter this default behavior by adding a `resetOnSuccess` attribute on your
+autoform helper, set to true or false.
+
 ## Frameworks
 
 By default, Bootstrap 3 classes are added to any generated elements. You may use

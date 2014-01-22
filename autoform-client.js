@@ -193,6 +193,11 @@ if (typeof Handlebars !== 'undefined') {
     if ("validation" in hash) {
       delete hash.validation;
     }
+    
+    if ("resetOnSuccess" in hash) {
+      autoFormContext._resetOnSuccess = hash.resetOnSuccess;
+      delete hash.resetOnSuccess;
+    }
 
     if ("onSubmit" in hash) {
       if (typeof hash.onSubmit === "function") {
@@ -427,7 +432,7 @@ if (typeof Handlebars !== 'undefined') {
       var onSubmit = hooks.onSubmit || template.data.onSubmit;
       var hasOnSubmit = (typeof onSubmit === "function");
       var ss = afObj.simpleSchema();
-
+      var resetOnSuccess = template.data._resetOnSuccess;
 
       //for inserts, delete any properties that are null, undefined, or empty strings,
       //and expand to use subdocuments instead of dot notation keys
@@ -501,7 +506,9 @@ if (typeof Handlebars !== 'undefined') {
           if (error) {
             onError && onError('insert', error, template);
           } else {
-            template.find("form").reset();
+            if (resetOnSuccess !== false) {
+              template.find("form").reset();
+            }
             onSuccess && onSuccess('insert', result, template);
           }
           afterInsert && afterInsert(error, result, template);
@@ -517,11 +524,14 @@ if (typeof Handlebars !== 'undefined') {
           }
 
           afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error, result) {
-            //don't automatically reset the form for updates because we
-            //often won't want that
             if (error) {
               onError && onError('update', error, template);
             } else {
+              //don't automatically reset the form for updates because we
+              //often won't want that
+              if (resetOnSuccess === true) {
+                template.find("form").reset();
+              }
               onSuccess && onSuccess('update', result, template);
             }
             afterUpdate && afterUpdate(error, result, template);
@@ -538,6 +548,9 @@ if (typeof Handlebars !== 'undefined') {
             if (error) {
               onError && onError('remove', error, template);
             } else {
+              if (resetOnSuccess !== false) {
+                template.find("form").reset();
+              }
               onSuccess && onSuccess('remove', result, template);
             }
             afterRemove && afterRemove(error, result, template);
@@ -563,7 +576,9 @@ if (typeof Handlebars !== 'undefined') {
             if (error) {
               onError && onError(method, error, template);
             } else {
-              template.find("form").reset();
+              if (resetOnSuccess !== false) {
+                template.find("form").reset();
+              }
               onSuccess && onSuccess(method, result, template);
             }
             afterMethod && afterMethod(error, result, template);

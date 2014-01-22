@@ -17,6 +17,8 @@ contains line break characters.
 the text or to use a `<span>` element, respectively.
 * `quickForm` and `afQuickField` now support a `template` attribute, allowing
 you to define your own template to be used for the quick fields.
+* Provide `resetOnSuccess` attribute to specify auto-reset behavior for a
+specific autoform.
 
 ### 0.4.10
 
