@@ -988,7 +988,9 @@ var getInputTemplate = function(name, autoform, defs, hash) {
 
   // Determine which template to render and what options to use
   var template, data = {};
-  hash.required = hash.required || !defs.optional;
+  if (typeof hash.required === "undefined" && !defs.optional) {
+    hash.required = "";
+  }
   data.name = name;
   if (selectOptions) {
     // Build anything that should be a select, which is anything with options
