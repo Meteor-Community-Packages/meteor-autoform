@@ -583,10 +583,17 @@ The arguments passed to your function are as follows:
 * `updateDoc`: The form input values in a modifier, suitable for use with update()
 * `currentDoc`: The object that's currently bound to the form through the doc attribute
 
-`this` provides a `resetForm` method, which you can call to reset the corresponding autoform if necessary.
+And `this` provides the following:
 
-If you return false, no further submission will happen. This allows you to use an
-`onSubmit` hook in combination with other submission methods.
+* A `resetForm` method, which you can call to reset the corresponding autoform
+if necessary
+* The form submit event, in `event`
+* The template, in `template`
+
+If you return false, no further submission will happen, and it is equivalent
+to calling `event.preventDefault()` and `event.stopPropagation()`.
+This allows you to use an `onSubmit` hook in combination with other
+submission methods.
 
 Otherwise the onSubmit function acts pretty much like any other onSubmit function, except
 that insertDoc and updateDoc are validated before it is called. However, since
