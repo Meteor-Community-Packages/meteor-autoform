@@ -6,6 +6,12 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.12
+
+Add support for `fields` attribute on `quickForm`. Bind an array or specify
+a comma-delimited string of field names to include. Only the listed fields
+will be included, and they'll appear in the order you specify.
+
 ### 0.4.11
 
 * Don't include fields in quickForms if their name contains "$"

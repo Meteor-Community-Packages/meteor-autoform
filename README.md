@@ -717,6 +717,10 @@ Syntax:
 * `buttonClasses`: class attribute for the submit button.
 * `buttonContent`: The submit button content. If you don't set this, "Submit" is used.
 * `framework`: Optional. See the "Frameworks" section.
+* `template`: Optional. See the "Custom Templates" section.
+* `fields`: Optional. Bind an array or specify a comma-delimited string of field
+names to include. Only the listed fields will be included, and they'll appear
+in the order you specify.
 
 Those are the only supported attributes at this time. Any other attributes you specify will be output as
 attributes of the `<form>` element, just like when using the `{{autoForm}}` block helper.
@@ -739,6 +743,8 @@ attribute value to automatically use the label from the schema.
 
 The `framework` attribute can be used with this helper as well. See the "Frameworks" section. To set the 
 framework for the label, use `label-framework`.
+
+The `template` attribute can be used with this helper as well. See the "Custom Templates" section. 
 
 ### afQuickField Example
 

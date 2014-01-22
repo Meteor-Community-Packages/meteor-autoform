@@ -236,9 +236,21 @@ if (typeof Handlebars !== 'undefined') {
     var context = {
       formFields: []
     };
+    
+    var fieldWhitelist;
+    if ("fields" in hash) {
+      if (_.isArray(hash.fields)) {
+        fieldWhitelist = hash.fields;
+      } else if (typeof hash.fields === "string") {
+        fieldWhitelist = hash.fields.replace(/ /g, '').split(',');
+      }
+      delete hash.fields;
+    }
 
     var ss = hash.schema.simpleSchema();
-    _.each(ss.schema(), function(fieldDefs, field) {
+    _.each(fieldWhitelist || ss._schemaKeys, function(field) {
+      var fieldDefs = ss.schema(field);
+      
       // Don't include fields with denyInsert=true when it's an insert form
       if (fieldDefs.denyInsert && hash.type === "insert")
         return;
@@ -1054,7 +1066,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
     }
   }
 
-  var label = defs.label;
+  var label = autoform._ss.label(makeGeneric(name));
 
   //get correct max/min attributes
   var max = "", min = "";
@@ -1278,7 +1290,7 @@ var createLabelHtml = function(name, autoform, defs, hash) {
     hash["class"] = hash["class"] ? hash["class"] + " control-label" : "control-label"; //IE<10 throws error if hash.class syntax is used
   }
 
-  var label = defs.label;
+  var label = autoform._ss.label(makeGeneric(name));
 
   var element = "label";
   if (hash.element) {
