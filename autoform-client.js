@@ -232,23 +232,32 @@ if (typeof Handlebars !== 'undefined') {
       formFields: []
     };
 
-    _.each(hash.schema.simpleSchema().schema(), function(fieldDefs, field) {
+    var ss = hash.schema.simpleSchema();
+    _.each(ss.schema(), function(fieldDefs, field) {
       // Don't include fields with denyInsert=true when it's an insert form
-      if (fieldDefs.denyInsert && hash.type === "insert") return;
-      
+      if (fieldDefs.denyInsert && hash.type === "insert")
+        return;
+
       // Don't include fields with denyUpdate=true when it's an update form
-      if (fieldDefs.denyUpdate && hash.type === "update") return;
-      
+      if (fieldDefs.denyUpdate && hash.type === "update")
+        return;
+
       // Don't include fields with array placeholders
-      if (field.indexOf("$") !== -1) return;
-      
+      if (field.indexOf("$") !== -1)
+        return;
+
       var info = {name: field};
-      
+
       // If there are allowedValues defined, use them as select element options
-      if (_.isArray(fieldDefs.allowedValues)) {
+      var av = fieldDefs.allowedValues;
+      if (fieldDefs.type === Array) {
+        var arrayItemDefs = ss.schema(field + ".$");
+        av = arrayItemDefs.allowedValues;
+      }
+      if (_.isArray(av)) {
         info.options = "allowed";
       }
-      
+
       context.formFields.push(info);
     });
 
@@ -273,7 +282,7 @@ if (typeof Handlebars !== 'undefined') {
     if ("method" in hash) {
       delete hash.method;
     }
-    
+
     if ("template" in hash) {
       context.template = hash.template;
       delete hash.template;
@@ -301,7 +310,7 @@ if (typeof Handlebars !== 'undefined') {
 
     if (!ss)
       throw new Error("afQuickField helper must be used within an autoForm block");
-    
+
     if (hash.template) {
       template = hash.template;
       if (typeof template === "string") {
@@ -418,14 +427,14 @@ if (typeof Handlebars !== 'undefined') {
       var onSubmit = hooks.onSubmit || template.data.onSubmit;
       var hasOnSubmit = (typeof onSubmit === "function");
       var ss = afObj.simpleSchema();
-      
+
 
       //for inserts, delete any properties that are null, undefined, or empty strings,
       //and expand to use subdocuments instead of dot notation keys
       var insertDoc = expandObj(cleanNulls(doc));
       //then clean
       insertDoc = ss.clean(insertDoc);
-      
+
       var updateDoc;
       if (isUpdate || hasOnSubmit) {
         //for updates, convert to modifier object with $set and $unset
@@ -918,7 +927,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   if (schemaType === Array) {
     defs = autoform._ss.schema(name + ".$");
     schemaType = defs.type;
-    
+
     //if the user overrides the type to anything,
     //then we won't be using a select box and
     //we won't be expecting an array for the current value
@@ -979,7 +988,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
       value = hash.value || "";
     }
   }
-  
+
   var valHasLineBreaks = (value.indexOf("\n") !== -1);
 
   //required?
@@ -1064,7 +1073,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   } else if (typeof resolvedMax === "number" && type === "number") {
     max = ' max="' + resolvedMax + '"';
   }
-  
+
   // Number or Date maximums
   if (hash.min && _.contains(["number", "date", "datetime", "datetime-local"], type)) {
     min = ' min="' + hash.min + '"';
@@ -1255,13 +1264,13 @@ var createLabelHtml = function(name, autoform, defs, hash) {
   }
 
   var label = defs.label;
-  
+
   var element = "label";
   if (hash.element) {
     element = hash.element;
     delete hash.element;
   }
-  
+
   if (element === "none") {
     return label;
   } else if (element === "span") {
