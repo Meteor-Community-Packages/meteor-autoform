@@ -358,7 +358,7 @@ if (typeof Handlebars !== 'undefined') {
     if (skipLabel) {
       context.labelHtml = "";
     } else {
-      context.labelHtml = createLabelHtml(name, autoform, defs, labelHash);
+      context.labelHtml = createLabelHtml(name, autoform, defs, labelHash, ss);
     }
 
     //add input HTML to _afQuickField template context
@@ -401,7 +401,7 @@ if (typeof Handlebars !== 'undefined') {
       throw new Error("afFieldInput helper must be used within an autoForm block");
 
     var defs = getDefs(ss, name); //defs will not be undefined
-    var html = createLabelHtml(name, autoform, defs, options.hash);
+    var html = createLabelHtml(name, autoform, defs, options.hash, ss);
     return new Handlebars.SafeString(html);
   });
 
@@ -1260,7 +1260,7 @@ var cleanHash = function(hash) {
   return hash;
 };
 
-var createLabelHtml = function(name, autoform, defs, hash) {
+var createLabelHtml = function(name, autoform, defs, hash, ss) {
   if ("autoform" in hash) {
     delete hash.autoform;
   }
@@ -1278,7 +1278,7 @@ var createLabelHtml = function(name, autoform, defs, hash) {
     hash["class"] = hash["class"] ? hash["class"] + " control-label" : "control-label"; //IE<10 throws error if hash.class syntax is used
   }
 
-  var label = defs.label;
+  var label = ss.label(name);
 
   var element = "label";
   if (hash.element) {
