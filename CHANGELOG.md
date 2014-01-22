@@ -15,6 +15,8 @@ contains line break characters.
 * Within an `onSubmit` function, you can now access `this.event` and `this.template`.
 * Specify `element="none"` or `element="span"` on afFieldLabel to get just
 the text or to use a `<span>` element, respectively.
+* `quickForm` and `afQuickField` now support a `template` attribute, allowing
+you to define your own template to be used for the quick fields.
 
 ### 0.4.10
 

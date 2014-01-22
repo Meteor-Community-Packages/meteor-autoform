@@ -8,12 +8,12 @@
   {{#autoForm qfHash=qfHash}}
   {{#each ../formFields}}
   {{#if ../../isReadOnly}}
-  {{afQuickField ../this.name autoform=../../this options=../this.options readonly=""}}
+  {{afQuickField ../this.name autoform=../../this options=../this.options template=../../../template readonly=""}}
   {{else}}
   {{#if ../../../isDisabled}}
-  {{afQuickField ../../this.name autoform=../../../this options=../../this.options disabled=""}}
+  {{afQuickField ../../this.name autoform=../../../this options=../../this.options template=../../../../template disabled=""}}
   {{else}}
-  {{afQuickField ../../this.name autoform=../../../this options=../../this.options}}
+  {{afQuickField ../../this.name autoform=../../../this options=../../this.options template=../../../../template}}
   {{/if}}
   {{/if}}
   {{/each}}

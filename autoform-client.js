@@ -273,6 +273,11 @@ if (typeof Handlebars !== 'undefined') {
     if ("method" in hash) {
       delete hash.method;
     }
+    
+    if ("template" in hash) {
+      context.template = hash.template;
+      delete hash.template;
+    }
 
     if ("buttonClasses" in hash) {
       context.buttonClasses = hash.buttonClasses;
@@ -290,12 +295,24 @@ if (typeof Handlebars !== 'undefined') {
   });
 
   Handlebars.registerHelper("afQuickField", function(name, options) {
-    var hash = options.hash,
+    var hash = options.hash, template,
             autoform = hash.autoform || this,
             ss = autoform._ss;
 
     if (!ss)
       throw new Error("afQuickField helper must be used within an autoForm block");
+    
+    if (hash.template) {
+      template = hash.template;
+      if (typeof template === "string") {
+        template = Template[template];
+      }
+      if (typeof template !== "function") {
+        template = Template._afQuickField;
+      }
+    } else {
+      template = Template._afQuickField;
+    }
 
     var defs = getDefs(ss, name); //defs will not be undefined
 
@@ -333,7 +350,7 @@ if (typeof Handlebars !== 'undefined') {
     //add input HTML to _afQuickField template context
     context.inputHtml = createInputHtml(name, autoform, defs, inputHash);
 
-    return new Handlebars.SafeString(Template._afQuickField(context));
+    return new Handlebars.SafeString(template(context));
   });
 
   Handlebars.registerHelper("afFieldMessage", function(name, options) {
