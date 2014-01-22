@@ -6,7 +6,7 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
-### Next
+### 0.4.11
 
 * Don't include fields in quickForms if their name contains "$"
 * Use `textarea` instead of `input[type=text]` if the schema type is `String`,

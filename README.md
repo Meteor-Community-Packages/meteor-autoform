@@ -7,6 +7,8 @@ This package requires and automatically installs the [simple-schema](https://git
 You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you
 have to add to your app yourself.
 
+*Note: If you're using Meteor UI, use the `ui` branch of autoform.*
+
 ## Installation
 
 Install using Meteorite. When in a Meteorite-managed app directory, enter:

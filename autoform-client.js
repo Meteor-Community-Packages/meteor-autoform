@@ -1004,8 +1004,8 @@ var createInputHtml = function(name, autoform, defs, hash) {
     }
   }
 
-  var valHasLineBreaks = (value.indexOf("\n") !== -1);
-
+  var valHasLineBreaks = typeof value === "string" ? (value.indexOf("\n") !== -1) : false;
+  
   //required?
   var req = defs.optional ? "" : " required";
 
