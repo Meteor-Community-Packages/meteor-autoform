@@ -1,4 +1,5 @@
 var defaultFramework = "bootstrap3";
+var formPreserve = new FormPreserve("autoforms");
 
 AutoForm = function(schema) {
   var self = this;
@@ -34,13 +35,13 @@ AutoForm.prototype.hooks = function(hooks) {
   _.extend(this._hooks, hooks);
 };
 
-AutoForm.resetForm = function(formID, simpleSchema) {
-  if (typeof formID !== "string") {
+AutoForm.resetForm = function(formId, simpleSchema) {
+  if (typeof formId !== "string") {
     return;
   }
 
-  simpleSchema && simpleSchema.namedContext(formID).resetValidation();
-  clearSelections(formID);
+  simpleSchema && simpleSchema.namedContext(formId).resetValidation();
+  clearSelections(formId);
 };
 
 if (typeof Handlebars !== 'undefined') {
@@ -54,13 +55,30 @@ if (typeof Handlebars !== 'undefined') {
 
     var schemaObj = getAutoForm(hash.schema);
 
+    // Set up the context to be used for everything within the autoform
+    var autoFormContext = {};
+    autoFormContext.context = (this instanceof Window) ? {} : _.clone(this);
+    autoFormContext.atts = hash.atts || hash;
+    
+    //formId is used to track input selections so that they are retained
+    //when the form is rerendered. If the id attribute is not provided,
+    //we use a generic ID, which will usually still result in retension
+    //of values, but might not work properly if any forms have input
+    //elements (schema keys) with the same name
+    var formId = autoFormContext.atts.id || "_afGenericID";
+    autoFormContext.context._formId = formId;
+
+    // formPreserve: retrieve doc after "hot code push"
+    var retrievedDoc = formPreserve.getDocument(formId);
+    if (retrievedDoc !== false) hash.doc = retrievedDoc;
+
     var flatDoc;
     if (hash.doc) {
       var mDoc = new MongoObject(hash.doc);
       flatDoc = mDoc.getFlatObject();
       mDoc = null;
 
-      var docToForm = schemaObj._hooks.docToForm || schemaObj.docToForm;
+      var docToForm = schemaObj._hooks.docToForm;
       if (typeof docToForm === "function") {
         flatDoc = docToForm(flatDoc);
       }
@@ -68,11 +86,7 @@ if (typeof Handlebars !== 'undefined') {
       flatDoc = {};
     }
 
-    // Set up the context to be used for everything within the autoform
-    var autoFormContext = {};
-
     // If a custom context was supplied, keep it
-    autoFormContext.context = (this instanceof Window) ? {} : _.clone(this);
     autoFormContext.context._afObj = schemaObj;
     autoFormContext.context._ss = schemaObj.simpleSchema();
     autoFormContext.context._doc = hash.doc;
@@ -82,14 +96,6 @@ if (typeof Handlebars !== 'undefined') {
 
     // Remove from hash everything that we don't want as a form attribute
     hash = cleanObj(hash, ["__content", "schema", "validation", "framework", "doc", "qfHash"]);
-
-    autoFormContext.atts = hash.atts || hash;
-    //formID is used to track input selections so that they are retained
-    //when the form is rerendered. If the id attribute is not provided,
-    //we use a generic ID, which will usually still result in retension
-    //of values, but might not work properly if any forms have input
-    //elements (schema keys) with the same name
-    autoFormContext.context._formID = autoFormContext.atts.id || "_afGenericID";
 
     return Template._autoForm.withData(autoFormContext);
   });
@@ -159,6 +165,21 @@ if (typeof Handlebars !== 'undefined') {
     return Template._quickForm.withData(context);
   });
 
+  Template._autoForm.created = function() {
+    var self = this;
+    var formId = self.data.atts.id;
+    formPreserve.registerForm(formId, function () {
+      return formValues(self, self.data.context._afObj._hooks.formToDoc);
+    });
+  };
+
+  Template._autoForm.destroyed = function () {
+    var self = this;
+    self._notInDOM = true;
+    var formId = self.data.atts.id;
+    formPreserve.unregisterForm(formId);
+  };
+
   Template._autoForm.afQuickField = function(name, options) {
     var hash = (options || {}).hash || {};
     var afContext = hash.autoform || this, ss = afContext._ss;
@@ -212,7 +233,7 @@ if (typeof Handlebars !== 'undefined') {
     }
 
     getDefs(ss, name); //for side effect of throwing errors when name is not in schema
-    return ss.namedContext(autoform._formID).keyErrorMessage(name);
+    return ss.namedContext(autoform._formId).keyErrorMessage(name);
   };
 
   Template._autoForm.afFieldIsInvalid = function(name, options) {
@@ -223,7 +244,7 @@ if (typeof Handlebars !== 'undefined') {
     }
 
     getDefs(ss, name); //for side effect of throwing errors when name is not in schema
-    return ss.namedContext(autoform._formID).keyIsInvalid(name);
+    return ss.namedContext(autoform._formId).keyIsInvalid(name);
   };
 
   Template._autoForm.afFieldInput = function(name, options) {
@@ -297,7 +318,7 @@ if (typeof Handlebars !== 'undefined') {
       var validationType = context._validationType;
       var afObj = context._afObj;
       var hooks = afObj._hooks;
-      var formId = context._formID;
+      var formId = context._formId;
       var currentDoc = context._doc || null;
       var docId = currentDoc ? currentDoc._id : null;
       var doc = formValues(template, hooks.formToDoc);
@@ -463,6 +484,8 @@ if (typeof Handlebars !== 'undefined') {
           submitButton.disabled = false;
         }
       }
+
+      formPreserve.unregisterForm(formId);
     },
     'keyup [data-schema-key]': function(event, template) {
       var validationType = template.data.context._validationType;
@@ -483,7 +506,7 @@ if (typeof Handlebars !== 'undefined') {
       if (event.currentTarget.nodeName.toLowerCase() === "select") {
         //workaround for selection being lost on rerender
         //store the selections in memory and reset in rendered
-        setSelections(event.currentTarget, template.data._formID);
+        setSelections(event.currentTarget, template.data._formId);
       }
       var validationType = template.data.context._validationType;
       var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
@@ -492,9 +515,10 @@ if (typeof Handlebars !== 'undefined') {
       }
     },
     'reset form': function() {
-      var self = this, context = self.context, ss = context._ss, formId = context._formID;
+      var self = this, context = self.context, ss = context._ss, formId = context._formId;
       if (ss && formId) {
         AutoForm.resetForm(formId, ss);
+        formPreserve.unregisterForm(formId);
       }
     }
   });
@@ -510,14 +534,14 @@ if (typeof Handlebars !== 'undefined') {
     //to transfer the selected attribute to the selected property when
     //the form is valid, to make sure current values show correctly for
     //an update form
-//    var self = this, formID = self.data._formID;
-//    var selections = getSelections(formID);
+//    var self = this, formId = self.data._formId;
+//    var selections = getSelections(formId);
 //    if (!selections) {
 //      _.each(self.findAll("select"), function(selectElement) {
 //        _.each(selectElement.options, function(option) {
 //          option.selected = option.hasAttribute("selected"); //transfer att to prop
 //        });
-//        setSelections(selectElement, formID);
+//        setSelections(selectElement, formId);
 //      });
 //      return;
 //    }
@@ -535,10 +559,6 @@ if (typeof Handlebars !== 'undefined') {
 //        });
 //      }
 //    });
-  };
-
-  Template._autoForm.destroyed = function() {
-    this._notInDOM = true;
   };
 }
 
@@ -1131,7 +1151,7 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
     return;
   }
 
-  var formId = template.data.context._formID;
+  var formId = template.data.context._formId;
   var afObj = template.data.context._afObj;
 
   if (onlyIfAlreadyInvalid && afObj.simpleSchema().namedContext(formId).isValid()) {
@@ -1179,7 +1199,7 @@ var validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
 };
 
 var autoformSelections = {};
-var setSelections = function(select, formID) {
+var setSelections = function(select, formId) {
   var key = select.getAttribute('data-schema-key');
   if (!key) {
     return;
@@ -1191,21 +1211,21 @@ var setSelections = function(select, formID) {
       selections.push(opt.value);
     }
   }
-  if (!(formID in autoformSelections)) {
-    autoformSelections[formID] = {};
+  if (!(formId in autoformSelections)) {
+    autoformSelections[formId] = {};
   }
-  autoformSelections[formID][key] = selections;
+  autoformSelections[formId][key] = selections;
 };
-var clearSelections = function(formID) {
-  if (formID in autoformSelections) {
-    delete autoformSelections[formID];
+var clearSelections = function(formId) {
+  if (formId in autoformSelections) {
+    delete autoformSelections[formId];
   }
 };
-var hasSelections = function(formID) {
-  return (formID in autoformSelections);
+var hasSelections = function(formId) {
+  return (formId in autoformSelections);
 };
-var getSelections = function(formID) {
-  return autoformSelections[formID];
+var getSelections = function(formId) {
+  return autoformSelections[formId];
 };
 
 var hasClass = function(element, cls) {

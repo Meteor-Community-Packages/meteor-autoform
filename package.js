@@ -4,6 +4,7 @@ Package.describe({
 
 Package.on_use(function(api) {
   api.use(['underscore', 'deps', 'templating', 'handlebars', 'moment'], 'client');
+  api.use('reload', 'client', {weak: true});
   api.use('collection2', ['client', 'server'], {weak: true});
   api.use('simple-schema', ['client', 'server']);
 
@@ -13,5 +14,5 @@ Package.on_use(function(api) {
     api.export('AutoForm', 'client');
   }
 
-  api.add_files(['autoform.html', 'autoform-client.js'], ['client']);
+  api.add_files(['autoform.html', 'form-preserve.js', 'autoform.js'], 'client');
 });
