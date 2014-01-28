@@ -193,7 +193,7 @@ if (typeof Handlebars !== 'undefined') {
     if ("validation" in hash) {
       delete hash.validation;
     }
-    
+
     if ("resetOnSuccess" in hash) {
       autoFormContext._resetOnSuccess = hash.resetOnSuccess;
       delete hash.resetOnSuccess;
@@ -236,7 +236,7 @@ if (typeof Handlebars !== 'undefined') {
     var context = {
       formFields: []
     };
-    
+
     var fieldWhitelist;
     if ("fields" in hash) {
       if (_.isArray(hash.fields)) {
@@ -250,7 +250,7 @@ if (typeof Handlebars !== 'undefined') {
     var ss = hash.schema.simpleSchema();
     _.each(fieldWhitelist || ss._schemaKeys, function(field) {
       var fieldDefs = ss.schema(field);
-      
+
       // Don't include fields with denyInsert=true when it's an insert form
       if (fieldDefs.denyInsert && hash.type === "insert")
         return;
@@ -417,6 +417,20 @@ if (typeof Handlebars !== 'undefined') {
     return new Handlebars.SafeString(html);
   });
 
+  function doBefore(docId, doc, hook, name) {
+    if (hook) {
+      if (docId) {
+        doc = hook(docId, doc);
+      } else {
+        doc = hook(doc);
+      }
+      if (!_.isObject(doc)) {
+        throw new Error(name + " must return an object");
+      }
+    }
+    return doc;
+  }
+
   Template._autoForm.events({
     'submit form': function(event, template) {
       var submitButton = template.find("button[type=submit]");
@@ -440,32 +454,20 @@ if (typeof Handlebars !== 'undefined') {
       var formId = template.data.formID;
       var currentDoc = self._doc || null;
       var docId = currentDoc ? currentDoc._id : null;
-      var doc = formValues(template, hooks.formToDoc || afObj.formToDoc);
       var onSubmit = hooks.onSubmit || template.data.onSubmit;
       var hasOnSubmit = (typeof onSubmit === "function");
       var ss = afObj.simpleSchema();
       var resetOnSuccess = template.data._resetOnSuccess;
 
-      //for inserts, delete any properties that are null, undefined, or empty strings,
-      //and expand to use subdocuments instead of dot notation keys
-      var insertDoc = expandObj(cleanNulls(doc));
-      //then clean
-      insertDoc = ss.clean(insertDoc);
-
-      var updateDoc;
-      if (isUpdate || hasOnSubmit) {
-        //for updates, convert to modifier object with $set and $unset
-        updateDoc = docToModifier(doc);
-        //no need to clean updateDoc now because the update method will do it
-      }
-
       if (isInsert || isUpdate || isRemove || method) {
         event.preventDefault(); //prevent default here if we're planning to do our own thing
       }
 
+      var form = formValues(template, hooks.formToDoc || afObj.formToDoc, ss);
+
       //pass both types of doc to onSubmit
       if (hasOnSubmit) {
-        if (validationType === 'none' || ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
+        if (validationType === 'none' || ss.namedContext(formId).validate(form.insertDoc, {modifier: false})) {
           var context = {
             event: event,
             template: template,
@@ -473,7 +475,7 @@ if (typeof Handlebars !== 'undefined') {
               template.find("form").reset();
             }
           };
-          var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
+          var shouldContinue = onSubmit.call(context, form.insertDoc, form.updateDoc, currentDoc);
           if (shouldContinue === false) {
             event.preventDefault();
             event.stopPropagation();
@@ -485,7 +487,7 @@ if (typeof Handlebars !== 'undefined') {
 
       //allow normal form submission
       if (!isInsert && !isUpdate && !isRemove && !method) {
-        if (validationType !== 'none' && !ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
+        if (validationType !== 'none' && !ss.namedContext(formId).validate(form.insertDoc, {modifier: false})) {
           event.preventDefault(); //don't submit the form if invalid
         }
         submitButton.disabled = false;
@@ -507,12 +509,7 @@ if (typeof Handlebars !== 'undefined') {
 
       //do it
       if (isInsert) {
-        if (beforeInsert) {
-          insertDoc = beforeInsert(insertDoc);
-          if (!_.isObject(insertDoc)) {
-            throw new Error("beforeInsert must return an object");
-          }
-        }
+        var insertDoc = doBefore(null, form.insertDoc, beforeInsert, 'before.insert hook');
 
         afObj._collection && afObj._collection.insert(insertDoc, {validationContext: formId}, function(error, result) {
           if (error) {
@@ -527,13 +524,9 @@ if (typeof Handlebars !== 'undefined') {
           submitButton.disabled = false;
         });
       } else if (isUpdate) {
+        var updateDoc = form.updateDoc;
         if (!_.isEmpty(updateDoc)) {
-          if (beforeUpdate) {
-            updateDoc = beforeUpdate(docId, updateDoc);
-            if (!_.isObject(updateDoc)) {
-              throw new Error("beforeUpdate must return an object");
-            }
-          }
+          updateDoc = doBefore(docId, updateDoc, beforeUpdate, 'before.update hook');
 
           afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error, result) {
             if (error) {
@@ -571,20 +564,13 @@ if (typeof Handlebars !== 'undefined') {
         }
       }
 
-      //we won't do an else here so that a method could be called in
-      //addition to another action on the same submit
+      // We won't do an else here so that a method could be called in
+      // addition to another action on the same submit
       if (method) {
-        // TODO: passing the method name as second argument was necessary for
-        // the old API only. Eventually can stop doing that.
-        if (beforeMethod) {
-          insertDoc = beforeMethod(insertDoc, method);
-          if (!_.isObject(insertDoc)) {
-            throw new Error("beforeMethod must return an object");
-          }
-        }
+        var methodDoc = doBefore(null, form.insertDoc, beforeMethod, 'before.method hook');
 
-        if (validationType === 'none' || ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
-          Meteor.call(method, insertDoc, function(error, result) {
+        if (validationType === 'none' || ss.namedContext(formId).validate(methodDoc, {modifier: false})) {
+          Meteor.call(method, methodDoc, function(error, result) {
             if (error) {
               onError && onError(method, error, template);
             } else {
@@ -600,6 +586,7 @@ if (typeof Handlebars !== 'undefined') {
           submitButton.disabled = false;
         }
       }
+
     },
     'keyup [data-schema-key]': function(event, template) {
       var validationType = template.data.validationType;
@@ -690,7 +677,7 @@ var maybeNum = function(val) {
   }
 };
 
-var formValues = function(template, transform) {
+var formValues = function(template, transform, ss) {
   var fields = template.findAll("[data-schema-key]");
   var doc = {};
   _.each(fields, function(field) {
@@ -791,7 +778,15 @@ var formValues = function(template, transform) {
   if (typeof transform === "function") {
     doc = transform(doc);
   }
-  return doc;
+  // We return doc, insertDoc, and updateDoc.
+  // For insertDoc, delete any properties that are null, undefined, or empty strings,
+  // and expand to use subdocuments instead of dot notation keys.
+  // For updateDoc, convert to modifier object with $set and $unset.
+  return {
+    doc: doc,
+    insertDoc: ss.clean(expandObj(cleanNulls(doc))),
+    updateDoc: ss.clean(docToModifier(doc))
+  };
 };
 var objToAttributes = function(obj) {
   if (!obj) {
@@ -1017,7 +1012,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   }
 
   var valHasLineBreaks = typeof value === "string" ? (value.indexOf("\n") !== -1) : false;
-  
+
   //required?
   var req = defs.optional ? "" : " required";
 
@@ -1066,7 +1061,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
     }
   }
 
-  var label = autoform._ss.label(makeGeneric(name));
+  var label = autoform._ss.label(name);
 
   //get correct max/min attributes
   var max = "", min = "";
@@ -1290,7 +1285,7 @@ var createLabelHtml = function(name, autoform, defs, hash) {
     hash["class"] = hash["class"] ? hash["class"] + " control-label" : "control-label"; //IE<10 throws error if hash.class syntax is used
   }
 
-  var label = autoform._ss.label(makeGeneric(name));
+  var label = autoform._ss.label(name);
 
   var element = "label";
   if (hash.element) {
@@ -1319,38 +1314,42 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
     afObj = new AutoForm(afObj);
   }
 
+  var ss = afObj.simpleSchema();
+
   if (onlyIfAlreadyInvalid &&
-          afObj.simpleSchema().namedContext(formId).isValid()) {
+          ss.namedContext(formId).isValid()) {
     return;
   }
 
   // Create a document based on all the values of all the inputs on the form
-  var doc = formValues(template, afObj._hooks.formToDoc || afObj.formToDoc);
+  var form = formValues(template, afObj._hooks.formToDoc || afObj.formToDoc, ss);
 
   // Determine whether we're validating for an insert or an update
   var isUpdate = !!template.find("button.update");
 
-  // If validating for an insert, delete any properties that are
-  // null, undefined, or empty strings
-  if (!isUpdate) {
-    doc = cleanNulls(doc);
-  }
-
   // Skip validation if skipEmpty is true and the field we're validating
   // has no value.
-  if (skipEmpty && !(key in doc)) {
-    return; //skip validation
+  if (skipEmpty) {
+
+    // If validating for an insert, delete any properties that are
+    // null, undefined, or empty strings so that the "empty" check will be
+    // accurate. For an update, we want to keep null and "" because these
+    // values might be invalid.
+    var doc = form.doc;
+    if (!isUpdate) {
+      doc = cleanNulls(doc);
+    }
+
+    if (!(key in doc)) {
+      return; //skip validation
+    }
   }
 
   // Clean and validate doc
   if (isUpdate) {
-    var updateDoc = docToModifier(doc);
-    updateDoc = afObj.simpleSchema().clean(updateDoc);
-    afObj.simpleSchema().namedContext(formId).validateOne(updateDoc, key, {modifier: true});
+    afObj.simpleSchema().namedContext(formId).validateOne(form.updateDoc, key, {modifier: true});
   } else {
-    var insertDoc = expandObj(doc);
-    insertDoc = afObj.simpleSchema().clean(insertDoc);
-    afObj.simpleSchema().namedContext(formId).validateOne(insertDoc, key, {modifier: false});
+    afObj.simpleSchema().namedContext(formId).validateOne(form.insertDoc, key, {modifier: false});
   }
 };
 //throttling function that calls out to _validateField
@@ -1416,19 +1415,12 @@ var docToModifier = function(doc) {
   return updateObj;
 };
 
-var makeGeneric = function(name) {
-  if (typeof name !== "string")
-    return null;
-
-  return name.replace(/\.[0-9]+\./g, '.$.').replace(/\.[0-9]+/g, '.$');
-};
-
 var getDefs = function(ss, name) {
   if (typeof name !== "string") {
     throw new Error("Invalid field name: (not a string)");
   }
 
-  var defs = ss.schema(makeGeneric(name));
+  var defs = ss.schema(name);
   if (!defs)
     throw new Error("Invalid field name: " + name);
   return defs;
