@@ -472,7 +472,9 @@ if (typeof Handlebars !== 'undefined') {
             event: event,
             template: template,
             resetForm: function() {
-              template.find("form").reset();
+              if (!template._notInDOM) {
+                template.find("form").reset();
+              }
             }
           };
           var shouldContinue = onSubmit.call(context, form.insertDoc, form.updateDoc, currentDoc);
@@ -515,7 +517,7 @@ if (typeof Handlebars !== 'undefined') {
           if (error) {
             onError && onError('insert', error, template);
           } else {
-            if (resetOnSuccess !== false) {
+            if (resetOnSuccess !== false && !template._notInDOM) {
               template.find("form").reset();
             }
             onSuccess && onSuccess('insert', result, template);
@@ -534,7 +536,7 @@ if (typeof Handlebars !== 'undefined') {
             } else {
               //don't automatically reset the form for updates because we
               //often won't want that
-              if (resetOnSuccess === true) {
+              if (resetOnSuccess === true && !template._notInDOM) {
                 template.find("form").reset();
               }
               onSuccess && onSuccess('update', result, template);
@@ -553,7 +555,7 @@ if (typeof Handlebars !== 'undefined') {
             if (error) {
               onError && onError('remove', error, template);
             } else {
-              if (resetOnSuccess !== false) {
+              if (resetOnSuccess !== false && !template._notInDOM) {
                 template.find("form").reset();
               }
               onSuccess && onSuccess('remove', result, template);
@@ -574,7 +576,7 @@ if (typeof Handlebars !== 'undefined') {
             if (error) {
               onError && onError(method, error, template);
             } else {
-              if (resetOnSuccess !== false) {
+              if (resetOnSuccess !== false && !template._notInDOM) {
                 template.find("form").reset();
               }
               onSuccess && onSuccess(method, result, template);
