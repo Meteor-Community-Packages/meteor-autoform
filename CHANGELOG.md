@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.13
+
+Changes related to SimpleSchema package changes. No visible changes.
+
 ### 0.4.12
 
 Add support for `fields` attribute on `quickForm`. Bind an array or specify
