@@ -210,7 +210,7 @@ helpers must be used within an `autoForm` block.
 
 Attributes:
 * `schema`: Required. Pass one of the following:
-    * An instance of `AutoForm` (recommended)
+    * An instance of `AutoForm` (recommended if you don't need any hooks; required if you do need hooks)
     * An instance of `Meteor.Collection2` (fine if you don't need any hooks on the form)
     * A string name of an `AutoForm` instance that is in the `window` scope.
     * A string name of an `Meteor.Collection2` instance that is in the `window` scope.
