@@ -375,13 +375,13 @@ if (typeof Handlebars !== 'undefined') {
   });
 
 
-  Handlebars.registerHelper("eachNestedField", function(name, options, c) {
+  Handlebars.registerHelper("eachNestedField", function(name, options) {
     var autoform = options.hash.autoform || this, ss = autoform._ss;
     var fn =  options.fn, inverse = options.inverse;
     var defs, ret = "", rows = [], field = {}, data = {};
 
-    if (!ss)
-      throw new Error("eachNestedField helper must be used within an autoForm block");
+    // if (!ss)
+    //   throw new Error("eachNestedField helper must be used within an autoForm block");
 
     if(!nestedFields[name])
       nestedFields[name] = {};
@@ -970,7 +970,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
 
   //adjust expected type when type is overridden
   var schemaType = defs.type;
-  var expectsArray = (schemaType === Array);
+  var expectsArray = _.isArray(schemaType);
   if (expectsArray && hash.type) {
     //if the user overrides the type to anything,
     //then we won't be using a select box and
