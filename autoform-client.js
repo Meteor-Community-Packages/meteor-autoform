@@ -383,10 +383,6 @@ if (typeof Handlebars !== 'undefined') {
     if (!ss)
       throw new Error("eachNestedField helper must be used within an autoForm block");
 
-    defs = getDefs(ss, name); //defs will not be undefined
-    if(!_.isArray(defs.type))
-      throw new Error("eachNestedField helper must be used for fields with nested schemas");
-
     if(!nestedFields[name])
       nestedFields[name] = {};
 
@@ -974,7 +970,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
 
   //adjust expected type when type is overridden
   var schemaType = defs.type;
-  var expectsArray = _.isArray(schemaType);
+  var expectsArray = (schemaType === Array);
   if (expectsArray && hash.type) {
     //if the user overrides the type to anything,
     //then we won't be using a select box and
