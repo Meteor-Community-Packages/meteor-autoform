@@ -461,8 +461,10 @@ if (typeof Handlebars !== 'undefined') {
         autoformSelections[template.data.formID] = _.extend(autoformSelections[template.data.formID], selectNestedFields);
       }
 
-      nestedFields[name]._values = (doc[name].length) ? doc[name] : -1;
-      nestedFields[name]._deps.changed();
+      if(nestedFields[name]){
+        nestedFields[name]._values = (doc[name].length) ? doc[name] : -1;
+        nestedFields[name]._deps.changed();
+      }
     },
     'click button.nf-add': function(event, template) {
       event.preventDefault();
