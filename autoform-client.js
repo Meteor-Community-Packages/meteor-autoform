@@ -444,6 +444,7 @@ if (typeof Handlebars !== 'undefined') {
       var isInsert = hasClass(submitButton, "insert");
       var isUpdate = hasClass(submitButton, "update");
       var isRemove = hasClass(submitButton, "remove");
+      var isOffline = hasClass(submitButton, "offline");
       var method = submitButton.getAttribute("data-meteor-method");
 
       //init
@@ -512,8 +513,8 @@ if (typeof Handlebars !== 'undefined') {
 
       //allow normal form submission
       if (!isInsert && !isUpdate && !isRemove && !method) {
-        if (!isValid(form.insertDoc)) {
-          event.preventDefault(); //don't submit the form if invalid
+        if (!isValid(form.insertDoc) || isOffline) {
+          event.preventDefault(); //don't submit the form if invalid or offline
         }
         submitButton.disabled = false;
         return;
