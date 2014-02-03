@@ -479,8 +479,10 @@ if (typeof Handlebars !== 'undefined') {
 
       doc[name].push(getEmptyObject(name, this._ss._schemaKeys));
 
-      nestedFields[name]._values = doc[name];
-      nestedFields[name]._deps.changed();
+      if(nestedFields[name]){
+        nestedFields[name]._values = doc[name];
+        nestedFields[name]._deps.changed();
+      }
     },
     'submit form': function(event, template) {
       var submitButton = template.find("button[type=submit]");
@@ -970,7 +972,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
 
   //adjust expected type when type is overridden
   var schemaType = defs.type;
-  var expectsArray = _.isArray(schemaType);
+  var expectsArray = _.isFunction(schemaType);
   if (expectsArray && hash.type) {
     //if the user overrides the type to anything,
     //then we won't be using a select box and
