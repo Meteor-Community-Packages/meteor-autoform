@@ -459,15 +459,38 @@ if (typeof Handlebars !== 'undefined') {
       var ss = afObj.simpleSchema();
       var resetOnSuccess = template.data._resetOnSuccess;
 
+	  // Gather hooks, falling back to the deprecated API
+	  // TODO eventually remove support for old API
+	  var beforeInsert = hooks.before.insert || afObj.beforeInsert;
+	  var beforeUpdate = hooks.before.update || afObj.beforeUpdate;
+	  var beforeRemove = hooks.before.remove || afObj.beforeRemove;
+	  var beforeMethod = method && (hooks.before[method] || afObj.beforeMethod);
+	  var afterInsert = hooks.after.insert || afObj._callbacks.insert;
+	  var afterUpdate = hooks.after.update || afObj._callbacks.update;
+	  var afterRemove = hooks.after.remove || afObj._callbacks.remove;
+	  var afterMethod = method && (hooks.after[method] || afObj._callbacks[method]);
+	  var onSuccess = hooks.onSuccess;
+	  var onError = hooks.onError;
+
       if (isInsert || isUpdate || isRemove || method) {
         event.preventDefault(); //prevent default here if we're planning to do our own thing
       }
 
       var form = formValues(template, hooks.formToDoc || afObj.formToDoc, ss);
 
+	  var validationErrorTriggered = 0;
+	  function isValid(doc) {
+		  var result = validationType === 'none' || ss.namedContext(formId).validate(doc, {modifier: false});
+		  if (!result && !validationErrorTriggered) {
+			  onError && onError('validation', new Error('failed validation'), template);
+			  validationErrorTriggered++;
+		  }
+		  return result;
+	  }
+
       //pass both types of doc to onSubmit
       if (hasOnSubmit) {
-        if (validationType === 'none' || ss.namedContext(formId).validate(form.insertDoc, {modifier: false})) {
+        if (isValid(form.insertDoc)) {
           var context = {
             event: event,
             template: template,
@@ -489,25 +512,12 @@ if (typeof Handlebars !== 'undefined') {
 
       //allow normal form submission
       if (!isInsert && !isUpdate && !isRemove && !method) {
-        if (validationType !== 'none' && !ss.namedContext(formId).validate(form.insertDoc, {modifier: false})) {
+        if (!isValid(form.insertDoc)) {
           event.preventDefault(); //don't submit the form if invalid
         }
         submitButton.disabled = false;
         return;
       }
-
-      // Gather hooks, falling back to the deprecated API
-      // TODO eventually remove support for old API
-      var beforeInsert = hooks.before.insert || afObj.beforeInsert;
-      var beforeUpdate = hooks.before.update || afObj.beforeUpdate;
-      var beforeRemove = hooks.before.remove || afObj.beforeRemove;
-      var beforeMethod = method && (hooks.before[method] || afObj.beforeMethod);
-      var afterInsert = hooks.after.insert || afObj._callbacks.insert;
-      var afterUpdate = hooks.after.update || afObj._callbacks.update;
-      var afterRemove = hooks.after.remove || afObj._callbacks.remove;
-      var afterMethod = method && (hooks.after[method] || afObj._callbacks[method]);
-      var onSuccess = hooks.onSuccess;
-      var onError = hooks.onError;
 
       //do it
       if (isInsert) {
@@ -571,7 +581,7 @@ if (typeof Handlebars !== 'undefined') {
       if (method) {
         var methodDoc = doBefore(null, form.insertDoc, beforeMethod, 'before.method hook');
 
-        if (validationType === 'none' || ss.namedContext(formId).validate(methodDoc, {modifier: false})) {
+        if (isValid(methodDoc)) {
           Meteor.call(method, methodDoc, function(error, result) {
             if (error) {
               onError && onError(method, error, template);
