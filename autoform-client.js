@@ -972,13 +972,15 @@ var createInputHtml = function(name, autoform, defs, hash) {
 
   //adjust expected type when type is overridden
   var schemaType = defs.type;
-  var expectsArray = _.isFunction(schemaType);
-  if (expectsArray && hash.type) {
+  var expectsArray = false;
+  if (schemaType === Array) {
+    defs = autoform._ss.schema(name + ".$");
+    schemaType = defs.type;
+
     //if the user overrides the type to anything,
     //then we won't be using a select box and
     //we won't be expecting an array for the current value
-    schemaType = schemaType[0]; //this, for example, changes [String] to String
-    expectsArray = false;
+    expectsArray = !hash.type;
   }
 
   var flatDoc = autoform._flatDoc;
@@ -1004,9 +1006,9 @@ var createInputHtml = function(name, autoform, defs, hash) {
       }
     });
 
-    if (schemaType[0] === Date) {
+    if (schemaType === Date) {
       if (flatDoc && name in flatDoc) {
-        arrayVal = flatDoc[name];
+        arrayVal = flatDoc[name] || [];
         value = [];
         _.each(arrayVal, function(v) {
           value.push(dateToDateStringUTC(v));
@@ -1016,7 +1018,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
       }
     } else {
       if (flatDoc && name in flatDoc) {
-        arrayVal = flatDoc[name];
+        arrayVal = flatDoc[name] || [];
         value = [];
         _.each(arrayVal, function(v) {
           value.push(v.toString());
@@ -1027,7 +1029,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
     }
   } else {
     if (flatDoc && name in flatDoc) {
-      value = flatDoc[name];
+      value = flatDoc[name] || "";
       if (!(value instanceof Date)) { //we will convert dates to a string later, after we know what the field type will be
         value = value.toString();
       }
@@ -1036,6 +1038,8 @@ var createInputHtml = function(name, autoform, defs, hash) {
     }
   }
 
+  var valHasLineBreaks = typeof value === "string" ? (value.indexOf("\n") !== -1) : false;
+
   //required?
   var req = defs.optional ? "" : " required";
 
@@ -1043,7 +1047,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   var type = "text";
   if (hash.type) {
     type = hash.type;
-  } else if (schemaType === String && hash.rows) {
+  } else if (schemaType === String && (hash.rows || valHasLineBreaks)) {
     type = "textarea";
   } else if (schemaType === String && defs.regEx === SchemaRegEx.Email) {
     type = "email";
@@ -1084,7 +1088,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
     }
   }
 
-  var label = defs.label;
+  var label = autoform._ss.label(name);
 
   //get correct max/min attributes
   var max = "", min = "";
@@ -1099,51 +1103,49 @@ var createInputHtml = function(name, autoform, defs, hash) {
     resolvedMax = resolvedMax();
   }
 
-  if (schemaType === String) {
-    if (resolvedMax) {
-      max = ' maxlength="' + resolvedMax + '"';
-    }
-  } else {
-    //max
-    if (hash.max) {
-      max = ' max="' + hash.max + '"';
-    } else if (resolvedMax) {
-      if (resolvedMax instanceof Date) {
-        if (type === "date") {
-          max = ' max="' + dateToDateStringUTC(resolvedMax) + '"';
-        } else if (type === "datetime") {
-          max = ' max="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMax) + '"';
-        } else if (type === "datetime-local") {
-          max = ' max="' + dateToNormalizedLocalDateAndTimeString(resolvedMax, hash["data-offset"]) + '"';
-        }
-      } else {
-        max = ' max="' + resolvedMax + '"';
-      }
-    }
-    //min
-    if (hash.min) {
-      min = ' min="' + hash.min + '"';
-    } else if (resolvedMin) {
-      if (resolvedMin instanceof Date) {
-        if (type === "date") {
-          min = ' min="' + dateToDateStringUTC(resolvedMin) + '"';
-        } else if (type === "datetime") {
-          min = ' min="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMin) + '"';
-        } else if (type === "datetime-local") {
-          min = ' min="' + dateToNormalizedLocalDateAndTimeString(resolvedMin, hash["data-offset"]) + '"';
-        }
-      } else {
-        min = ' min="' + resolvedMin + '"';
-      }
-    }
+  // Max text entry length
+  if (resolvedMax && _.contains(["text", "textarea", "email", "url"], type)) {
+    max = ' maxlength="' + resolvedMax + '"';
   }
 
-  //get step value
+  // Number or Date minimums
+  if (hash.max && _.contains(["number", "date", "datetime", "datetime-local"], type)) {
+    max = ' max="' + hash.max + '"';
+  } else if (resolvedMax instanceof Date) {
+    if (type === "date") {
+      max = ' max="' + dateToDateStringUTC(resolvedMax) + '"';
+    } else if (type === "datetime") {
+      max = ' max="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMax) + '"';
+    } else if (type === "datetime-local") {
+      max = ' max="' + dateToNormalizedLocalDateAndTimeString(resolvedMax, hash["data-offset"]) + '"';
+    }
+  } else if (typeof resolvedMax === "number" && type === "number") {
+    max = ' max="' + resolvedMax + '"';
+  }
+
+  // Number or Date maximums
+  if (hash.min && _.contains(["number", "date", "datetime", "datetime-local"], type)) {
+    min = ' min="' + hash.min + '"';
+  } else if (resolvedMin instanceof Date) {
+    if (type === "date") {
+      min = ' min="' + dateToDateStringUTC(resolvedMin) + '"';
+    } else if (type === "datetime") {
+      min = ' min="' + dateToNormalizedForcedUtcGlobalDateAndTimeString(resolvedMin) + '"';
+    } else if (type === "datetime-local") {
+      min = ' min="' + dateToNormalizedLocalDateAndTimeString(resolvedMin, hash["data-offset"]) + '"';
+    }
+  } else if (typeof resolvedMin === "number" && type === "number") {
+    min = ' min="' + resolvedMin + '"';
+  }
+
+  // Step value
   var step = "";
-  if (hash.step) {
-    step = ' step="' + hash.step + '"';
-  } else if (defs.decimal) {
-    step = ' step="0.01"';
+  if (type === "number") {
+    if (hash.step) {
+      step = ' step="' + hash.step + '"';
+    } else if (defs.decimal) {
+      step = ' step="0.01"';
+    }
   }
 
   //extract settings from hash
@@ -1160,7 +1162,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   if (selectOptions === "allowed") {
     selectOptions = _.map(defs.allowedValues, function(v) {
       var label = v;
-      if (hash.capitalize && v.length > 0 && (schemaType === String || (expectsArray && schemaType[0] === String))) {
+      if (hash.capitalize && v.length > 0 && schemaType === String) {
         label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
       }
 
