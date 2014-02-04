@@ -98,6 +98,11 @@ AutoForm.resetForm = function(formID, simpleSchema) {
     return;
   }
 
+  _.each(nestedFields, function(row, key){
+    nestedFields[key]._values = -1;
+    nestedFields[key]._deps.changed();
+  });
+
   simpleSchema && simpleSchema.namedContext(formID).resetValidation();
   clearSelections(formID);
 };
@@ -434,62 +439,11 @@ if (typeof Handlebars !== 'undefined') {
   Template._autoForm.events({
     'click button.nf-remove': function(event, template) {
       event.preventDefault();
-
-      var name = this._target;
-      var afObj = template.data.schema;
-      var hooks = afObj._hooks;
-      var doc = formValues(template, hooks.formToDoc || afObj.formToDoc);
-      var self = this;
-      var deletedKey = '';
-
-      doc = expandObj(doc);
-
-      if(!doc[name])
-        doc[name] = [];
-
-      doc[name].splice(this._index, 1);
-
-      if(autoformSelections[template.data.formID]){
-        var selectKeys = _.keys(autoformSelections[template.data.formID]);
-        var selectKeysFiltered = _.filter(selectKeys, function(selectKey){ return selectKey.indexOf(self._target) !== -1; });
-        var removeSelected = _.difference(selectKeys, selectKeysFiltered);
-        var selectNestedFields = {};
-
-        _.each(doc[name], function(field, i){
-          _.each(field, function(v, k){
-            var key = name+'.'+i+'.'+k;
-            if(_.indexOf(selectKeysFiltered, key) !== -1)
-              selectNestedFields[key] = field[k];
-          });
-        });
-        autoformSelections[template.data.formID] = _.pick(autoformSelections[template.data.formID], removeSelected);
-        autoformSelections[template.data.formID] = _.extend(autoformSelections[template.data.formID], selectNestedFields);
-      }
-
-      if(nestedFields[name]){
-        nestedFields[name]._values = (doc[name].length) ? doc[name] : -1;
-        nestedFields[name]._deps.changed();
-      }
+      removeNestedField(this, template, event);
     },
     'click button.nf-add': function(event, template) {
       event.preventDefault();
-
-      var name = event.target.getAttribute('data-nf');
-      var afObj = template.data.schema;
-      var hooks = afObj._hooks;
-      var doc = formValues(template, hooks.formToDoc || afObj.formToDoc);
-
-      doc = expandObj(doc);
-
-      if(!doc[name])
-        doc[name] = [];
-
-      doc[name].push(getEmptyObject(name, this._ss._schemaKeys));
-
-      if(nestedFields[name]){
-        nestedFields[name]._values = doc[name];
-        nestedFields[name]._deps.changed();
-      }
+      addNestedField(this, template, event);
     },
     'submit form': function(event, template) {
       var submitButton = template.find("button[type=submit]");
@@ -1489,3 +1443,63 @@ var getEmptyObject = function(name, schemaKeys){
 };
 
 var nestedFields = {};
+
+var removeNestedField = function(self, template, event){
+
+  var name = self._target;
+  var afObj = template.data.schema;
+  var hooks = afObj._hooks;
+  var doc = formValues(template, hooks.formToDoc || afObj.formToDoc);
+  var deletedKey = '';
+
+  doc = expandObj(doc);
+
+  if(!doc[name])
+    doc[name] = [];
+
+  doc[name].splice(self._index, 1);
+
+  if(autoformSelections[template.data.formID]){
+    var selectKeys = _.keys(autoformSelections[template.data.formID]);
+    var selectKeysFiltered = _.filter(selectKeys, function(selectKey){ return selectKey.indexOf(self._target) !== -1; });
+    var removeSelected = _.difference(selectKeys, selectKeysFiltered);
+    var selectNestedFields = {};
+
+    _.each(doc[name], function(field, i){
+      _.each(field, function(v, k){
+        var key = name+'.'+i+'.'+k;
+        if(_.indexOf(selectKeysFiltered, key) !== -1)
+          selectNestedFields[key] = field[k];
+      });
+    });
+    autoformSelections[template.data.formID] = _.pick(autoformSelections[template.data.formID], removeSelected);
+    autoformSelections[template.data.formID] = _.extend(autoformSelections[template.data.formID], selectNestedFields);
+  }
+
+  if(nestedFields[name]){
+    nestedFields[name]._values = (doc[name].length) ? doc[name] : -1;
+    nestedFields[name]._deps.changed();
+  }
+
+};
+
+var addNestedField = function(self, template, event){
+
+  var name = event.target.getAttribute('data-nf');
+  var afObj = template.data.schema;
+  var hooks = afObj._hooks;
+  var doc = formValues(template, hooks.formToDoc || afObj.formToDoc);
+
+  doc = expandObj(doc);
+
+  if(!doc[name])
+    doc[name] = [];
+
+  doc[name].push(getEmptyObject(name, self._ss._schemaKeys));
+
+  if(nestedFields[name]){
+    nestedFields[name]._values = doc[name];
+    nestedFields[name]._deps.changed();
+  }
+
+};
