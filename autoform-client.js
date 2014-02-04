@@ -341,6 +341,11 @@ if (typeof Handlebars !== 'undefined') {
     var autoform = options.hash.autoform || this, ss = autoform._ss;
     if (!ss)
       throw new Error("afFieldIsInvalid helper must be used within an autoForm block");
+
+    if(name.indexOf('.$.') !== -1 && _.isNumber(this._index)){
+      name = name.replace('$', this._index);
+    }
+
     getDefs(ss, name); //for side effect of throwing errors when name is not in schema
     return ss.namedContext(autoform._formID).keyIsInvalid(name);
   });
