@@ -390,8 +390,8 @@ if (typeof Handlebars !== 'undefined') {
     var fn =  options.fn, inverse = options.inverse;
     var defs, ret = "", rows = [], field = {}, data = {};
 
-    // if (!ss)
-    //   throw new Error("eachNestedField helper must be used within an autoForm block");
+    if (!ss)
+      throw new Error("eachNestedField helper must be used within an autoForm block");
 
     if(!nestedFields[name])
       nestedFields[name] = {};
@@ -657,7 +657,6 @@ if (typeof Handlebars !== 'undefined') {
   };
 
   Template._autoForm.destroyed = function() {
-    nestedFields = {};
     autoformSelections = {};
     this._notInDOM = true;
   };
