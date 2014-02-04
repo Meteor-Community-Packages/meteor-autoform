@@ -98,9 +98,9 @@ AutoForm.resetForm = function(formID, simpleSchema) {
     return;
   }
 
-  _.each(nestedFields, function(row, key){
-    nestedFields[key]._values = -1;
-    nestedFields[key]._deps.changed();
+  _.each(nestedFields[formID], function(row, key){
+    nestedFields[formID][key]._values = -1;
+    nestedFields[formID][key]._deps.changed();
   });
 
   simpleSchema && simpleSchema.namedContext(formID).resetValidation();
@@ -393,30 +393,33 @@ if (typeof Handlebars !== 'undefined') {
     if (!ss)
       throw new Error("eachNestedField helper must be used within an autoForm block");
 
-    if(!nestedFields[name])
-      nestedFields[name] = {};
+    if(!nestedFields[autoform._formID])
+      nestedFields[autoform._formID] = {};
 
-    if(!nestedFields[name]._deps){
-      nestedFields[name]._deps = new Deps.Dependency();
+    if(!nestedFields[autoform._formID][name])
+      nestedFields[autoform._formID][name] = {};
+
+    if(!nestedFields[autoform._formID][name]._deps){
+      nestedFields[autoform._formID][name]._deps = new Deps.Dependency();
     }
 
-    Deps.depend(nestedFields[name]._deps);
+    Deps.depend(nestedFields[autoform._formID][name]._deps);
 
-    if(!nestedFields[name]._values)
-       nestedFields[name]._values = [];
+    if(!nestedFields[autoform._formID][name]._values)
+       nestedFields[autoform._formID][name]._values = [];
 
-    if(nestedFields[name]._values.length === 0)
-      nestedFields[name]._values = (autoform._doc && autoform._doc[name]) ? autoform._doc[name] : [];
+    if(nestedFields[autoform._formID][name]._values.length === 0)
+      nestedFields[autoform._formID][name]._values = (autoform._doc && autoform._doc[name]) ? autoform._doc[name] : [];
 
-    if(autoform._doc && nestedFields[name]){
-      autoform._doc[name] = _.isArray(nestedFields[name]._values) ? nestedFields[name]._values : [];
+    if(autoform._doc && nestedFields[autoform._formID][name]){
+      autoform._doc[name] = _.isArray(nestedFields[autoform._formID][name]._values) ? nestedFields[autoform._formID][name]._values : [];
 
       mDoc = new MongoObject(autoform._doc);
       autoform._flatDoc = mDoc.getFlatObject();
     }
 
-    if(_.isArray(nestedFields[name]._values)){
-      _.each(nestedFields[name]._values, function(value, i){
+    if(_.isArray(nestedFields[autoform._formID][name]._values)){
+      _.each(nestedFields[autoform._formID][name]._values, function(value, i){
 
         rows[i] = _.extend(_.omit(autoform, '_templateData'), {
           _index: i,
@@ -424,9 +427,9 @@ if (typeof Handlebars !== 'undefined') {
           _values: {},
         });
 
-        for (var idx in nestedFields[name]._values[i]){
+        for (var idx in nestedFields[autoform._formID][name]._values[i]){
           var key = name + "." + i + "." + idx;
-          rows[i]._values[key] = nestedFields[name]._values[i][idx];
+          rows[i]._values[key] = nestedFields[autoform._formID][name]._values[i][idx];
         }
 
         ret = ret + fn(rows[i]);
@@ -476,8 +479,9 @@ if (typeof Handlebars !== 'undefined') {
       var insertDoc = expandObj(cleanNulls(doc));
       //for updates, convert to modifier object with $set and $unset
       var updateDoc = expandObj(doc);
-      if(nestedFields){
-        _.each(nestedFields, function(v, k){
+
+      if(nestedFields[self._formID]){
+        _.each(nestedFields[self._formID], function(v, k){
           if(!_.isArray(v._values) || v._values.length === 0)
             updateDoc[k] = [];
         });
@@ -657,6 +661,7 @@ if (typeof Handlebars !== 'undefined') {
   };
 
   Template._autoForm.destroyed = function() {
+    nestedFields[this.data.formID] = {};
     autoformSelections = {};
     this._notInDOM = true;
   };
@@ -1475,9 +1480,9 @@ var removeNestedField = function(self, template, event){
     autoformSelections[template.data.formID] = _.extend(autoformSelections[template.data.formID], selectNestedFields);
   }
 
-  if(nestedFields[name]){
-    nestedFields[name]._values = (doc[name].length) ? doc[name] : -1;
-    nestedFields[name]._deps.changed();
+  if(nestedFields[self._formID][name]){
+    nestedFields[self._formID][name]._values = (doc[name].length) ? doc[name] : -1;
+    nestedFields[self._formID][name]._deps.changed();
   }
 
 };
@@ -1496,9 +1501,9 @@ var addNestedField = function(self, template, event){
 
   doc[name].push(getEmptyObject(name, self._ss._schemaKeys));
 
-  if(nestedFields[name]){
-    nestedFields[name]._values = doc[name];
-    nestedFields[name]._deps.changed();
+  if(nestedFields[self._formID][name]){
+    nestedFields[self._formID][name]._values = doc[name];
+    nestedFields[self._formID][name]._deps.changed();
   }
 
 };
