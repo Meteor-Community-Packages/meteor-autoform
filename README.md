@@ -312,9 +312,12 @@ The `framework` attribute can be used with this helper as well. See the "Framewo
 
 ### afFieldLabel "propertyName" [options]
 
-Adds a `<label>` element with the `label` defined in the schema, or the property
+Adds a `<label>` element with the `label` defined in the schema, or the humanized property
 name if no label is defined. You can specify any additional attributes for the helper,
 and they will be transferred to the resulting `<label>` element.
+
+Use `element="none"` to get just the label text without the `<label>` element. Use `element="span"`
+to render a `<span>` element instead of `<label>`.
 
 The `framework` attribute can be used with this helper as well. See the "Frameworks" section.
 
