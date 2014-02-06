@@ -493,6 +493,16 @@ if (typeof Handlebars !== 'undefined') {
         return result;
       }
 
+      // validation checks
+      if (isInsert && !isValid(insertDoc)) {
+        submitButton.disabled = false;
+        return;
+      }
+      if (method && !isValid(methodDoc)) {
+        submitButton.disabled = false;
+        return;
+      }
+
       //pass both types of doc to onSubmit
       if (hasOnSubmit) {
         if (isValid(insertDoc)) {
@@ -579,22 +589,18 @@ if (typeof Handlebars !== 'undefined') {
       // We won't do an else here so that a method could be called in
       // addition to another action on the same submit
       if (method) {
-        if (isValid(methodDoc)) {
-          Meteor.call(method, methodDoc, function(error, result) {
-            if (error) {
-              onError && onError(method, error, template);
-            } else {
-              if (resetOnSuccess !== false && !template._notInDOM) {
-                template.find("form").reset();
-              }
-              onSuccess && onSuccess(method, result, template);
+        Meteor.call(method, methodDoc, function(error, result) {
+          if (error) {
+            onError && onError(method, error, template);
+          } else {
+            if (resetOnSuccess !== false && !template._notInDOM) {
+              template.find("form").reset();
             }
-            afterMethod && afterMethod(error, result, template);
-            submitButton.disabled = false;
-          });
-        } else {
+            onSuccess && onSuccess(method, result, template);
+          }
+          afterMethod && afterMethod(error, result, template);
           submitButton.disabled = false;
-        }
+        });
       }
 
     },
