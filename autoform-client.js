@@ -638,34 +638,44 @@ if (typeof Handlebars !== 'undefined') {
     //the form is valid, to make sure current values show correctly for
     //an update form
     var self = this, formID = self.data.formID;
+
     var selections = getSelections(formID);
     if (!selections) {
+      // on first render, cache the initial selections for all select elements
       _.each(self.findAll("select"), function(selectElement) {
+        // first transfer the selected attribute to the selected property
         _.each(selectElement.options, function(option) {
           option.selected = option.hasAttribute("selected"); //transfer att to prop
         });
+        // then cache the selections
         setSelections(selectElement, formID);
       });
+      // selections will be updated whenever they change in the
+      // onchange event handler, too
       return;
+    } else {
+      // whenever we rerender, keep the correct selected values
+      // by resetting them all from the cached values
+      _.each(self.findAll("select"), function(selectElement) {
+        var key = selectElement.getAttribute('data-schema-key');
+        var selectedValues = selections[key];
+        if (selectedValues && selectedValues.length) {
+          _.each(selectElement.options, function(option) {
+            if (_.contains(selectedValues, option.value)) {
+              option.selected = true;
+            }
+          });
+        }
+      });
     }
-    if (!selections) {
-      return;
-    }
-    _.each(self.findAll("select"), function(selectElement) {
-      var key = selectElement.getAttribute('data-schema-key');
-      var selectedValues = selections[key];
-      if (selectedValues && selectedValues.length) {
-        _.each(selectElement.options, function(option) {
-          if (_.contains(selectedValues, option.value)) {
-            option.selected = true;
-          }
-        });
-      }
-    });
   };
 
   Template._autoForm.destroyed = function() {
-    this._notInDOM = true;
+    var self = this, formID = self.data.formID;
+    
+    self._notInDOM = true;
+    self.data.schema.simpleSchema().namedContext(formID).resetValidation();
+    clearSelections(formID);
   };
 }
 
