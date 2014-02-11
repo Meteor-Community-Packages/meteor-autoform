@@ -459,43 +459,6 @@ if (typeof Handlebars !== 'undefined') {
       var ss = afObj.simpleSchema();
       var resetOnSuccess = template.data._resetOnSuccess;
 
-      if (isInsert || isUpdate || isRemove || method) {
-        event.preventDefault(); //prevent default here if we're planning to do our own thing
-      }
-
-      var form = formValues(template, hooks.formToDoc || afObj.formToDoc, ss);
-
-      //pass both types of doc to onSubmit
-      if (hasOnSubmit) {
-        if (validationType === 'none' || ss.namedContext(formId).validate(form.insertDoc, {modifier: false})) {
-          var context = {
-            event: event,
-            template: template,
-            resetForm: function() {
-              if (!template._notInDOM) {
-                template.find("form").reset();
-              }
-            }
-          };
-          var shouldContinue = onSubmit.call(context, form.insertDoc, form.updateDoc, currentDoc);
-          if (shouldContinue === false) {
-            event.preventDefault();
-            event.stopPropagation();
-            submitButton.disabled = false;
-            return;
-          }
-        }
-      }
-
-      //allow normal form submission
-      if (!isInsert && !isUpdate && !isRemove && !method) {
-        if (validationType !== 'none' && !ss.namedContext(formId).validate(form.insertDoc, {modifier: false})) {
-          event.preventDefault(); //don't submit the form if invalid
-        }
-        submitButton.disabled = false;
-        return;
-      }
-
       // Gather hooks, falling back to the deprecated API
       // TODO eventually remove support for old API
       var beforeInsert = hooks.before.insert || afObj.beforeInsert;
@@ -509,10 +472,70 @@ if (typeof Handlebars !== 'undefined') {
       var onSuccess = hooks.onSuccess;
       var onError = hooks.onError;
 
+      if (isInsert || isUpdate || isRemove || method) {
+        event.preventDefault(); //prevent default here if we're planning to do our own thing
+      }
+
+      var form = formValues(template, hooks.formToDoc || afObj.formToDoc, ss);
+
+      // execute before hooks
+      var insertDoc = isInsert ? doBefore(null, form.insertDoc, beforeInsert, 'before.insert hook') : form.insertDoc;
+      var updateDoc = isUpdate && !_.isEmpty(form.updateDoc) ? doBefore(docId, form.updateDoc, beforeUpdate, 'before.update hook') : form.updateDoc;
+      var methodDoc = method ? doBefore(null, form.insertDoc, beforeMethod, 'before.method hook') : form.insertDoc;
+
+      var validationErrorTriggered = 0;
+      function isValid(doc) {
+        var result = validationType === 'none' || ss.namedContext(formId).validate(doc, {modifier: false});
+        if (!result && !validationErrorTriggered) {
+          onError && onError('validation', new Error('failed validation'), template);
+          validationErrorTriggered++;
+        }
+        return result;
+      }
+
+      // validation checks
+      if (isInsert && !isValid(insertDoc)) {
+        submitButton.disabled = false;
+        return;
+      }
+      if (method && !isValid(methodDoc)) {
+        submitButton.disabled = false;
+        return;
+      }
+
+      //pass both types of doc to onSubmit
+      if (hasOnSubmit) {
+        if (isValid(insertDoc)) {
+          var context = {
+            event: event,
+            template: template,
+            resetForm: function() {
+              if (!template._notInDOM) {
+                template.find("form").reset();
+              }
+            }
+          };
+          var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
+          if (shouldContinue === false) {
+            event.preventDefault();
+            event.stopPropagation();
+            submitButton.disabled = false;
+            return;
+          }
+        }
+      }
+
+      //allow normal form submission
+      if (!isInsert && !isUpdate && !isRemove && !method) {
+        if (!isValid(insertDoc)) {
+          event.preventDefault(); //don't submit the form if invalid
+        }
+        submitButton.disabled = false;
+        return;
+      }
+
       //do it
       if (isInsert) {
-        var insertDoc = doBefore(null, form.insertDoc, beforeInsert, 'before.insert hook');
-
         afObj._collection && afObj._collection.insert(insertDoc, {validationContext: formId}, function(error, result) {
           if (error) {
             onError && onError('insert', error, template);
@@ -526,10 +549,7 @@ if (typeof Handlebars !== 'undefined') {
           submitButton.disabled = false;
         });
       } else if (isUpdate) {
-        var updateDoc = form.updateDoc;
         if (!_.isEmpty(updateDoc)) {
-          updateDoc = doBefore(docId, updateDoc, beforeUpdate, 'before.update hook');
-
           afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error, result) {
             if (error) {
               onError && onError('update', error, template);
@@ -569,24 +589,18 @@ if (typeof Handlebars !== 'undefined') {
       // We won't do an else here so that a method could be called in
       // addition to another action on the same submit
       if (method) {
-        var methodDoc = doBefore(null, form.insertDoc, beforeMethod, 'before.method hook');
-
-        if (validationType === 'none' || ss.namedContext(formId).validate(methodDoc, {modifier: false})) {
-          Meteor.call(method, methodDoc, function(error, result) {
-            if (error) {
-              onError && onError(method, error, template);
-            } else {
-              if (resetOnSuccess !== false && !template._notInDOM) {
-                template.find("form").reset();
-              }
-              onSuccess && onSuccess(method, result, template);
+        Meteor.call(method, methodDoc, function(error, result) {
+          if (error) {
+            onError && onError(method, error, template);
+          } else {
+            if (resetOnSuccess !== false && !template._notInDOM) {
+              template.find("form").reset();
             }
-            afterMethod && afterMethod(error, result, template);
-            submitButton.disabled = false;
-          });
-        } else {
+            onSuccess && onSuccess(method, result, template);
+          }
+          afterMethod && afterMethod(error, result, template);
           submitButton.disabled = false;
-        }
+        });
       }
 
     },

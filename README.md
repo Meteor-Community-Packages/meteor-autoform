@@ -19,10 +19,10 @@ $ mrt add autoform
 
 ## Example
 
-Let's say you have the following definition of a Collection2 instance:
+Let's say you have the following Meteor.Collection instance, with schema support provided by the collection2 package:
 
 ```js
-Books = new Meteor.Collection2("books", {
+Books = new Meteor.Collection("books", {
     schema: {
         title: {
             type: String,
@@ -211,9 +211,9 @@ helpers must be used within an `autoForm` block.
 Attributes:
 * `schema`: Required. Pass one of the following:
     * An instance of `AutoForm` (recommended if you don't need any hooks; required if you do need hooks)
-    * An instance of `Meteor.Collection2` (fine if you don't need any hooks on the form)
+    * An instance of `Meteor.Collection` that has a `schema` (fine if you don't need any hooks on the form)
     * A string name of an `AutoForm` instance that is in the `window` scope.
-    * A string name of an `Meteor.Collection2` instance that is in the `window` scope.
+    * A string name of an `Meteor.Collection` instance that has a `schema` and is in the `window` scope.
 * `doc`: Required for update and remove actions. Pass the current document object. It's usually easiest to pass
 the name of a custom helper that returns the object by calling `findOne()`.
 * `validation`: Optional. See the "Fine Tuning Validation" section.
@@ -312,23 +312,26 @@ The `framework` attribute can be used with this helper as well. See the "Framewo
 
 ### afFieldLabel "propertyName" [options]
 
-Adds a `<label>` element with the `label` defined in the schema, or the property
+Adds a `<label>` element with the `label` defined in the schema, or the humanized property
 name if no label is defined. You can specify any additional attributes for the helper,
 and they will be transferred to the resulting `<label>` element.
 
+Use `element="none"` to get just the label text without the `<label>` element. Use `element="span"`
+to render a `<span>` element instead of `<label>`.
+
 The `framework` attribute can be used with this helper as well. See the "Frameworks" section.
 
-## Non-Collection2 Forms
+## Non-Collection Forms
 
 If you want to use an AutoForm for a form that does not relate to a collection (like a simple
-contact form that sends an e-mail), or for a form that relates to a collection that is not a
-collection2 collection (for example, Meteor.users()), you can do that.
+contact form that sends an e-mail), or for a form that relates to a collection that is
+schemaless (for example, Meteor.users()), you can do that.
 
 1. In client+server code, create a `SimpleSchema` instance to define the form's schema.
-2. On the client only, create an instance of `AutoForm`, passing in your `SimpleSchema` instance.
+2. On the client only, create an instance of `AutoForm`, passing in your `SimpleSchema` instance as the only argument.
 3. Pass the AutoForm instance as the `schema` attribute of the `autoForm` helper.
 4. Add one attribute, `data-meteor-method`, to the submit button of the form (must be `type="submit"`), and
-set its value to the name of any 'Meteor.method()' you have defined in server code.
+set its value to the name of any `Meteor.method()` you have defined in server code.
 
 If you do these things, the form data will be gathered into a single object when
 the user clicks the submit button. Then that object will be cleaned and validated against the
@@ -368,21 +371,21 @@ Schema.contact = new SimpleSchema({
     <fieldset>
         <legend>Contact Us</legend>
         <div class="form-group{{#if afFieldIsInvalid 'name'}} has-error{{/if}}">
-            {{afFieldLabel "name" class="control-label"}}
+            {{afFieldLabel "name"}}
             {{afFieldInput "name"}}
             {{#if afFieldIsInvalid "name"}}
             <span class="help-block">{{afFieldMessage "name"}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'email'}} has-error{{/if}}">
-            {{afFieldLabel "email" class="control-label"}}
+            {{afFieldLabel "email"}}
             {{afFieldInput "email"}}
             {{#if afFieldIsInvalid "email"}}
             <span class="help-block">{{afFieldMessage "email"}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'message'}} has-error{{/if}}">
-            {{afFieldLabel "message" class="control-label"}}
+            {{afFieldLabel "message"}}
             {{afFieldInput "message" rows="10"}}
             {{#if afFieldIsInvalid "message"}}
             <span class="help-block">{{afFieldMessage "message"}}</span>
@@ -433,7 +436,7 @@ Meteor.methods({
 Note the call to `check()`, which will throw an error if doc doesn't
 match the schema. **To reiterate, you must call `check()` in the method or perform your
 own validation since a user could bypass the client side validation.** You do
-not have to do any of your own validation with Collection2 inserts or updates,
+not have to do any of your own validation with collection inserts or updates,
 but you do have to call `check()` on the server when submitting to a Meteor method.
 
 ## The Form Document
