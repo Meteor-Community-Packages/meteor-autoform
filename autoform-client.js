@@ -445,6 +445,7 @@ if (typeof Handlebars !== 'undefined') {
       var isUpdate = hasClass(submitButton, "update");
       var isRemove = hasClass(submitButton, "remove");
       var method = submitButton.getAttribute("data-meteor-method");
+      var isNormalSubmit = (!isInsert && !isUpdate && !isRemove && !method);
 
       //init
       var self = this;
@@ -472,137 +473,112 @@ if (typeof Handlebars !== 'undefined') {
       var onSuccess = hooks.onSuccess;
       var onError = hooks.onError;
 
-      if (isInsert || isUpdate || isRemove || method) {
-        event.preventDefault(); //prevent default here if we're planning to do our own thing
+      // Prevent browser form submission if we're planning to do our own thing
+      if (!isNormalSubmit) {
+        event.preventDefault();
       }
 
+      // Gather all form values
       var form = formValues(template, hooks.formToDoc || afObj.formToDoc, ss);
 
-      // execute before hooks
+      // Execute before hooks
       var insertDoc = isInsert ? doBefore(null, form.insertDoc, beforeInsert, 'before.insert hook') : form.insertDoc;
       var updateDoc = isUpdate && !_.isEmpty(form.updateDoc) ? doBefore(docId, form.updateDoc, beforeUpdate, 'before.update hook') : form.updateDoc;
       var methodDoc = method ? doBefore(null, form.insertDoc, beforeMethod, 'before.method hook') : form.insertDoc;
 
+      // Prep haltSubmission function
+      function haltSubmission() {
+        event.preventDefault();
+        event.stopPropagation();
+        submitButton.disabled = false;
+      }
+
+      // Prep isValid function
       var validationErrorTriggered = 0;
-      function isValid(doc) {
-        var result = validationType === 'none' || ss.namedContext(formId).validate(doc, {modifier: false});
+      function isValid(doc, isModifier, type) {
+        var result = validationType === 'none' || ss.namedContext(formId).validate(doc, {modifier: isModifier});
         if (!result && !validationErrorTriggered) {
-          onError && onError('validation', new Error('failed validation'), template);
+          onError && onError(type, new Error('failed validation'), template);
           validationErrorTriggered++;
         }
         return result;
       }
 
-      // validation checks
-      if (isInsert && !isValid(insertDoc)) {
-        submitButton.disabled = false;
-        return;
+      // Perform validation for onSubmit call or for normal form submission
+      if ((hasOnSubmit || isNormalSubmit) && !isValid(insertDoc, false, 'pre-submit validation')) {
+        return haltSubmission();
       }
-      if (method && !isValid(methodDoc)) {
-        submitButton.disabled = false;
-        return;
+      if (hasOnSubmit && !_.isEmpty(updateDoc) && !isValid(updateDoc, true, 'pre-submit validation')) {
+        return haltSubmission();
       }
 
-      //pass both types of doc to onSubmit
+      // Call onSubmit
       if (hasOnSubmit) {
-        if (isValid(insertDoc)) {
-          var context = {
-            event: event,
-            template: template,
-            resetForm: function() {
-              if (!template._notInDOM) {
-                template.find("form").reset();
-              }
-            }
-          };
-          var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
-          if (shouldContinue === false) {
-            event.preventDefault();
-            event.stopPropagation();
-            submitButton.disabled = false;
-            return;
-          }
-        }
-      }
-
-      //allow normal form submission
-      if (!isInsert && !isUpdate && !isRemove && !method) {
-        if (!isValid(insertDoc)) {
-          event.preventDefault(); //don't submit the form if invalid
-        }
-        submitButton.disabled = false;
-        return;
-      }
-
-      //do it
-      if (isInsert) {
-        afObj._collection && afObj._collection.insert(insertDoc, {validationContext: formId}, function(error, result) {
-          if (error) {
-            onError && onError('insert', error, template);
-          } else {
-            if (resetOnSuccess !== false && !template._notInDOM) {
+        var context = {
+          event: event,
+          template: template,
+          resetForm: function() {
+            if (!template._notInDOM) {
               template.find("form").reset();
             }
-            onSuccess && onSuccess('insert', result, template);
           }
-          afterInsert && afterInsert(error, result, template);
+        };
+        // Pass both types of doc to onSubmit
+        var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
+        if (shouldContinue === false) {
+          return haltSubmission();
+        }
+      }
+
+      // Prep callback creator function
+      function makeCallback(name, afterHook) {
+        return function(error, result) {
+          if (error) {
+            onError && onError(name, error, template);
+          } else {
+            // Potentially reset form after successful submit.
+            // Update forms are opt-in while all others are opt-out.
+            if (!template._notInDOM &&
+                    ((name !== 'update' && resetOnSuccess !== false) ||
+                            (name === 'update' && resetOnSuccess === true))) {
+              template.find("form").reset();
+            }
+            onSuccess && onSuccess(name, result, template);
+          }
+          afterHook && afterHook(error, result, template);
           submitButton.disabled = false;
-        });
+        };
+      }
+
+      // Now we will do the requested insert, update, remove, method, or normal
+      // browser form submission. Even though we may have already validated above
+      // if we have an onSubmit hook, we do it again upon insert or update
+      // because collection2 validation catches additional stuff like unique.
+      if (isInsert) {
+        afObj._collection && afObj._collection.insert(insertDoc, {validationContext: formId}, makeCallback('insert', afterInsert));
       } else if (isUpdate) {
         if (!_.isEmpty(updateDoc)) {
-          afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error, result) {
-            if (error) {
-              onError && onError('update', error, template);
-            } else {
-              //don't automatically reset the form for updates because we
-              //often won't want that
-              if (resetOnSuccess === true && !template._notInDOM) {
-                template.find("form").reset();
-              }
-              onSuccess && onSuccess('update', result, template);
-            }
-            afterUpdate && afterUpdate(error, result, template);
-            submitButton.disabled = false;
-          });
+          afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, makeCallback('update', afterUpdate));
         }
       } else if (isRemove) {
         //call beforeRemove if present, and stop if it's false
         if (beforeRemove && beforeRemove(docId) === false) {
           //stopped
-          submitButton.disabled = false;
+          return haltSubmission();
         } else {
-          afObj._collection && afObj._collection.remove(docId, function(error, result) {
-            if (error) {
-              onError && onError('remove', error, template);
-            } else {
-              if (resetOnSuccess !== false && !template._notInDOM) {
-                template.find("form").reset();
-              }
-              onSuccess && onSuccess('remove', result, template);
-            }
-            afterRemove && afterRemove(error, result, template);
-            submitButton.disabled = false;
-          });
+          afObj._collection && afObj._collection.remove(docId, makeCallback('remove', afterRemove));
         }
       }
 
       // We won't do an else here so that a method could be called in
       // addition to another action on the same submit
       if (method) {
-        Meteor.call(method, methodDoc, function(error, result) {
-          if (error) {
-            onError && onError(method, error, template);
-          } else {
-            if (resetOnSuccess !== false && !template._notInDOM) {
-              template.find("form").reset();
-            }
-            onSuccess && onSuccess(method, result, template);
-          }
-          afterMethod && afterMethod(error, result, template);
-          submitButton.disabled = false;
-        });
+        // Validate first
+        if (!isValid(methodDoc, false, method)) {
+          return haltSubmission();
+        }
+        Meteor.call(method, methodDoc, makeCallback(method, afterMethod));
       }
-
     },
     'keyup [data-schema-key]': function(event, template) {
       var validationType = template.data.validationType;
@@ -686,7 +662,7 @@ if (typeof Handlebars !== 'undefined') {
 
   Template._autoForm.destroyed = function() {
     var self = this, formID = self.data.formID;
-    
+
     self._notInDOM = true;
     self.data.schema.simpleSchema().namedContext(formID).resetValidation();
     clearSelections(formID);

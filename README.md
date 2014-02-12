@@ -474,7 +474,7 @@ myAutoForm.hooks({
   onSuccess: function(operation, result, template) {}, 
 
   //called when any operation fails, where operation will be
-  //"insert", "update", "remove", or the method name.
+  //"validation", "insert", "update", "remove", or the method name.
   onError: function(operation, error, template) {},
   formToDoc: function(doc) {},
   docToForm: function(doc) {}
@@ -586,7 +586,7 @@ The arguments passed to your function are as follows:
 
 * `insertDoc`: The form input values in a document, suitable for use with insert()
 * `updateDoc`: The form input values in a modifier, suitable for use with update()
-* `currentDoc`: The object that's currently bound to the form through the doc attribute
+* `currentDoc`: The object that's currently bound to the form through the `doc` attribute
 
 And `this` provides the following:
 
@@ -598,7 +598,7 @@ if necessary
 If you return false, no further submission will happen, and it is equivalent
 to calling `event.preventDefault()` and `event.stopPropagation()`.
 This allows you to use an `onSubmit` hook in combination with other
-submission methods.
+submission methods to add pre-submit logic.
 
 Otherwise the onSubmit function acts pretty much like any other onSubmit function, except
 that insertDoc and updateDoc are validated before it is called. However, since
@@ -611,7 +611,11 @@ After a successful submission, validation is reset, ensuring that any error
 messages disappear and form input values are correct. However, you may need
 to reset validation for other reasons, such as when you reuse an edit form to
 edit a different document. To do this, call `AutoForm.resetForm()`, passing
-the form's `id` attribute and the SimpleSchema instance:
+the form's `id` attribute and the SimpleSchema instance.
+
+Here is a specific example of how you might reuse a single form to create or
+edit multiple documents by resetting the form validation and then swapping
+in various values for the `doc` attribute of the autoForm:
 
 ```js
 Template.example.events({
@@ -627,6 +631,9 @@ Template.example.events({
   }
 });
 ```
+
+Note that we do NOT reset the form itself (form.reset()). If you do this, it
+will cause problems with incorrect values being displayed in some fields.
 
 ## Complex Controls
 
