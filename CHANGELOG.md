@@ -6,6 +6,13 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.14
+
+The execution flow for hooks has been improved. The `onError` hook is now
+always called if there's an error at any point in the form submission process,
+and it will never be called more than once. Also, any "before" hooks are now
+executed before the `onSubmit` hook. *(Thanks @blazer82)*
+
 ### 0.4.13
 
 Changes related to SimpleSchema package changes. No visible changes.
