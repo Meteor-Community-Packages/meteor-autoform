@@ -734,12 +734,12 @@ var formValues = function(template, transform, ss) {
   var doc = {};
   _.each(fields, function(field) {
     var name = field.getAttribute("data-schema-key");
-    var val = field.value;
+    var val = field.value || field.innerHTML; //value is undefined for contenteditable
     var type = field.getAttribute("type") || "";
     type = type.toLowerCase();
     var tagName = field.tagName || "";
     tagName = tagName.toLowerCase();
-
+    
     // Handle select
     if (tagName === "select") {
       if (val === "true") { //boolean select
@@ -1137,7 +1137,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   }
 
   // Max text entry length
-  if (resolvedMax && _.contains(["text", "textarea", "email", "url"], type)) {
+  if (resolvedMax && _.contains(["text", "textarea", "contenteditable", "email", "url"], type)) {
     max = ' maxlength="' + resolvedMax + '"';
   }
 
@@ -1275,6 +1275,8 @@ var createInputHtml = function(name, autoform, defs, hash) {
       hash["class"] = hash["class"] ? hash["class"] + " form-control" : "form-control"; //IE<10 throws error if hash.class syntax is used
     }
     html = '<textarea data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</textarea>';
+  } else if (type === "contenteditable") {
+    html = '<div contenteditable="true" data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</div>';
   } else if (type === "boolean") {
     if (radio) {
       html = '<div class="radio"><label><input type="radio" data-schema-key="' + name + '" name="' + name + '" value="true"' + checked + objToAttributes(hash) + req + ' /> ' + trueLabel + '</label></div>';
