@@ -6,6 +6,17 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.15
+
+* Labels are now generated with "for" attribute
+* QuickForms work better with schemas containing objects now. The object is
+treated as a `fieldset` with its child fields nested within. This only works
+to one level deep.
+* The `updateDoc` passed to an `onSubmit` handler is no longer validated before
+being passed. The `insertDoc` is still validated.
+* Changes to account for `autoValue` and `defaultValue` options now available
+in the SimpleSchema package.
+
 ### 0.4.14
 
 The execution flow for hooks has been improved. The `onError` hook is now
