@@ -262,10 +262,10 @@ if (typeof Handlebars !== 'undefined') {
       // Don't include fields with array placeholders
       if (field.indexOf("$") !== -1)
         return;
-      
+
       if (fieldDefs.type === Object) {
         var addedGroup, label = ss.label(field);
-        _.each(ss._schemaKeys, function (key) {
+        _.each(ss._schemaKeys, function(key) {
           if (key.indexOf(field + ".") === 0) {
             if (!addedGroup) {
               addedGroup = {
@@ -296,9 +296,9 @@ if (typeof Handlebars !== 'undefined') {
 
       list.push(info);
     }
-    
+
     // Add top level (or requested) fields
-    _.each(fieldWhitelist || ss.firstLevelSchemaKeys(), function (key) {
+    _.each(fieldWhitelist || ss.firstLevelSchemaKeys(), function(key) {
       addField(key, context.formFields);
     });
 
@@ -520,7 +520,10 @@ if (typeof Handlebars !== 'undefined') {
       // we ultimately want them generated on the server
       var insertDocForValidation = ss.clean(_.clone(insertDoc), {
         filter: false,
-        autoConvert: false
+        autoConvert: false,
+        extendAutoValueContext: {
+          userId: (Meteor.userId && Meteor.userId()) || null
+        }
       });
 
       // Prep haltSubmission function
@@ -533,7 +536,12 @@ if (typeof Handlebars !== 'undefined') {
       // Prep isValid function
       var validationErrorTriggered = 0;
       function isValid(doc, isModifier, type) {
-        var result = validationType === 'none' || ss.namedContext(formId).validate(doc, {modifier: isModifier});
+        var result = validationType === 'none' || ss.namedContext(formId).validate(doc, {
+          modifier: isModifier,
+          extendedCustomContext: {
+            userId: (Meteor.userId && Meteor.userId()) || null
+          }
+        });
         if (!result && !validationErrorTriggered) {
           onError && onError(type, new Error('failed validation'), template);
           validationErrorTriggered++;
@@ -610,7 +618,10 @@ if (typeof Handlebars !== 'undefined') {
         var methodDocForValidation = ss.clean(_.clone(methodDoc), {
           isModifier: true,
           filter: false,
-          autoConvert: false
+          autoConvert: false,
+          extendAutoValueContext: {
+            userId: (Meteor.userId && Meteor.userId()) || null
+          }
         });
         // Validate first
         if (!isValid(methodDocForValidation, false, method)) {
@@ -1402,16 +1413,32 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
     // formValues did some cleaning but didn't add auto values; add them now
     ss.clean(form.updateDoc, {
       filter: false,
-      autoConvert: false
+      autoConvert: false,
+      extendAutoValueContext: {
+        userId: (Meteor.userId && Meteor.userId()) || null
+      }
     });
-    afObj.simpleSchema().namedContext(formId).validateOne(form.updateDoc, key, {modifier: true});
+    afObj.simpleSchema().namedContext(formId).validateOne(form.updateDoc, key, {
+      modifier: true,
+      extendedCustomContext: {
+        userId: (Meteor.userId && Meteor.userId()) || null
+      }
+    });
   } else {
     // formValues did some cleaning but didn't add auto values; add them now
     ss.clean(form.insertDoc, {
       filter: false,
-      autoConvert: false
+      autoConvert: false,
+      extendAutoValueContext: {
+        userId: (Meteor.userId && Meteor.userId()) || null
+      }
     });
-    afObj.simpleSchema().namedContext(formId).validateOne(form.insertDoc, key, {modifier: false});
+    afObj.simpleSchema().namedContext(formId).validateOne(form.insertDoc, key, {
+      modifier: false,
+      extendedCustomContext: {
+        userId: (Meteor.userId && Meteor.userId()) || null
+      }
+    });
   }
 };
 //throttling function that calls out to _validateField
