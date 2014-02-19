@@ -339,6 +339,10 @@ schema on the client and passed along to your method on the server. **You must
 validate it again in your method on the server, using `check()` in combination
 with `myAutoFormSchema`. This is why we create the `SimpleSchema` instance in client+server code.**
 
+It's also generally best to call `myAutoFormSchema.clean` for the object again
+in the server method. In particular, you will definitely want to do this if
+the object's schema has auto or default values so that they can be added.
+
 ### An Example Contact Form
 
 *common.js:*
@@ -584,7 +588,9 @@ ContactForm.hooks({
 
 The arguments passed to your function are as follows:
 
-* `insertDoc`: The form input values in a document, suitable for use with insert()
+* `insertDoc`: The form input values in a document, suitable for use with insert().
+This object has been cleaned and validated, but auto values and default values
+have not been added to it.
 * `updateDoc`: The form input values in a modifier, suitable for use with update()
 * `currentDoc`: The object that's currently bound to the form through the `doc` attribute
 
@@ -604,6 +610,27 @@ Otherwise the onSubmit function acts pretty much like any other onSubmit functio
 that insertDoc and updateDoc are validated before it is called. However, since
 this is client code, you should never assume that insertDoc and updateDoc are valid
 from a security perspective.
+
+If you use `autoValue` or `defaultValue` options, be aware that `insertDoc` and
+`updateDoc` will not yet have auto or default values added to them. If you're
+passing them to `insert` or `update` on a Meteor.Collection with a schema, then
+there's nothing to worry about. But if you're doing something else with the
+object on the client, then you might want to call `clean` to add the auto and
+default values:
+
+```js
+PeopleForm.hooks({
+  onSubmit: function (doc) {
+    People.clean(doc);
+    console.log("People doc with auto values", doc);
+    return false;
+  }
+});
+```
+
+If you're sending the objects to the server in any way, it's always best to
+wait to call `clean` until you're on the server so that the auto values can be
+trusted.
 
 ## Resetting Validation
 

@@ -515,6 +515,14 @@ if (typeof Handlebars !== 'undefined') {
       var updateDoc = isUpdate && !_.isEmpty(form.updateDoc) ? doBefore(docId, form.updateDoc, beforeUpdate, 'before.update hook') : form.updateDoc;
       var methodDoc = method ? doBefore(null, form.insertDoc, beforeMethod, 'before.method hook') : form.insertDoc;
 
+      // Get a version of the doc that has auto values to validate here. We
+      // don't want to actually send any auto values to the server because
+      // we ultimately want them generated on the server
+      var insertDocForValidation = ss.clean(_.clone(insertDoc), {
+        filter: false,
+        autoConvert: false
+      });
+
       // Prep haltSubmission function
       function haltSubmission() {
         event.preventDefault();
@@ -534,7 +542,7 @@ if (typeof Handlebars !== 'undefined') {
       }
 
       // Perform validation for onSubmit call or for normal form submission
-      if ((hasOnSubmit || isNormalSubmit) && !isValid(insertDoc, false, 'pre-submit validation')) {
+      if ((hasOnSubmit || isNormalSubmit) && !isValid(insertDocForValidation, false, 'pre-submit validation')) {
         return haltSubmission();
       }
 
@@ -599,8 +607,13 @@ if (typeof Handlebars !== 'undefined') {
       // We won't do an else here so that a method could be called in
       // addition to another action on the same submit
       if (method) {
+        var methodDocForValidation = ss.clean(_.clone(methodDoc), {
+          isModifier: true,
+          filter: false,
+          autoConvert: false
+        });
         // Validate first
-        if (!isValid(methodDoc, false, method)) {
+        if (!isValid(methodDocForValidation, false, method)) {
           return haltSubmission();
         }
         Meteor.call(method, methodDoc, makeCallback(method, afterMethod));
@@ -810,11 +823,19 @@ var formValues = function(template, transform, ss) {
   // For insertDoc, delete any properties that are null, undefined, or empty strings,
   // and expand to use subdocuments instead of dot notation keys.
   // For updateDoc, convert to modifier object with $set and $unset.
-  return {
+  // Do not add auto values to either.
+  var result = {
     doc: doc,
-    insertDoc: ss.clean(expandObj(cleanNulls(doc))),
-    updateDoc: ss.clean(docToModifier(doc))
+    insertDoc: ss.clean(expandObj(cleanNulls(doc)), {
+      isModifier: true,
+      getAutoValues: false
+    }),
+    updateDoc: ss.clean(docToModifier(doc), {
+      isModifier: true,
+      getAutoValues: false
+    })
   };
+  return result;
 };
 var objToAttributes = function(obj) {
   if (!obj) {
@@ -1326,7 +1347,10 @@ var createLabelHtml = function(name, autoform, defs, hash) {
   } else if (element === "span") {
     return '<span' + objToAttributes(hash) + '>' + label + '</span>';
   } else {
-    return '<label for="name"' + objToAttributes(hash) + '>' + label + '</label>';
+    if (!('for' in hash)) {
+      hash.for = name;
+    }
+    return '<label' + objToAttributes(hash) + '>' + label + '</label>';
   }
 };
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
@@ -1375,8 +1399,18 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
 
   // Clean and validate doc
   if (isUpdate) {
+    // formValues did some cleaning but didn't add auto values; add them now
+    ss.clean(form.updateDoc, {
+      filter: false,
+      autoConvert: false
+    });
     afObj.simpleSchema().namedContext(formId).validateOne(form.updateDoc, key, {modifier: true});
   } else {
+    // formValues did some cleaning but didn't add auto values; add them now
+    ss.clean(form.insertDoc, {
+      filter: false,
+      autoConvert: false
+    });
     afObj.simpleSchema().namedContext(formId).validateOne(form.insertDoc, key, {modifier: false});
   }
 };
