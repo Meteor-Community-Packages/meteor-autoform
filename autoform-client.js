@@ -1326,7 +1326,7 @@ var createLabelHtml = function(name, autoform, defs, hash) {
   } else if (element === "span") {
     return '<span' + objToAttributes(hash) + '>' + label + '</span>';
   } else {
-    return '<label' + objToAttributes(hash) + '>' + label + '</label>';
+    return '<label for="name"' + objToAttributes(hash) + '>' + label + '</label>';
   }
 };
 var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
