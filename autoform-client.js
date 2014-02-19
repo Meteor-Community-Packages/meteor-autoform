@@ -248,7 +248,7 @@ if (typeof Handlebars !== 'undefined') {
     }
 
     var ss = hash.schema.simpleSchema();
-    _.each(fieldWhitelist || ss._schemaKeys, function(field) {
+    function addField(field, list) {
       var fieldDefs = ss.schema(field);
 
       // Don't include fields with denyInsert=true when it's an insert form
@@ -262,6 +262,25 @@ if (typeof Handlebars !== 'undefined') {
       // Don't include fields with array placeholders
       if (field.indexOf("$") !== -1)
         return;
+      
+      if (fieldDefs.type === Object) {
+        var addedGroup, label = ss.label(field);
+        _.each(ss._schemaKeys, function (key) {
+          if (key.indexOf(field + ".") === 0) {
+            if (!addedGroup) {
+              addedGroup = {
+                name: field,
+                label: label,
+                isGroup: true,
+                formFields: []
+              };
+              context.formFields.push(addedGroup);
+            }
+            addField(key, addedGroup.formFields);
+          }
+        });
+        return;
+      }
 
       var info = {name: field};
 
@@ -275,7 +294,12 @@ if (typeof Handlebars !== 'undefined') {
         info.options = "allowed";
       }
 
-      context.formFields.push(info);
+      list.push(info);
+    }
+    
+    // Add top level (or requested) fields
+    _.each(fieldWhitelist || ss.firstLevelSchemaKeys(), function (key) {
+      addField(key, context.formFields);
     });
 
     if ("type" in hash) {
@@ -292,8 +316,12 @@ if (typeof Handlebars !== 'undefined') {
         context.isReadOnly = true;
       } else if (hash.type === "disabled") {
         context.isDisabled = true;
+      } else {
+        context.doNormal = true;
       }
       delete hash.type;
+    } else {
+      context.doNormal = true;
     }
 
     if ("method" in hash) {
@@ -328,7 +356,7 @@ if (typeof Handlebars !== 'undefined') {
     if (!ss)
       throw new Error("afQuickField helper must be used within an autoForm block");
 
-    if (hash.template) {
+    if ('template' in hash) {
       template = hash.template;
       if (typeof template === "string") {
         template = Template[template];
@@ -336,6 +364,7 @@ if (typeof Handlebars !== 'undefined') {
       if (typeof template !== "function") {
         template = Template._afQuickField;
       }
+      delete hash.template;
     } else {
       template = Template._afQuickField;
     }
@@ -506,9 +535,6 @@ if (typeof Handlebars !== 'undefined') {
 
       // Perform validation for onSubmit call or for normal form submission
       if ((hasOnSubmit || isNormalSubmit) && !isValid(insertDoc, false, 'pre-submit validation')) {
-        return haltSubmission();
-      }
-      if (hasOnSubmit && !_.isEmpty(updateDoc) && !isValid(updateDoc, true, 'pre-submit validation')) {
         return haltSubmission();
       }
 

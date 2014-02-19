@@ -13,7 +13,16 @@
   {{#if ../../../isDisabled}}
   {{afQuickField ../../this.name autoform=../../../this options=../../this.options template=../../../../template disabled=""}}
   {{else}}
-  {{afQuickField ../../this.name autoform=../../../this options=../../this.options template=../../../../template}}
+  {{#if ../../this.isGroup}}
+  <fieldset>
+  <legend>{{../../../this.label}}</legend>
+  {{#each ../../../this.formFields}}
+  {{afQuickField this.name autoform=../../../../../this options=../../../../this.options template=../../../../../../template}}
+  {{/each}}
+  </fieldset>
+  {{else}}
+  {{afQuickField ../../../this.name autoform=../../../../this options=../../../this.options template=../../../../../template}}
+  {{/if}}
   {{/if}}
   {{/if}}
   {{/each}}
@@ -29,6 +38,9 @@
     {{/if}}
     {{#if ../doMethod}}
     <button type="submit" data-meteor-method="{{../../method}}" class="{{../../buttonClasses}}">{{../../buttonContent}}</button>
+    {{/if}}
+    {{#if ../doNormal}}
+    <button type="submit" class="{{../../buttonClasses}}">{{../../buttonContent}}</button>
     {{/if}}
   </div>
   {{/autoForm}}
