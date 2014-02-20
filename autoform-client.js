@@ -734,7 +734,7 @@ var formValues = function(template, transform, ss) {
   var doc = {};
   _.each(fields, function(field) {
     var name = field.getAttribute("data-schema-key");
-    var val = field.value || field.innerHTML; //value is undefined for contenteditable
+    var val = field.value || field.getAttribute('contenteditable') && field.innerHTML; //value is undefined for contenteditable
     var type = field.getAttribute("type") || "";
     type = type.toLowerCase();
     var tagName = field.tagName || "";
