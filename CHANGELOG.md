@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.16
+
+Add support for `contenteditable` input type. *(Thanks @chrisbutler)*
+
 ### 0.4.15
 
 * Labels are now generated with "for" attribute
