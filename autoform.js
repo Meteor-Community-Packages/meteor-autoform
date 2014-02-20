@@ -481,7 +481,7 @@ if (typeof Handlebars !== 'undefined') {
         return haltSubmission();
       }
 
-      //pass both types of doc to onSubmit
+      // Call onSubmit
       if (onSubmit) {
         var context = {
           event: event,
@@ -494,11 +494,10 @@ if (typeof Handlebars !== 'undefined') {
             }
           }
         };
-        var shouldContinue = onSubmit.call(onSubmitContext, insertDoc, updateDoc, currentDoc);
+        // Pass both types of doc to onSubmit
+        var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
         if (shouldContinue === false) {
-          event.preventDefault();
-          submitButton.disabled = false;
-          return;
+          return haltSubmission();
         }
       }
       

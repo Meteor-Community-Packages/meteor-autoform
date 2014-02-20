@@ -6,24 +6,6 @@
   </form>
 </template>
 
-{{#each ../formFields}}
-  {{#if ../../isReadOnly}}
-  {{afQuickField ../this.name autoform=../../this options=../this.options template=../../../template readonly=""}}
-  {{else}}
-  {{#if ../../../isDisabled}}
-  {{afQuickField ../../this.name autoform=../../../this options=../../this.options template=../../../../template disabled=""}}
-  {{else}}
-  {{#if ../../this.isGroup}}
-  <fieldset>
-  <legend>{{../../../this.label}}</legend>
-  {{#each ../../../this.formFields}}
-  {{afQuickField this.name autoform=../../../../../this options=../../../../this.options template=../../../../../../template}}
-  {{/each}}
-  </fieldset>
-  {{else}}
-  {{afQuickField ../../../this.name autoform=../../../../this options=../../../this.options template=../../../../../template}}
-  {{/if}}
-
 <template name="_quickForm">
   {{#autoForm qfHash=qfHash}}
   {{#each formFields}}
