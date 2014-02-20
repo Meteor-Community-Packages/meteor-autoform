@@ -26,6 +26,9 @@
     {{else}}
     <button type="submit" class="{{buttonClasses}}">{{buttonContent}}</button>
     {{/if}}
+    {{#if ../doNormal}}
+    <button type="submit" class="{{../../buttonClasses}}">{{../../buttonContent}}</button>
+    {{/if}}
   </div>
   {{/if}}
   {{/autoForm}}

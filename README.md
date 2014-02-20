@@ -7,6 +7,8 @@ This package requires and automatically installs the [simple-schema](https://git
 You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you
 have to add to your app yourself.
 
+*Note: If you're using Meteor UI, use the `ui` branch of autoform.*
+
 ## Installation
 
 Install using Meteorite. When in a Meteorite-managed app directory, enter:
@@ -17,10 +19,10 @@ $ mrt add autoform
 
 ## Example
 
-Let's say you have the following definition of a Collection2 instance:
+Let's say you have the following Meteor.Collection instance, with schema support provided by the collection2 package:
 
 ```js
-Books = new Meteor.Collection2("books", {
+Books = new Meteor.Collection("books", {
     schema: {
         title: {
             type: String,
@@ -208,10 +210,10 @@ helpers must be used within an `autoForm` block.
 
 Attributes:
 * `schema`: Required. Pass one of the following:
-    * An instance of `AutoForm` (recommended)
-    * An instance of `Meteor.Collection2` (fine if you don't need any hooks on the form)
+    * An instance of `AutoForm` (recommended if you don't need any hooks; required if you do need hooks)
+    * An instance of `Meteor.Collection` that has a `schema` (fine if you don't need any hooks on the form)
     * A string name of an `AutoForm` instance that is in the `window` scope.
-    * A string name of an `Meteor.Collection2` instance that is in the `window` scope.
+    * A string name of an `Meteor.Collection` instance that has a `schema` and is in the `window` scope.
 * `doc`: Required for update and remove actions. Pass the current document object. It's usually easiest to pass
 the name of a custom helper that returns the object by calling `findOne()`.
 * `validation`: Optional. See the "Fine Tuning Validation" section.
@@ -310,29 +312,36 @@ The `framework` attribute can be used with this helper as well. See the "Framewo
 
 ### afFieldLabel "propertyName" [options]
 
-Adds a `<label>` element with the `label` defined in the schema, or the property
+Adds a `<label>` element with the `label` defined in the schema, or the humanized property
 name if no label is defined. You can specify any additional attributes for the helper,
 and they will be transferred to the resulting `<label>` element.
 
+Use `element="none"` to get just the label text without the `<label>` element. Use `element="span"`
+to render a `<span>` element instead of `<label>`.
+
 The `framework` attribute can be used with this helper as well. See the "Frameworks" section.
 
-## Non-Collection2 Forms
+## Non-Collection Forms
 
 If you want to use an AutoForm for a form that does not relate to a collection (like a simple
-contact form that sends an e-mail), or for a form that relates to a collection that is not a
-collection2 collection (for example, Meteor.users()), you can do that.
+contact form that sends an e-mail), or for a form that relates to a collection that is
+schemaless (for example, Meteor.users()), you can do that.
 
 1. In client+server code, create a `SimpleSchema` instance to define the form's schema.
-2. On the client only, create an instance of `AutoForm`, passing in your `SimpleSchema` instance.
+2. On the client only, create an instance of `AutoForm`, passing in your `SimpleSchema` instance as the only argument.
 3. Pass the AutoForm instance as the `schema` attribute of the `autoForm` helper.
 4. Add one attribute, `data-meteor-method`, to the submit button of the form (must be `type="submit"`), and
-set its value to the name of any 'Meteor.method()' you have defined in server code.
+set its value to the name of any `Meteor.method()` you have defined in server code.
 
 If you do these things, the form data will be gathered into a single object when
 the user clicks the submit button. Then that object will be cleaned and validated against the
 schema on the client and passed along to your method on the server. **You must
 validate it again in your method on the server, using `check()` in combination
 with `myAutoFormSchema`. This is why we create the `SimpleSchema` instance in client+server code.**
+
+It's also generally best to call `myAutoFormSchema.clean` for the object again
+in the server method. In particular, you will definitely want to do this if
+the object's schema has auto or default values so that they can be added.
 
 ### An Example Contact Form
 
@@ -366,21 +375,21 @@ Schema.contact = new SimpleSchema({
     <fieldset>
         <legend>Contact Us</legend>
         <div class="form-group{{#if afFieldIsInvalid 'name'}} has-error{{/if}}">
-            {{afFieldLabel "name" class="control-label"}}
+            {{afFieldLabel "name"}}
             {{afFieldInput "name"}}
             {{#if afFieldIsInvalid "name"}}
             <span class="help-block">{{afFieldMessage "name"}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'email'}} has-error{{/if}}">
-            {{afFieldLabel "email" class="control-label"}}
+            {{afFieldLabel "email"}}
             {{afFieldInput "email"}}
             {{#if afFieldIsInvalid "email"}}
             <span class="help-block">{{afFieldMessage "email"}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'message'}} has-error{{/if}}">
-            {{afFieldLabel "message" class="control-label"}}
+            {{afFieldLabel "message"}}
             {{afFieldInput "message" rows="10"}}
             {{#if afFieldIsInvalid "message"}}
             <span class="help-block">{{afFieldMessage "message"}}</span>
@@ -431,7 +440,7 @@ Meteor.methods({
 Note the call to `check()`, which will throw an error if doc doesn't
 match the schema. **To reiterate, you must call `check()` in the method or perform your
 own validation since a user could bypass the client side validation.** You do
-not have to do any of your own validation with Collection2 inserts or updates,
+not have to do any of your own validation with collection inserts or updates,
 but you do have to call `check()` on the server when submitting to a Meteor method.
 
 ## The Form Document
@@ -458,11 +467,19 @@ myAutoForm.hooks({
   },
   after: {
     insert: function(error, result, template) {},
-    update: function(error, template) {},
-    remove: function(error, template) {},
+    update: function(error, result, template) {},
+    remove: function(error, result, template) {},
     "methodName": function(error, result, template) {}
   },
   onSubmit: function(error, result, template) {},
+
+  //called when any operation succeeds, where operation will be
+  //"insert", "update", "remove", or the method name.
+  onSuccess: function(operation, result, template) {}, 
+
+  //called when any operation fails, where operation will be
+  //"validation", "insert", "update", "remove", or the method name.
+  onError: function(operation, error, template) {},
   formToDoc: function(doc) {},
   docToForm: function(doc) {}
 });
@@ -571,19 +588,49 @@ ContactForm.hooks({
 
 The arguments passed to your function are as follows:
 
-* `insertDoc`: The form input values in a document, suitable for use with insert()
+* `insertDoc`: The form input values in a document, suitable for use with insert().
+This object has been cleaned and validated, but auto values and default values
+have not been added to it.
 * `updateDoc`: The form input values in a modifier, suitable for use with update()
-* `currentDoc`: The object that's currently bound to the form through the doc attribute
+* `currentDoc`: The object that's currently bound to the form through the `doc` attribute
 
-`this` provides a `resetForm` method, which you can call to reset the corresponding autoform if necessary.
+And `this` provides the following:
 
-If you return false, no further submission will happen. This allows you to use an
-`onSubmit` hook in combination with other submission methods.
+* A `resetForm` method, which you can call to reset the corresponding autoform
+if necessary
+* The form submit event, in `event`
+* The template, in `template`
+
+If you return false, no further submission will happen, and it is equivalent
+to calling `event.preventDefault()` and `event.stopPropagation()`.
+This allows you to use an `onSubmit` hook in combination with other
+submission methods to add pre-submit logic.
 
 Otherwise the onSubmit function acts pretty much like any other onSubmit function, except
 that insertDoc and updateDoc are validated before it is called. However, since
 this is client code, you should never assume that insertDoc and updateDoc are valid
 from a security perspective.
+
+If you use `autoValue` or `defaultValue` options, be aware that `insertDoc` and
+`updateDoc` will not yet have auto or default values added to them. If you're
+passing them to `insert` or `update` on a Meteor.Collection with a schema, then
+there's nothing to worry about. But if you're doing something else with the
+object on the client, then you might want to call `clean` to add the auto and
+default values:
+
+```js
+PeopleForm.hooks({
+  onSubmit: function (doc) {
+    People.clean(doc);
+    console.log("People doc with auto values", doc);
+    return false;
+  }
+});
+```
+
+If you're sending the objects to the server in any way, it's always best to
+wait to call `clean` until you're on the server so that the auto values can be
+trusted.
 
 ## Resetting Validation
 
@@ -591,7 +638,11 @@ After a successful submission, validation is reset, ensuring that any error
 messages disappear and form input values are correct. However, you may need
 to reset validation for other reasons, such as when you reuse an edit form to
 edit a different document. To do this, call `AutoForm.resetForm()`, passing
-the form's `id` attribute and the SimpleSchema instance:
+the form's `id` attribute and the SimpleSchema instance.
+
+Here is a specific example of how you might reuse a single form to create or
+edit multiple documents by resetting the form validation and then swapping
+in various values for the `doc` attribute of the autoForm:
 
 ```js
 Template.example.events({
@@ -607,6 +658,9 @@ Template.example.events({
   }
 });
 ```
+
+Note that we do NOT reset the form itself (form.reset()). If you do this, it
+will cause problems with incorrect values being displayed in some fields.
 
 ## Complex Controls
 
@@ -700,6 +754,10 @@ Syntax:
 * `buttonClasses`: class attribute for the submit button.
 * `buttonContent`: The submit button content. If you don't set this, "Submit" is used.
 * `framework`: Optional. See the "Frameworks" section.
+* `template`: Optional. See the "Custom Templates" section.
+* `fields`: Optional. Bind an array or specify a comma-delimited string of field
+names to include. Only the listed fields will be included, and they'll appear
+in the order you specify.
 
 Those are the only supported attributes at this time. Any other attributes you specify will be output as
 attributes of the `<form>` element, just like when using the `{{autoForm}}` block helper.
@@ -722,6 +780,8 @@ attribute value to automatically use the label from the schema.
 
 The `framework` attribute can be used with this helper as well. See the "Frameworks" section. To set the 
 framework for the label, use `label-framework`.
+
+The `template` attribute can be used with this helper as well. See the "Custom Templates" section. 
 
 ### afQuickField Example
 
@@ -849,6 +909,11 @@ a normal form (to the `action` url) if you have not set up the submit button to 
 remove, or method call. This may be useful in some cases because it allows normal form submission after
 auto-validation.
 
+In most cases, the form is automatically reset for you after a successful
+submission action. For update forms, the form is *not* automatically reset. You
+can alter this default behavior by adding a `resetOnSuccess` attribute on your
+autoform helper, set to true or false.
+
 ## Frameworks
 
 By default, Bootstrap 3 classes are added to any generated elements. You may use
@@ -859,6 +924,24 @@ to affect the whole form. Set it on helpers within an `autoForm` to affect only
 the elements generated by that helper, or to override the parent `autoForm` framework.
 
 Submit an issue if you'd like to see another popular framework supported.
+
+## Custom Templates
+
+The `quickForm` and `afQuickField` helpers support a `template` attribute.
+Specify a template name or bind an actual template function to use your
+custom template to render the quick fields. An example custom template:
+
+```
+<template name="myField">
+  <div class="myField">
+    {{{labelHtml}}}
+    {{{inputHtml}}}
+  </div>
+  {{#if afFieldIsInvalid name autoform=autoform}}
+  <div>{{{afFieldMessage name autoform=autoform}}}</div>
+  {{/if}}
+</template>
+```
 
 ## More Examples
 

@@ -6,6 +6,81 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.16
+
+Add support for `contenteditable` input type. *(Thanks @chrisbutler)*
+
+### 0.4.15
+
+* Labels are now generated with "for" attribute
+* QuickForms work better with schemas containing objects now. The object is
+treated as a `fieldset` with its child fields nested within. This only works
+to one level deep.
+* The `updateDoc` passed to an `onSubmit` handler is no longer validated before
+being passed. The `insertDoc` is still validated.
+* Changes to account for `autoValue` and `defaultValue` options now available
+in the SimpleSchema package.
+
+### 0.4.14
+
+The execution flow for hooks has been improved. The `onError` hook is now
+always called if there's an error at any point in the form submission process,
+and it will never be called more than once. Also, any "before" hooks are now
+executed before the `onSubmit` hook. *(Thanks @blazer82)*
+
+### 0.4.13
+
+Changes related to SimpleSchema package changes. No visible changes.
+
+### 0.4.12
+
+Add support for `fields` attribute on `quickForm`. Bind an array or specify
+a comma-delimited string of field names to include. Only the listed fields
+will be included, and they'll appear in the order you specify.
+
+### 0.4.11
+
+* Don't include fields in quickForms if their name contains "$"
+* Use `textarea` instead of `input[type=text]` if the schema type is `String`,
+no specific type attribute is specified, and the current value of the doc
+contains line break characters.
+* Within an `onSubmit` function, you can now access `this.event` and `this.template`.
+* Specify `element="none"` or `element="span"` on afFieldLabel to get just
+the text or to use a `<span>` element, respectively.
+* `quickForm` and `afQuickField` now support a `template` attribute, allowing
+you to define your own template to be used for the quick fields.
+* Provide `resetOnSuccess` attribute to specify auto-reset behavior for a
+specific autoform.
+
+### 0.4.10
+
+Add explicit cleaning since SimpleSchema validation does not do it anymore
+
+### 0.4.9
+
+Fix error when a source doc has null values
+
+### 0.4.8
+
+Minor internal change to adjust for changes made to the internal schema in the
+SimpleSchema package.
+
+### 0.4.7
+
+* quickForm no longer displays fields for denyInsert or denyUpdate keys when
+building an insert or update form, respectively.
+* Fix an issue with being able to pass a Collection2 as the autoForm schema.
+(This is not recommended anyway.)
+* Automatically disable the submit button while submitting an autoform.
+
+### 0.4.6
+
+Ensure docToForm hook is called
+
+### 0.4.5
+
+Add onSuccess and onError hooks
+
 ### 0.4.4
 
 * Fix issues, introduced by 0.4.3, where select, checkbox, and radio form values

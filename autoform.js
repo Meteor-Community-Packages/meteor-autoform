@@ -72,13 +72,18 @@ if (typeof Handlebars !== 'undefined') {
     var retrievedDoc = formPreserve.getDocument(formId);
     if (retrievedDoc !== false) hash.doc = retrievedDoc;
 
+    // Allow passing a Collection2 as the schema, but wrap in AutoForm
+    if ("Collection2" in Meteor && schemaObj instanceof Meteor.Collection2) {
+      schemaObj = new AutoForm(schemaObj);
+    }
+
     var flatDoc;
     if (hash.doc) {
       var mDoc = new MongoObject(hash.doc);
       flatDoc = mDoc.getFlatObject();
       mDoc = null;
+      var docToForm = schemaObj._hooks.docToForm || schemaObj.docToForm;
 
-      var docToForm = schemaObj._hooks.docToForm;
       if (typeof docToForm === "function") {
         flatDoc = docToForm(flatDoc);
       }
@@ -109,19 +114,69 @@ if (typeof Handlebars !== 'undefined') {
       formFields: []
     };
 
-    // Look through all fields defined in the schema, and make
-    // a list of those that should be on the form.
-    _.each(autoForm.simpleSchema().schema(), function(fieldDefs, field) {
-      var info = {name: field};
+    var fieldWhitelist;
+    if ("fields" in hash) {
+      if (_.isArray(hash.fields)) {
+        fieldWhitelist = hash.fields;
+      } else if (typeof hash.fields === "string") {
+        fieldWhitelist = hash.fields.replace(/ /g, '').split(',');
+      }
+      delete hash.fields;
+    }
 
-      if ((fieldDefs.denyInsert && hash.type === "insert") ||
-              (fieldDefs.denyUpdate && hash.type === "update")) {
+    var ss = hash.schema.simpleSchema();
+    function addField(field, list) {
+      var fieldDefs = ss.schema(field);
+
+      // Don't include fields with denyInsert=true when it's an insert form
+      if (fieldDefs.denyInsert && hash.type === "insert")
+        return;
+
+      // Don't include fields with denyUpdate=true when it's an update form
+      if (fieldDefs.denyUpdate && hash.type === "update")
+        return;
+
+      // Don't include fields with array placeholders
+      if (field.indexOf("$") !== -1)
+        return;
+
+      if (fieldDefs.type === Object) {
+        var addedGroup, label = ss.label(field);
+        _.each(ss._schemaKeys, function(key) {
+          if (key.indexOf(field + ".") === 0) {
+            if (!addedGroup) {
+              addedGroup = {
+                name: field,
+                label: label,
+                isGroup: true,
+                formFields: []
+              };
+              context.formFields.push(addedGroup);
+            }
+            addField(key, addedGroup.formFields);
+          }
+        });
         return;
       }
-      if (_.isArray(fieldDefs.allowedValues)) {
+
+      var info = {name: field};
+
+      // If there are allowedValues defined, use them as select element options
+      var av = fieldDefs.allowedValues;
+      if (fieldDefs.type === Array) {
+        var arrayItemDefs = ss.schema(field + ".$");
+        av = arrayItemDefs.allowedValues;
+      }
+      if (_.isArray(av)) {
         info.options = "allowed";
       }
-      context.formFields.push(info);
+
+      list.push(info);
+    }
+
+    // Add top level (or requested) fields
+    _.each(fieldWhitelist || ss.firstLevelSchemaKeys(), function(key) {
+      addField(key, context.formFields);
     });
 
     // Prepare additional form customizations
@@ -298,6 +353,20 @@ if (typeof Handlebars !== 'undefined') {
     }
   };
 
+  function doBefore(docId, doc, hook, name) {
+    if (hook) {
+      if (docId) {
+        doc = hook(docId, doc);
+      } else {
+        doc = hook(doc);
+      }
+      if (!_.isObject(doc)) {
+        throw new Error(name + " must return an object");
+      }
+    }
+    return doc;
+  }
+
   Template._autoForm.events({
     'submit form': function(event, template) {
       var submitButton = template.find("button[type=submit]");
@@ -312,6 +381,7 @@ if (typeof Handlebars !== 'undefined') {
       var isUpdate = hasClass(submitButton, "update");
       var isRemove = hasClass(submitButton, "remove");
       var method = submitButton.getAttribute("data-meteor-method");
+      var isNormalSubmit = (!isInsert && !isUpdate && !isRemove && !method);
 
       //init
       var self = this, context = self.context;
@@ -423,6 +493,13 @@ if (typeof Handlebars !== 'undefined') {
               throw new Error("beforeUpdate must return an object");
             }
           }
+        };
+        // Pass both types of doc to onSubmit
+        var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
+        if (shouldContinue === false) {
+          return haltSubmission();
+        }
+      }
 
           afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error, result) {
             //don't automatically reset the form for updates because we
@@ -456,33 +533,22 @@ if (typeof Handlebars !== 'undefined') {
         }
       }
 
-      //we won't do an else here so that a method could be called in
-      //addition to another action on the same submit
+      // We won't do an else here so that a method could be called in
+      // addition to another action on the same submit
       if (method) {
-        if (beforeMethod) {
-          insertDoc = beforeMethod(insertDoc);
-          if (!_.isObject(insertDoc)) {
-            throw new Error("beforeMethod must return an object");
+        var methodDocForValidation = ss.clean(_.clone(methodDoc), {
+          isModifier: true,
+          filter: false,
+          autoConvert: false,
+          extendAutoValueContext: {
+            userId: (Meteor.userId && Meteor.userId()) || null
           }
+        });
+        // Validate first
+        if (!isValid(methodDocForValidation, false, method)) {
+          return haltSubmission();
         }
-
-        if (validationType === 'none' || ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
-          Meteor.call(method, insertDoc, function(error, result) {
-            if (error) {
-              selectFirstInvalidField();
-              onError && onError(method, error, template);
-            } else {
-              template.find("form").reset();
-              var focusInput = template.find("[autofocus]");
-              focusInput && focusInput.focus();
-              onSuccess && onSuccess(method, result, template);
-            }
-            afterMethod && afterMethod(error, result, template);
-            submitButton.disabled = false;
-          });
-        } else {
-          submitButton.disabled = false;
-        }
+        Meteor.call(method, methodDoc, makeCallback(method, afterMethod));
       }
 
       formPreserve.unregisterForm(formId);
@@ -534,31 +600,45 @@ if (typeof Handlebars !== 'undefined') {
     //to transfer the selected attribute to the selected property when
     //the form is valid, to make sure current values show correctly for
     //an update form
-//    var self = this, formId = self.data._formId;
-//    var selections = getSelections(formId);
-//    if (!selections) {
-//      _.each(self.findAll("select"), function(selectElement) {
-//        _.each(selectElement.options, function(option) {
-//          option.selected = option.hasAttribute("selected"); //transfer att to prop
-//        });
-//        setSelections(selectElement, formId);
-//      });
-//      return;
-//    }
-//    if (!selections) {
-//      return;
-//    }
-//    _.each(self.findAll("select"), function(selectElement) {
-//      var key = selectElement.getAttribute('data-schema-key');
-//      var selectedValues = selections[key];
-//      if (selectedValues && selectedValues.length) {
-//        _.each(selectElement.options, function(option) {
-//          if (_.contains(selectedValues, option.value)) {
-//            option.selected = true;
-//          }
-//        });
-//      }
-//    });
+    var self = this, formID = self.data.formID;
+
+    var selections = getSelections(formID);
+    if (!selections) {
+      // on first render, cache the initial selections for all select elements
+      _.each(self.findAll("select"), function(selectElement) {
+        // first transfer the selected attribute to the selected property
+        _.each(selectElement.options, function(option) {
+          option.selected = option.hasAttribute("selected"); //transfer att to prop
+        });
+        // then cache the selections
+        setSelections(selectElement, formID);
+      });
+      // selections will be updated whenever they change in the
+      // onchange event handler, too
+      return;
+    } else {
+      // whenever we rerender, keep the correct selected values
+      // by resetting them all from the cached values
+      _.each(self.findAll("select"), function(selectElement) {
+        var key = selectElement.getAttribute('data-schema-key');
+        var selectedValues = selections[key];
+        if (selectedValues && selectedValues.length) {
+          _.each(selectElement.options, function(option) {
+            if (_.contains(selectedValues, option.value)) {
+              option.selected = true;
+            }
+          });
+        }
+      });
+    }
+  };
+
+  Template._autoForm.destroyed = function() {
+    var self = this, formID = self.data.formID;
+
+    self._notInDOM = true;
+    self.data.schema.simpleSchema().namedContext(formID).resetValidation();
+    clearSelections(formID);
   };
 }
 
@@ -572,17 +652,17 @@ var maybeNum = function(val) {
   }
 };
 
-var formValues = function(template, transform) {
+var formValues = function(template, transform, ss) {
   var fields = template.findAll("[data-schema-key]");
   var doc = {};
   _.each(fields, function(field) {
     var name = field.getAttribute("data-schema-key");
-    var val = field.value;
+    var val = field.value || field.getAttribute('contenteditable') && field.innerHTML; //value is undefined for contenteditable
     var type = field.getAttribute("type") || "";
     type = type.toLowerCase();
     var tagName = field.tagName || "";
     tagName = tagName.toLowerCase();
-
+    
     // Handle select
     if (tagName === "select") {
       if (val === "true") { //boolean select
@@ -673,7 +753,23 @@ var formValues = function(template, transform) {
   if (typeof transform === "function") {
     doc = transform(doc);
   }
-  return doc;
+  // We return doc, insertDoc, and updateDoc.
+  // For insertDoc, delete any properties that are null, undefined, or empty strings,
+  // and expand to use subdocuments instead of dot notation keys.
+  // For updateDoc, convert to modifier object with $set and $unset.
+  // Do not add auto values to either.
+  var result = {
+    doc: doc,
+    insertDoc: ss.clean(expandObj(cleanNulls(doc)), {
+      isModifier: true,
+      getAutoValues: false
+    }),
+    updateDoc: ss.clean(docToModifier(doc), {
+      isModifier: true,
+      getAutoValues: false
+    })
+  };
+  return result;
 };
 
 var expandObj = function(doc) {
@@ -900,7 +996,7 @@ var getInputTemplate = function(name, autoform, defs, hash) {
   var type = "text";
   if (hash.type) {
     type = hash.type;
-  } else if (schemaType === String && hash.rows) {
+  } else if (schemaType === String && (hash.rows || valHasLineBreaks)) {
     type = "textarea";
   } else if (schemaType === String && defs.regEx === SchemaRegEx.Email) {
     type = "email";
@@ -1154,33 +1250,68 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   var formId = template.data.context._formId;
   var afObj = template.data.context._afObj;
 
-  if (onlyIfAlreadyInvalid && afObj.simpleSchema().namedContext(formId).isValid()) {
+  var ss = afObj.simpleSchema();
+
+  if (onlyIfAlreadyInvalid &&
+          ss.namedContext(formId).isValid()) {
     return;
   }
 
   // Create a document based on all the values of all the inputs on the form
-  var doc = formValues(template, afObj._hooks.formToDoc);
+  var form = formValues(template, afObj._hooks.formToDoc || afObj.formToDoc, ss);
 
   // Determine whether we're validating for an insert or an update
   var isUpdate = !!template.find("button.update");
 
-  // If validating for an insert, delete any properties that are
-  // null, undefined, or empty strings
-  if (!isUpdate) {
-    doc = cleanNulls(doc);
-  }
-
   // Skip validation if skipEmpty is true and the field we're validating
   // has no value.
-  if (skipEmpty && !(key in doc)) {
-    return; //skip validation
+  if (skipEmpty) {
+
+    // If validating for an insert, delete any properties that are
+    // null, undefined, or empty strings so that the "empty" check will be
+    // accurate. For an update, we want to keep null and "" because these
+    // values might be invalid.
+    var doc = form.doc;
+    if (!isUpdate) {
+      doc = cleanNulls(doc);
+    }
+
+    if (!(key in doc)) {
+      return; //skip validation
+    }
   }
 
   // Clean and validate doc
   if (isUpdate) {
-    afObj.simpleSchema().namedContext(formId).validateOne(docToModifier(doc), key, {modifier: true});
+    // formValues did some cleaning but didn't add auto values; add them now
+    ss.clean(form.updateDoc, {
+      filter: false,
+      autoConvert: false,
+      extendAutoValueContext: {
+        userId: (Meteor.userId && Meteor.userId()) || null
+      }
+    });
+    afObj.simpleSchema().namedContext(formId).validateOne(form.updateDoc, key, {
+      modifier: true,
+      extendedCustomContext: {
+        userId: (Meteor.userId && Meteor.userId()) || null
+      }
+    });
   } else {
-    afObj.simpleSchema().namedContext(formId).validateOne(expandObj(doc), key, {modifier: false});
+    // formValues did some cleaning but didn't add auto values; add them now
+    ss.clean(form.insertDoc, {
+      filter: false,
+      autoConvert: false,
+      extendAutoValueContext: {
+        userId: (Meteor.userId && Meteor.userId()) || null
+      }
+    });
+    afObj.simpleSchema().namedContext(formId).validateOne(form.insertDoc, key, {
+      modifier: false,
+      extendedCustomContext: {
+        userId: (Meteor.userId && Meteor.userId()) || null
+      }
+    });
   }
 };
 //throttling function that calls out to _validateField
@@ -1246,19 +1377,12 @@ var docToModifier = function(doc) {
   return updateObj;
 };
 
-var makeGeneric = function(name) {
-  if (typeof name !== "string")
-    return null;
-
-  return name.replace(/\.[0-9]+\./g, '.$.').replace(/\.[0-9]+/g, '.$');
-};
-
 var getDefs = function(ss, name) {
   if (typeof name !== "string") {
     throw new Error("Invalid field name: (not a string)");
   }
 
-  var defs = ss.schema(makeGeneric(name));
+  var defs = ss.schema(name);
   if (!defs)
     throw new Error("Invalid field name: " + name);
   return defs;
