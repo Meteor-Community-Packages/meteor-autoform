@@ -6,16 +6,43 @@
   </form>
 </template>
 
+{{#each ../formFields}}
+  {{#if ../../isReadOnly}}
+  {{afQuickField ../this.name autoform=../../this options=../this.options template=../../../template readonly=""}}
+  {{else}}
+  {{#if ../../../isDisabled}}
+  {{afQuickField ../../this.name autoform=../../../this options=../../this.options template=../../../../template disabled=""}}
+  {{else}}
+  {{#if ../../this.isGroup}}
+  <fieldset>
+  <legend>{{../../../this.label}}</legend>
+  {{#each ../../../this.formFields}}
+  {{afQuickField this.name autoform=../../../../../this options=../../../../this.options template=../../../../../../template}}
+  {{/each}}
+  </fieldset>
+  {{else}}
+  {{afQuickField ../../../this.name autoform=../../../../this options=../../../this.options template=../../../../../template}}
+  {{/if}}
+
 <template name="_quickForm">
   {{#autoForm qfHash=qfHash}}
   {{#each formFields}}
   {{#if ../isReadOnly}}
-  {{> afQuickField name autoform=.. options=options readonly=""}}
+  {{> afQuickField name autoform=.. options=options readonly="" template=../template}}
   {{else}}
   {{#if ../isDisabled}}
-  {{> afQuickField name autoform=.. options=options disabled=""}}
+  {{> afQuickField name autoform=.. options=options disabled="" template=../template}}
   {{else}}
-  {{> afQuickField name autoform=.. options=options}}
+  {{#if ../isGroup}}
+  <fieldset>
+  <legend>{{label}}</legend>
+  {{#each this.formFields}}
+  {{> afQuickField name autoform=../.. options=options template=../../template}}
+  {{/each}}
+  </fieldset>
+  {{else}}
+  {{> afQuickField name autoform=.. options=options template=../template}}
+  {{/if}}
   {{/if}}
   {{/if}}
   {{/each}}
@@ -25,9 +52,6 @@
     <button type="submit" data-meteor-method="{{method}}" class="{{buttonClasses}}">{{buttonContent}}</button>
     {{else}}
     <button type="submit" class="{{buttonClasses}}">{{buttonContent}}</button>
-    {{/if}}
-    {{#if ../doNormal}}
-    <button type="submit" class="{{../../buttonClasses}}">{{../../buttonContent}}</button>
     {{/if}}
   </div>
   {{/if}}

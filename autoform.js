@@ -98,9 +98,10 @@ if (typeof Handlebars !== 'undefined') {
     autoFormContext.context._flatDoc = flatDoc;
     autoFormContext.context._framework = hash.framework || defaultFramework;
     autoFormContext.context._validationType = hash.validation || "submitThenKeyup";
+    autoFormContext.context._resetOnSuccess = hash.resetOnSuccess;
 
     // Remove from hash everything that we don't want as a form attribute
-    hash = cleanObj(hash, ["__content", "schema", "validation", "framework", "doc", "qfHash"]);
+    hash = cleanObj(hash, ["__content", "schema", "validation", "framework", "doc", "qfHash", "resetOnSuccess"]);
 
     return Template._autoForm.withData(autoFormContext);
   });
@@ -115,16 +116,15 @@ if (typeof Handlebars !== 'undefined') {
     };
 
     var fieldWhitelist;
-    if ("fields" in hash) {
+    if (hash.fields) {
       if (_.isArray(hash.fields)) {
         fieldWhitelist = hash.fields;
       } else if (typeof hash.fields === "string") {
         fieldWhitelist = hash.fields.replace(/ /g, '').split(',');
       }
-      delete hash.fields;
     }
 
-    var ss = hash.schema.simpleSchema();
+    var ss = autoform.simpleSchema();
     function addField(field, list) {
       var fieldDefs = ss.schema(field);
 
@@ -207,12 +207,12 @@ if (typeof Handlebars !== 'undefined') {
         break;
 
       default:
-
+        // Normal browser form submission
         break;
     }
 
     // Remove from hash everything that we don't want passed along to autoform
-    hash = cleanObj(hash, ["__content", "buttonContent", "buttonClasses", "method", "type"]);
+    hash = cleanObj(hash, ["__content", "buttonContent", "buttonClasses", "method", "type", "fields"]);
 
     // Store the hash for the autoForm helper to use
     context.qfHash = hash;
@@ -224,7 +224,7 @@ if (typeof Handlebars !== 'undefined') {
     var self = this;
     var formId = self.data.atts.id;
     formPreserve.registerForm(formId, function () {
-      return formValues(self, self.data.context._afObj._hooks.formToDoc);
+      return formValues(self, self.data.context._afObj._hooks.formToDoc, self.data.context._ss);
     });
   };
 
@@ -332,18 +332,24 @@ if (typeof Handlebars !== 'undefined') {
       throw new Error("afFieldLabel helper must be used within an autoForm block");
     }
 
-    var defs = getDefs(ss, name); //defs will not be undefined
     var framework = hash.framework || afContext._framework || defaultFramework;
     var cls = hash["class"] || "";
+    var element = hash.element || "label";
+    
+    if (element === "label" && !('for' in hash)) {
+      hash.for = name;
+    }
 
-    hash = cleanObj(hash, ["autoform", "framework", "class"]);
+    hash = cleanObj(hash, ["autoform", "framework", "class", "element"]);
 
     var lblContext = {
-      label: defs.label,
+      label: ss.label(name),
       cls: cls,
+      element: element,
       atts: hash
     };
 
+    //TODO merge element/framework/template concepts
     switch (framework) {
       case "bootstrap3":
         return Template._afLabel_Bootstrap3.withData(lblContext);
@@ -391,17 +397,54 @@ if (typeof Handlebars !== 'undefined') {
       var formId = context._formId;
       var currentDoc = context._doc || null;
       var docId = currentDoc ? currentDoc._id : null;
-      var doc = formValues(template, hooks.formToDoc);
-      var onSubmit = hooks.onSubmit || context.onSubmit;
       var ss = context._ss;
-
-      //for inserts, delete any properties that are null, undefined, or empty strings,
-      //and expand to use subdocuments instead of dot notation keys
-      var insertDoc = expandObj(cleanNulls(doc));
-      //for updates, convert to modifier object with $set and $unset
-      var updateDoc = docToModifier(doc);
+      var resetOnSuccess = context._resetOnSuccess;
       
-      // Function to select the focus the first field with an error
+      // Gather hooks
+      var beforeInsert = hooks.before.insert;
+      var beforeUpdate = hooks.before.update;
+      var beforeRemove = hooks.before.remove;
+      var beforeMethod = method && hooks.before[method];
+      var afterInsert = hooks.after.insert;
+      var afterUpdate = hooks.after.update;
+      var afterRemove = hooks.after.remove;
+      var afterMethod = method && hooks.after[method];
+      var onSuccess = hooks.onSuccess;
+      var onError = hooks.onError;
+      var onSubmit = hooks.onSubmit;
+      
+      // Prevent browser form submission if we're planning to do our own thing
+      if (!isNormalSubmit) {
+        event.preventDefault();
+      }
+      
+      // Gather all form values
+      var form = formValues(template, hooks.formToDoc, ss);
+      
+      // Execute before hooks
+      var insertDoc = isInsert ? doBefore(null, form.insertDoc, beforeInsert, 'before.insert hook') : form.insertDoc;
+      var updateDoc = isUpdate && !_.isEmpty(form.updateDoc) ? doBefore(docId, form.updateDoc, beforeUpdate, 'before.update hook') : form.updateDoc;
+      var methodDoc = method ? doBefore(null, form.insertDoc, beforeMethod, 'before.method hook') : form.insertDoc;
+
+      // Get a version of the doc that has auto values to validate here. We
+      // don't want to actually send any auto values to the server because
+      // we ultimately want them generated on the server
+      var insertDocForValidation = ss.clean(_.clone(insertDoc), {
+        filter: false,
+        autoConvert: false,
+        extendAutoValueContext: {
+          userId: (Meteor.userId && Meteor.userId()) || null
+        }
+      });
+      
+      // Prep haltSubmission function
+      function haltSubmission() {
+        event.preventDefault();
+        event.stopPropagation();
+        submitButton.disabled = false;
+      }
+      
+      // Prep function to select the focus the first field with an error
       function selectFirstInvalidField() {
         if (! ss.namedContext(formId).isValid()) {
           var ctx = ss.namedContext(formId);
@@ -416,120 +459,89 @@ if (typeof Handlebars !== 'undefined') {
         }
       }
 
-      if (isInsert || isUpdate || isRemove || method) {
-        event.preventDefault(); //prevent default here if we're planning to do our own thing
+      // Prep isValid function
+      var validationErrorTriggered = 0;
+      function isValid(doc, isModifier, type) {
+        var result = validationType === 'none' || ss.namedContext(formId).validate(doc, {
+          modifier: isModifier,
+          extendedCustomContext: {
+            userId: (Meteor.userId && Meteor.userId()) || null
+          }
+        });
+        if (!result && !validationErrorTriggered) {
+          selectFirstInvalidField();
+          onError && onError(type, new Error('failed validation'), template);
+          validationErrorTriggered++;
+        }
+        return result;
+      }
+      
+      // Perform validation for onSubmit call or for normal form submission
+      if ((onSubmit || isNormalSubmit) && !isValid(insertDocForValidation, false, 'pre-submit validation')) {
+        return haltSubmission();
       }
 
       //pass both types of doc to onSubmit
-      if (typeof onSubmit === "function") {
-        if (validationType === 'none' || ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
-          var onSubmitContext = {
-            resetForm: function() {
+      if (onSubmit) {
+        var context = {
+          event: event,
+          template: template,
+          resetForm: function() {
+            if (!template._notInDOM) {
               template.find("form").reset();
               var focusInput = template.find("[autofocus]");
               focusInput && focusInput.focus();
             }
-          };
-          var shouldContinue = onSubmit.call(onSubmitContext, insertDoc, updateDoc, currentDoc);
-          if (shouldContinue === false) {
-            event.preventDefault();
-            submitButton.disabled = false;
-            return;
-          }
-        } else {
-          selectFirstInvalidField();
-        }
-      }
-
-      //allow normal form submission
-      if (!isInsert && !isUpdate && !isRemove && !method) {
-        if (validationType !== 'none' && !ss.namedContext(formId).validate(insertDoc, {modifier: false})) {
-          event.preventDefault(); //don't submit the form if invalid
-          selectFirstInvalidField();
-        }
-        submitButton.disabled = false;
-        return;
-      }
-
-      // Gather hooks
-      var beforeInsert = hooks.before.insert;
-      var beforeUpdate = hooks.before.update;
-      var beforeRemove = hooks.before.remove;
-      var beforeMethod = method && hooks.before[method];
-      var afterInsert = hooks.after.insert;
-      var afterUpdate = hooks.after.update;
-      var afterRemove = hooks.after.remove;
-      var afterMethod = method && hooks.after[method];
-      var onSuccess = hooks.onSuccess;
-      var onError = hooks.onError;
-
-      //do it
-      if (isInsert) {
-        if (beforeInsert) {
-          insertDoc = beforeInsert(insertDoc);
-          if (!_.isObject(insertDoc)) {
-            throw new Error("beforeInsert must return an object");
-          }
-        }
-        
-        afObj._collection && afObj._collection.insert(insertDoc, {validationContext: formId}, function(error, result) {
-          if (error) {
-            selectFirstInvalidField();
-            onError && onError('insert', error, template);
-          } else {
-            template.find("form").reset();
-            var focusInput = template.find("[autofocus]");
-            focusInput && focusInput.focus();
-            onSuccess && onSuccess('insert', result, template);
-          }
-          afterInsert && afterInsert(error, result, template);
-          submitButton.disabled = false;
-        });
-      } else if (isUpdate) {
-        if (!_.isEmpty(updateDoc)) {
-          if (beforeUpdate) {
-            updateDoc = beforeUpdate(docId, updateDoc);
-            if (!_.isObject(updateDoc)) {
-              throw new Error("beforeUpdate must return an object");
-            }
           }
         };
-        // Pass both types of doc to onSubmit
-        var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
+        var shouldContinue = onSubmit.call(onSubmitContext, insertDoc, updateDoc, currentDoc);
         if (shouldContinue === false) {
-          return haltSubmission();
+          event.preventDefault();
+          submitButton.disabled = false;
+          return;
         }
       }
-
-          afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, function(error, result) {
-            //don't automatically reset the form for updates because we
-            //often won't want that
-            if (error) {
-              selectFirstInvalidField();
-              onError && onError('update', error, template);
-            } else {
-              onSuccess && onSuccess('update', result, template);
+      
+      // Prep callback creator function
+      function makeCallback(name, afterHook) {
+        return function(error, result) {
+          if (error) {
+            selectFirstInvalidField();
+            onError && onError(name, error, template);
+          } else {
+            // Potentially reset form after successful submit.
+            // Update forms are opt-in while all others are opt-out.
+            if (!template._notInDOM &&
+                    ((name !== 'update' && resetOnSuccess !== false) ||
+                            (name === 'update' && resetOnSuccess === true))) {
+              template.find("form").reset();
+              var focusInput = template.find("[autofocus]");
+              focusInput && focusInput.focus();
             }
-            afterUpdate && afterUpdate(error, result, template);
-            submitButton.disabled = false;
-          });
+            onSuccess && onSuccess(name, result, template);
+          }
+          afterHook && afterHook(error, result, template);
+          submitButton.disabled = false;
+        };
+      }
+      
+      // Now we will do the requested insert, update, remove, method, or normal
+      // browser form submission. Even though we may have already validated above
+      // if we have an onSubmit hook, we do it again upon insert or update
+      // because collection2 validation catches additional stuff like unique.
+      if (isInsert) {
+        afObj._collection && afObj._collection.insert(insertDoc, {validationContext: formId}, makeCallback('insert', afterInsert));
+      } else if (isUpdate) {
+        if (!_.isEmpty(updateDoc)) {
+          afObj._collection && afObj._collection.update(docId, updateDoc, {validationContext: formId}, makeCallback('update', afterUpdate));
         }
       } else if (isRemove) {
         //call beforeRemove if present, and stop if it's false
         if (beforeRemove && beforeRemove(docId) === false) {
           //stopped
-          submitButton.disabled = false;
+          return haltSubmission();
         } else {
-          afObj._collection && afObj._collection.remove(docId, function(error, result) {
-            if (error) {
-              selectFirstInvalidField();
-              onError && onError('remove', error, template);
-            } else {
-              onSuccess && onSuccess('remove', result, template);
-            }
-            afterRemove && afterRemove(error, result, template);
-            submitButton.disabled = false;
-          });
+          afObj._collection && afObj._collection.remove(docId, makeCallback('remove', afterRemove));
         }
       }
 
@@ -594,52 +606,52 @@ if (typeof Handlebars !== 'undefined') {
   //but attributes that are properties don't have the properties updated to match.
   //This means that selected is not updated properly even if the selected
   //attribute is on the element.
-  Template._autoForm.rendered = function() {
-    //using autoformSelections is only necessary when the form is invalid, and will
-    //cause problems if done when the form is valid, but we still have
-    //to transfer the selected attribute to the selected property when
-    //the form is valid, to make sure current values show correctly for
-    //an update form
-    var self = this, formID = self.data.formID;
-
-    var selections = getSelections(formID);
-    if (!selections) {
-      // on first render, cache the initial selections for all select elements
-      _.each(self.findAll("select"), function(selectElement) {
-        // first transfer the selected attribute to the selected property
-        _.each(selectElement.options, function(option) {
-          option.selected = option.hasAttribute("selected"); //transfer att to prop
-        });
-        // then cache the selections
-        setSelections(selectElement, formID);
-      });
-      // selections will be updated whenever they change in the
-      // onchange event handler, too
-      return;
-    } else {
-      // whenever we rerender, keep the correct selected values
-      // by resetting them all from the cached values
-      _.each(self.findAll("select"), function(selectElement) {
-        var key = selectElement.getAttribute('data-schema-key');
-        var selectedValues = selections[key];
-        if (selectedValues && selectedValues.length) {
-          _.each(selectElement.options, function(option) {
-            if (_.contains(selectedValues, option.value)) {
-              option.selected = true;
-            }
-          });
-        }
-      });
-    }
-  };
-
-  Template._autoForm.destroyed = function() {
-    var self = this, formID = self.data.formID;
-
-    self._notInDOM = true;
-    self.data.schema.simpleSchema().namedContext(formID).resetValidation();
-    clearSelections(formID);
-  };
+//  Template._autoForm.rendered = function() {
+//    //using autoformSelections is only necessary when the form is invalid, and will
+//    //cause problems if done when the form is valid, but we still have
+//    //to transfer the selected attribute to the selected property when
+//    //the form is valid, to make sure current values show correctly for
+//    //an update form
+//    var self = this, formID = self.data.formID;
+//
+//    var selections = getSelections(formID);
+//    if (!selections) {
+//      // on first render, cache the initial selections for all select elements
+//      _.each(self.findAll("select"), function(selectElement) {
+//        // first transfer the selected attribute to the selected property
+//        _.each(selectElement.options, function(option) {
+//          option.selected = option.hasAttribute("selected"); //transfer att to prop
+//        });
+//        // then cache the selections
+//        setSelections(selectElement, formID);
+//      });
+//      // selections will be updated whenever they change in the
+//      // onchange event handler, too
+//      return;
+//    } else {
+//      // whenever we rerender, keep the correct selected values
+//      // by resetting them all from the cached values
+//      _.each(self.findAll("select"), function(selectElement) {
+//        var key = selectElement.getAttribute('data-schema-key');
+//        var selectedValues = selections[key];
+//        if (selectedValues && selectedValues.length) {
+//          _.each(selectElement.options, function(option) {
+//            if (_.contains(selectedValues, option.value)) {
+//              option.selected = true;
+//            }
+//          });
+//        }
+//      });
+//    }
+//  };
+//
+//  Template._autoForm.destroyed = function() {
+//    var self = this, formID = self.data.formID;
+//
+//    self._notInDOM = true;
+//    self.data.schema.simpleSchema().namedContext(formID).resetValidation();
+//    clearSelections(formID);
+//  };
 }
 
 var maybeNum = function(val) {
@@ -991,6 +1003,8 @@ var getInputTemplate = function(name, autoform, defs, hash) {
       value = [value];
     }
   }
+  
+  var valHasLineBreaks = typeof value === "string" ? (value.indexOf("\n") !== -1) : false;
 
   //get type
   var type = "text";
@@ -1025,7 +1039,7 @@ var getInputTemplate = function(name, autoform, defs, hash) {
     }
   }
 
-  var label = defs.label;
+  var label = autoform._ss.label(name);
   var min = defs.min;
   var max = defs.max;
 
@@ -1127,6 +1141,9 @@ var getInputTemplate = function(name, autoform, defs, hash) {
     hash = cleanObj(hash, ["class"]);
     data.atts = hash;
     template = "_afTextarea";
+  } else if (type === "contenteditable") {
+    //TODO convert this type
+    //html = '<div contenteditable="true" data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</div>';
   } else if (type === "boolean") {
     value = (value === "true") ? true : false;
     var items = [
@@ -1258,7 +1275,7 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   }
 
   // Create a document based on all the values of all the inputs on the form
-  var form = formValues(template, afObj._hooks.formToDoc || afObj.formToDoc, ss);
+  var form = formValues(template, afObj._hooks.formToDoc, ss);
 
   // Determine whether we're validating for an insert or an update
   var isUpdate = !!template.find("button.update");
