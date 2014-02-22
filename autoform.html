@@ -1,71 +1,53 @@
-<template name="_autoForm">
+<template name="autoForm">
   <form {{atts}}>
-    {{#with context}}
-    {{> content}}
-    {{/with}}
+    {{> content innerContext}}
   </form>
 </template>
 
-<template name="_quickForm">
-  {{#autoForm qfHash=qfHash}}
-  {{#each formFields}}
-  {{#if ../isReadOnly}}
-  {{> afQuickField name autoform=.. options=options readonly="" template=../template}}
-  {{else}}
-  {{#if ../isDisabled}}
-  {{> afQuickField name autoform=.. options=options disabled="" template=../template}}
-  {{else}}
-  {{#if ../isGroup}}
-  <fieldset>
-  <legend>{{label}}</legend>
-  {{#each this.formFields}}
-  {{> afQuickField name autoform=../.. options=options template=../../template}}
-  {{/each}}
-  </fieldset>
-  {{else}}
-  {{> afQuickField name autoform=.. options=options template=../template}}
-  {{/if}}
-  {{/if}}
-  {{/if}}
-  {{/each}}
-  {{#if needsButton}}
-  <div>
-    {{#if method}}
-    <button type="submit" data-meteor-method="{{method}}" class="{{buttonClasses}}">{{buttonContent}}</button>
+<template name="quickForm">
+  {{#autoForm afContext}}
+    {{#each formFields}}
+    {{#if isGroup}}
+    <fieldset>
+      <legend>{{label}}</legend>
+      {{#each this.formFields}}
+      {{> afQuickField this}}
+      {{/each}}
+    </fieldset>
     {{else}}
-    <button type="submit" class="{{buttonClasses}}">{{buttonContent}}</button>
+    {{> afQuickField this}}
     {{/if}}
-  </div>
-  {{/if}}
+    {{/each}}
+    {{#if needsButton}}
+    <div>
+      <button {{submitButtonAtts}}>
+      {{#with buttonContent}}
+      {{this}}
+      {{else}}
+      Submit
+      {{/with}}
+      </button>
+    </div>
+    {{/if}}
   {{/autoForm}}
 </template>
 
-<template name="_afQuickField_Bootstrap3">
-  <div class="form-group {{#if afFieldIsInvalid name}}has-error{{/if}}">
+<template name="afQuickField">
+  <div class="form-group {{#if afFieldIsInvalid name=name autoform=autoform}}has-error{{/if}}">
     {{#unless skipLabel}}
-    {{> afFieldLabel name qfHash=labelHash}}
+    {{> afFieldLabel labelContext}}
     {{/unless}}
-    {{> afFieldInput name qfHash=inputHash}}
-    <span class="help-block">{{{afFieldMessage name}}}</span>
+    {{> afFieldInput inputContext}}
+    <span class="help-block">{{{afFieldMessage name=name autoform=autoform}}}</span>
   </div>
 </template>
 
-<template name="_afQuickField_Plain">
-  <div>
-    {{#unless skipLabel}}
-    {{> afFieldLabel name qfHash=labelHash framework="none"}}
-    {{/unless}}
-    {{> afFieldInput name qfHash=inputHash framework="none"}}
-    <span>{{{afFieldMessage name}}}</span>
-  </div>
+<template name="afFieldLabel">
+  <label {{atts}}>{{label}}</label>
 </template>
 
-<template name="_afLabel_Bootstrap3">
-  <label class="{{cls}} control-label" {{atts}}>{{label}}</label>
-</template>
-
-<template name="_afLabel_Plain">
-  <label class="{{cls}}" {{atts}}>{{label}}</label>
+<template name="afFieldInput">
+  {{> renderTemplate inputInfo}}
 </template>
 
 <template name="_afCheckbox_Bootstrap3">
@@ -145,3 +127,34 @@
 <template name="_afInput_Plain">
   <input type="{{type}}" data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" value="{{value}}" {{atts}}/>
 </template>
+
+<!--
+<template name="_afQuickField_Bootstrap3">
+  <div class="form-group {{#if afFieldIsInvalid name}}has-error{{/if}}">
+    {{#unless skipLabel}}
+    {{> afFieldLabel name qfHash=labelHash}}
+    {{/unless}}
+    {{> afFieldInput name qfHash=inputHash}}
+    <span class="help-block">{{{afFieldMessage name}}}</span>
+  </div>
+</template>
+
+<template name="_afQuickField_Plain">
+  <div>
+    {{#unless skipLabel}}
+    {{> afFieldLabel name qfHash=labelHash framework="none"}}
+    {{/unless}}
+    {{> afFieldInput name qfHash=inputHash framework="none"}}
+    <span>{{{afFieldMessage name}}}</span>
+  </div>
+</template>
+
+<template name="_afLabel_Bootstrap3">
+  <label class="{{cls}} control-label" {{atts}}>{{label}}</label>
+</template>
+
+<template name="_afLabel_Plain">
+  <label class="{{cls}}" {{atts}}>{{label}}</label>
+</template>
+
+-->

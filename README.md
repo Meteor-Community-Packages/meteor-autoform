@@ -59,40 +59,40 @@ Creating an insert form with automatic validation and submission is as simple as
 
 ```html
 <template name="insertBookForm">
-    {{#autoForm schema=booksCollection id="insertBookForm"}}
+    {{#autoForm form=booksCollection id="insertBookForm"}}
     <fieldset>
         <legend>Add a Book</legend>
         <div class="form-group{{#if afFieldIsInvalid 'title'}} has-error{{/if}}">
-            {{afFieldLabel 'title'}}
-            {{afFieldInput 'title'}}
+            {{> afFieldLabel 'title'}}
+            {{> afFieldInput 'title'}}
             {{#if afFieldIsInvalid 'title'}}
             <span class="help-block">{{afFieldMessage 'title'}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'author'}} has-error{{/if}}">
-            {{afFieldLabel 'author'}}
-            {{afFieldInput 'author'}}
+            {{> afFieldLabel 'author'}}
+            {{> afFieldInput 'author'}}
             {{#if afFieldIsInvalid 'author'}}
             <span class="help-block">{{afFieldMessage 'author'}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'summary'}} has-error{{/if}}">
-            {{afFieldLabel 'summary'}}
-            {{afFieldInput 'summary'}}
+            {{> afFieldLabel 'summary'}}
+            {{> afFieldInput 'summary'}}
             {{#if afFieldIsInvalid 'summary'}}
             <span class="help-block">{{afFieldMessage 'summary'}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'copies'}} has-error{{/if}}">
-            {{afFieldLabel 'copies'}}
-            {{afFieldInput 'copies'}}
+            {{> afFieldLabel 'copies'}}
+            {{> afFieldInput 'copies'}}
             {{#if afFieldIsInvalid 'copies'}}
             <span class="help-block">{{afFieldMessage 'copies'}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'lastCheckedOut'}} has-error{{/if}}">
-            {{afFieldLabel 'lastCheckedOut'}}
-            {{afFieldInput 'lastCheckedOut'}}
+            {{> afFieldLabel 'lastCheckedOut'}}
+            {{> afFieldInput 'lastCheckedOut'}}
             {{#if afFieldIsInvalid 'lastCheckedOut'}}
             <span class="help-block">{{afFieldMessage 'lastCheckedOut'}}</span>
             {{/if}}
@@ -111,7 +111,7 @@ Template.insertBookForm.booksCollection = function () {
 };
 ```
 
-(If `Books` is in the global/window scope, you could instead do `schema="Books"`
+(If `Books` is in the global/window scope, you could instead do `form="Books"`
 on the `autoForm` helper and skip the `booksCollection` helper.)
 
 And that's it! You don't have to write any specific javascript functions to validate the data
@@ -133,40 +133,40 @@ What about an update form? It's pretty much the same as an insert form:
 
 ```html
 <template name="updateBookForm">
-    {{#autoForm schema=booksCollection doc=selectedBook id="updateBookForm"}}
+    {{#autoForm form=booksCollection doc=selectedBook id="updateBookForm"}}
     <fieldset>
         <legend>Edit Book</legend>
         <div class="form-group{{#if afFieldIsInvalid 'title'}} has-error{{/if}}">
-            {{afFieldLabel 'title'}}
-            {{afFieldInput 'title'}}
+            {{> afFieldLabel 'title'}}
+            {{> afFieldInput 'title'}}
             {{#if afFieldIsInvalid 'title'}}
             <span class="help-block">{{afFieldMessage 'title'}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'author'}} has-error{{/if}}">
-            {{afFieldLabel 'author'}}
-            {{afFieldInput 'author'}}
+            {{> afFieldLabel 'author'}}
+            {{> afFieldInput 'author'}}
             {{#if afFieldIsInvalid 'author'}}
             <span class="help-block">{{afFieldMessage 'author'}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'summary'}} has-error{{/if}}">
-            {{afFieldLabel 'summary'}}
-            {{afFieldInput 'summary'}}
+            {{> afFieldLabel 'summary'}}
+            {{> afFieldInput 'summary'}}
             {{#if afFieldIsInvalid 'summary'}}
             <span class="help-block">{{afFieldMessage 'summary'}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'copies'}} has-error{{/if}}">
-            {{afFieldLabel 'copies'}}
-            {{afFieldInput 'copies'}}
+            {{> afFieldLabel 'copies'}}
+            {{> afFieldInput 'copies'}}
             {{#if afFieldIsInvalid 'copies'}}
             <span class="help-block">{{afFieldMessage 'copies'}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'lastCheckedOut'}} has-error{{/if}}">
-            {{afFieldLabel 'lastCheckedOut'}}
-            {{afFieldInput 'lastCheckedOut'}}
+            {{> afFieldLabel 'lastCheckedOut'}}
+            {{> afFieldInput 'lastCheckedOut'}}
             {{#if afFieldIsInvalid 'lastCheckedOut'}}
             <span class="help-block">{{afFieldMessage 'lastCheckedOut'}}</span>
             {{/if}}
@@ -193,7 +193,7 @@ pass in null or undefined to the `doc` attribute.
 And finally, how about an example of a remove form:
 
 ```html
-{{#autoForm schema=booksCollection doc=this}}
+{{#autoForm form=booksCollection doc=this}}
   <button type="submit" class="btn btn-primary remove">Delete</button>
 {{/autoForm}}
 ```
@@ -209,7 +209,7 @@ Use this block helper instead of `<form>` elements to wrap your form and gain al
 helpers must be used within an `autoForm` block.
 
 Attributes:
-* `schema`: Required. Pass one of the following:
+* `form`: Required. Pass one of the following:
     * An instance of `AutoForm` (recommended if you don't need any hooks; required if you do need hooks)
     * An instance of `Meteor.Collection` that has a `schema` (fine if you don't need any hooks on the form)
     * A string name of an `AutoForm` instance that is in the `window` scope.
@@ -218,6 +218,8 @@ Attributes:
 the name of a custom helper that returns the object by calling `findOne()`.
 * `validation`: Optional. See the "Fine Tuning Validation" section.
 * `framework`: Optional. See the "Frameworks" section.
+* `type`: Optional. One of "insert", "update", "remove", or "method". Anything else will result in normal browser form submission after validation.
+* `meteormethod`: Optional. When `type` is "method", indicate the name of the Meteor method in this attribute.
 * Any additional attributes are passed along to the `<form>` element, meaning that you can add classes, etc.
 
 It's best to always include an `id` attribute on your `autoForm` helper. This helps
@@ -251,8 +253,8 @@ data type, as defined in the schema.
 * If type is `Number`, `<input type="number">`. You may specify the step, min, and max attributes to further restrict entry. The min and max values defined in your schema are automatically transferred to the DOM element, too.
 * If type is `Date`, `<input type="date">`. If you want `datetime` or `datetime-local` instead, specify your own `type`
 attribute when calling the helper.
-* If type is `String` and regEx is `SchemaRegEx.Email`, `<input type="email">`.
-* If type is `String` and regEx is `SchemaRegEx.Url`, `<input type="url">`.
+* If type is `String` and regEx is `SimpleSchema.RegEx.Email`, `<input type="email">`.
+* If type is `String` and regEx is `SimpleSchema.RegEx.Url`, `<input type="url">`.
 * If type is `Boolean`, a checkbox is used by default. However, if you set the
 `radio` or `select` attributes when calling the helper, then a radio or select
 control will be used instead. Use the `trueLabel` and `falseLabel` attributes
@@ -271,7 +273,7 @@ when defining your min/max values in SimpleSchema and it should work correctly.
 You can specify any additional attributes for the helper, and they will be transferred to the resulting DOM element. For example:
 
 ```html
-{{afFieldInput "firstName" autofocus="" class="inputClass"}}
+{{> afFieldInput "firstName" autofocus="" class="inputClass"}}
 ```
 
 For boolean attributes, such as autofocus, you must specify an empty string after the
@@ -284,7 +286,7 @@ As mentioned, you must pass in `options` if you want a `<select>` control. The v
 options attribute must be an array of objects, where each object has a `label` key and a `value` key. For example:
 
 ```html
-{{afFieldInput "year" options=yearOptions}}
+{{> afFieldInput "year" options=yearOptions}}
 ```
 
 ```js
@@ -301,7 +303,7 @@ Or if you wanted those options to appear as checkboxes or radios instead, the
 html would look like this:
 
 ```html
-{{afFieldInput "year" options=yearOptions noselect="true"}}
+{{> afFieldInput "year" options=yearOptions noselect="true"}}
 ```
 
 To use the `allowedValues` from the schema as the options, set
@@ -329,9 +331,8 @@ schemaless (for example, Meteor.users()), you can do that.
 
 1. In client+server code, create a `SimpleSchema` instance to define the form's schema.
 2. On the client only, create an instance of `AutoForm`, passing in your `SimpleSchema` instance as the only argument.
-3. Pass the AutoForm instance as the `schema` attribute of the `autoForm` helper.
-4. Add one attribute, `data-meteor-method`, to the submit button of the form (must be `type="submit"`), and
-set its value to the name of any `Meteor.method()` you have defined in server code.
+3. Pass the AutoForm instance as the `form` attribute of the `autoForm` helper.
+4. Pass the name of any Meteor method you have defined in server code as the `meteormethod` attribute of the `autoForm` helper.
 
 If you do these things, the form data will be gathered into a single object when
 the user clicks the submit button. Then that object will be cleaned and validated against the
@@ -356,7 +357,7 @@ Schema.contact = new SimpleSchema({
     },
     email: {
         type: String,
-        regEx: SchemaRegEx.Email,
+        regEx: SimpleSchema.RegEx.Email,
         label: "E-mail address"
     },
     message: {
@@ -371,26 +372,26 @@ Schema.contact = new SimpleSchema({
 
 ```html
 <template name="contactForm">
-    {{#autoForm schema=contactForm id="contactForm"}}
+    {{#autoForm form=contactForm id="contactForm"}}
     <fieldset>
         <legend>Contact Us</legend>
         <div class="form-group{{#if afFieldIsInvalid 'name'}} has-error{{/if}}">
-            {{afFieldLabel "name"}}
-            {{afFieldInput "name"}}
+            {{> afFieldLabel "name"}}
+            {{> afFieldInput "name"}}
             {{#if afFieldIsInvalid "name"}}
             <span class="help-block">{{afFieldMessage "name"}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'email'}} has-error{{/if}}">
-            {{afFieldLabel "email"}}
-            {{afFieldInput "email"}}
+            {{> afFieldLabel "email"}}
+            {{> afFieldInput "email"}}
             {{#if afFieldIsInvalid "email"}}
             <span class="help-block">{{afFieldMessage "email"}}</span>
             {{/if}}
         </div>
         <div class="form-group{{#if afFieldIsInvalid 'message'}} has-error{{/if}}">
-            {{afFieldLabel "message"}}
-            {{afFieldInput "message" rows="10"}}
+            {{> afFieldLabel "message"}}
+            {{> afFieldInput "message" rows="10"}}
             {{#if afFieldIsInvalid "message"}}
             <span class="help-block">{{afFieldMessage "message"}}</span>
             {{/if}}
@@ -527,7 +528,7 @@ are actually storing.
 *For the `afFieldInput` helper, don't supply options:*
 
 ```html
-{{afFieldInput "tags"}}
+{{> afFieldInput "tags"}}
 ```
 
 When there are no options, a `<select>` element will not be generated.
@@ -551,20 +552,30 @@ PostsForm.hooks({
 
 ## Fine Tuning Validation
 
-To control when fields should be validated, use the `validation` attribute on
-the `{{autoform}}` helper. Supported values are:
+To control when and how fields should be validated, use the `validation`
+attribute on the `autoform` block helper. Supported values are:
 
 * `none`: Do not validate any form fields at any time.
 * `submit`: Validate all form fields only when the form is submitted.
-* `keyup`: Validate each form field on every key press and when the user moves the cursor off it (throttled to run at most once every 300 milliseconds). Also validate all fields again when the form is submitted.
-* `blur`: Validate each form field when the user moves the cursor off it (throttled to run at most once every 300 milliseconds). Also validate all fields again when the form is submitted.
-* `submitThenKeyup`: At first acts like the `submit` option, but after the user attempts to submit the form and it fails validation, subsequently acts like `keyup`.
-* `submitThenBlur`: At first acts like the `submit` option, but after the user attempts to submit the form and it fails validation, subsequently acts like `blur`.
+* `keyup`: Validate each form field on every key press and when the user moves
+the cursor off it (throttled to run at most once every 300 milliseconds). Also
+validate all fields again when the form is submitted.
+* `blur`: Validate each form field when the user moves the cursor off it
+(throttled to run at most once every 300 milliseconds). Also validate all
+fields again when the form is submitted.
+* `submitThenKeyup`: __(Default)__ At first acts like the `submit` option, but after the
+user attempts to submit the form and it fails validation, subsequently acts
+like `keyup`.
+* `submitThenBlur`: At first acts like the `submit` option, but after the
+user attempts to submit the form and it fails validation, subsequently acts
+like `blur`.
+* `browser`: Let the browser handle validation, if supported.
 
-If you do not include the validation attribute, `submitThenKeyup` is used as the default validation method.
+__Notes:__
 
-__Note:__
-If you choose `keyup` validation, there is sometimes a bug in Safari where
+* For all values except "browser", the `novalidate="novalidate"` attribute
+is automatically added to the rendered form.
+* If you choose `keyup` validation, there is sometimes a bug in Safari where
 the autofill mechanism will cause the text in the input to be selected after
 each keypress.  This has the effect of making it near impossible to
 actually type anything because you keep "overwriting" your input. To fix this,
@@ -682,11 +693,11 @@ Pretty simple. But now you want to give the user check boxes to select those tim
 derive the bestTimes string from her selections. The HTML would look like this:
 
 ```html
-{{#autoForm schema="ContactForm" id="contactForm"}}
+{{#autoForm form="ContactForm" id="contactForm"}}
 <!-- other fields -->
 <div>
-    {{afFieldLabel "bestTimes"}}
-    {{afFieldInput "bestTimes" type="hidden"}}
+    {{> afFieldLabel "bestTimes"}}
+    {{> afFieldInput "bestTimes" type="hidden"}}
     <div class="checkbox"><label><input type="checkbox" id="cfTimes1" name="cfTimes" value="Morning" /> Morning</label></div>
     <div class="checkbox"><label><input type="checkbox" id="cfTimes2" name="cfTimes" value="Afternoon" /> Afternoon</label></div>
     <div class="checkbox"><label><input type="checkbox" id="cfTimes3" name="cfTimes" value="Evening" /> Evening</label></div>
@@ -734,8 +745,8 @@ will be an empty string, and bestTimes is required.
 
 You can use mongo dot notation to map an input to a subdocument. For example:
 
-* If you use `{{afFieldInput 'address.street'}}`, whatever is entered in the field will be assigned to `doc.address.street`.
-* If you use `{{afFieldInput 'addresses.1.street'}}`, whatever is entered in the field will be assigned to the `street` property of the object at index 1 in the `doc.addresses` array.
+* If you use `{{> afFieldInput 'address.street'}}`, whatever is entered in the field will be assigned to `doc.address.street`.
+* If you use `{{> afFieldInput 'addresses.1.street'}}`, whatever is entered in the field will be assigned to the `street` property of the object at index 1 in the `doc.addresses` array.
 
 ## QuickForm
 
@@ -746,7 +757,7 @@ with fields, labels, and error messages based on the corresponding SimpleSchema.
 Syntax:
 
 ```html
-{{quickForm schema=myAutoForm type="typeOfForm" method="methodName" buttonClasses="class1 class2" buttonContent="Insert" anotherFormAttribute="value"}}
+{{quickForm form=myAutoForm type="typeOfForm" method="methodName" buttonClasses="class1 class2" buttonContent="Insert" anotherFormAttribute="value"}}
 ```
 
 * `type`: Must be supplied and must be "insert", "update", "remove", "method", "readonly", or "disabled".
@@ -768,11 +779,11 @@ Similar to the `{{quickForm}}` helper, you can use `{{afQuickField}}` to output 
 at once: the label, the input, and the error message. Currently the default HTML markup and classes
 matches what you would expect when using Bootstrap 3.
 
-Any attributes you add will be passed along to the `{{afFieldInput}}` helper, so you can, for example,
+Any attributes you add will be passed along to the `{{> afFieldInput}}` helper, so you can, for example,
 pass in options to create a select control.
 
 But what if you want to pass additional attributes to the label element? Simply prepend any attribute with
-"label-" and it will be passed along to `{{afFieldLabel}}` instead of `{{afFieldInput}}`.
+"label-" and it will be passed along to `{{> afFieldLabel}}` instead of `{{> afFieldInput}}`.
 
 To omit the label element, use `label=false`. You can combine this with `placeholder="My Label"`
 to get a placeholder label instead of a label element. Use the special `placeholder="schemaLabel"`
@@ -786,7 +797,7 @@ The `template` attribute can be used with this helper as well. See the "Custom T
 ### afQuickField Example
 
 ```html
-{{#autoForm schema=docCollection doc=selectedDoc}}
+{{#autoForm form=docCollection doc=selectedDoc}}
     {{afQuickField 'firstField' autofocus=''}}
     {{afQuickField 'weirdColors' style="color: orange" label-style="color: green"}}
     {{afQuickField "longString" rows="5"}}
@@ -816,7 +827,7 @@ the Handlebars "../" syntax.
 An example will be clearer:
 
 ```html
-{{#autoForm schema=booksCollection id="myBookForm"}}
+{{#autoForm form=booksCollection id="myBookForm"}}
     {{#with "title"}}
         {{afQuickField this autoform=../this}}
     {{/with}}
