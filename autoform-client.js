@@ -1414,6 +1414,7 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   if (isUpdate) {
     // formValues did some cleaning but didn't add auto values; add them now
     ss.clean(form.updateDoc, {
+      isModifier: true,
       filter: false,
       autoConvert: false,
       extendAutoValueContext: {
