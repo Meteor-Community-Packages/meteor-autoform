@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.17
+
+Bug fix for validation of updates when auto values are involved. *(Thanks @mjgallag)*
+
 ### 0.4.16
 
 Add support for `contenteditable` input type. *(Thanks @chrisbutler)*
