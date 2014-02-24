@@ -1,59 +1,151 @@
-var defaultFramework = "bootstrap3";
 var defaultFormId = "_afGenericID";
 var formPreserve = new FormPreserve("autoforms");
+var formHooks = {};
+var formSchemas = {}; //keep a reference to simplify resetting validation
 
-AutoForm = function(schema) {
-  var self = this;
-  if (schema instanceof SimpleSchema) {
-    self._simpleSchema = schema;
-  } else if ("Collection2" in Meteor && schema instanceof Meteor.Collection2) {
-    self._collection = schema;
-    self._simpleSchema = self._collection.simpleSchema();
+AutoForm = {};
+
+/**
+ * @param {Object} hooks
+ * @returns {undefined}
+ * 
+ * Defines hooks by form id. Safe to be called multiple times for the same
+ * form.
+ */
+AutoForm.hooks = function autoFormHooks(hooks) {
+  _.each(hooks, function(hooksObj, formId) {
+    
+    // Init the hooks object for this formId if not done yet
+    formHooks[formId] = formHooks[formId] || {
+      before: {},
+      after: {},
+      formToDoc: [],
+      docToForm: [],
+      onSubmit: [],
+      onSuccess: [],
+      onError: []
+    };
+    
+    // Add before hooks
+    hooksObj.before && _.each(hooksObj.before, function autoFormBeforeHooksEach(func, type) {
+      if (typeof func !== "function") {
+        throw new Error("AutoForm before hook must be a function, not " + typeof func);
+      }
+      formHooks[formId].before[type] = formHooks[formId].before[type] || [];
+      formHooks[formId].before[type].push(func);
+    });
+    
+    // Add after hooks
+    hooksObj.after && _.each(hooksObj.after, function autoFormAfterHooksEach(func, type) {
+      if (typeof func !== "function") {
+        throw new Error("AutoForm after hook must be a function, not " + typeof func);
+      }
+      formHooks[formId].after[type] = formHooks[formId].after[type] || [];
+      formHooks[formId].after[type].push(func);
+    });
+    
+    // Add all other hooks
+    _.each(['formToDoc', 'docToForm', 'onSubmit', 'onSuccess', 'onError'], function autoFormHooksEach(name) {
+      if (hooksObj[name]) {
+        if (typeof hooksObj[name] !== "function") {
+          throw new Error("AutoForm " + name + " hook must be a function, not " + typeof hooksObj[name]);
+        }
+        formHooks[formId][name].push(hooksObj[name]);
+      }
+    });
+  });
+};
+
+function getHooks(formId, type, subtype) {
+  if (subtype) {
+    return formHooks[formId] && formHooks[formId][type] && formHooks[formId][type][subtype] || [];
   } else {
-    self._simpleSchema = new SimpleSchema(schema);
+    return formHooks[formId] && formHooks[formId][type] || [];
   }
+}
 
-  self._hooks = {
-    before: {
-      //insert, update, remove, "methodName"
-    },
-    after: {
-      //insert, update, remove, "methodName"
-    },
-    formToDoc: null,
-    docToForm: null,
-    onSubmit: null,
-    onSuccess: null,
-    onError: null
-  };
-};
-
-AutoForm.prototype.simpleSchema = function() {
-  return this._simpleSchema;
-};
-
-AutoForm.prototype.hooks = function(hooks) {
-  _.extend(this._hooks, hooks);
-};
-
-AutoForm.resetForm = function(formId, simpleSchema) {
+/**
+ * @param {String} formId
+ * @param {SimpleSchema} simpleSchema
+ * @returns {undefined}
+ * 
+ * Resets validation for an autoform.
+ */
+AutoForm.resetForm = function autoFormResetForm(formId) {
   if (typeof formId !== "string") {
     return;
   }
+  
+  
+  formPreserve.unregisterForm(formId);
 
+  var simpleSchema = formSchemas[formId];
   simpleSchema && simpleSchema.namedContext(formId).resetValidation();
-  clearSelections(formId);
+  // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
+  // there is no need to reset validation for it. No error need be thrown.
+  
+  //clearSelections(formId); // TODO don't think this is needed with new engine
 };
 
-Template.autoForm.atts = function() {
-  var context = this;
+var deps = {};
 
-  //formId is used to track input selections so that they are retained
-  //when the form is rerendered. If the id attribute is not provided,
-  //we use a generic ID, which will usually still result in retension
-  //of values, but might not work properly if any forms have input
-  //elements (schema keys) with the same name
-  context.id = context.id || defaultFormId;
+var defaultTemplate = "bootstrap3";
+deps.defaultTemplate = new Deps.Dependency;
+AutoForm.setDefaultTemplate = function autoFormSetDefaultTemplate(template) {
+  defaultTemplate = template;
+  deps.defaultTemplate.changed();
+};
+
+AutoForm.getDefaultTemplate = function autoFormGetDefaultTemplate() {
+  deps.defaultTemplate.depend();
+  return defaultTemplate;
+};
+
+var defaultTypeTemplates = {
+  afFieldLabel: null, //use global template by default
+  afCheckboxGroup: null, //use global template by default
+  afRadioGroup: null, //use global template by default
+  afSelect: null, //use global template by default
+  afTextarea: null, //use global template by default
+  afContenteditable: null, //use global template by default
+  afCheckbox: null, //use global template by default
+  afInput: null, //use global template by default
+  afDeleteButton: null, //use global template by default
+  afQuickField: null //use global template by default
+};
+deps.defaultTypeTemplates = {
+  afFieldLabel: new Deps.Dependency,
+  afCheckboxGroup: new Deps.Dependency,
+  afRadioGroup: new Deps.Dependency,
+  afSelect: new Deps.Dependency,
+  afTextarea: new Deps.Dependency,
+  afContenteditable: new Deps.Dependency,
+  afCheckbox: new Deps.Dependency,
+  afInput: new Deps.Dependency,
+  afDeleteButton: new Deps.Dependency,
+  afQuickField: new Deps.Dependency
+};
+AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(type, template) {
+  if (!deps.defaultTypeTemplates[type]) {
+    throw new Error("invalid template type: " + type);
+  }
+  if (template !== null && !Template[type + "_" + template]) {
+    throw new Error("setDefaultTemplateForType can't set default template to \"" + template + "\" for type \"" + type + "\" because there is no defined template with the name \"" + type + "_" + template + "\"");
+  }
+  defaultTypeTemplates[type] = template;
+  deps.defaultTypeTemplates[type].changed();
+};
+
+AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(type) {
+  if (!deps.defaultTypeTemplates[type]) {
+    throw new Error("invalid template type: " + type);
+  }
+  deps.defaultTypeTemplates[type].depend();
+  return defaultTypeTemplates[type];
+};
+
+Template.autoForm.atts = function autoFormTplAtts() {
+  var context = _.clone(this);
 
   // By default, we add the `novalidate="novalidate"` attribute to our form,
   // unless the user passes `validation="browser"`.
@@ -62,32 +154,42 @@ Template.autoForm.atts = function() {
   }
   // After removing all of the props we know about, everything else should
   // become a form attribute.
-  return _.omit(context, "__content", "form", "validation", "framework",
-          "doc", "resetOnSuccess");
+  return _.omit(context, "schema", "collection", "validation", "doc", "resetOnSuccess");
 };
 
-Template.autoForm.innerContext = function() {
+Template.autoForm.innerContext = function autoFormTplInnerContext() {
   var context = this;
-  var formObj = getAutoForm(context.form);
   var formId = context.id || defaultFormId;
-
+  
+  var collection = lookup(context.collection);
+  check(collection, Match.Optional(Meteor.Collection));
+  
+  var ss = lookup(context.schema) || collection && collection.simpleSchema();
+  if (!Match.test(ss, SimpleSchema)) {
+    throw new Error("autoForm with id " + formId + " needs either 'schema' or 'collection' attribute");
+  }
+  
+  // Cache a reference to help with resetting validation later
+  formSchemas[formId] = ss;
+  
   // Retain doc values after a "hot code push", if possible
   var retrievedDoc = formPreserve.getDocument(formId);
-  if (retrievedDoc !== false)
+  if (retrievedDoc !== false) {
+    console.log("Retrieved preserved form document", retrievedDoc);
     context.doc = retrievedDoc;
+  }
 
   var flatDoc;
   if (context.doc) {
     // We create and use a "flat doc" instead of dynamic lookups because
     // that makes it easier for the user to alter using a docToForm function.
-    var mDoc = new MongoObject(context.doc);
+    var mDoc = new MongoObject(_.clone(context.doc));
     flatDoc = mDoc.getFlatObject();
     mDoc = null;
-    // Pass flat doc through docToForm
-    var docToForm = formObj._hooks.docToForm;
-    if (typeof docToForm === "function") {
-      flatDoc = docToForm(flatDoc);
-    }
+    // Pass flat doc through docToForm hooks
+    _.each(getHooks(formId, 'docToForm'), function autoFormEachDocToForm(func) {
+      flatDoc = func(flatDoc);
+    });
   } else {
     flatDoc = {};
   }
@@ -97,18 +199,17 @@ Template.autoForm.innerContext = function() {
   // TODO is there a way to grab the calling context if the af is within a block?
   var innerContext = {_af: {}};
   innerContext._af.formId = formId;
-  innerContext._af.formObj = formObj;
-  innerContext._af.ss = formObj.simpleSchema();
-  innerContext._af.doc = context.doc; //TODO is this used somewhere
+  innerContext._af.collection = collection;
+  innerContext._af.ss = ss;
+  innerContext._af.doc = context.doc; //TODO is this used somewhere?
   innerContext._af.flatDoc = flatDoc;
-  innerContext._af.framework = context.framework || defaultFramework; //TODO replace with custom templates?
   innerContext._af.validationType = context.validation || "submitThenKeyup";
   innerContext._af.submitType = context.type;
   innerContext._af.resetOnSuccess = context.resetOnSuccess;
   return innerContext;
 };
 
-Template.quickForm.needsButton = function() {
+Template.quickForm.needsButton = function autoFormNeedsButton() {
   var context = this;
   var needsButton = true;
 
@@ -126,97 +227,105 @@ Template.quickForm.needsButton = function() {
   return needsButton;
 };
 
-Template.quickForm.afContext = function() {
+Template.quickForm.afContext = function autoFormContext() {
   // Pass along quickForm context to autoForm context, minus a few
   // properties that are specific to quickForms.
   return _.omit(this, "buttonContent", "buttonClasses", "fields");
 };
 
-Template.afFieldLabel.atts = function() {
-  var atts = _.omit(this, 'name', 'framework', 'autoform', 'element');
-  // Add bootstrap class if necessary; TODO use custom templates
-  if (typeof atts['class'] === "string") {
-    atts['class'] += " control-label"; //might be added twice but that shouldn't hurt anything
-  } else {
-    atts['class'] = "control-label";
+Template.afFieldLabel.label = function getLabel() {
+  var context = this || {};
+  var atts = context.atts || {};
+  var afContext = atts.autoform || context.autoform;
+  if (!afContext || !afContext._af) {
+    throw new Error("afFieldLabel helper must be used within an autoForm block");
   }
-  // Add for if missing and using label element
-  var element = this.element || "label";
-  if (element === "label" && !('for' in atts)) {
-    atts.for = this.name;
-  }
-  return atts;
+  
+  var ss = afContext._af.ss;
+  
+  return ss.label(atts.name);
 };
 
-Template.afFieldLabel.label = function() {
-  var context = this;
-  var afContext = context.autoform || this; //TODO how can we get the parent context now?
-  var ss = afContext._af.ss;
-
-  if (!ss) {
+Handlebars.registerHelper("_afFieldLabel", function autoFormFieldLabel(context) {
+  var context = this || {};
+  var atts = context.atts || {};
+  var afContext = atts.autoform || context.autoform;
+  if (!afContext || !afContext._af) {
     throw new Error("afFieldLabel helper must be used within an autoForm block");
   }
 
-  //TODO remove framework and element in favor of custom templates
-  //var framework = context.framework || afContext._framework;
-  //var element = context.element || "label";
+  var template = atts.template || AutoForm.getDefaultTemplateForType("afFieldLabel") || AutoForm.getDefaultTemplate();
 
-  return ss.label(context.name);
+  // Return the template instance that we want to use, which will be
+  // built with the same 'this' value
+  var result = Template['afFieldLabel_' + template];
+  if (!result) {
+    throw new Error("afFieldLabel: \"" + template + "\" is not a valid template name");
+  }
+  return result;
+});
+
+Template.afFieldInput.inputInfo = function getLabel() {
+  var context = this || {};
+  var atts = context.atts || {};
+  var afContext = atts.autoform || context.autoform;
+  if (!afContext || !afContext._af) {
+    throw new Error("afFieldInput template must be used within an autoForm block");
+  }
+  
+  var ss = afContext._af.ss;
+  var defs = getDefs(ss, atts.name); //defs will not be undefined
+  
+  return getInputData(atts.name, ss, afContext._af.flatDoc, defs, atts);
 };
 
-Template.afFieldInput.renderTemplate = function() {
-  var context = this;
-  var afContext = context.outer.autoform || this; //TODO how can we get the parent context now?
-  var ss = afContext._af.ss;
-  if (!ss) {
-    throw new Error("afFieldInput helper must be used within an autoForm block");
+Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
+  var context = this || {};
+  var atts = context.atts || {};
+  var afContext = atts.autoform || context.autoform;
+  if (!afContext || !afContext._af) {
+    throw new Error("afFieldInput template must be used within an autoForm block");
   }
-
-  var defs = getDefs(ss, context.outer.name); //defs will not be undefined
-  return getInputTemplate(context.outer.name, afContext, defs, context.outer);
-};
-
-Template.afFieldInput.inputInfo = function() {
-  var context = this;
-  var afContext = context.autoform || this; //TODO how can we get the parent context now?
+  
   var ss = afContext._af.ss;
-  if (!ss) {
-    throw new Error("afFieldInput helper must be used within an autoForm block");
+  var defs = getDefs(ss, atts.name); //defs will not be undefined
+  
+  // TODO figure out a way to not duplicate this call and still get valHasLineBreaks
+  var data = getInputData(atts.name, ss, afContext._af.flatDoc, defs, atts);
+  
+  // Construct template name
+  var templateType = getInputTemplateType(atts.name, ss, defs, atts, data.valHasLineBreaks);
+  var template = atts.template || AutoForm.getDefaultTemplateForType(templateType) || AutoForm.getDefaultTemplate();
+
+  // Return the template instance that we want to use, which will be
+  // built with the same 'this' value
+  var result = Template[templateType + "_" + template];
+  if (!result) {
+    throw new Error("afFieldInput: \"" + template + "\" is not a valid template name");
   }
+  return result;
+});
 
-  var defs = getDefs(ss, context.name); //defs will not be undefined
-  return _.extend({outer: context}, getInputData(context.name, afContext, defs, context));
-};
+Handlebars.registerHelper("afDeleteButton", function autoFormFieldLabel(context) {
+  var atts = this;
+  var template = atts.template || AutoForm.getDefaultTemplateForType("afDeleteButton") || AutoForm.getDefaultTemplate();
 
-Template.afQuickField.skipLabel = function() {
-  var context = this;
-  var afContext = context.autoform || this; //TODO how can we get the parent context now?
-  var ss = afContext._af.ss;
-  if (!ss) {
-    throw new Error("afQuickField helper must be used within an autoForm block");
+  // Return the template instance that we want to use, which will be
+  // built with the same 'this' value
+  var result = Template['afDeleteButton_' + template];
+  if (!result) {
+    throw new Error("afDeleteButton: \"" + template + "\" is not a valid template name");
   }
+  return result;
+});
 
-  var defs = getDefs(ss, context.name); //defs will not be undefined
-  return context.label === false || (defs.type === Boolean && !("select" in context) && !("radio" in context));
-};
-
-Template.afQuickField.labelContext = function() {
-  var context = _.clone(this);
-  var afContext = context.autoform || this; //TODO how can we get the parent context now?
-  var ss = afContext._af.ss;
-  if (!ss) {
-    throw new Error("afQuickField helper must be used within an autoForm block");
-  }
-
-  // Figure out the desired framework TODO deprecate
-  var framework = context.framework || afContext._af._framework;
-
+function quickFieldLabelAtts(context) {
   // Remove unwanted props from the hash
-  context = _.omit(context, 'framework', 'label');
+  context = _.omit(context, 'label');
 
-  //separate label options from input options; label items begin with "label-"
-  var labelContext = {name: context.name, autoform: context.autoform};
-  _.each(context, function(val, key) {
+  // Separate label options from input options; label items begin with "label-"
+  var labelContext = {name: context.name, template: context.template};
+  _.each(context, function autoFormLabelContextEach(val, key) {
     if (key.indexOf("label-") === 0) {
       labelContext[key.substring(6)] = val;
     }
@@ -225,23 +334,13 @@ Template.afQuickField.labelContext = function() {
   return labelContext;
 };
 
-Template.afQuickField.inputContext = function() {
-  var context = _.clone(this);
-  var afContext = context.autoform || this; //TODO how can we get the parent context now?
-  var ss = afContext._af.ss;
-  if (!ss) {
-    throw new Error("afQuickField helper must be used within an autoForm block");
-  }
-
-  // Figure out the desired framework TODO deprecate
-  var framework = context.framework || afContext._af._framework;
-
+function quickFieldInputAtts(context) {
   // Remove unwanted props from the hash
-  context = _.omit(context, 'framework', 'label');
+  context = _.omit(context, 'label');
 
-  //separate label options from input options; label items begin with "label-"
+  // Separate label options from input options; label items begin with "label-"
   var inputContext = {};
-  _.each(context, function(val, key) {
+  _.each(context, function autoFormInputContextEach(val, key) {
     if (key.indexOf("label-") !== 0) {
       inputContext[key] = val;
     }
@@ -250,7 +349,44 @@ Template.afQuickField.inputContext = function() {
   return inputContext;
 };
 
-Template.quickForm.submitButtonAtts = function() {
+Handlebars.registerHelper("_afQuickField", function autoFormFieldLabel() {
+  var context = this || {};
+  var atts = context.atts || {};
+  var afContext = (atts.autoform || context.autoform);
+  if (!afContext || !afContext._af) {
+    throw new Error("afQuickField helper must be used within an autoForm block");
+  }
+  
+  var ss = afContext._af.ss;
+  
+  var field = atts.name;
+  var formFields = _.filter(ss._schemaKeys, function autoFormFormFieldsSchemaEach(key) {
+    if (key.indexOf(field + ".") === 0) {
+      return true;
+    }
+  });
+  formFields = quickFieldFormFields(formFields, afContext, ss);
+  
+  var defs = getDefs(ss, atts.name); //defs will not be undefined
+  _.extend(afContext, {
+    skipLabel: (atts.label === false || (defs.type === Boolean && !("select" in atts) && !("radio" in atts))),
+    labelContext: quickFieldLabelAtts(atts),
+    inputContext: quickFieldInputAtts(atts),
+    isGroup: !!formFields,
+    formFields: formFields
+  });
+  
+  // Return the template instance that we want to use, which will be
+  // built with the same 'this' value
+  var template = atts.template || AutoForm.getDefaultTemplateForType("afQuickField") || AutoForm.getDefaultTemplate();
+  var result = Template['afQuickField_' + template];
+  if (!result) {
+    throw new Error("afQuickField: \"" + template + "\" is not a valid template name");
+  }
+  return result;
+});
+
+Template.quickForm.submitButtonAtts = function autoFormSubmitButtonAtts() {
   var context = this;
   var atts = {type: "submit"};
   if (typeof context.buttonClasses === "string") {
@@ -259,15 +395,31 @@ Template.quickForm.submitButtonAtts = function() {
   return atts;
 };
 
-Template.quickForm.formFields = function() {
+Template.quickForm.formFields = function quickFormFields() {
   var context = this;
   var ss = context._af.ss;
+  
+  // Get the list of fields we want included
+  var fieldList;
+  if (context.fields) {
+    if (_.isArray(context.fields)) {
+      fieldList = context.fields;
+    } else if (typeof context.fields === "string") {
+      fieldList = context.fields.replace(/ /g, '').split(',');
+    }
+  }
+  fieldList = fieldList || ss.firstLevelSchemaKeys();
+  
+  return quickFieldFormFields(fieldList, context, ss);
+};
+
+function quickFieldFormFields(fieldList, autoform, ss) {
 
   function shouldIncludeField(field) {
     var fieldDefs = ss.schema(field);
 
     // Don't include fields with denyInsert=true when it's an insert form
-    if (fieldDefs.denyInsert && context.type === "insert")
+    if (fieldDefs.denyInsert && autoform._af.formType === "insert")
       return false;
 
     // Don't include fields with denyUpdate=true when it's an update form
@@ -277,7 +429,7 @@ Template.quickForm.formFields = function() {
     // Don't include fields with array placeholders
     if (field.indexOf("$") !== -1)
       return false;
-    
+
     // Don't include fields with more than one level of descendents
     if (field.split(".").length > 2)
       return false;
@@ -293,14 +445,8 @@ Template.quickForm.formFields = function() {
       info = {
         name: field,
         label: ss.label(field),
-        isGroup: true,
         formFields: []
       };
-      _.each(ss._schemaKeys, function(key) {
-        if (key.indexOf(field + ".") === 0 && shouldIncludeField(key)) {
-          info.formFields.push(infoForField(key, extendedProps));
-        }
-      });
     } else {
       // If there are allowedValues defined, use them as select element options
       var av = fieldDefs.type === Array ? ss.schema(field + ".$").allowedValues : fieldDefs.allowedValues;
@@ -312,17 +458,6 @@ Template.quickForm.formFields = function() {
     return _.extend(info, extendedProps);
   }
 
-  // Get the list of fields we want included
-  var fieldList;
-  if (context.fields) {
-    if (_.isArray(context.fields)) {
-      fieldList = context.fields;
-    } else if (typeof context.fields === "string") {
-      fieldList = context.fields.replace(/ /g, '').split(',');
-    }
-  }
-  fieldList = fieldList || ss.firstLevelSchemaKeys();
-
   // Filter out fields we truly don't want
   fieldList = _.filter(fieldList, shouldIncludeField);
 
@@ -330,81 +465,72 @@ Template.quickForm.formFields = function() {
     return [];
 
   var extendedAtts = {
-    autoform: context
+    autoform: autoform
   };
-  
-  if (context._af.submitType === "disabled") {
+
+  if (autoform._af.submitType === "disabled") {
     extendedAtts.disabled = "";
-  } else if (context._af.submitType === "readonly") {
+  } else if (autoform._af.submitType === "readonly") {
     extendedAtts.readonly = "";
   }
 
   // Return info for all requested fields
-  return _.map(fieldList, function(field) {
+  return _.map(fieldList, function autoFormFormFieldsListEach(field) {
     return infoForField(field, extendedAtts);
   });
 };
 
-Template.autoForm.rendered = function() {
-  //TODO can we get parent component and attach it to data context here?
-  var self = this;
-  var formObj = getAutoForm(self.data.form);
-  var ss = formObj.simpleSchema();
-  var hooks = formObj._hooks || {};
-  var formId = self.data.id || defaultFormId;
-  //self.data.something = "something";
-  formPreserve.registerForm(formId, function() {
-    return formValues(self, hooks.formToDoc, ss).insertDoc;
-  });
-};
-
-Template.autoForm.destroyed = function() {
+Template.autoForm.destroyed = function autoFormDestroyed() {
   var self = this;
   self._notInDOM = true;
   var formId = self.data.id || defaultFormId;
   formPreserve.unregisterForm(formId);
 };
 
-Handlebars.registerHelper("afFieldMessage", function(options) {
+Template.autoForm.afFieldMessage = function autoFormFieldMessage(options) {
   var hash = (options || {}).hash || {};
-  var afContext = hash.autoform || this;
-  var ss = afContext._af.ss;
+  var afContext = hash.autoform && hash.autoform._af || this && this._af;
+  var ss = afContext.ss;
   if (!ss) {
     throw new Error("afQuickField helper must be used within an autoForm block");
   }
 
   getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
-  return ss.namedContext(afContext._af.formId).keyErrorMessage(hash.name);
-});
+  return ss.namedContext(afContext.formId).keyErrorMessage(hash.name);
+};
 
-Handlebars.registerHelper("afFieldIsInvalid", function(options) {
+//Handlebars.registerHelper("afFieldMessage", );
+
+Handlebars.registerHelper("afFieldIsInvalid", function autoFormFieldIsInvalid(options) {
   var hash = (options || {}).hash || {};
-  var afContext = hash.autoform || this;
-  var ss = afContext._af.ss;
+  var afContext = hash.autoform && hash.autoform._af || this && this._af;
+  var ss = afContext.ss;
   if (!ss) {
     throw new Error("afQuickField helper must be used within an autoForm block");
   }
 
   getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
-  return ss.namedContext(afContext._af.formId).keyIsInvalid(hash.name);
+  return ss.namedContext(afContext.formId).keyIsInvalid(hash.name);
 });
 
-function doBefore(docId, doc, hook, name) {
-  if (hook) {
-    if (docId) {
-      doc = hook(docId, doc);
-    } else {
-      doc = hook(doc);
+function doBefore(docId, doc, hooks, name) {
+  _.each(hooks, function doBeforeHook(hook) {
+    if (hook) {
+      if (docId) {
+        doc = hook(docId, doc);
+      } else {
+        doc = hook(doc);
+      }
+      if (!_.isObject(doc)) {
+        throw new Error(name + " must return an object");
+      }
     }
-    if (!_.isObject(doc)) {
-      throw new Error(name + " must return an object");
-    }
-  }
+  });
   return doc;
 }
 
 Template.autoForm.events({
-  'submit form': function(event, template) {
+  'submit form': function autoFormSubmitHandler(event, template) {
     var submitButton = template.find("button[type=submit]") || template.find("input[type=submit]");
     if (!submitButton) {
       return;
@@ -423,34 +549,98 @@ Template.autoForm.events({
 
     //init
     var validationType = context.validation || "submitThenKeyup";
-    var formObj = getAutoForm(context.form);
-    var ss = formObj.simpleSchema();
-    var hooks = formObj._hooks;
+    var collection = lookup(context.collection);
+    var ss = lookup(context.schema) || collection && collection.simpleSchema();
     var formId = context.id || defaultFormId;
     var currentDoc = context.doc || null;
     var docId = currentDoc ? currentDoc._id : null;
     var resetOnSuccess = context.resetOnSuccess;
 
     // Gather hooks
-    var beforeInsert = hooks.before.insert;
-    var beforeUpdate = hooks.before.update;
-    var beforeRemove = hooks.before.remove;
-    var beforeMethod = method && hooks.before[method];
-    var afterInsert = hooks.after.insert;
-    var afterUpdate = hooks.after.update;
-    var afterRemove = hooks.after.remove;
-    var afterMethod = method && hooks.after[method];
-    var onSuccess = hooks.onSuccess;
-    var onError = hooks.onError;
-    var onSubmit = hooks.onSubmit;
+    var beforeInsert = getHooks(formId, 'before', 'insert');
+    var beforeUpdate = getHooks(formId, 'before', 'update');
+    var beforeRemove = getHooks(formId, 'before', 'remove');
+    var beforeMethod = method && getHooks(formId, 'before', method);
+    var afterInsert = getHooks(formId, 'after', 'insert');
+    var afterUpdate = getHooks(formId, 'after', 'update');
+    var afterRemove = getHooks(formId, 'after', 'remove');
+    var afterMethod = method && getHooks(formId, 'after', method);
+    var onSuccess = getHooks(formId, 'onSuccess');
+    var onError = getHooks(formId, 'onError');
+    var onSubmit = getHooks(formId, 'onSubmit');
 
     // Prevent browser form submission if we're planning to do our own thing
     if (!isNormalSubmit) {
       event.preventDefault();
     }
+    
+    // Prep haltSubmission function
+    function haltSubmission() {
+      event.preventDefault();
+      event.stopPropagation();
+      submitButton.disabled = false;
+    }
+    
+    // Prep function to select the focus the first field with an error
+    function selectFirstInvalidField() {
+      var ctx = ss.namedContext(formId);
+      if (!ctx.isValid()) {
+        _.every(template.findAll('[data-schema-key]'), function selectFirstInvalidFieldEvery(input) {
+          if (ctx.keyIsInvalid(input.getAttribute('data-schema-key'))) {
+            input.focus();
+            return false;
+          } else {
+            return true;
+          }
+        });
+      }
+    }
+    
+    // Prep callback creator function
+    function makeCallback(name, afterHook) {
+      return function autoFormActionCallback(error, result) {
+        if (error) {
+          selectFirstInvalidField();
+          _.each(onError, function onErrorEach(hook) {
+            hook(name, error, template);
+          });
+        } else {
+          // Potentially reset form after successful submit.
+          // Update forms are opt-in while all others are opt-out.
+          if (!template._notInDOM &&
+                  ((name !== 'update' && resetOnSuccess !== false) ||
+                          (name === 'update' && resetOnSuccess === true))) {
+            template.find("form").reset();
+            var focusInput = template.find("[autofocus]");
+            focusInput && focusInput.focus();
+          }
+          _.each(onSuccess, function onSuccessEach(hook) {
+            hook(name, result, template);
+          });
+        }
+        _.each(afterHook, function afterHookEach(hook) {
+          hook(error, result, template);
+        });
+        submitButton.disabled = false;
+      };
+    }
+    
+    // If type is "remove", do that right away since we don't need to gather
+    // form values or validate.
+    if (isRemove) {
+      // Call beforeRemove hooks if present, and stop if any return false
+      var shouldStop = _.any(beforeRemove, function eachBeforeRemove(hook) {
+        return (hook(docId) === false);
+      });
+      if (shouldStop) {
+        return haltSubmission();
+      }
+      collection && collection.remove(docId, makeCallback('remove', afterRemove));
+      return;
+    }
 
     // Gather all form values
-    var form = formValues(template, hooks.formToDoc, ss);
+    var form = formValues(template, getHooks(formId, 'formToDoc'), ss);
 
     // Execute before hooks
     var insertDoc = isInsert ? doBefore(null, form.insertDoc, beforeInsert, 'before.insert hook') : form.insertDoc;
@@ -468,28 +658,6 @@ Template.autoForm.events({
       }
     });
 
-    // Prep haltSubmission function
-    function haltSubmission() {
-      event.preventDefault();
-      event.stopPropagation();
-      submitButton.disabled = false;
-    }
-
-    // Prep function to select the focus the first field with an error
-    function selectFirstInvalidField() {
-      if (!ss.namedContext(formId).isValid()) {
-        var ctx = ss.namedContext(formId);
-        _.every(template.findAll('[data-schema-key]'), function(input) {
-          if (ctx.keyIsInvalid(input.getAttribute('data-schema-key'))) {
-            input.focus();
-            return false;
-          } else {
-            return true;
-          }
-        });
-      }
-    }
-
     // Prep isValid function
     var validationErrorTriggered = 0;
     function isValid(doc, isModifier, type) {
@@ -501,7 +669,9 @@ Template.autoForm.events({
       });
       if (!result && !validationErrorTriggered) {
         selectFirstInvalidField();
-        onError && onError(type, new Error('failed validation'), template);
+        _.each(onError, function onErrorEach(hook) {
+          hook(type, new Error('failed validation'), template);
+        });
         validationErrorTriggered++;
       }
       return result;
@@ -517,7 +687,7 @@ Template.autoForm.events({
       var context = {
         event: event,
         template: template,
-        resetForm: function() {
+        resetForm: function autoFormDoResetForm() {
           if (!template._notInDOM) {
             template.find("form").reset();
             var focusInput = template.find("[autofocus]");
@@ -526,52 +696,24 @@ Template.autoForm.events({
         }
       };
       // Pass both types of doc to onSubmit
-      var shouldContinue = onSubmit.call(context, insertDoc, updateDoc, currentDoc);
-      if (shouldContinue === false) {
+      var shouldStop = _.any(onSubmit, function eachOnSubmit(hook) {
+        return (hook.call(context, insertDoc, updateDoc, currentDoc) === false);
+      });
+      if (shouldStop) {
         return haltSubmission();
       }
-    }
-
-    // Prep callback creator function
-    function makeCallback(name, afterHook) {
-      return function(error, result) {
-        if (error) {
-          selectFirstInvalidField();
-          onError && onError(name, error, template);
-        } else {
-          // Potentially reset form after successful submit.
-          // Update forms are opt-in while all others are opt-out.
-          if (!template._notInDOM &&
-                  ((name !== 'update' && resetOnSuccess !== false) ||
-                          (name === 'update' && resetOnSuccess === true))) {
-            template.find("form").reset();
-            var focusInput = template.find("[autofocus]");
-            focusInput && focusInput.focus();
-          }
-          onSuccess && onSuccess(name, result, template);
-        }
-        afterHook && afterHook(error, result, template);
-        submitButton.disabled = false;
-      };
     }
 
     // Now we will do the requested insert, update, remove, method, or normal
     // browser form submission. Even though we may have already validated above
     // if we have an onSubmit hook, we do it again upon insert or update
-    // because collection2 validation catches additional stuff like unique.
+    // because collection2 validation catches additional stuff like unique and
+    // because our form schema need not be the same as our collection schema.
     if (isInsert) {
-      formObj._collection && formObj._collection.insert(insertDoc, {validationContext: formId}, makeCallback('insert', afterInsert));
+      collection && collection.insert(insertDoc, {validationContext: formId}, makeCallback('insert', afterInsert));
     } else if (isUpdate) {
       if (!_.isEmpty(updateDoc)) {
-        formObj._collection && formObj._collection.update(docId, updateDoc, {validationContext: formId}, makeCallback('update', afterUpdate));
-      }
-    } else if (isRemove) {
-      //call beforeRemove if present, and stop if it's false
-      if (beforeRemove && beforeRemove(docId) === false) {
-        //stopped
-        return haltSubmission();
-      } else {
-        formObj._collection && formObj._collection.remove(docId, makeCallback('remove', afterRemove));
+        collection && collection.update(docId, updateDoc, {validationContext: formId}, makeCallback('update', afterUpdate));
       }
     }
 
@@ -592,10 +734,8 @@ Template.autoForm.events({
       }
       Meteor.call(method, methodDoc, makeCallback(method, afterMethod));
     }
-
-    formPreserve.unregisterForm(formId);
   },
-  'keyup [data-schema-key]': function(event, template) {
+  'keyup [data-schema-key]': function autoFormKeyUpHandler(event, template) {
     var validationType = template.data.validation || 'submitThenKeyup';
     var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup');
     var skipEmpty = !(event.keyCode === 8 || event.keyCode === 46); //if deleting or backspacing, don't skip empty
@@ -603,33 +743,41 @@ Template.autoForm.events({
       validateField(event.currentTarget.getAttribute("data-schema-key"), template, skipEmpty, onlyIfAlreadyInvalid);
     }
   },
-  'blur [data-schema-key]': function(event, template) {
+  'blur [data-schema-key]': function autoFormBlurHandler(event, template) {
     var validationType = template.data.validation || 'submitThenKeyup';
     var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
     if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
       validateField(event.currentTarget.getAttribute("data-schema-key"), template, false, onlyIfAlreadyInvalid);
     }
   },
-  'change [data-schema-key]': function(event, template) {
+  'change [data-schema-key]': function autoFormChangeHandler(event, template) {
 //    if (event.currentTarget.nodeName.toLowerCase() === "select") {
 //      //workaround for selection being lost on rerender
 //      //store the selections in memory and reset in rendered
 //      setSelections(event.currentTarget, template.data._formId);
 //    }
+    var afContext = (this && this.autoform && this.autoform._af) || {};
+    if (afContext) {
+      var formId = afContext.formId;
+      var ss = afContext.ss;
+      formPreserve.registerForm(formId, function autoFormRegFormCallback() {
+        return formValues(template, getHooks(formId, 'formToDoc'), ss).insertDoc;
+      });
+    }
     var validationType = template.data.validation || 'submitThenKeyup';
     var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
     if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
       validateField(event.currentTarget.getAttribute("data-schema-key"), template, false, onlyIfAlreadyInvalid);
     }
   },
-  'reset form': function() {
+  'reset form': function autoFormResetHandler(event, template) {
     var context = this;
-    var formObj = getAutoForm(context.form);
-    var ss = formObj.simpleSchema();
     var formId = context.id || defaultFormId;
-    if (ss && formId) {
-      AutoForm.resetForm(formId, ss);
-      formPreserve.unregisterForm(formId);
+    AutoForm.resetForm(formId);
+    if (context.doc) {
+      //reload form values from doc
+      event.preventDefault();
+      template['__component__'].render();
     }
   }
 });
@@ -689,7 +837,7 @@ if (typeof Handlebars !== 'undefined') {
 //  };
 }
 
-var maybeNum = function(val) {
+function maybeNum(val) {
   // Convert val to a number if possible; otherwise, just use the value
   var floatVal = parseFloat(val);
   if (!isNaN(floatVal)) {
@@ -697,12 +845,12 @@ var maybeNum = function(val) {
   } else {
     return val;
   }
-};
+}
 
-var formValues = function(template, transform, ss) {
+function formValues(template, transforms, ss) {
   var fields = template.findAll("[data-schema-key]");
   var doc = {};
-  _.each(fields, function(field) {
+  _.each(fields, function formValuesEach(field) {
     var name = field.getAttribute("data-schema-key");
     var val = field.value || field.getAttribute('contenteditable') && field.innerHTML; //value is undefined for contenteditable
     var type = field.getAttribute("type") || "";
@@ -797,9 +945,10 @@ var formValues = function(template, transform, ss) {
     // Handle all other inputs
     doc[name] = val;
   });
-  if (typeof transform === "function") {
+  // Pass flat doc through formToDoc hooks
+  _.each(transforms, function formValuesTransform(transform) {
     doc = transform(doc);
-  }
+  });
   // We return doc, insertDoc, and updateDoc.
   // For insertDoc, delete any properties that are null, undefined, or empty strings,
   // and expand to use subdocuments instead of dot notation keys.
@@ -819,7 +968,7 @@ var formValues = function(template, transform, ss) {
   return result;
 };
 
-var expandObj = function(doc) {
+function expandObj(doc) {
   var newDoc = {}, subkeys, subkey, subkeylen, nextPiece, current;
   _.each(doc, function(val, key) {
     subkeys = key.split(".");
@@ -847,9 +996,9 @@ var expandObj = function(doc) {
     }
   });
   return newDoc;
-};
+}
 
-var cleanNulls = function(doc) {
+function cleanNulls(doc) {
   var newDoc = {};
   _.each(doc, function(val, key) {
     if (val !== void 0 && val !== null && !(typeof val === "string" && val.length === 0)) {
@@ -857,9 +1006,9 @@ var cleanNulls = function(doc) {
     }
   });
   return newDoc;
-};
+}
 
-var reportNulls = function(doc) {
+function reportNulls(doc) {
   var nulls = {};
   _.each(doc, function(val, key) {
     if (val === void 0 || val === null || (typeof val === "string" && val.length === 0)) {
@@ -867,16 +1016,16 @@ var reportNulls = function(doc) {
     }
   });
   return nulls;
-};
+}
 
 //returns true if dateString is a "valid date string"
-var isValidDateString = function(dateString) {
+function isValidDateString(dateString) {
   var m = moment(dateString, 'YYYY-MM-DD', true);
   return m && m.isValid();
-};
+}
 
 //returns true if timeString is a "valid time string"
-var isValidTimeString = function(timeString) {
+function isValidTimeString(timeString) {
   if (typeof timeString !== "string")
     return false;
 
@@ -884,10 +1033,10 @@ var isValidTimeString = function(timeString) {
   //we can catch that when parsing
   var regEx = /^[0-2][0-9]:[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
   return regEx.test(timeString);
-};
+}
 
 //returns a "valid date string" representing the local date
-var dateToDateString = function(date) {
+function dateToDateString(date) {
   var m = (date.getMonth() + 1);
   if (m < 10) {
     m = "0" + m;
@@ -897,10 +1046,10 @@ var dateToDateString = function(date) {
     d = "0" + d;
   }
   return date.getFullYear() + '-' + m + '-' + d;
-};
+}
 
 //returns a "valid date string" representing the date converted to the UTC time zone
-var dateToDateStringUTC = function(date) {
+function dateToDateStringUTC(date) {
   var m = (date.getUTCMonth() + 1);
   if (m < 10) {
     m = "0" + m;
@@ -910,17 +1059,17 @@ var dateToDateStringUTC = function(date) {
     d = "0" + d;
   }
   return date.getUTCFullYear() + '-' + m + '-' + d;
-};
+}
 
 //returns a "valid normalized forced-UTC global date and time string" representing the time converted to the UTC time zone and expressed as the shortest possible string for the given time (e.g. omitting the seconds component entirely if the given time is zero seconds past the minute)
 //http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#date-and-time-state-(type=datetime)
 //http://www.whatwg.org/specs/web-apps/current-work/multipage/common-microsyntaxes.html#valid-normalized-forced-utc-global-date-and-time-string
-var dateToNormalizedForcedUtcGlobalDateAndTimeString = function(date) {
+function dateToNormalizedForcedUtcGlobalDateAndTimeString(date) {
   return moment(date).utc().format("YYYY-MM-DD[T]HH:mm:ss.SSS[Z]");
-};
+}
 
 //returns true if dateString is a "valid normalized forced-UTC global date and time string"
-var isValidNormalizedForcedUtcGlobalDateAndTimeString = function(dateString) {
+function isValidNormalizedForcedUtcGlobalDateAndTimeString(dateString) {
   if (typeof dateString !== "string")
     return false;
 
@@ -929,16 +1078,16 @@ var isValidNormalizedForcedUtcGlobalDateAndTimeString = function(dateString) {
   var timePart = dateString.substring(11, dateString.length - 1);
   var zPart = dateString.substring(dateString.length - 1);
   return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart) && zPart === "Z";
-};
+}
 
 //returns a "valid normalized local date and time string"
-var dateToNormalizedLocalDateAndTimeString = function(date, offset) {
+function dateToNormalizedLocalDateAndTimeString(date, offset) {
   var m = moment(date);
   m.zone(offset);
   return m.format("YYYY-MM-DD[T]hh:mm:ss.SSS");
-};
+}
 
-var isValidNormalizedLocalDateAndTimeString = function(dtString) {
+function isValidNormalizedLocalDateAndTimeString(dtString) {
   if (typeof dtString !== "string")
     return false;
 
@@ -946,9 +1095,9 @@ var isValidNormalizedLocalDateAndTimeString = function(dtString) {
   var tPart = dtString.substring(10, 11);
   var timePart = dtString.substring(11, dtString.length);
   return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart);
-};
+}
 
-var getSelectValues = function(select) {
+function getSelectValues(select) {
   var result = [];
   var options = select && select.options;
   var opt;
@@ -961,15 +1110,15 @@ var getSelectValues = function(select) {
     }
   }
   return result;
-};
+}
 
-var getInputData = function getInputData(name, autoform, defs, hash) {
+function getInputData(name, ss, flatDoc, defs, hash) {
   var schemaType = defs.type;
 
   // Adjust for array fields if necessary
   var expectsArray = false;
   if (schemaType === Array) {
-    defs = autoform._af.ss.schema(name + ".$");
+    defs = ss.schema(name + ".$");
     schemaType = defs.type;
 
     //if the user overrides the type to anything,
@@ -981,7 +1130,7 @@ var getInputData = function getInputData(name, autoform, defs, hash) {
   // Determine what the current value is, if any
   var value;
   if (typeof hash.value === "undefined") {
-    var flatDoc = autoform._af.flatDoc, arrayVal;
+    var arrayVal;
     if (expectsArray) {
 
       // For arrays, we need the flatDoc value as an array
@@ -1073,7 +1222,7 @@ var getInputData = function getInputData(name, autoform, defs, hash) {
     }
   }
 
-  var label = autoform._af.ss.label(name);
+  var label = ss.label(name);
   var min = defs.min;
   var max = defs.max;
 
@@ -1093,7 +1242,6 @@ var getInputData = function getInputData(name, autoform, defs, hash) {
   var trueLabel = hash.trueLabel;
   var falseLabel = hash.falseLabel;
   var selectOptions = hash.options;
-  var framework = hash.framework || autoform._af.framework;
 
   // Handle options="allowed"
   if (selectOptions === "allowed") {
@@ -1125,12 +1273,10 @@ var getInputData = function getInputData(name, autoform, defs, hash) {
           "trueLabel",
           "falseLabel",
           "options",
-          "framework",
           "offset");
 
-
   // Determine what options to use
-  var data = {};
+  var data = {valHasLineBreaks: valHasLineBreaks};
   if (typeof hash.required === "undefined" && !defs.optional) {
     hash.required = "";
   }
@@ -1167,8 +1313,10 @@ var getInputData = function getInputData(name, autoform, defs, hash) {
     hash = _.omit(hash, "class");
     data.atts = hash;
   } else if (type === "contenteditable") {
-    //TODO convert this type
-    //html = '<div contenteditable="true" data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</div>';
+    if (typeof hash['data-maxlength'] === "undefined" && typeof max === "number") {
+      hash['data-maxlength'] = max;
+    }
+    data.atts = hash;
   } else if (type === "boolean") {
     value = (value === "true") ? true : false;
     var items = [
@@ -1259,15 +1407,15 @@ var getInputData = function getInputData(name, autoform, defs, hash) {
   }
 
   return data;
-};
+}
 
-var getInputTemplate = function(name, autoform, defs, hash) {
+function getInputTemplateType(name, ss, defs, hash, valHasLineBreaks) {
   var schemaType = defs.type;
 
   // Adjust for array fields if necessary
   var expectsArray = false;
   if (schemaType === Array) {
-    defs = autoform._af.ss.schema(name + ".$");
+    defs = ss.schema(name + ".$");
     schemaType = defs.type;
 
     //if the user overrides the type to anything,
@@ -1275,10 +1423,6 @@ var getInputTemplate = function(name, autoform, defs, hash) {
     //we won't be expecting an array for the current value
     expectsArray = !hash.type;
   }
-
-  // TODO how to do this efficiently now
-  //var valHasLineBreaks = typeof value === "string" ? (value.indexOf("\n") !== -1) : false;
-  var valHasLineBreaks = false;
 
   //get type
   var type = "text";
@@ -1303,59 +1447,47 @@ var getInputTemplate = function(name, autoform, defs, hash) {
   var select = hash.select;
   var noselect = hash.noselect;
   var selectOptions = hash.options;
-  var framework = hash.framework || autoform._af.framework;
 
   // Determine which template to render
-  var template;
+  var templateType;
   if (selectOptions) {
     if (noselect) {
       if (expectsArray) {
-        template = "_afCheckboxGroup";
+        templateType = "afCheckboxGroup";
       } else {
-        template = "_afRadioGroup";
+        templateType = "afRadioGroup";
       }
     } else {
-      template = "_afSelect";
+      templateType = "afSelect";
     }
   } else if (type === "textarea") {
-    template = "_afTextarea";
+    templateType = "afTextarea";
   } else if (type === "contenteditable") {
-    //TODO convert this type
-    //html = '<div contenteditable="true" data-schema-key="' + name + '" name="' + name + '"' + objToAttributes(hash) + req + max + '>' + value + '</div>';
+    templateType = "afContenteditable";
   } else if (type === "boolean") {
     if (radio) {
-      template = "_afRadioGroup";
+      templateType = "afRadioGroup";
     } else if (select) {
-      template = "_afSelect";
+      templateType = "afSelect";
     } else {
-      template = "_afCheckbox";
+      templateType = "afCheckbox";
     }
   } else {
     // All other input types
-    template = "_afInput";
+    templateType = "afInput";
   }
 
-  // Return the correct template; TODO more robust template overrides
-  switch (framework) {
-    case "bootstrap3":
-      template += "_Bootstrap3";
-      break;
-    default:
-      template += "_Plain";
-      break;
-  }
+  return templateType;
+}
 
-  return Template[template];
-};
-
-var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
+function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   if (!template || template._notInDOM) {
     return;
   }
 
   var context = template.data;
-  var formObj = getAutoForm(context.form);
-  var ss = formObj.simpleSchema();
+  var collection = lookup(context.collection);
+  var ss = lookup(context.schema) || collection && collection.simpleSchema();
   var formId = context.id || defaultFormId;
 
   if (onlyIfAlreadyInvalid &&
@@ -1364,7 +1496,7 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   }
 
   // Create a document based on all the values of all the inputs on the form
-  var form = formValues(template, formObj._hooks.formToDoc, ss);
+  var form = formValues(template, getHooks(formId, 'formToDoc'), ss);
 
   // Determine whether we're validating for an insert or an update
   var isUpdate = !!template.find("button.update");
@@ -1419,10 +1551,11 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
       }
     });
   }
-};
+}
+
 //throttling function that calls out to _validateField
 var vok = {}, tm = {};
-var validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
+function validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   if (vok[key] === false) {
     Meteor.clearTimeout(tm[key]);
     tm[key] = Meteor.setTimeout(function() {
@@ -1433,43 +1566,39 @@ var validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   }
   vok[key] = false;
   _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
-};
+}
 
-var autoformSelections = {};
-var setSelections = function(select, formId) {
-  var key = select.getAttribute('data-schema-key');
-  if (!key) {
-    return;
-  }
-  var selections = [];
-  for (var i = 0, ln = select.length, opt; i < ln; i++) {
-    opt = select.options[i];
-    if (opt.selected) {
-      selections.push(opt.value);
-    }
-  }
-  if (!(formId in autoformSelections)) {
-    autoformSelections[formId] = {};
-  }
-  autoformSelections[formId][key] = selections;
-};
-var clearSelections = function(formId) {
-  if (formId in autoformSelections) {
-    delete autoformSelections[formId];
-  }
-};
-var hasSelections = function(formId) {
-  return (formId in autoformSelections);
-};
-var getSelections = function(formId) {
-  return autoformSelections[formId];
-};
+//var autoformSelections = {};
+//var setSelections = function(select, formId) {
+//  var key = select.getAttribute('data-schema-key');
+//  if (!key) {
+//    return;
+//  }
+//  var selections = [];
+//  for (var i = 0, ln = select.length, opt; i < ln; i++) {
+//    opt = select.options[i];
+//    if (opt.selected) {
+//      selections.push(opt.value);
+//    }
+//  }
+//  if (!(formId in autoformSelections)) {
+//    autoformSelections[formId] = {};
+//  }
+//  autoformSelections[formId][key] = selections;
+//};
+//var clearSelections = function(formId) {
+//  if (formId in autoformSelections) {
+//    delete autoformSelections[formId];
+//  }
+//};
+//var hasSelections = function(formId) {
+//  return (formId in autoformSelections);
+//};
+//var getSelections = function(formId) {
+//  return autoformSelections[formId];
+//};
 
-var hasClass = function(element, cls) {
-  return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
-};
-
-var docToModifier = function(doc) {
+function docToModifier(doc) {
   var updateObj = {};
   var nulls = reportNulls(doc);
   doc = cleanNulls(doc);
@@ -1481,9 +1610,9 @@ var docToModifier = function(doc) {
     updateObj.$unset = nulls;
   }
   return updateObj;
-};
+}
 
-var getDefs = function(ss, name) {
+function getDefs(ss, name) {
   if (typeof name !== "string") {
     throw new Error("Invalid field name: (not a string)");
   }
@@ -1492,24 +1621,14 @@ var getDefs = function(ss, name) {
   if (!defs)
     throw new Error("Invalid field name: " + name);
   return defs;
-};
+}
 
-var getAutoForm = function(autoform) {
-  if (typeof autoform === "string") {
-    if (!window || !window[autoform]) {
-      throw new Error("autoForm schema " + autoform + " is not in the window scope");
+function lookup(obj) {
+  if (typeof obj === "string") {
+    if (!window || !window[obj]) {
+      throw new Error(obj + " is not in the window scope");
     }
-    autoform = window[autoform];
+    return window[obj];
   }
-
-  // Allow passing a Collection as the schema, but wrap in AutoForm
-  if (autoform instanceof Meteor.Collection) {
-    autoform = new AutoForm(autoform);
-  }
-
-  if (typeof autoform !== "object" || typeof autoform.simpleSchema !== "function") {
-    throw new Error('The form attribute for an autoForm block helper must provide an object with a "simpleSchema" method');
-  }
-
-  return autoform;
-};
+  return obj;
+}

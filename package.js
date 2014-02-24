@@ -14,5 +14,22 @@ Package.on_use(function(api) {
     api.export('AutoForm', 'client');
   }
 
-  api.add_files(['autoform.html', 'form-preserve.js', 'autoform.js'], 'client');
+  api.add_files([
+    // bootstrap3 Template
+    'templates/bootstrap3/bootstrap3.html',
+    'templates/bootstrap3/bootstrap3.js',
+    // bootstrap3-span Template
+    'templates/bootstrap3-span/bootstrap3-span.html',
+    'templates/bootstrap3-span/bootstrap3-span.js',
+    // plain Template
+    'templates/plain/plain.html',
+    'templates/plain/plain.js',
+    // plain-span Template
+    'templates/plain-span/plain-span.html',
+    'templates/plain-span/plain-span.js',
+    // Core Files
+    'autoform.html',
+    'form-preserve.js',
+    'autoform.js'
+  ], 'client');
 });

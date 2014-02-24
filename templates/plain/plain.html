@@ -1,0 +1,74 @@
+<template name="afFieldLabel_plain">
+  <label {{atts}}>{{label}}</label>
+</template>
+
+<template name="afCheckbox_plain">
+  {{#with inputInfo}}
+  <div><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+  {{/with}}
+</template>
+
+<template name="afCheckboxGroup_plain">
+  {{#each items}}
+    {{> afCheckbox_plain}}
+  {{/each}}
+</template>
+
+<template name="afRadio_plain">
+  {{#with inputInfo}}
+  <div><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+  {{/with}}
+</template>
+
+<template name="afRadioGroup_plain">
+  {{#each items}}
+    {{> afRadio_plain}}
+  {{/each}}
+</template>
+
+<template name="afContenteditable_plain">
+  {{#with inputInfo}}
+  <div contenteditable="true" data-schema-key="{{name}}" name="{{name}}" {{atts}}>{{value}}</div>
+  {{/with}}
+</template>
+
+<template name="afSelect_plain">
+  {{#with inputInfo}}
+  <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" {{atts}}>
+    {{#if firstOption}}
+    <option value="">{{firstOption}}</option>
+    {{/if}}
+    {{#each items}}
+      <option value="{{value}}" {{selected}}>{{label}}</option>
+    {{/each}}
+  </select>
+  {{/with}}
+</template>
+
+<template name="afTextarea_plain">
+  {{#with inputInfo}}
+  <textarea data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" {{atts}}>{{value}}</textarea>
+  {{/with}}
+</template>
+
+<template name="afInput_plain">
+  {{#with inputInfo}}
+  <input type="{{type}}" data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" value="{{value}}" {{atts}}/>
+  {{/with}}
+</template>
+
+<template name="afDeleteButton_plain">
+  {{#autoForm collection=atts.collection type="remove" doc=atts.doc}}
+  <button type="submit">{{#with content}}this{{else}}Delete{{/with}}</button>
+  {{/autoForm}}
+</template>
+
+<template name="afQuickField_plain">
+  <div class="{{#if afFieldIsInvalid name=name autoform=autoform}}has-error{{/if}}">
+    {{#unless skipLabel}}
+    {{> afFieldLabel labelContext}}
+    {{/unless}}
+    {{> afFieldInput inputContext}}
+    <span>{{{afFieldMessage name=name autoform=autoform}}}</span>
+  </div>
+</template>
