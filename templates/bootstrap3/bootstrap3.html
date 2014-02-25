@@ -1,0 +1,100 @@
+<template name="quickForm_bootstrap3">
+  {{#autoForm afContext}}
+    {{#each formFields}}
+    {{> afQuickField name=name autoform=autoform}}
+    {{/each}}
+    {{#if needsButton}}
+    <div>
+      <button {{submitButtonAtts}}>
+      {{#with buttonContent}}
+      {{this}}
+      {{else}}
+      Submit
+      {{/with}}
+      </button>
+    </div>
+    {{/if}}
+  {{/autoForm}}
+</template>
+
+<template name="afFieldLabel_bootstrap3">
+  <label {{atts}}>{{label}}</label>
+</template>
+
+<template name="afCheckbox_bootstrap3">
+  {{#with inputInfo}}
+  <div class="checkbox"><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+  {{/with}}
+</template>
+
+<template name="afCheckboxGroup_bootstrap3">
+  {{#each items}}
+    {{> afCheckbox_bootstrap3}}
+  {{/each}}
+</template>
+
+<template name="afRadio_bootstrap3">
+  {{#with inputInfo}}
+  <div class="radio"><label for="{{name}}"><input type="radio" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+  {{/with}}
+</template>
+
+<template name="afRadioGroup_bootstrap3">
+  {{#each items}}
+    {{> afRadio_bootstrap3}}
+  {{/each}}
+</template>
+
+<template name="afContenteditable_bootstrap3">
+  {{> afContenteditable_plain}}
+</template>
+
+<template name="afSelect_bootstrap3">
+  {{#with inputInfo}}
+  <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" {{atts}}>
+    {{#if firstOption}}
+    <option value="">{{firstOption}}</option>
+    {{/if}}
+    {{#each items}}
+      <option value="{{value}}" {{selected}}>{{label}}</option>
+    {{/each}}
+  </select>
+  {{/with}}
+</template>
+
+<template name="afTextarea_bootstrap3">
+  {{#with inputInfo}}
+  <textarea data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" {{atts}}>{{value}}</textarea>
+  {{/with}}
+</template>
+
+<template name="afInput_bootstrap3">
+  {{#with inputInfo}}
+  <input type="{{type}}" data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" value="{{value}}" {{atts}}/>
+  {{/with}}
+</template>
+
+<template name="afDeleteButton_bootstrap3">
+  {{#autoForm collection=atts.collection type="remove" doc=atts.doc}}
+  <button type="submit" class="btn btn-danger">{{#with content}}this{{else}}Delete{{/with}}</button>
+  {{/autoForm}}
+</template>
+
+<template name="afQuickField_bootstrap3">
+  {{#if isGroup}}
+  <fieldset>
+    <legend>{{label}}</legend>
+    {{#each formFields}}
+    {{> _afQuickField autoform=../autoform atts=this}}
+    {{/each}}
+  </fieldset>
+  {{else}}
+  <div class="form-group {{#if afFieldIsInvalid name=name autoform=autoform}}has-error{{/if}}">
+    {{#unless skipLabel}}
+    {{> _afFieldLabel autoform=autoform atts=labelAtts}}
+    {{/unless}}
+    {{> _afFieldInput autoform=autoform atts=inputAtts}}
+    <span class="help-block">{{{afFieldMessage name=name autoform=autoform}}}</span>
+  </div>
+  {{/if}}
+</template>
