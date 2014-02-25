@@ -691,12 +691,22 @@ Then in client code, add the hooks:
 AutoForm.hooks({
   postsForm: {
     docToForm: function (doc) {
-      return doc.tags.join(', ');
+      var tags = [];
+      _.each(doc, function (val, key) {
+        if (key.slice(0, 5) === "tags.") {
+          tags.push(val);
+        }
+      });
+      doc.tags = tags.join(", ");
+      return doc;
     },
     formToDoc: function (doc) {
       if (typeof doc.tags === "string") {
-        doc.tags = doc.tags.split(",");
-        //loop through values and trim() or whatever else you want to do
+        var tags = doc.tags.split(",");
+        _.each(tags, function (tag, i) {
+          doc['tag.' + i] = tag;
+        });
+        delete doc.tags;
       }
       return doc;
     }
