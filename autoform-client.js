@@ -616,7 +616,6 @@ if (typeof Handlebars !== 'undefined') {
       // addition to another action on the same submit
       if (method) {
         var methodDocForValidation = ss.clean(_.clone(methodDoc), {
-          isModifier: true,
           filter: false,
           autoConvert: false,
           extendAutoValueContext: {
@@ -838,7 +837,6 @@ var formValues = function(template, transform, ss) {
   var result = {
     doc: doc,
     insertDoc: ss.clean(expandObj(cleanNulls(doc)), {
-      isModifier: true,
       getAutoValues: false
     }),
     updateDoc: ss.clean(docToModifier(doc), {
