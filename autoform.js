@@ -573,6 +573,10 @@ Template.autoForm.events({
     var currentDoc = context.doc || null;
     var docId = currentDoc ? currentDoc._id : null;
     var resetOnSuccess = context.resetOnSuccess;
+    
+    if ((isInsert || isUpdate || isRemove) && !collection) {
+      throw new Error("AutoForm: You must specify a collection when form type is insert, update, or remove.");
+    }
 
     // Gather hooks
     var beforeInsert = getHooks(formId, 'before', 'insert');
@@ -653,7 +657,7 @@ Template.autoForm.events({
       if (shouldStop) {
         return haltSubmission();
       }
-      collection && collection.remove(docId, makeCallback('remove', afterRemove));
+      collection.remove(docId, makeCallback('remove', afterRemove));
       return;
     }
 
@@ -728,10 +732,14 @@ Template.autoForm.events({
     // because collection2 validation catches additional stuff like unique and
     // because our form schema need not be the same as our collection schema.
     if (isInsert) {
-      collection && collection.insert(insertDoc, {validationContext: formId}, makeCallback('insert', afterInsert));
+      collection.insert(insertDoc, {validationContext: formId}, makeCallback('insert', afterInsert));
     } else if (isUpdate) {
-      if (!_.isEmpty(updateDoc)) {
-        collection && collection.update(docId, updateDoc, {validationContext: formId}, makeCallback('update', afterUpdate));
+      var updateCallback = makeCallback('update', afterUpdate);
+      if (_.isEmpty(updateDoc)) {
+        // Nothing to update. Just treat it as a successful update.
+        updateCallback(null, 0);
+      } else {
+        collection.update(docId, updateDoc, {validationContext: formId}, updateCallback);
       }
     }
 
@@ -739,7 +747,6 @@ Template.autoForm.events({
     // addition to another action on the same submit
     if (method) {
       var methodDocForValidation = ss.clean(_.clone(methodDoc), {
-        isModifier: true,
         filter: false,
         autoConvert: false,
         extendAutoValueContext: {
@@ -975,7 +982,7 @@ function formValues(template, transforms, ss) {
   var result = {
     doc: doc,
     insertDoc: ss.clean(expandObj(cleanNulls(doc)), {
-      isModifier: true,
+      isModifier: false,
       getAutoValues: false
     }),
     updateDoc: ss.clean(docToModifier(doc), {
@@ -1517,7 +1524,7 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   var form = formValues(template, getHooks(formId, 'formToDoc'), ss);
 
   // Determine whether we're validating for an insert or an update
-  var isUpdate = !!template.find("button.update");
+  var isUpdate = (context.type === "update");
 
   // Skip validation if skipEmpty is true and the field we're validating
   // has no value.
