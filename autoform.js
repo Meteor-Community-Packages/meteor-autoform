@@ -101,19 +101,23 @@ AutoForm.getDefaultTemplate = function autoFormGetDefaultTemplate() {
   return defaultTemplate;
 };
 
+// All use global template by default
 var defaultTypeTemplates = {
-  afFieldLabel: null, //use global template by default
-  afCheckboxGroup: null, //use global template by default
-  afRadioGroup: null, //use global template by default
-  afSelect: null, //use global template by default
-  afTextarea: null, //use global template by default
-  afContenteditable: null, //use global template by default
-  afCheckbox: null, //use global template by default
-  afInput: null, //use global template by default
-  afDeleteButton: null, //use global template by default
-  afQuickField: null //use global template by default
+  quickForm: null, 
+  afFieldLabel: null,
+  afCheckboxGroup: null,
+  afRadioGroup: null,
+  afSelect: null,
+  afTextarea: null,
+  afContenteditable: null,
+  afCheckbox: null,
+  afRadio: null,
+  afInput: null,
+  afDeleteButton: null,
+  afQuickField: null
 };
 deps.defaultTypeTemplates = {
+  quickForm: new Deps.Dependency,
   afFieldLabel: new Deps.Dependency,
   afCheckboxGroup: new Deps.Dependency,
   afRadioGroup: new Deps.Dependency,
@@ -121,6 +125,7 @@ deps.defaultTypeTemplates = {
   afTextarea: new Deps.Dependency,
   afContenteditable: new Deps.Dependency,
   afCheckbox: new Deps.Dependency,
+  afRadio: new Deps.Dependency,
   afInput: new Deps.Dependency,
   afDeleteButton: new Deps.Dependency,
   afQuickField: new Deps.Dependency
@@ -382,6 +387,19 @@ Handlebars.registerHelper("_afQuickField", function autoFormFieldLabel() {
   var result = Template['afQuickField_' + template];
   if (!result) {
     throw new Error("afQuickField: \"" + template + "\" is not a valid template name");
+  }
+  return result;
+});
+
+Handlebars.registerHelper("_quickForm", function autoFormQuickForm() {
+  var atts = this;
+  
+  // Return the template instance that we want to use, which will be
+  // built with the same 'this' value
+  var template = atts.template || AutoForm.getDefaultTemplateForType("afQuickField") || AutoForm.getDefaultTemplate();
+  var result = Template['quickForm_' + template];
+  if (!result) {
+    throw new Error("quickForm: \"" + template + "\" is not a valid template name");
   }
   return result;
 });

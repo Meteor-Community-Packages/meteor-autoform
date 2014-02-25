@@ -1,3 +1,22 @@
+<template name="quickForm_bootstrap3">
+  {{#autoForm afContext}}
+    {{#each formFields}}
+    {{> afQuickField name=name autoform=autoform}}
+    {{/each}}
+    {{#if needsButton}}
+    <div>
+      <button {{submitButtonAtts}}>
+      {{#with buttonContent}}
+      {{this}}
+      {{else}}
+      Submit
+      {{/with}}
+      </button>
+    </div>
+    {{/if}}
+  {{/autoForm}}
+</template>
+
 <template name="afFieldLabel_bootstrap3">
   <label {{atts}}>{{label}}</label>
 </template>

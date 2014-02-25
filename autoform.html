@@ -5,22 +5,7 @@
 </template>
 
 <template name="quickForm">
-  {{#autoForm afContext}}
-    {{#each formFields}}
-    {{> afQuickField name=name autoform=autoform}}
-    {{/each}}
-    {{#if needsButton}}
-    <div>
-      <button {{submitButtonAtts}}>
-      {{#with buttonContent}}
-      {{this}}
-      {{else}}
-      Submit
-      {{/with}}
-      </button>
-    </div>
-    {{/if}}
-  {{/autoForm}}
+  {{> _quickForm}}
 </template>
 
 <template name="afQuickField">
