@@ -664,11 +664,10 @@ Template.autoForm.events({
     // Gather all form values
     var form = formValues(template, getHooks(formId, 'formToDoc'), ss);
 
-    // Execute before hooks
+    // Execute some before hooks
     var insertDoc = isInsert ? doBefore(null, form.insertDoc, beforeInsert, 'before.insert hook') : form.insertDoc;
     var updateDoc = isUpdate && !_.isEmpty(form.updateDoc) ? doBefore(docId, form.updateDoc, beforeUpdate, 'before.update hook') : form.updateDoc;
-    var methodDoc = method ? doBefore(null, form.insertDoc, beforeMethod, 'before.method hook') : form.insertDoc;
-
+    
     // Get a version of the doc that has auto values to validate here. We
     // don't want to actually send any auto values to the server because
     // we ultimately want them generated on the server
@@ -746,6 +745,8 @@ Template.autoForm.events({
     // We won't do an else here so that a method could be called in
     // addition to another action on the same submit
     if (method) {
+      var methodDoc = doBefore(null, form.insertDoc, beforeMethod, 'before.method hook');
+      // Get a copy of the doc with auto values added to use for validation
       var methodDocForValidation = ss.clean(_.clone(methodDoc), {
         filter: false,
         autoConvert: false,
@@ -757,7 +758,7 @@ Template.autoForm.events({
       if (!isValid(methodDocForValidation, false, method)) {
         return haltSubmission();
       }
-      Meteor.call(method, methodDoc, makeCallback(method, afterMethod));
+      Meteor.call(method, methodDoc, form.updateDoc, makeCallback(method, afterMethod));
     }
   },
   'keyup [data-schema-key]': function autoFormKeyUpHandler(event, template) {
