@@ -14,7 +14,7 @@ AutoForm = {};
  */
 AutoForm.hooks = function autoFormHooks(hooks) {
   _.each(hooks, function(hooksObj, formId) {
-    
+
     // Init the hooks object for this formId if not done yet
     formHooks[formId] = formHooks[formId] || {
       before: {},
@@ -25,7 +25,7 @@ AutoForm.hooks = function autoFormHooks(hooks) {
       onSuccess: [],
       onError: []
     };
-    
+
     // Add before hooks
     hooksObj.before && _.each(hooksObj.before, function autoFormBeforeHooksEach(func, type) {
       if (typeof func !== "function") {
@@ -34,7 +34,7 @@ AutoForm.hooks = function autoFormHooks(hooks) {
       formHooks[formId].before[type] = formHooks[formId].before[type] || [];
       formHooks[formId].before[type].push(func);
     });
-    
+
     // Add after hooks
     hooksObj.after && _.each(hooksObj.after, function autoFormAfterHooksEach(func, type) {
       if (typeof func !== "function") {
@@ -43,7 +43,7 @@ AutoForm.hooks = function autoFormHooks(hooks) {
       formHooks[formId].after[type] = formHooks[formId].after[type] || [];
       formHooks[formId].after[type].push(func);
     });
-    
+
     // Add all other hooks
     _.each(['formToDoc', 'docToForm', 'onSubmit', 'onSuccess', 'onError'], function autoFormHooksEach(name) {
       if (hooksObj[name]) {
@@ -66,7 +66,6 @@ function getHooks(formId, type, subtype) {
 
 /**
  * @param {String} formId
- * @param {SimpleSchema} simpleSchema
  * @returns {undefined}
  * 
  * Resets validation for an autoform.
@@ -75,15 +74,14 @@ AutoForm.resetForm = function autoFormResetForm(formId) {
   if (typeof formId !== "string") {
     return;
   }
-  
-  
+
   formPreserve.unregisterForm(formId);
 
   var simpleSchema = formSchemas[formId];
   simpleSchema && simpleSchema.namedContext(formId).resetValidation();
   // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
   // there is no need to reset validation for it. No error need be thrown.
-  
+
   //clearSelections(formId); // TODO don't think this is needed with new engine
 };
 
@@ -103,7 +101,7 @@ AutoForm.getDefaultTemplate = function autoFormGetDefaultTemplate() {
 
 // All use global template by default
 var defaultTypeTemplates = {
-  quickForm: null, 
+  quickForm: null,
   afFieldLabel: null,
   afCheckboxGroup: null,
   afRadioGroup: null,
@@ -165,18 +163,18 @@ Template.autoForm.atts = function autoFormTplAtts() {
 Template.autoForm.innerContext = function autoFormTplInnerContext() {
   var context = this;
   var formId = context.id || defaultFormId;
-  
+
   var collection = lookup(context.collection);
   check(collection, Match.Optional(Meteor.Collection));
-  
+
   var ss = lookup(context.schema) || collection && collection.simpleSchema();
   if (!Match.test(ss, SimpleSchema)) {
     throw new Error("autoForm with id " + formId + " needs either 'schema' or 'collection' attribute");
   }
-  
+
   // Cache a reference to help with resetting validation later
   formSchemas[formId] = ss;
-  
+
   // Retain doc values after a "hot code push", if possible
   var retrievedDoc = formPreserve.getDocument(formId);
   if (retrievedDoc !== false) {
@@ -184,17 +182,18 @@ Template.autoForm.innerContext = function autoFormTplInnerContext() {
     context.doc = retrievedDoc;
   }
 
-  var flatDoc;
-  if (context.doc) {
-    // We create and use a "flat doc" instead of dynamic lookups because
-    // that makes it easier for the user to alter using a docToForm function.
-    var mDoc = new MongoObject(_.clone(context.doc));
-    flatDoc = mDoc.getFlatObject();
-    mDoc = null;
-    // Pass flat doc through docToForm hooks
+  var mDoc, flatDoc;
+  if (context.doc && !_.isEmpty(context.doc)) {
+    // Clone doc
+    var copy = _.clone(context.doc);
+    // Pass doc through docToForm hooks
     _.each(getHooks(formId, 'docToForm'), function autoFormEachDocToForm(func) {
-      flatDoc = func(flatDoc);
+      copy = func(copy);
     });
+    // Create a "flat doc" that can be used to easily get values for corresponding
+    // form fields.
+    mDoc = new MongoObject(copy);
+    flatDoc = mDoc.getFlatObject();
   } else {
     flatDoc = {};
   }
@@ -207,6 +206,7 @@ Template.autoForm.innerContext = function autoFormTplInnerContext() {
   innerContext._af.collection = collection;
   innerContext._af.ss = ss;
   innerContext._af.doc = context.doc; //TODO is this used somewhere?
+  innerContext._af.mDoc = mDoc;
   innerContext._af.flatDoc = flatDoc;
   innerContext._af.validationType = context.validation || "submitThenKeyup";
   innerContext._af.submitType = context.type;
@@ -245,9 +245,9 @@ Template.afFieldLabel.label = function getLabel() {
   if (!afContext || !afContext._af) {
     throw new Error("afFieldLabel helper must be used within an autoForm block");
   }
-  
+
   var ss = afContext._af.ss;
-  
+
   return ss.label(atts.name);
 };
 
@@ -270,7 +270,7 @@ Handlebars.registerHelper("_afFieldLabel", function autoFormFieldLabel(context) 
   return result;
 });
 
-Template.afFieldInput.inputInfo = function getLabel() {
+Template.afFieldInput.inputInfo = function inputInfo() {
   var context = this || {};
   var atts = context.atts || {};
   var afContext = atts.autoform || context.autoform;
@@ -278,10 +278,7 @@ Template.afFieldInput.inputInfo = function getLabel() {
     throw new Error("afFieldInput template must be used within an autoForm block");
   }
   
-  var ss = afContext._af.ss;
-  var defs = getDefs(ss, atts.name); //defs will not be undefined
-  
-  return getInputData(atts.name, ss, afContext._af.flatDoc, defs, atts);
+  return getInputData(context.defs, atts, context.inputValue, context.inputType, context.inputLabel, context.expectsArray);
 };
 
 Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
@@ -291,15 +288,41 @@ Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
   if (!afContext || !afContext._af) {
     throw new Error("afFieldInput template must be used within an autoForm block");
   }
-  
+
   var ss = afContext._af.ss;
   var defs = getDefs(ss, atts.name); //defs will not be undefined
   
-  // TODO figure out a way to not duplicate this call and still get valHasLineBreaks
-  var data = getInputData(atts.name, ss, afContext._af.flatDoc, defs, atts);
+  // Get schema type
+  var schemaType = defs.type;
+  // Adjust for array fields if necessary
+  var expectsArray = false;
+  if (schemaType === Array) {
+    defs = ss.schema(atts.name + ".$");
+    schemaType = defs.type;
+
+    //if the user overrides the type to anything,
+    //then we won't be using a select box and
+    //we won't be expecting an array for the current value
+    expectsArray = !atts.type;
+  }
   
+  // Get input value
+  var value = getInputValue(atts.name, atts, afContext._af.mDoc, expectsArray, defs.type);
+
+  // Get type
+  var type = getInputType(atts, defs, value);
+  
+  // Cache some info for use by helpers
+  _.extend(this, {
+    defs: defs,
+    expectsArray: expectsArray,
+    inputValue: value,
+    inputType: type,
+    inputLabel: ss.label(atts.name)
+  });
+
   // Construct template name
-  var templateType = getInputTemplateType(atts.name, ss, defs, atts, data.valHasLineBreaks);
+  var templateType = getInputTemplateType(atts, type, expectsArray);
   var template = atts.template || AutoForm.getDefaultTemplateForType(templateType) || AutoForm.getDefaultTemplate();
 
   // Return the template instance that we want to use, which will be
@@ -337,7 +360,8 @@ function quickFieldLabelAtts(context) {
   });
 
   return labelContext;
-};
+}
+;
 
 function quickFieldInputAtts(context) {
   // Remove unwanted props from the hash
@@ -352,7 +376,8 @@ function quickFieldInputAtts(context) {
   });
 
   return inputContext;
-};
+}
+;
 
 Handlebars.registerHelper("_afQuickField", function autoFormFieldLabel() {
   var context = this || {};
@@ -361,9 +386,9 @@ Handlebars.registerHelper("_afQuickField", function autoFormFieldLabel() {
   if (!afContext || !afContext._af) {
     throw new Error("afQuickField helper must be used within an autoForm block");
   }
-  
+
   var ss = afContext._af.ss;
-  
+
   var field = atts.name;
   var formFields = _.filter(ss._schemaKeys, function autoFormFormFieldsSchemaEach(key) {
     if (key.indexOf(field + ".") === 0) {
@@ -371,7 +396,7 @@ Handlebars.registerHelper("_afQuickField", function autoFormFieldLabel() {
     }
   });
   formFields = quickFieldFormFields(formFields, afContext, ss);
-  
+
   var defs = getDefs(ss, atts.name); //defs will not be undefined
   _.extend(afContext, {
     skipLabel: (atts.label === false || (defs.type === Boolean && !("select" in atts) && !("radio" in atts))),
@@ -380,7 +405,7 @@ Handlebars.registerHelper("_afQuickField", function autoFormFieldLabel() {
     isGroup: !!formFields,
     formFields: formFields
   });
-  
+
   // Return the template instance that we want to use, which will be
   // built with the same 'this' value
   var template = atts.template || AutoForm.getDefaultTemplateForType("afQuickField") || AutoForm.getDefaultTemplate();
@@ -393,7 +418,7 @@ Handlebars.registerHelper("_afQuickField", function autoFormFieldLabel() {
 
 Handlebars.registerHelper("_quickForm", function autoFormQuickForm() {
   var atts = this;
-  
+
   // Return the template instance that we want to use, which will be
   // built with the same 'this' value
   var template = atts.template || AutoForm.getDefaultTemplateForType("afQuickField") || AutoForm.getDefaultTemplate();
@@ -416,7 +441,7 @@ Template.quickForm.submitButtonAtts = function autoFormSubmitButtonAtts() {
 Template.quickForm.formFields = function quickFormFields() {
   var context = this;
   var ss = context._af.ss;
-  
+
   // Get the list of fields we want included
   var fieldList;
   if (context.fields) {
@@ -427,7 +452,7 @@ Template.quickForm.formFields = function quickFormFields() {
     }
   }
   fieldList = fieldList || ss.firstLevelSchemaKeys();
-  
+
   return quickFieldFormFields(fieldList, context, ss);
 };
 
@@ -496,7 +521,8 @@ function quickFieldFormFields(fieldList, autoform, ss) {
   return _.map(fieldList, function autoFormFormFieldsListEach(field) {
     return infoForField(field, extendedAtts);
   });
-};
+}
+;
 
 Template.autoForm.destroyed = function autoFormDestroyed() {
   var self = this;
@@ -505,7 +531,7 @@ Template.autoForm.destroyed = function autoFormDestroyed() {
   formPreserve.unregisterForm(formId);
 };
 
-Template.autoForm.afFieldMessage = function autoFormFieldMessage(options) {
+Handlebars.registerHelper("afFieldMessage", function autoFormFieldMessage(options) {
   var hash = (options || {}).hash || {};
   var afContext = hash.autoform && hash.autoform._af || this && this._af;
   var ss = afContext.ss;
@@ -515,9 +541,7 @@ Template.autoForm.afFieldMessage = function autoFormFieldMessage(options) {
 
   getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
   return ss.namedContext(afContext.formId).keyErrorMessage(hash.name);
-};
-
-//Handlebars.registerHelper("afFieldMessage", );
+});
 
 Handlebars.registerHelper("afFieldIsInvalid", function autoFormFieldIsInvalid(options) {
   var hash = (options || {}).hash || {};
@@ -573,7 +597,7 @@ Template.autoForm.events({
     var currentDoc = context.doc || null;
     var docId = currentDoc ? currentDoc._id : null;
     var resetOnSuccess = context.resetOnSuccess;
-    
+
     if ((isInsert || isUpdate || isRemove) && !collection) {
       throw new Error("AutoForm: You must specify a collection when form type is insert, update, or remove.");
     }
@@ -595,14 +619,14 @@ Template.autoForm.events({
     if (!isNormalSubmit) {
       event.preventDefault();
     }
-    
+
     // Prep haltSubmission function
     function haltSubmission() {
       event.preventDefault();
       event.stopPropagation();
       submitButton.disabled = false;
     }
-    
+
     // Prep function to select the focus the first field with an error
     function selectFirstInvalidField() {
       var ctx = ss.namedContext(formId);
@@ -617,7 +641,7 @@ Template.autoForm.events({
         });
       }
     }
-    
+
     // Prep callback creator function
     function makeCallback(name, afterHook) {
       return function autoFormActionCallback(error, result) {
@@ -646,7 +670,7 @@ Template.autoForm.events({
         submitButton.disabled = false;
       };
     }
-    
+
     // If type is "remove", do that right away since we don't need to gather
     // form values or validate.
     if (isRemove) {
@@ -667,7 +691,7 @@ Template.autoForm.events({
     // Execute some before hooks
     var insertDoc = isInsert ? doBefore(null, form.insertDoc, beforeInsert, 'before.insert hook') : form.insertDoc;
     var updateDoc = isUpdate && !_.isEmpty(form.updateDoc) ? doBefore(docId, form.updateDoc, beforeUpdate, 'before.update hook') : form.updateDoc;
-    
+
     // Get a version of the doc that has auto values to validate here. We
     // don't want to actually send any auto values to the server because
     // we ultimately want them generated on the server
@@ -863,16 +887,6 @@ if (typeof Handlebars !== 'undefined') {
 //  };
 }
 
-function maybeNum(val) {
-  // Convert val to a number if possible; otherwise, just use the value
-  var floatVal = parseFloat(val);
-  if (!isNaN(floatVal)) {
-    return floatVal;
-  } else {
-    return val;
-  }
-}
-
 function formValues(template, transforms, ss) {
   var fields = template.findAll("[data-schema-key]");
   var doc = {};
@@ -892,7 +906,7 @@ function formValues(template, transforms, ss) {
         doc[name] = false;
       } else if (field.hasAttribute("multiple")) {
         //multiple select, so we want an array value
-        doc[name] = getSelectValues(field);
+        doc[name] = Utility.getSelectValues(field);
       } else {
         doc[name] = val;
       }
@@ -928,7 +942,7 @@ function formValues(template, transforms, ss) {
 
     // Handle number
     if (type === "select") {
-      doc[name] = maybeNum(val);
+      doc[name] = Utility.maybeNum(val);
       return;
     }
 
@@ -971,28 +985,47 @@ function formValues(template, transforms, ss) {
     // Handle all other inputs
     doc[name] = val;
   });
-  // Pass flat doc through formToDoc hooks
+  
+  console.log("fv1", doc);
+
+  // Expand the object
+  doc = expandObj(doc);
+
+  console.log("fv2", doc);
+
+  // Pass expanded doc through formToDoc hooks
   _.each(transforms, function formValuesTransform(transform) {
     doc = transform(doc);
   });
+  
+  console.log("fv3", doc);
+  
+  console.log("fv4", Utility.cleanNulls(doc));
+  console.log("fv5", Utility.docToModifier(doc));
+
   // We return doc, insertDoc, and updateDoc.
-  // For insertDoc, delete any properties that are null, undefined, or empty strings,
-  // and expand to use subdocuments instead of dot notation keys.
+  // For insertDoc, delete any properties that are null, undefined, or empty strings.
   // For updateDoc, convert to modifier object with $set and $unset.
   // Do not add auto values to either.
   var result = {
-    doc: doc,
-    insertDoc: ss.clean(expandObj(cleanNulls(doc)), {
+    insertDoc: ss.clean(Utility.cleanNulls(doc), {
       isModifier: false,
       getAutoValues: false
     }),
-    updateDoc: ss.clean(docToModifier(doc), {
+    updateDoc: ss.clean(Utility.docToModifier(doc), {
       isModifier: true,
       getAutoValues: false
     })
   };
   return result;
-};
+}
+;
+
+// TODO should make this a static method in MongoObject
+function objAffectsKey(obj, key) {
+  var mDoc = new MongoObject(obj);
+  return mDoc.affectsKey(key);
+}
 
 function expandObj(doc) {
   var newDoc = {}, subkeys, subkey, subkeylen, nextPiece, current;
@@ -1022,26 +1055,6 @@ function expandObj(doc) {
     }
   });
   return newDoc;
-}
-
-function cleanNulls(doc) {
-  var newDoc = {};
-  _.each(doc, function(val, key) {
-    if (val !== void 0 && val !== null && !(typeof val === "string" && val.length === 0)) {
-      newDoc[key] = val;
-    }
-  });
-  return newDoc;
-}
-
-function reportNulls(doc) {
-  var nulls = {};
-  _.each(doc, function(val, key) {
-    if (val === void 0 || val === null || (typeof val === "string" && val.length === 0)) {
-      nulls[key] = "";
-    }
-  });
-  return nulls;
 }
 
 //returns true if dateString is a "valid date string"
@@ -1123,40 +1136,20 @@ function isValidNormalizedLocalDateAndTimeString(dtString) {
   return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart);
 }
 
-function getSelectValues(select) {
-  var result = [];
-  var options = select && select.options;
-  var opt;
-
-  for (var i = 0, iLen = options.length; i < iLen; i++) {
-    opt = options[i];
-
-    if (opt.selected) {
-      result.push(opt.value || opt.text);
-    }
-  }
-  return result;
-}
-
-function getInputData(name, ss, flatDoc, defs, hash) {
-  var schemaType = defs.type;
-
-  // Adjust for array fields if necessary
-  var expectsArray = false;
-  if (schemaType === Array) {
-    defs = ss.schema(name + ".$");
-    schemaType = defs.type;
-
-    //if the user overrides the type to anything,
-    //then we won't be using a select box and
-    //we won't be expecting an array for the current value
-    expectsArray = !hash.type;
-  }
-
-  // Determine what the current value is, if any
+function getInputValue(name, hash, mDoc, expectsArray, schemaType) {
   var value;
   if (typeof hash.value === "undefined") {
-    var arrayVal;
+    var docValue;
+    
+    // Get the value for this key in the current document
+    if (mDoc) {
+      var valueInfo = mDoc.getInfoForKey(name);
+      if (valueInfo) {
+        docValue = valueInfo.value;
+      }
+    }
+    
+    // If we're expecting value to be an array
     if (expectsArray) {
 
       // For arrays, we need the flatDoc value as an array
@@ -1164,43 +1157,43 @@ function getInputData(name, ss, flatDoc, defs, hash) {
       // that adjustment here.
       // For example, if we have "numbers.0" = 1 and "numbers.1" = 2,
       // we will create "numbers" = [1,2]
-      _.each(flatDoc, function(flatVal, flatKey) {
-        var l = name.length;
-        if (flatKey.slice(0, l + 1) === name + ".") {
-          var end = flatKey.slice(l + 1);
-          var intEnd = parseInt(end, 10);
-          if (!isNaN(intEnd)) {
-            flatDoc[name] = flatDoc[name] || [];
-            flatDoc[name][intEnd] = flatVal;
-          }
-        }
-      });
+//      _.each(flatDoc, function(flatVal, flatKey) {
+//        var l = name.length;
+//        if (flatKey.slice(0, l + 1) === name + ".") {
+//          var end = flatKey.slice(l + 1);
+//          var intEnd = parseInt(end, 10);
+//          if (!isNaN(intEnd)) {
+//            flatDoc[name] = flatDoc[name] || [];
+//            flatDoc[name][intEnd] = flatVal;
+//          }
+//        }
+//      });
 
-      if (schemaType === Date) {
-        value = [];
-        if (flatDoc && name in flatDoc) {
-          arrayVal = flatDoc[name];
-          _.each(arrayVal, function(v) {
+      value = [];
+      if (_.isArray(docValue)) {
+        if (schemaType === Date) {
+          _.each(docValue, function(v) {
             value.push(dateToDateStringUTC(v));
           });
-        }
-      } else {
-        value = [];
-        if (flatDoc && name in flatDoc) {
-          arrayVal = flatDoc[name];
-          _.each(arrayVal, function(v) {
+        } else {
+          _.each(docValue, function(v) {
             value.push(v.toString());
           });
         }
       }
+
     }
 
     // If not array
     else {
-      if (flatDoc && name in flatDoc) {
-        value = flatDoc[name];
-        if (!(value instanceof Date)) { //we will convert dates to a string later, after we know what the field type will be
-          value = value.toString();
+      if (docValue) {
+        if (docValue instanceof Date) {
+          // We will convert dates to a string later, after we
+          // know what the field type will be
+          value = docValue;
+        } else {
+          // Convert everything else to a string now
+          value = docValue.toString();
         }
       } else {
         value = "";
@@ -1208,30 +1201,18 @@ function getInputData(name, ss, flatDoc, defs, hash) {
     }
   } else {
     value = hash.value;
-    if (expectsArray && !(value instanceof Array)) {
+    if (expectsArray && _.isArray(value)) {
       value = [value];
     }
   }
+  return value;
+}
 
-  var valHasLineBreaks = typeof value === "string" ? (value.indexOf("\n") !== -1) : false;
-
-  //get type
-  var type = "text";
-  if (hash.type) {
-    type = hash.type;
-  } else if (schemaType === String && (hash.rows || valHasLineBreaks)) {
-    type = "textarea";
-  } else if (schemaType === String && defs.regEx === SchemaRegEx.Email) {
-    type = "email";
-  } else if (schemaType === String && defs.regEx === SchemaRegEx.Url) {
-    type = "url";
-  } else if (schemaType === Number) {
-    type = "number";
-  } else if (schemaType === Date) {
-    type = "date";
-  } else if (schemaType === Boolean) {
-    type = "boolean";
-  }
+function getInputData(defs, hash, value, type, label, expectsArray) {
+  var schemaType = defs.type;
+  
+  var min = (typeof defs.min === "function") ? defs.min() : defs.min;
+  var max = (typeof defs.max === "function") ? defs.max() : defs.max;
 
   if (type === "datetime-local") {
     hash["data-offset"] = hash.offset || "Z";
@@ -1246,18 +1227,6 @@ function getInputData(name, ss, flatDoc, defs, hash) {
     } else if (type === "datetime-local") {
       value = dateToNormalizedLocalDateAndTimeString(value, hash["data-offset"]);
     }
-  }
-
-  var label = ss.label(name);
-  var min = defs.min;
-  var max = defs.max;
-
-  // If min/max are functions, call them
-  if (typeof min === "function") {
-    min = min();
-  }
-  if (typeof max === "function") {
-    max = max();
   }
 
   // Extract settings from hash
@@ -1286,6 +1255,12 @@ function getInputData(name, ss, flatDoc, defs, hash) {
     hash.placeholder = label;
   }
 
+  // Determine what options to use
+  var data = {};
+  
+  // Add name to every type of element
+  data.name = hash.name;
+  
   // Clean hash so that we can add anything remaining as attributes
   hash = _.omit(hash,
           "name",
@@ -1300,20 +1275,19 @@ function getInputData(name, ss, flatDoc, defs, hash) {
           "falseLabel",
           "options",
           "offset");
-
-  // Determine what options to use
-  var data = {valHasLineBreaks: valHasLineBreaks};
+  
+  // Add required to every type of element, if required
   if (typeof hash.required === "undefined" && !defs.optional) {
     hash.required = "";
   }
-  data.name = name;
+  
   if (selectOptions) {
     // Build anything that should be a select, which is anything with options
     data.items = [];
     _.each(selectOptions, function(opt) {
       var selected = expectsArray ? _.contains(value, opt.value.toString()) : (opt.value.toString() === value.toString());
       data.items.push({
-        name: name,
+        name: data.name,
         label: opt.label,
         value: opt.value,
         checked: selected ? "checked" : "",
@@ -1347,14 +1321,14 @@ function getInputData(name, ss, flatDoc, defs, hash) {
     value = (value === "true") ? true : false;
     var items = [
       {
-        name: name,
+        name: data.name,
         value: "false",
         checked: !value ? "checked" : "",
         selected: !value ? "selected" : "",
         label: falseLabel
       },
       {
-        name: name,
+        name: data.name,
         value: "true",
         checked: value ? "checked" : "",
         selected: value ? "selected" : "",
@@ -1435,31 +1409,20 @@ function getInputData(name, ss, flatDoc, defs, hash) {
   return data;
 }
 
-function getInputTemplateType(name, ss, defs, hash, valHasLineBreaks) {
+function getInputType(hash, defs, value) {
   var schemaType = defs.type;
-
-  // Adjust for array fields if necessary
-  var expectsArray = false;
-  if (schemaType === Array) {
-    defs = ss.schema(name + ".$");
-    schemaType = defs.type;
-
-    //if the user overrides the type to anything,
-    //then we won't be using a select box and
-    //we won't be expecting an array for the current value
-    expectsArray = !hash.type;
-  }
-
-  //get type
+  var valHasLineBreaks = typeof value === "string" ? (value.indexOf("\n") !== -1) : false;
+  var max = (typeof defs.max === "function") ? defs.max() : defs.max;
+  
   var type = "text";
   if (hash.type) {
     type = hash.type;
-  } else if (schemaType === String && (hash.rows || valHasLineBreaks)) {
-    type = "textarea";
   } else if (schemaType === String && defs.regEx === SimpleSchema.RegEx.Email) {
     type = "email";
   } else if (schemaType === String && defs.regEx === SimpleSchema.RegEx.Url) {
     type = "url";
+  } else if (schemaType === String && (hash.rows || valHasLineBreaks || max >= 150)) {
+    type = "textarea";
   } else if (schemaType === Number) {
     type = "number";
   } else if (schemaType === Date) {
@@ -1467,7 +1430,10 @@ function getInputTemplateType(name, ss, defs, hash, valHasLineBreaks) {
   } else if (schemaType === Boolean) {
     type = "boolean";
   }
+  return type;
+}
 
+function getInputTemplateType(hash, type, expectsArray) {  
   // Extract settings from hash
   var radio = hash.radio;
   var select = hash.select;
@@ -1508,7 +1474,7 @@ function getInputTemplateType(name, ss, defs, hash, valHasLineBreaks) {
 
 function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   if (!template || template._notInDOM) {
-    return;
+    return; //skip validation
   }
 
   var context = template.data;
@@ -1516,37 +1482,21 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   var ss = lookup(context.schema) || collection && collection.simpleSchema();
   var formId = context.id || defaultFormId;
 
-  if (onlyIfAlreadyInvalid &&
-          ss.namedContext(formId).isValid()) {
-    return;
+  if (onlyIfAlreadyInvalid && ss.namedContext(formId).isValid()) {
+    return; //skip validation
   }
 
   // Create a document based on all the values of all the inputs on the form
   var form = formValues(template, getHooks(formId, 'formToDoc'), ss);
 
-  // Determine whether we're validating for an insert or an update
-  var isUpdate = (context.type === "update");
-
-  // Skip validation if skipEmpty is true and the field we're validating
-  // has no value.
-  if (skipEmpty) {
-
-    // If validating for an insert, delete any properties that are
-    // null, undefined, or empty strings so that the "empty" check will be
-    // accurate. For an update, we want to keep null and "" because these
-    // values might be invalid.
-    var doc = form.doc;
-    if (!isUpdate) {
-      doc = cleanNulls(doc);
-    }
-
-    if (!(key in doc)) {
-      return; //skip validation
-    }
-  }
-
   // Clean and validate doc
-  if (isUpdate) {
+  if (context.type === "update") {
+
+    // Skip validation if skipEmpty is true and the field we're validating
+    // has no value.
+    if (skipEmpty && !objAffectsKey(form.updateDoc, key))
+      return; //skip validation
+
     // formValues did some cleaning but didn't add auto values; add them now
     ss.clean(form.updateDoc, {
       isModifier: true,
@@ -1563,6 +1513,12 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
       }
     });
   } else {
+
+    // Skip validation if skipEmpty is true and the field we're validating
+    // has no value.
+    if (skipEmpty && !objAffectsKey(form.insertDoc, key))
+      return; //skip validation
+
     // formValues did some cleaning but didn't add auto values; add them now
     ss.clean(form.insertDoc, {
       filter: false,
@@ -1624,20 +1580,6 @@ function validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
 //var getSelections = function(formId) {
 //  return autoformSelections[formId];
 //};
-
-function docToModifier(doc) {
-  var updateObj = {};
-  var nulls = reportNulls(doc);
-  doc = cleanNulls(doc);
-
-  if (!_.isEmpty(doc)) {
-    updateObj.$set = doc;
-  }
-  if (!_.isEmpty(nulls)) {
-    updateObj.$unset = nulls;
-  }
-  return updateObj;
-}
 
 function getDefs(ss, name) {
   if (typeof name !== "string") {

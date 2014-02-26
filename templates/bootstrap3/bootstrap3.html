@@ -21,28 +21,40 @@
   <label {{atts}}>{{label}}</label>
 </template>
 
+<template name="_afCheckbox_bootstrap3">
+  <div class="checkbox"><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+</template>
+
 <template name="afCheckbox_bootstrap3">
   {{#with inputInfo}}
-  <div class="checkbox"><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+  {{> _afCheckbox_bootstrap3}}
   {{/with}}
 </template>
 
 <template name="afCheckboxGroup_bootstrap3">
-  {{#each items}}
-    {{> afCheckbox_bootstrap3}}
-  {{/each}}
+  {{#with inputInfo}}
+    {{#each items}}
+      {{> _afCheckbox_bootstrap3}}
+    {{/each}}
+  {{/with}}
+</template>
+
+<template name="_afRadio_bootstrap3">
+  <div class="radio"><label for="{{name}}"><input type="radio" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
 </template>
 
 <template name="afRadio_bootstrap3">
   {{#with inputInfo}}
-  <div class="radio"><label for="{{name}}"><input type="radio" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+  {{> _afRadio_bootstrap3}}
   {{/with}}
 </template>
 
 <template name="afRadioGroup_bootstrap3">
-  {{#each items}}
-    {{> afRadio_bootstrap3}}
-  {{/each}}
+  {{#with inputInfo}}
+    {{#each items}}
+    {{> _afRadio_bootstrap3}}
+    {{/each}}
+  {{/with}}
 </template>
 
 <template name="afContenteditable_bootstrap3">

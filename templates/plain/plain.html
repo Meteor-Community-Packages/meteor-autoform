@@ -21,28 +21,40 @@
   <label {{atts}}>{{label}}</label>
 </template>
 
+<template name="_afCheckbox_plain">
+  <div><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+</template>
+
 <template name="afCheckbox_plain">
   {{#with inputInfo}}
-  <div><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+  {{> _afCheckbox_plain}}
   {{/with}}
 </template>
 
 <template name="afCheckboxGroup_plain">
-  {{#each items}}
-  {{> afCheckbox_plain}}
-  {{/each}}
+  {{#with inputInfo}}
+    {{#each items}}
+    {{> _afCheckbox_plain}}
+    {{/each}}
+  {{/with}}
+</template>
+
+<template name="_afRadio_plain">
+  <div><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
 </template>
 
 <template name="afRadio_plain">
   {{#with inputInfo}}
-  <div><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+  {{> _afRadio_plain}}
   {{/with}}
 </template>
 
 <template name="afRadioGroup_plain">
-  {{#each items}}
-  {{> afRadio_plain}}
-  {{/each}}
+  {{#with inputInfo}}
+    {{#each items}}
+    {{> _afRadio_plain}}
+    {{/each}}
+  {{/with}}
 </template>
 
 <template name="afContenteditable_plain">

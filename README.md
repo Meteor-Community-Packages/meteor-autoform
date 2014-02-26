@@ -1030,6 +1030,12 @@ errors for the form.
 You will probably also have to remove the `preserve-inputs` package to avoid
 issues with values from the previous form state refusing to disappear.
 
+### Can I put HTML in my error messages?
+
+Yes. Define your messages using one of the `SimpleSchema` methods, including
+HTML elements such as `<strong>`. Then be sure to wrap your `afFieldMessage`
+tags in triple stashes.
+
 ## More Examples
 
 A somewhat messy example app is [here](https://github.com/aldeed/meteor-autoform-example).

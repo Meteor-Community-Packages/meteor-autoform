@@ -29,6 +29,7 @@ Package.on_use(function(api) {
     'templates/plain-span/plain-span.js',
     // Core Files
     'autoform.html',
+    'utility.js',
     'form-preserve.js',
     'autoform.js'
   ], 'client');
