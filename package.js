@@ -13,7 +13,7 @@ Package.on_use(function(api) {
     api.imply('simple-schema', 'client');
     api.export('AutoForm', 'client');
   }
-
+  
   api.add_files([
     // bootstrap3 Template
     'templates/bootstrap3/bootstrap3.html',

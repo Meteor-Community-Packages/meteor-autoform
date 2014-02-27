@@ -178,7 +178,6 @@ Template.autoForm.innerContext = function autoFormTplInnerContext() {
   // Retain doc values after a "hot code push", if possible
   var retrievedDoc = formPreserve.getDocument(formId);
   if (retrievedDoc !== false) {
-    console.log("Retrieved preserved form document", retrievedDoc);
     context.doc = retrievedDoc;
   }
 
@@ -641,6 +640,15 @@ Template.autoForm.events({
         });
       }
     }
+    
+    // Prep reset form function
+    function autoFormDoResetForm() {
+      if (!template._notInDOM) {
+        template.find("form").reset();
+        var focusInput = template.find("[autofocus]");
+        focusInput && focusInput.focus();
+      }
+    }
 
     // Prep callback creator function
     function makeCallback(name, afterHook) {
@@ -651,14 +659,10 @@ Template.autoForm.events({
             hook(name, error, template);
           });
         } else {
-          // Potentially reset form after successful submit.
-          // Update forms are opt-in while all others are opt-out.
-          if (!template._notInDOM &&
-                  ((name !== 'update' && resetOnSuccess !== false) ||
-                          (name === 'update' && resetOnSuccess === true))) {
-            template.find("form").reset();
-            var focusInput = template.find("[autofocus]");
-            focusInput && focusInput.focus();
+          // By default, we reset form after successful submit, but
+          // you can opt out.
+          if (resetOnSuccess !== false) {
+            autoFormDoResetForm();
           }
           _.each(onSuccess, function onSuccessEach(hook) {
             hook(name, result, template);
@@ -732,13 +736,7 @@ Template.autoForm.events({
       var context = {
         event: event,
         template: template,
-        resetForm: function autoFormDoResetForm() {
-          if (!template._notInDOM) {
-            template.find("form").reset();
-            var focusInput = template.find("[autofocus]");
-            focusInput && focusInput.focus();
-          }
-        }
+        resetForm: autoFormDoResetForm
       };
       // Pass both types of doc to onSubmit
       var shouldStop = _.any(onSubmit, function eachOnSubmit(hook) {
@@ -810,7 +808,7 @@ Template.autoForm.events({
     if (afContext) {
       var formId = afContext.formId;
       var ss = afContext.ss;
-      formPreserve.registerForm(formId, function autoFormRegFormCallback() {
+      formId && ss && formPreserve.registerForm(formId, function autoFormRegFormCallback() {
         return formValues(template, getHooks(formId, 'formToDoc'), ss).insertDoc;
       });
     }
@@ -986,23 +984,14 @@ function formValues(template, transforms, ss) {
     doc[name] = val;
   });
   
-  console.log("fv1", doc);
-
   // Expand the object
   doc = expandObj(doc);
-
-  console.log("fv2", doc);
 
   // Pass expanded doc through formToDoc hooks
   _.each(transforms, function formValuesTransform(transform) {
     doc = transform(doc);
   });
   
-  console.log("fv3", doc);
-  
-  console.log("fv4", Utility.cleanNulls(doc));
-  console.log("fv5", Utility.docToModifier(doc));
-
   // We return doc, insertDoc, and updateDoc.
   // For insertDoc, delete any properties that are null, undefined, or empty strings.
   // For updateDoc, convert to modifier object with $set and $unset.
@@ -1151,24 +1140,6 @@ function getInputValue(name, hash, mDoc, expectsArray, schemaType) {
     
     // If we're expecting value to be an array
     if (expectsArray) {
-
-      // For arrays, we need the flatDoc value as an array
-      // rather than as separate array values, so we'll do
-      // that adjustment here.
-      // For example, if we have "numbers.0" = 1 and "numbers.1" = 2,
-      // we will create "numbers" = [1,2]
-//      _.each(flatDoc, function(flatVal, flatKey) {
-//        var l = name.length;
-//        if (flatKey.slice(0, l + 1) === name + ".") {
-//          var end = flatKey.slice(l + 1);
-//          var intEnd = parseInt(end, 10);
-//          if (!isNaN(intEnd)) {
-//            flatDoc[name] = flatDoc[name] || [];
-//            flatDoc[name][intEnd] = flatVal;
-//          }
-//        }
-//      });
-
       value = [];
       if (_.isArray(docValue)) {
         if (schemaType === Date) {
@@ -1181,7 +1152,6 @@ function getInputValue(name, hash, mDoc, expectsArray, schemaType) {
           });
         }
       }
-
     }
 
     // If not array

@@ -666,7 +666,7 @@ format in your form versus in the mongo document. They are mainly useful if you
 decide to override an input type.
 
 *Unlike document modifications made in "before hooks", modifications made in the
-`formToDoc` and `docToForm` hooks are made every time the form is validated, which could
+`formToDoc` hooks are made every time the form is validated, which could
 happen a couple times per second on the client, depending on validation mode.
 The other hooks are run only right before the corresponding submission actions,
 as their names imply.*
@@ -677,13 +677,14 @@ a text field but store (and validate) the values as an array:
 First specify `type: [String]` in the schema. The schema should reflect what you
 are actually storing.
 
-*For the `afFieldInput` helper, don't supply options:*
+*For the `afFieldInput` helper, don't supply the `options` attribute:*
 
 ```html
 {{> afFieldInput name="tags"}}
 ```
 
-When there are no options, a `<select>` element will not be generated.
+When there are no options, a `<select>` element will not be generated
+even though we're expecting an array.
 
 Then in client code, add the hooks:
 
@@ -691,22 +692,12 @@ Then in client code, add the hooks:
 AutoForm.hooks({
   postsForm: {
     docToForm: function (doc) {
-      var tags = [];
-      _.each(doc, function (val, key) {
-        if (key.slice(0, 5) === "tags.") {
-          tags.push(val);
-        }
-      });
-      doc.tags = tags.join(", ");
+      doc.tags = doc.tags.join(", ");
       return doc;
     },
     formToDoc: function (doc) {
       if (typeof doc.tags === "string") {
-        var tags = doc.tags.split(",");
-        _.each(tags, function (tag, i) {
-          doc['tag.' + i] = tag;
-        });
-        delete doc.tags;
+        doc.tags = doc.tags.split(",");
       }
       return doc;
     }
