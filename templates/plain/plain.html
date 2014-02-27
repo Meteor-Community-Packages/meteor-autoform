@@ -95,11 +95,20 @@
 </template>
 
 <template name="afQuickField_plain">
-  <div class="{{#if afFieldIsInvalid name=name autoform=autoform}}has-error{{/if}}">
+  {{#if isGroup}}
+  <fieldset>
+    <legend>{{label}}</legend>
+    {{#each formFields}}
+    {{> afQuickField}}
+    {{/each}}
+  </fieldset>
+  {{else}}
+  <div class="{{#if afFieldIsInvalid name=atts.name autoform=autoform}}has-error{{/if}}">
     {{#unless skipLabel}}
-    {{> afFieldLabel labelContext}}
+    {{> afFieldLabel labelAtts}}
     {{/unless}}
-    {{> afFieldInput inputContext}}
-    <span>{{{afFieldMessage name=name autoform=autoform}}}</span>
+    {{> afFieldInput inputAtts}}
+    <span>{{{afFieldMessage name=atts.name autoform=autoform}}}</span>
   </div>
+  {{/if}}
 </template>

@@ -1,7 +1,7 @@
 <template name="quickForm_bootstrap3">
   {{#autoForm afContext}}
     {{#each formFields}}
-    {{> afQuickField name=name autoform=autoform}}
+    {{> afQuickField}}
     {{/each}}
     {{#if needsButton}}
     <div>
@@ -93,20 +93,21 @@
 </template>
 
 <template name="afQuickField_bootstrap3">
+  {{log isGroup}}
   {{#if isGroup}}
   <fieldset>
     <legend>{{label}}</legend>
     {{#each formFields}}
-    {{> _afQuickField autoform=../autoform atts=this}}
+    {{> afQuickField}}
     {{/each}}
   </fieldset>
   {{else}}
-  <div class="form-group {{#if afFieldIsInvalid name=name autoform=autoform}}has-error{{/if}}">
+  <div class="form-group {{#if afFieldIsInvalid name=atts.name autoform=autoform}}has-error{{/if}}">
     {{#unless skipLabel}}
-    {{> _afFieldLabel autoform=autoform atts=labelAtts}}
+    {{> afFieldLabel labelAtts}}
     {{/unless}}
-    {{> _afFieldInput autoform=autoform atts=inputAtts}}
-    <span class="help-block">{{{afFieldMessage name=name autoform=autoform}}}</span>
+    {{> afFieldInput inputAtts}}
+    <span class="help-block">{{{afFieldMessage name=atts.name autoform=autoform}}}</span>
   </div>
   {{/if}}
 </template>

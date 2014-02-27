@@ -81,8 +81,6 @@ AutoForm.resetForm = function autoFormResetForm(formId) {
   simpleSchema && simpleSchema.namedContext(formId).resetValidation();
   // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
   // there is no need to reset validation for it. No error need be thrown.
-
-  //clearSelections(formId); // TODO don't think this is needed with new engine
 };
 
 var deps = {};
@@ -346,12 +344,16 @@ Handlebars.registerHelper("afDeleteButton", function autoFormFieldLabel(context)
   return result;
 });
 
-function quickFieldLabelAtts(context) {
+function quickFieldLabelAtts(context, autoform) {
   // Remove unwanted props from the hash
   context = _.omit(context, 'label');
 
   // Separate label options from input options; label items begin with "label-"
-  var labelContext = {name: context.name, template: context.template};
+  var labelContext = {
+    name: context.name,
+    template: context.template,
+    autoform: autoform
+  };
   _.each(context, function autoFormLabelContextEach(val, key) {
     if (key.indexOf("label-") === 0) {
       labelContext[key.substring(6)] = val;
@@ -360,14 +362,13 @@ function quickFieldLabelAtts(context) {
 
   return labelContext;
 }
-;
 
-function quickFieldInputAtts(context) {
+function quickFieldInputAtts(context, autoform) {
   // Remove unwanted props from the hash
   context = _.omit(context, 'label');
 
   // Separate label options from input options; label items begin with "label-"
-  var inputContext = {};
+  var inputContext = {autoform: autoform};
   _.each(context, function autoFormInputContextEach(val, key) {
     if (key.indexOf("label-") !== 0) {
       inputContext[key] = val;
@@ -376,7 +377,6 @@ function quickFieldInputAtts(context) {
 
   return inputContext;
 }
-;
 
 Handlebars.registerHelper("_afQuickField", function autoFormFieldLabel() {
   var context = this || {};
@@ -387,21 +387,21 @@ Handlebars.registerHelper("_afQuickField", function autoFormFieldLabel() {
   }
 
   var ss = afContext._af.ss;
-
-  var field = atts.name;
-  var formFields = _.filter(ss._schemaKeys, function autoFormFormFieldsSchemaEach(key) {
-    if (key.indexOf(field + ".") === 0) {
+  
+  var fields = _.filter(ss._schemaKeys, function autoFormFormFieldsSchemaEach(key) {
+    if (key.indexOf(atts.name + ".") === 0) {
       return true;
     }
   });
-  formFields = quickFieldFormFields(formFields, afContext, ss);
+
+  formFields = quickFieldFormFields(fields, afContext, ss);
 
   var defs = getDefs(ss, atts.name); //defs will not be undefined
-  _.extend(afContext, {
+  _.extend(this, {
     skipLabel: (atts.label === false || (defs.type === Boolean && !("select" in atts) && !("radio" in atts))),
-    labelContext: quickFieldLabelAtts(atts),
-    inputContext: quickFieldInputAtts(atts),
-    isGroup: !!formFields,
+    labelAtts: quickFieldLabelAtts(atts, afContext),
+    inputAtts: quickFieldInputAtts(atts, afContext),
+    isGroup: !!(formFields && formFields.length),
     formFields: formFields
   });
 
@@ -479,22 +479,37 @@ function quickFieldFormFields(fieldList, autoform, ss) {
     return true;
   }
 
+  var addedFields = [];
   function infoForField(field, extendedProps) {
-    var info = {name: field};
+    
+    if (_.contains(addedFields, field))
+      return;
+    
     var fieldDefs = ss.schema(field);
 
+    var info;
     if (fieldDefs.type === Object) {
       info = {
         name: field,
-        label: ss.label(field),
-        formFields: []
+        label: ss.label(field)
       };
+      
+      var fields = _.filter(ss._schemaKeys, function autoFormFormFieldsSchemaEach(key) {
+        if (key.indexOf(field + ".") === 0) {
+          return true;
+        }
+      });
+      
+      info.formFields = quickFieldFormFields(fields, autoform, ss);
+      addedFields = addedFields.concat(fields);
     } else {
+      info = {name: field};
       // If there are allowedValues defined, use them as select element options
       var av = fieldDefs.type === Array ? ss.schema(field + ".$").allowedValues : fieldDefs.allowedValues;
       if (_.isArray(av)) {
         info.options = "allowed";
       }
+      addedFields.push(field);
     }
 
     return _.extend(info, extendedProps);
@@ -799,11 +814,6 @@ Template.autoForm.events({
     }
   },
   'change [data-schema-key]': function autoFormChangeHandler(event, template) {
-//    if (event.currentTarget.nodeName.toLowerCase() === "select") {
-//      //workaround for selection being lost on rerender
-//      //store the selections in memory and reset in rendered
-//      setSelections(event.currentTarget, template.data._formId);
-//    }
     var afContext = (this && this.autoform && this.autoform._af) || {};
     if (afContext) {
       var formId = afContext.formId;
@@ -829,61 +839,6 @@ Template.autoForm.events({
     }
   }
 });
-
-if (typeof Handlebars !== 'undefined') {
-
-  //This is a workaround for what seems to be a Meteor issue.
-  //When Meteor updates an existing form, it selectively updates the attributes,
-  //but attributes that are properties don't have the properties updated to match.
-  //This means that selected is not updated properly even if the selected
-  //attribute is on the element.
-//  Template._autoForm.rendered = function() {
-//    //using autoformSelections is only necessary when the form is invalid, and will
-//    //cause problems if done when the form is valid, but we still have
-//    //to transfer the selected attribute to the selected property when
-//    //the form is valid, to make sure current values show correctly for
-//    //an update form
-//    var self = this, formID = self.data.formID;
-//
-//    var selections = getSelections(formID);
-//    if (!selections) {
-//      // on first render, cache the initial selections for all select elements
-//      _.each(self.findAll("select"), function(selectElement) {
-//        // first transfer the selected attribute to the selected property
-//        _.each(selectElement.options, function(option) {
-//          option.selected = option.hasAttribute("selected"); //transfer att to prop
-//        });
-//        // then cache the selections
-//        setSelections(selectElement, formID);
-//      });
-//      // selections will be updated whenever they change in the
-//      // onchange event handler, too
-//      return;
-//    } else {
-//      // whenever we rerender, keep the correct selected values
-//      // by resetting them all from the cached values
-//      _.each(self.findAll("select"), function(selectElement) {
-//        var key = selectElement.getAttribute('data-schema-key');
-//        var selectedValues = selections[key];
-//        if (selectedValues && selectedValues.length) {
-//          _.each(selectElement.options, function(option) {
-//            if (_.contains(selectedValues, option.value)) {
-//              option.selected = true;
-//            }
-//          });
-//        }
-//      });
-//    }
-//  };
-//
-//  Template._autoForm.destroyed = function() {
-//    var self = this, formID = self.data.formID;
-//
-//    self._notInDOM = true;
-//    self.data.schema.simpleSchema().namedContext(formID).resetValidation();
-//    clearSelections(formID);
-//  };
-}
 
 function formValues(template, transforms, ss) {
   var fields = template.findAll("[data-schema-key]");
@@ -1520,36 +1475,6 @@ function validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   vok[key] = false;
   _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
 }
-
-//var autoformSelections = {};
-//var setSelections = function(select, formId) {
-//  var key = select.getAttribute('data-schema-key');
-//  if (!key) {
-//    return;
-//  }
-//  var selections = [];
-//  for (var i = 0, ln = select.length, opt; i < ln; i++) {
-//    opt = select.options[i];
-//    if (opt.selected) {
-//      selections.push(opt.value);
-//    }
-//  }
-//  if (!(formId in autoformSelections)) {
-//    autoformSelections[formId] = {};
-//  }
-//  autoformSelections[formId][key] = selections;
-//};
-//var clearSelections = function(formId) {
-//  if (formId in autoformSelections) {
-//    delete autoformSelections[formId];
-//  }
-//};
-//var hasSelections = function(formId) {
-//  return (formId in autoformSelections);
-//};
-//var getSelections = function(formId) {
-//  return autoformSelections[formId];
-//};
 
 function getDefs(ss, name) {
   if (typeof name !== "string") {

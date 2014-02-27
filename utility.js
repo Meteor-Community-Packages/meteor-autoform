@@ -56,6 +56,33 @@ Utility = {
     // Get a list of null, undefined, and empty string values so we can unset them instead
     var nulls = Utility.reportNulls(flatDoc);
     flatDoc = Utility.cleanNulls(flatDoc);
+    
+    // For arrays, we need the $set value as an array
+    // rather than as separate array values, so we'll do
+    // that adjustment here.
+    // 
+    // For example, if we have "numbers.0" = 1 and "numbers.1" = 2,
+    // we will create "numbers" = [1,2]
+    // 
+    // This means that we cannot have a field
+    // that updates just one item in an array without overwriting
+    // the whole array, but there is no good way around that for
+    // now because we can't ensure that there is an existing array
+    // and therefore MongoDB might end up creating an object ({"0": value})
+    // instead of an array. If we could use non-id selectors on the
+    // client, then we could set the array to [] if it is null, ensuring
+    // that MongoDB would know it's supposed to be an array.
+    _.each(flatDoc, function(flatVal, flatKey) {
+      var lastDot = flatKey.lastIndexOf(".");
+      var beginning = flatKey.slice(0, lastDot);
+      var end = flatKey.slice(lastDot + 1);
+      var intEnd = parseInt(end, 10);
+      if (!isNaN(intEnd)) {
+        flatDoc[beginning] = flatDoc[beginning] || [];
+        flatDoc[beginning][intEnd] = flatVal;
+        delete flatDoc[flatKey];
+      }
+    });
 
     if (!_.isEmpty(flatDoc)) {
       modifier.$set = flatDoc;
