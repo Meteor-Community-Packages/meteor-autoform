@@ -691,13 +691,15 @@ Then in client code, add the hooks:
 ```js
 AutoForm.hooks({
   postsForm: {
-    docToForm: function (doc) {
-      doc.tags = doc.tags.join(", ");
+    docToForm: function(doc) {
+      if (_.isArray(doc.optionalStringArray)) {
+        doc.optionalStringArray = doc.optionalStringArray.join(", ");
+      }
       return doc;
     },
-    formToDoc: function (doc) {
-      if (typeof doc.tags === "string") {
-        doc.tags = doc.tags.split(",");
+    formToDoc: function(doc) {
+      if (typeof doc.optionalStringArray === "string") {
+        doc.optionalStringArray = doc.optionalStringArray.split(",");
       }
       return doc;
     }
