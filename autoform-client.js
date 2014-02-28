@@ -700,7 +700,7 @@ if (typeof Handlebars !== 'undefined') {
         var selectedValues = selections[key];
         if (selectedValues && selectedValues.length) {
           $(selectElement).find('option').each(function() {
-            if (_.contains(selectedValues, $(this).prop('value')) {
+            if (_.contains(selectedValues, $(this).prop('value'))) {
               $(this).prop('selected', true);
             }
           });
