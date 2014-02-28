@@ -3,6 +3,7 @@ Package.describe({
 });
 
 Package.on_use(function(api) {
+  api.use('jquery');
   api.use('underscore', ['client', 'server']);
   api.use('deps', ['client', 'server']);
   api.use(['templating', 'handlebars', 'moment'], 'client');
