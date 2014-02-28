@@ -683,7 +683,7 @@ if (typeof Handlebars !== 'undefined') {
       // on first render, cache the initial selections for all select elements
       _.each(self.findAll("select"), function(selectElement) {
         // first transfer the selected attribute to the selected property
-        _.each(selectElement.options, function(option) {
+        _.each($(selectElement).children(), function(option) {
           option.selected = option.hasAttribute("selected"); //transfer att to prop
         });
         // then cache the selections
@@ -699,7 +699,7 @@ if (typeof Handlebars !== 'undefined') {
         var key = selectElement.getAttribute('data-schema-key');
         var selectedValues = selections[key];
         if (selectedValues && selectedValues.length) {
-          _.each(selectElement.options, function(option) {
+          _.each($(selectElement).children(), function(option) {
             if (_.contains(selectedValues, option.value)) {
               option.selected = true;
             }
