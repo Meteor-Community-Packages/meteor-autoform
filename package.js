@@ -12,6 +12,7 @@ Package.on_use(function(api) {
     api.use('livedata', 'client');
     api.imply('simple-schema', 'client');
     api.export('AutoForm', 'client');
+    api.export('Utility', 'client', {testOnly: true});
   }
   
   api.add_files([
@@ -33,4 +34,10 @@ Package.on_use(function(api) {
     'form-preserve.js',
     'autoform.js'
   ], 'client');
+});
+
+Package.on_test(function (api) {
+  api.use(['autoform', 'tinytest', 'underscore']);
+  api.add_files('tests/utility-tests.js');
+  api.add_files('tests/autoform-tests.js');
 });

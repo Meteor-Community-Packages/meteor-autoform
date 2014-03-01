@@ -5,8 +5,13 @@
   "author": "Eric Dobbertin (http://dairystatedesigns.com)",
   "version": "0.4.17",
   "git": "https://github.com/aldeed/meteor-autoform.git",
+  "meteor": {
+    "git": "https://github.com/meteor/meteor.git",
+    "branch": "shark"
+  },
   "packages": {
     "simple-schema": {},
+    "collection2": {},
     "moment": {}
   }
 }
