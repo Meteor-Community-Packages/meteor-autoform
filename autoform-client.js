@@ -684,7 +684,7 @@ if (typeof Handlebars !== 'undefined') {
       _.each(self.findAll("select"), function(selectElement) {
         // first transfer the selected attribute to the selected property
         $(selectElement).find('option').each(function() {
-          $(this).prop('selected', $(this).attr('selected')); //transfer att to prop
+          $(this).prop('selected', $(this).attr('selected') !== undefined); //transfer att to prop
         });
         // then cache the selections
         setSelections(selectElement, formID);
