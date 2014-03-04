@@ -691,7 +691,6 @@ if (typeof Handlebars !== 'undefined') {
       });
       // selections will be updated whenever they change in the
       // onchange event handler, too
-      return;
     } else {
       // whenever we rerender, keep the correct selected values
       // by resetting them all from the cached values
@@ -1060,12 +1059,13 @@ var createInputHtml = function(name, autoform, defs, hash) {
     }
   } else {
     if (flatDoc && name in flatDoc) {
-      value = flatDoc[name] || "";
-      if (!(value instanceof Date)) { //we will convert dates to a string later, after we know what the field type will be
-        value = value.toString();
-      }
+      value = flatDoc[name];
     } else {
-      value = hash.value || "";
+      value = hash.value;
+    }
+    value = (value == null) ? "" : value;
+    if (!(value instanceof Date)) { //we will convert dates to a string later, after we know what the field type will be
+      value = value.toString();
     }
   }
 
@@ -1111,7 +1111,15 @@ var createInputHtml = function(name, autoform, defs, hash) {
   //adjust some variables for booleans
   var checked = "", checkedOpposite = "";
   if (type === "boolean") {
-    value = (value === "true") ? true : false;
+    if (value === "true") {
+      value = true;
+    } else if (value === "false") {
+      value = false;
+    } else if (typeof defs.defaultValue === "boolean") {
+      value = defs.defaultValue;
+    } else {
+      value = false;
+    }
     if (value) {
       checked = " checked";
     } else {
