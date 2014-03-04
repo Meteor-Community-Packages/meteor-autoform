@@ -274,7 +274,7 @@ Template.afFieldInput.inputInfo = function inputInfo() {
   if (!afContext || !afContext._af) {
     throw new Error("afFieldInput template must be used within an autoForm block");
   }
-  
+
   return getInputData(context.defs, atts, context.inputValue, context.inputType, context.inputLabel, context.expectsArray);
 };
 
@@ -288,7 +288,7 @@ Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
 
   var ss = afContext._af.ss;
   var defs = getDefs(ss, atts.name); //defs will not be undefined
-  
+
   // Get schema type
   var schemaType = defs.type;
   // Adjust for array fields if necessary
@@ -302,13 +302,13 @@ Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
     //we won't be expecting an array for the current value
     expectsArray = !atts.type;
   }
-  
+
   // Get input value
-  var value = getInputValue(atts.name, atts, afContext._af.mDoc, expectsArray, defs.type);
+  var value = getInputValue(atts.name, atts, afContext._af.mDoc, expectsArray, defs.type, defs.defaultValue);
 
   // Get type
   var type = getInputType(atts, defs, value);
-  
+
   // Cache some info for use by helpers
   _.extend(this, {
     defs: defs,
@@ -387,7 +387,7 @@ Handlebars.registerHelper("_afQuickField", function autoFormFieldLabel() {
   }
 
   var ss = afContext._af.ss;
-  
+
   var fields = _.filter(ss._schemaKeys, function autoFormFormFieldsSchemaEach(key) {
     if (key.indexOf(atts.name + ".") === 0) {
       return true;
@@ -481,10 +481,10 @@ function quickFieldFormFields(fieldList, autoform, ss) {
 
   var addedFields = [];
   function infoForField(field, extendedProps) {
-    
+
     if (_.contains(addedFields, field))
       return;
-    
+
     var fieldDefs = ss.schema(field);
 
     var info;
@@ -493,13 +493,13 @@ function quickFieldFormFields(fieldList, autoform, ss) {
         name: field,
         label: ss.label(field)
       };
-      
+
       var fields = _.filter(ss._schemaKeys, function autoFormFormFieldsSchemaEach(key) {
         if (key.indexOf(field + ".") === 0) {
           return true;
         }
       });
-      
+
       info.formFields = quickFieldFormFields(fields, autoform, ss);
       addedFields = addedFields.concat(fields);
     } else {
@@ -655,7 +655,7 @@ Template.autoForm.events({
         });
       }
     }
-    
+
     // Prep reset form function
     function autoFormDoResetForm() {
       if (!template._notInDOM) {
@@ -938,7 +938,7 @@ function formValues(template, transforms, ss) {
     // Handle all other inputs
     doc[name] = val;
   });
-  
+
   // Expand the object
   doc = expandObj(doc);
 
@@ -946,7 +946,7 @@ function formValues(template, transforms, ss) {
   _.each(transforms, function formValuesTransform(transform) {
     doc = transform(doc);
   });
-  
+
   // We return doc, insertDoc, and updateDoc.
   // For insertDoc, delete any properties that are null, undefined, or empty strings.
   // For updateDoc, convert to modifier object with $set and $unset.
@@ -1080,62 +1080,66 @@ function isValidNormalizedLocalDateAndTimeString(dtString) {
   return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart);
 }
 
-function getInputValue(name, hash, mDoc, expectsArray, schemaType) {
+function getInputValue(name, hash, mDoc, expectsArray, schemaType, defaultValue) {
   var value;
   if (typeof hash.value === "undefined") {
-    var docValue;
-    
     // Get the value for this key in the current document
     if (mDoc) {
       var valueInfo = mDoc.getInfoForKey(name);
       if (valueInfo) {
-        docValue = valueInfo.value;
-      }
-    }
-    
-    // If we're expecting value to be an array
-    if (expectsArray) {
-      value = [];
-      if (_.isArray(docValue)) {
-        if (schemaType === Date) {
-          _.each(docValue, function(v) {
-            value.push(dateToDateStringUTC(v));
-          });
-        } else {
-          _.each(docValue, function(v) {
-            value.push(v.toString());
-          });
-        }
+        value = valueInfo.value;
       }
     }
 
-    // If not array
-    else {
-      if (docValue) {
-        if (docValue instanceof Date) {
-          // We will convert dates to a string later, after we
-          // know what the field type will be
-          value = docValue;
-        } else {
-          // Convert everything else to a string now
-          value = docValue.toString();
-        }
-      } else {
-        value = "";
-      }
+    // Only if there is no current document, use the schema defaultValue
+    else if (defaultValue !== null && defaultValue !== undefined) {
+      value = defaultValue;
     }
   } else {
     value = hash.value;
-    if (expectsArray && _.isArray(value)) {
-      value = [value];
+  }
+
+  // Change null or undefined to an empty string
+  value = (value == null) ? '' : value;
+
+  // If we're expecting value to be an array
+  if (expectsArray) {
+    // If value is array, loop through and convert to strings
+    if (_.isArray(value)) {
+      if (schemaType === Date) {
+        value = _.map(value, function (v) {
+          return dateToDateStringUTC(v);
+        });
+      } else {
+        value = _.map(value, function (v) {
+          return v.toString();
+        });
+      }
+    }
+    // If value is not array, try to make it one
+    else {
+      if (typeof value === "string") {
+        value = value.split(',');
+      } else {
+        value = [value.toString()];
+      }
     }
   }
+  // If we're not expecting an array and it's not an instance of Date, convert to string
+  else if (!(value instanceof Date)) {
+    // We will convert dates to a string later, after we
+    // know what the field type will be.
+    // Convert everything else to a string now.
+    value = value.toString();
+  }
+
+  // We return either a string, an array of strings, or an instance of Date
   return value;
 }
 
 function getInputData(defs, hash, value, type, label, expectsArray) {
   var schemaType = defs.type;
-  
+
   var min = (typeof defs.min === "function") ? defs.min() : defs.min;
   var max = (typeof defs.max === "function") ? defs.max() : defs.max;
 
@@ -1182,10 +1186,10 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
 
   // Determine what options to use
   var data = {};
-  
+
   // Add name to every type of element
   data.name = hash.name;
-  
+
   // Clean hash so that we can add anything remaining as attributes
   hash = _.omit(hash,
           "name",
@@ -1200,12 +1204,12 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
           "falseLabel",
           "options",
           "offset");
-  
+
   // Add required to every type of element, if required
   if (typeof hash.required === "undefined" && !defs.optional) {
     hash.required = "";
   }
-  
+
   if (selectOptions) {
     // Build anything that should be a select, which is anything with options
     data.items = [];
@@ -1338,7 +1342,7 @@ function getInputType(hash, defs, value) {
   var schemaType = defs.type;
   var valHasLineBreaks = typeof value === "string" ? (value.indexOf("\n") !== -1) : false;
   var max = (typeof defs.max === "function") ? defs.max() : defs.max;
-  
+
   var type = "text";
   if (hash.type) {
     type = hash.type;
@@ -1358,7 +1362,7 @@ function getInputType(hash, defs, value) {
   return type;
 }
 
-function getInputTemplateType(hash, type, expectsArray) {  
+function getInputTemplateType(hash, type, expectsArray) {
   // Extract settings from hash
   var radio = hash.radio;
   var select = hash.select;
