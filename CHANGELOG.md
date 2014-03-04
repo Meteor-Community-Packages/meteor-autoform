@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.20
+
+Better implementation of `defaultValue` support
+
 ### 0.4.19
 
 * Use jQuery to fix issues related to maintaining selections in a cross-browser way. *(Thanks @mjgallag)*

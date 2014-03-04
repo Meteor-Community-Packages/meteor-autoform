@@ -173,6 +173,10 @@ if (typeof Handlebars !== 'undefined') {
     } else {
       flatDoc = {};
     }
+    
+    if (_.isEmpty(flatDoc)) {
+      flatDoc = null;
+    }
 
     var autoFormContext = {
       schema: schemaObj,
@@ -1003,7 +1007,9 @@ var createInputHtml = function(name, autoform, defs, hash) {
   //adjust expected type when type is overridden
   var schemaType = defs.type;
   var expectsArray = false;
+  var defaultValue = defs.defaultValue;
   if (schemaType === Array) {
+    defaultValue = defs.defaultValue;
     defs = autoform._ss.schema(name + ".$");
     schemaType = defs.type;
 
@@ -1013,61 +1019,8 @@ var createInputHtml = function(name, autoform, defs, hash) {
     expectsArray = !hash.type;
   }
 
-  var flatDoc = autoform._flatDoc;
-
   //get current value
-  var value, arrayVal;
-  if (expectsArray) {
-
-    // For arrays, we need the flatDoc value as an array
-    // rather than as separate array values, so we'll do
-    // that adjustment here.
-    // For example, if we have "numbers.0" = 1 and "numbers.1" = 2,
-    // we will create "numbers" = [1,2]
-    _.each(flatDoc, function(flatVal, flatKey) {
-      var l = name.length;
-      if (flatKey.slice(0, l + 1) === name + ".") {
-        var end = flatKey.slice(l + 1);
-        var intEnd = parseInt(end, 10);
-        if (!isNaN(intEnd)) {
-          flatDoc[name] = flatDoc[name] || [];
-          flatDoc[name][intEnd] = flatVal;
-        }
-      }
-    });
-
-    if (schemaType === Date) {
-      if (flatDoc && name in flatDoc) {
-        arrayVal = flatDoc[name] || [];
-        value = [];
-        _.each(arrayVal, function(v) {
-          value.push(dateToDateStringUTC(v));
-        });
-      } else {
-        value = hash.value || [];
-      }
-    } else {
-      if (flatDoc && name in flatDoc) {
-        arrayVal = flatDoc[name] || [];
-        value = [];
-        _.each(arrayVal, function(v) {
-          value.push(v.toString());
-        });
-      } else {
-        value = hash.value || [];
-      }
-    }
-  } else {
-    if (flatDoc && name in flatDoc) {
-      value = flatDoc[name];
-    } else {
-      value = hash.value;
-    }
-    value = (value == null) ? "" : value;
-    if (!(value instanceof Date)) { //we will convert dates to a string later, after we know what the field type will be
-      value = value.toString();
-    }
-  }
+  var value = getInputValue(name, hash, autoform._flatDoc, expectsArray, schemaType, defaultValue);
 
   var valHasLineBreaks = typeof value === "string" ? (value.indexOf("\n") !== -1) : false;
 
@@ -1111,15 +1064,7 @@ var createInputHtml = function(name, autoform, defs, hash) {
   //adjust some variables for booleans
   var checked = "", checkedOpposite = "";
   if (type === "boolean") {
-    if (value === "true") {
-      value = true;
-    } else if (value === "false") {
-      value = false;
-    } else if (typeof defs.defaultValue === "boolean") {
-      value = defs.defaultValue;
-    } else {
-      value = false;
-    }
+    value = (value === "true") ? true : false;
     if (value) {
       checked = " checked";
     } else {
@@ -1523,3 +1468,77 @@ var getDefs = function(ss, name) {
     throw new Error("Invalid field name: " + name);
   return defs;
 };
+
+function getInputValue(name, hash, flatDoc, expectsArray, schemaType, defaultValue) {
+  
+  if (expectsArray) {
+    // For arrays, we need the flatDoc value as an array
+    // rather than as separate array values, so we'll do
+    // that adjustment here.
+    // For example, if we have "numbers.0" = 1 and "numbers.1" = 2,
+    // we will create "numbers" = [1,2]
+    _.each(flatDoc, function(flatVal, flatKey) {
+      var l = name.length;
+      if (flatKey.slice(0, l + 1) === name + ".") {
+        var end = flatKey.slice(l + 1);
+        var intEnd = parseInt(end, 10);
+        if (!isNaN(intEnd)) {
+          flatDoc[name] = flatDoc[name] || [];
+          flatDoc[name][intEnd] = flatVal;
+        }
+      }
+    });
+  }
+  
+  var value;
+  if (typeof hash.value === "undefined") {
+    // Get the value for this key in the current document
+    if (flatDoc) {
+      value = flatDoc[name] || [];
+    }
+
+    // Only if there is no current document, use the schema defaultValue
+    else if (defaultValue !== null && defaultValue !== undefined) {
+      value = defaultValue;
+    }
+  } else {
+    value = hash.value;
+  }
+
+  // Change null or undefined to an empty string
+  value = (value == null) ? '' : value;
+
+  // If we're expecting value to be an array
+  if (expectsArray) {
+    // If value is array, loop through and convert to strings
+    if (_.isArray(value)) {
+      if (schemaType === Date) {
+        value = _.map(value, function (v) {
+          return dateToDateStringUTC(v);
+        });
+      } else {
+        value = _.map(value, function (v) {
+          return v.toString();
+        });
+      }
+    }
+    // If value is not array, try to make it one
+    else {
+      if (typeof value === "string") {
+        value = value.split(',');
+      } else {
+        value = [value.toString()];
+      }
+    }
+  }
+  // If we're not expecting an array and it's not an instance of Date, convert to string
+  else if (!(value instanceof Date)) {
+    // We will convert dates to a string later, after we
+    // know what the field type will be.
+    // Convert everything else to a string now.
+    value = value.toString();
+  }
+  
+  // We return either a string, an array of strings, or an instance of Date
+  return value;
+}
