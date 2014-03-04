@@ -6,6 +6,11 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.4.19
+
+* Use jQuery to fix issues related to maintaining selections in a cross-browser way. *(Thanks @mjgallag)*
+* Use schema `defaultValue` as default value for boolean controls.
+
 ### 0.4.18
 
 A couple more bug fixes related to cleaning objects.
