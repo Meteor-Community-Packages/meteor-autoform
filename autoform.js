@@ -293,6 +293,7 @@ Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
   var schemaType = defs.type;
   // Adjust for array fields if necessary
   var expectsArray = false;
+  var defaultValue = defs.defaultValue; //make sure to use pre-adjustment defaultValue for arrays
   if (schemaType === Array) {
     defs = ss.schema(atts.name + ".$");
     schemaType = defs.type;
@@ -304,7 +305,7 @@ Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
   }
 
   // Get input value
-  var value = getInputValue(atts.name, atts, afContext._af.mDoc, expectsArray, defs.type, defs.defaultValue);
+  var value = getInputValue(atts.name, atts, afContext._af.mDoc, expectsArray, defs.type, defaultValue);
 
   // Get type
   var type = getInputType(atts, defs, value);
