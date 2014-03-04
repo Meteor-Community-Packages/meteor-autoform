@@ -348,6 +348,7 @@ the object's schema has auto or default values so that they can be added.
 *common.js:*
 
 ```js
+Schema = {};
 Schema.contact = new SimpleSchema({
     name: {
         type: String,
@@ -366,6 +367,8 @@ Schema.contact = new SimpleSchema({
     }
 });
 ```
+
+Note that we've created an object `Schema` in which to store all of our app's schemas.
 
 *html:*
 
