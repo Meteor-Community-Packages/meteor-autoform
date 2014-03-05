@@ -274,6 +274,8 @@ Template.afFieldInput.inputInfo = function inputInfo() {
   if (!afContext || !afContext._af) {
     throw new Error("afFieldInput template must be used within an autoForm block");
   }
+  
+  if (!context.defs) return {}; // Can happen when recomputing as template is removed from DOM
 
   return getInputData(context.defs, atts, context.inputValue, context.inputType, context.inputLabel, context.expectsArray);
 };
