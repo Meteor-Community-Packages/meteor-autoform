@@ -179,7 +179,7 @@ Template.autoForm.innerContext = function autoFormTplInnerContext() {
     context.doc = retrievedDoc;
   }
 
-  var mDoc, flatDoc;
+  var mDoc;
   if (context.doc && !_.isEmpty(context.doc)) {
     // Clone doc
     var copy = _.clone(context.doc);
@@ -190,9 +190,6 @@ Template.autoForm.innerContext = function autoFormTplInnerContext() {
     // Create a "flat doc" that can be used to easily get values for corresponding
     // form fields.
     mDoc = new MongoObject(copy);
-    flatDoc = mDoc.getFlatObject();
-  } else {
-    flatDoc = {};
   }
 
   // Set up the context to be used for everything within the autoform
@@ -204,7 +201,6 @@ Template.autoForm.innerContext = function autoFormTplInnerContext() {
   innerContext._af.ss = ss;
   innerContext._af.doc = context.doc; //TODO is this used somewhere?
   innerContext._af.mDoc = mDoc;
-  innerContext._af.flatDoc = flatDoc;
   innerContext._af.validationType = context.validation || "submitThenKeyup";
   innerContext._af.submitType = context.type;
   innerContext._af.resetOnSuccess = context.resetOnSuccess;
