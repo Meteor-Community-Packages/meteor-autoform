@@ -1240,11 +1240,13 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
     data.cls = hash["class"] || "";
     hash = _.omit(hash, "class");
     data.atts = hash;
+    data.value = value;
   } else if (type === "contenteditable") {
     if (typeof hash['data-maxlength'] === "undefined" && typeof max === "number") {
       hash['data-maxlength'] = max;
     }
     data.atts = hash;
+    data.value = value;
   } else if (type === "boolean") {
     value = (value === "true") ? true : false;
     var items = [
