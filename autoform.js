@@ -8,7 +8,7 @@ AutoForm = {};
 /**
  * @param {Object} hooks
  * @returns {undefined}
- * 
+ *
  * Defines hooks by form id. Safe to be called multiple times for the same
  * form.
  */
@@ -67,7 +67,7 @@ function getHooks(formId, type, subtype) {
 /**
  * @param {String} formId
  * @returns {undefined}
- * 
+ *
  * Resets validation for an autoform.
  */
 AutoForm.resetForm = function autoFormResetForm(formId) {
@@ -143,6 +143,21 @@ AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(
   }
   deps.defaultTypeTemplates[type].depend();
   return defaultTypeTemplates[type];
+};
+
+AutoForm._normalizeContext = function autoFormNormalizeContext(context, name) {
+  context = context || {};
+  var atts = context.atts || {};
+  var afContext = atts.autoform || context.autoform;
+  if (!afContext || !afContext._af) {
+    throw new Error(name + " must be used within an autoForm block");
+  }
+
+  return {
+    afc: afContext,
+    af: afContext._af,
+    atts: atts
+  };
 };
 
 Template.autoForm.atts = function autoFormTplAtts() {
@@ -232,27 +247,14 @@ Template.quickForm.afContext = function autoFormContext() {
 };
 
 Template.afFieldLabel.label = function getLabel() {
-  var context = this || {};
-  var atts = context.atts || {};
-  var afContext = atts.autoform || context.autoform;
-  if (!afContext || !afContext._af) {
-    throw new Error("afFieldLabel helper must be used within an autoForm block");
-  }
-
-  var ss = afContext._af.ss;
-
-  return ss.label(atts.name);
+  var c = AutoForm._normalizeContext(this, "afFieldLabel");
+  return c.af.ss.label(c.atts.name);
 };
 
 Handlebars.registerHelper("_afFieldLabel", function autoFormFieldLabel(context) {
-  var context = this || {};
-  var atts = context.atts || {};
-  var afContext = atts.autoform || context.autoform;
-  if (!afContext || !afContext._af) {
-    throw new Error("afFieldLabel helper must be used within an autoForm block");
-  }
+  var c = AutoForm._normalizeContext(this, "afFieldLabel");
 
-  var template = atts.template || AutoForm.getDefaultTemplateForType("afFieldLabel") || AutoForm.getDefaultTemplate();
+  var template = c.atts.template || AutoForm.getDefaultTemplateForType("afFieldLabel") || AutoForm.getDefaultTemplate();
 
   // Return the template instance that we want to use, which will be
   // built with the same 'this' value
@@ -263,29 +265,11 @@ Handlebars.registerHelper("_afFieldLabel", function autoFormFieldLabel(context) 
   return result;
 });
 
-Template.afFieldInput.inputInfo = function inputInfo() {
-  var context = this || {};
-  var atts = context.atts || {};
-  var afContext = atts.autoform || context.autoform;
-  if (!afContext || !afContext._af) {
-    throw new Error("afFieldInput template must be used within an autoForm block");
-  }
-  
-  if (!context.defs) return {}; // Can happen when recomputing as template is removed from DOM
-
-  return getInputData(context.defs, atts, context.inputValue, context.inputType, context.inputLabel, context.expectsArray);
-};
-
 Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
-  var context = this || {};
-  var atts = context.atts || {};
-  var afContext = atts.autoform || context.autoform;
-  if (!afContext || !afContext._af) {
-    throw new Error("afFieldInput template must be used within an autoForm block");
-  }
+  var c = AutoForm._normalizeContext(this, "afFieldInput");
 
-  var ss = afContext._af.ss;
-  var defs = getDefs(ss, atts.name); //defs will not be undefined
+  var ss = c.af.ss;
+  var defs = getDefs(ss, c.atts.name); //defs will not be undefined
 
   // Get schema type
   var schemaType = defs.type;
@@ -293,33 +277,29 @@ Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
   var expectsArray = false;
   var defaultValue = defs.defaultValue; //make sure to use pre-adjustment defaultValue for arrays
   if (schemaType === Array) {
-    defs = ss.schema(atts.name + ".$");
+    defs = ss.schema(c.atts.name + ".$");
     schemaType = defs.type;
 
     //if the user overrides the type to anything,
     //then we won't be using a select box and
     //we won't be expecting an array for the current value
-    expectsArray = !atts.type;
+    expectsArray = !c.atts.type;
   }
 
   // Get input value
-  var value = getInputValue(atts.name, atts, afContext._af.mDoc, expectsArray, defs.type, defaultValue);
+  var value = getInputValue(c.atts.name, c.atts, c.af.mDoc, expectsArray, defs.type, defaultValue);
 
   // Get type
-  var type = getInputType(atts, defs, value);
+  var type = getInputType(c.atts, defs, value);
 
   // Cache some info for use by helpers
   _.extend(this, {
-    defs: defs,
-    expectsArray: expectsArray,
-    inputValue: value,
-    inputType: type,
-    inputLabel: ss.label(atts.name)
+    inputInfo: getInputData(defs, c.atts, value, type, ss.label(c.atts.name), expectsArray)
   });
 
   // Construct template name
-  var templateType = getInputTemplateType(atts, type, expectsArray);
-  var template = atts.template || AutoForm.getDefaultTemplateForType(templateType) || AutoForm.getDefaultTemplate();
+  var templateType = getInputTemplateType(c.atts, type, expectsArray);
+  var template = c.atts.template || AutoForm.getDefaultTemplateForType(templateType) || AutoForm.getDefaultTemplate();
 
   // Return the template instance that we want to use, which will be
   // built with the same 'this' value
@@ -378,35 +358,30 @@ function quickFieldInputAtts(context, autoform) {
 }
 
 Handlebars.registerHelper("_afQuickField", function autoFormFieldLabel() {
-  var context = this || {};
-  var atts = context.atts || {};
-  var afContext = (atts.autoform || context.autoform);
-  if (!afContext || !afContext._af) {
-    throw new Error("afQuickField helper must be used within an autoForm block");
-  }
+  var c = AutoForm._normalizeContext(this, "afQuickField");
 
-  var ss = afContext._af.ss;
+  var ss = c.af.ss;
 
   var fields = _.filter(ss._schemaKeys, function autoFormFormFieldsSchemaEach(key) {
-    if (key.indexOf(atts.name + ".") === 0) {
+    if (key.indexOf(c.atts.name + ".") === 0) {
       return true;
     }
   });
 
-  formFields = quickFieldFormFields(fields, afContext, ss);
+  formFields = quickFieldFormFields(fields, c.afc, ss);
 
-  var defs = getDefs(ss, atts.name); //defs will not be undefined
+  var defs = getDefs(ss, c.atts.name); //defs will not be undefined
   _.extend(this, {
-    skipLabel: (atts.label === false || (defs.type === Boolean && !("select" in atts) && !("radio" in atts))),
-    labelAtts: quickFieldLabelAtts(atts, afContext),
-    inputAtts: quickFieldInputAtts(atts, afContext),
+    skipLabel: (c.atts.label === false || (defs.type === Boolean && !("select" in c.atts) && !("radio" in c.atts))),
+    labelAtts: quickFieldLabelAtts(c.atts, c.afc),
+    inputAtts: quickFieldInputAtts(c.atts, c.afc),
     isGroup: !!(formFields && formFields.length),
     formFields: formFields
   });
 
   // Return the template instance that we want to use, which will be
   // built with the same 'this' value
-  var template = atts.template || AutoForm.getDefaultTemplateForType("afQuickField") || AutoForm.getDefaultTemplate();
+  var template = c.atts.template || AutoForm.getDefaultTemplateForType("afQuickField") || AutoForm.getDefaultTemplate();
   var result = Template['afQuickField_' + template];
   if (!result) {
     throw new Error("afQuickField: \"" + template + "\" is not a valid template name");
