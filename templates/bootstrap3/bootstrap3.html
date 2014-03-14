@@ -87,8 +87,8 @@
 </template>
 
 <template name="afDeleteButton_bootstrap3">
-  {{#autoForm collection=atts.collection type="remove" doc=atts.doc}}
-  <button type="submit" class="btn btn-danger">{{#with content}}this{{else}}Delete{{/with}}</button>
+  {{#autoForm collection=collection type="remove" doc=doc}}
+  <button type="submit" class="btn btn-danger">{{#if UI.contentBlock}}{{> UI.contentBlock}}{{else}}Delete{{/if}}</button>
   {{/autoForm}}
 </template>
 

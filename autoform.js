@@ -310,7 +310,7 @@ Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
   return result;
 });
 
-Handlebars.registerHelper("afDeleteButton", function autoFormFieldLabel(context) {
+Handlebars.registerHelper("afDeleteButton", function autoFormDeleteButton() {
   var atts = this;
   var template = atts.template || AutoForm.getDefaultTemplateForType("afDeleteButton") || AutoForm.getDefaultTemplate();
 
