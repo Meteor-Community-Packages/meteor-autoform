@@ -716,12 +716,12 @@ Template.autoForm.events({
     }
 
     // Perform validation for onSubmit call or for normal form submission
-    if ((onSubmit || isNormalSubmit) && !isValid(insertDocForValidation, false, 'pre-submit validation')) {
+    if (((onSubmit.length > 0) || isNormalSubmit) && !isValid(insertDocForValidation, false, 'pre-submit validation')) {
       return haltSubmission();
     }
 
     // Call onSubmit
-    if (onSubmit) {
+    if (onSubmit.length > 0) {
       var context = {
         event: event,
         template: template,
