@@ -520,11 +520,16 @@ Template.autoForm.destroyed = function autoFormDestroyed() {
 };
 
 Handlebars.registerHelper("afFieldMessage", function autoFormFieldMessage(options) {
+  //help users transition from positional name arg
+  if (typeof options === "string") {
+    throw new Error('Use the new syntax {{afFieldMessage name="name"}} rather than {{afFieldMessage "name"}}');
+  }
+
   var hash = (options || {}).hash || {};
   var afContext = hash.autoform && hash.autoform._af || this && this._af;
   var ss = afContext.ss;
   if (!ss) {
-    throw new Error("afQuickField helper must be used within an autoForm block");
+    throw new Error("afFieldMessage helper must be used within an autoForm block");
   }
 
   getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
@@ -532,11 +537,16 @@ Handlebars.registerHelper("afFieldMessage", function autoFormFieldMessage(option
 });
 
 Handlebars.registerHelper("afFieldIsInvalid", function autoFormFieldIsInvalid(options) {
+  //help users transition from positional name arg
+  if (typeof options === "string") {
+    throw new Error('Use the new syntax {{#if afFieldIsInvalid name="name"}} rather than {{#if afFieldIsInvalid "name"}}');
+  }
+
   var hash = (options || {}).hash || {};
   var afContext = hash.autoform && hash.autoform._af || this && this._af;
   var ss = afContext.ss;
   if (!ss) {
-    throw new Error("afQuickField helper must be used within an autoForm block");
+    throw new Error("afFieldIsInvalid helper must be used within an autoForm block");
   }
 
   getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
