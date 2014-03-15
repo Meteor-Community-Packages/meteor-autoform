@@ -1,67 +1,111 @@
 var defaultFormId = "_afGenericID";
 var formPreserve = new FormPreserve("autoforms");
 var formHooks = {};
+var globalFormHooks = {
+  before: {},
+  after: {},
+  formToDoc: [],
+  docToForm: [],
+  onSubmit: [],
+  onSuccess: [],
+  onError: []
+};
 var formSchemas = {}; //keep a reference to simplify resetting validation
 
 AutoForm = {};
 
+function addHooksToList(hooksList, hooks) {
+  // Add before hooks
+  hooks.before && _.each(hooks.before, function autoFormBeforeHooksEach(func, type) {
+    if (typeof func !== "function") {
+      throw new Error("AutoForm before hook must be a function, not " + typeof func);
+    }
+    hooksList.before[type] = hooksList.before[type] || [];
+    hooksList.before[type].push(func);
+  });
+
+  // Add after hooks
+  hooks.after && _.each(hooks.after, function autoFormAfterHooksEach(func, type) {
+    if (typeof func !== "function") {
+      throw new Error("AutoForm after hook must be a function, not " + typeof func);
+    }
+    hooksList.after[type] = hooksList.after[type] || [];
+    hooksList.after[type].push(func);
+  });
+
+  // Add all other hooks
+  _.each(['formToDoc', 'docToForm', 'onSubmit', 'onSuccess', 'onError'], function autoFormHooksEach(name) {
+    if (hooks[name]) {
+      if (typeof hooks[name] !== "function") {
+        throw new Error("AutoForm " + name + " hook must be a function, not " + typeof hooks[name]);
+      }
+      hooksList[name].push(hooks[name]);
+    }
+  });
+}
+
 /**
+ * @method AutoForm.addHooks
+ * @public
+ * @param {String[]|String|null} formIds Form `id` or array of form IDs to which these hooks apply. Specify `null` to add hooks that will run for every form.
+ * @param {Object} hooks Hooks to add, where supported names are "before", "after", "formToDoc", "docToForm", "onSubmit", "onSuccess", and "onError".
+ * @returns {undefined}
+ *
+ * Defines hooks to be used by one or more forms. Extends hooks lists if called multiple times for the same
+ * form.
+ */
+AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) {
+  if (typeof formIds === "string") {
+    formIds = [formIds];
+  }
+
+  // If formIds is null, add global hooks
+  if (!formIds) {
+    addHooksToList(globalFormHooks, hooks);
+  } else {
+    _.each(formIds, function (formId) {
+
+      // Init the hooks object if not done yet
+      formHooks[formId] = formHooks[formId] || {
+        before: {},
+        after: {},
+        formToDoc: [],
+        docToForm: [],
+        onSubmit: [],
+        onSuccess: [],
+        onError: []
+      };
+
+      addHooksToList(formHooks[formId], hooks);
+    });
+  }
+};
+
+/**
+ * @method AutoForm.hooks
+ * @public
  * @param {Object} hooks
  * @returns {undefined}
  *
- * Defines hooks by form id. Safe to be called multiple times for the same
+ * Defines hooks by form id. Extends hooks lists if called multiple times for the same
  * form.
  */
 AutoForm.hooks = function autoFormHooks(hooks) {
   _.each(hooks, function(hooksObj, formId) {
-
-    // Init the hooks object for this formId if not done yet
-    formHooks[formId] = formHooks[formId] || {
-      before: {},
-      after: {},
-      formToDoc: [],
-      docToForm: [],
-      onSubmit: [],
-      onSuccess: [],
-      onError: []
-    };
-
-    // Add before hooks
-    hooksObj.before && _.each(hooksObj.before, function autoFormBeforeHooksEach(func, type) {
-      if (typeof func !== "function") {
-        throw new Error("AutoForm before hook must be a function, not " + typeof func);
-      }
-      formHooks[formId].before[type] = formHooks[formId].before[type] || [];
-      formHooks[formId].before[type].push(func);
-    });
-
-    // Add after hooks
-    hooksObj.after && _.each(hooksObj.after, function autoFormAfterHooksEach(func, type) {
-      if (typeof func !== "function") {
-        throw new Error("AutoForm after hook must be a function, not " + typeof func);
-      }
-      formHooks[formId].after[type] = formHooks[formId].after[type] || [];
-      formHooks[formId].after[type].push(func);
-    });
-
-    // Add all other hooks
-    _.each(['formToDoc', 'docToForm', 'onSubmit', 'onSuccess', 'onError'], function autoFormHooksEach(name) {
-      if (hooksObj[name]) {
-        if (typeof hooksObj[name] !== "function") {
-          throw new Error("AutoForm " + name + " hook must be a function, not " + typeof hooksObj[name]);
-        }
-        formHooks[formId][name].push(hooksObj[name]);
-      }
-    });
+    AutoForm.addHooks(formId, hooksObj);
   });
 };
 
 function getHooks(formId, type, subtype) {
+  var f, g;
   if (subtype) {
-    return formHooks[formId] && formHooks[formId][type] && formHooks[formId][type][subtype] || [];
+    f = formHooks[formId] && formHooks[formId][type] && formHooks[formId][type][subtype] || [];
+    g = globalFormHooks[type] && globalFormHooks[type][subtype] || [];
   } else {
-    return formHooks[formId] && formHooks[formId][type] || [];
+    f = formHooks[formId] && formHooks[formId][type] || [];
+    g = globalFormHooks[type] || [];
   }
+  return f.concat(g);
 }
 
 /**

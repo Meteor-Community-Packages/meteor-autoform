@@ -18,8 +18,8 @@ If you've been using AutoForm and are now switching to the Blaze rendering engin
 * When specifying the field name for any component or helper, add `name=`. For example, `{{afFieldMessage name="name"}}` rather than `{{afFieldMessage "name"}}`.
 * Instead of using a submit button class to determine form behavior, use a `type` attribute on the `autoForm` component.
 * Instead of using a submit button `data-meteor-method` attribute to identify the method name, use a `meteormethod` attribute on the `autoForm` or `quickForm` component.
-* There is no `AutoForm` object. [How to add hooks.](#callbackshooks) There is also now support for multiple hooks of the same type per form. (Adding hooks multiple times will extend the list of hooks rather than overwriting the previous hook.)
-* Again, there is no `AutoForm` object. The `autoForm` component can take a `schema` attribute that supplies a `SimpleSchema` instance or a `collection` attribute that supplies a `Meteor.Collection` instance with an attached schema. You can also specify both attributes, in which case form generation and validation will be based on the schema, but insert/update (and final validation) will happen on the collection. In this way, you can use slightly different validation logic or add additional constraints to a form that are not actual constraints on the collection's schema.
+* There is no `AutoForm` instance. [How to add hooks.](#callbackshooks) There is also now support for global hooks and multiple hooks of the same type per form. (Adding hooks multiple times will extend the list of hooks rather than overwriting the previous hook.)
+* Again, there is no `AutoForm` instance. The `autoForm` component can take a `schema` attribute that supplies a `SimpleSchema` instance or a `collection` attribute that supplies a `Meteor.Collection` instance with an attached schema. You can also specify both attributes, in which case form generation and validation will be based on the schema, but insert/update (and final validation) will happen on the collection. In this way, you can use slightly different validation logic or add additional constraints to a form that are not actual constraints on the collection's schema.
 * Read about [choosing and customizing templates](#templates).
 * You may find the new [Common Questions](#common-questions) section helpful. 
 
@@ -559,7 +559,8 @@ use "before" hooks or a `formToDoc` hook to do this.
 ## Callbacks/Hooks
 
 To add client-side hooks and callbacks for a form, use the `AutoForm.hooks`
-method. Here's an example that shows all the supported hooks:
+or `AutoForm.addHooks` method. Here's an example of `AutoForm.hooks` that shows
+all the supported hooks:
 
 ```js
 AutoForm.hooks({
@@ -591,12 +592,49 @@ AutoForm.hooks({
 });
 ```
 
+If you want to add the same hook for multiple forms or for all forms, use the
+`AutoForm.addHooks` method instead:
+
+```js
+  AutoForm.addHooks(['form1', 'form2', 'form3', 'form4'], {
+    after: {
+      insert: function(error, result) {
+        if (error) {
+          console.log("Insert Error:", error);
+        } else {
+          console.log("Insert Result:", result);
+        }
+      },
+      update: function(error) {
+        if (error) {
+          console.log("Update Error:", error);
+        } else {
+          console.log("Updated!");
+        }
+      },
+      remove: function(error) {
+        console.log("Remove Error:", error);
+      }
+    }
+  });
+
+  AutoForm.addHooks(null, {
+    onSubmit: function () {
+      console.log("onSubmit ALL FORMS!");
+    }
+  });
+```
+
 Notes:
 
-* It's safe to call this method multiple times and even to call it for the same
+* It's safe to call the hooks methods multiple times and even to call them for the same
 form multiple times. The list of hooks is extended each time you call it, which
 means that multiple hooks of the same type can run for the same form. Hooks
-will run in the order in which they are added (through calls to `AutoForm.hooks`).
+will run in the order in which they are added, but all form-specific hooks run
+before all global hooks.
+* Passing `null` as the first argument of `AutoForm.addHooks` adds global hooks, that is,
+hooks that run for every form that has been created and every form that ever will be created
+in the app.
 * The before hooks are called just before the insert, update, remove, or method
 call. The `insert`, `update`, and `"methodName"` functions are passed the document or
 modifier as gathered from the form fields. They must return this same object,
@@ -1009,7 +1047,52 @@ keyword, then you can use this trick to avoid writing helpers.
 If you don't use quotation marks, then you must define a helper function with
 that name and have it return the SimpleSchema or Meteor.Collection instance.
 
-TODO add example of using a `Schemas` object and registering that as a helper.
+Probably the best technique for organizing your form schemas and making them
+available as helpers is to add all SimpleSchema instances to a `Schemas` object
+and register that object as a helper:
+
+*common.js:*
+
+```js
+var Schemas = {};
+
+Schemas.ContactForm = new SimpleSchema({
+  name: {
+    type: String,
+    label: "Your name",
+    max: 50
+  },
+  email: {
+    type: String,
+    regEx: SimpleSchema.RegEx.Email,
+    label: "E-mail address"
+  },
+  message: {
+    type: String,
+    label: "Message",
+    max: 1000
+  }
+});
+
+//... define all schemas
+
+```
+
+*client.js:*
+
+```js
+Handlebars.registerHelper("Schemas", Schemas);
+```
+
+*html:*
+
+```html
+<template name="contactForm">
+  {{#autoForm schema=Schemas.ContactForm id="contactForm" type="method" meteormethod="sendEmail"}}
+  <!-- etc. -->
+  {{/autoForm}}
+</template>
+```
 
 ### Which components should I use?
 
