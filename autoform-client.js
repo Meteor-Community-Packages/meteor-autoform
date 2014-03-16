@@ -466,7 +466,7 @@ if (typeof Handlebars !== 'undefined') {
 
   Template._autoForm.events({
     'submit form': function(event, template) {
-      var submitButton = template.find("button[type=submit]");
+      var submitButton = template.find("button[type=submit]") || template.find("input[type=submit]");
       if (!submitButton) {
         return;
       }
@@ -1341,7 +1341,7 @@ var _validateField = function(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   var form = formValues(template, afObj._hooks.formToDoc || afObj.formToDoc, ss);
 
   // Determine whether we're validating for an insert or an update
-  var isUpdate = !!template.find("button.update");
+  var isUpdate = (!!template.find("button.update") || !!template.find("input[type=submit].update"));
 
   // Skip validation if skipEmpty is true and the field we're validating
   // has no value.
