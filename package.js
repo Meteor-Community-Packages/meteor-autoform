@@ -14,7 +14,7 @@ Package.on_use(function(api) {
     api.export('AutoForm', 'client');
     api.export('Utility', 'client', {testOnly: true});
   }
-  
+
   api.add_files([
     // bootstrap3 Template
     'templates/bootstrap3/bootstrap3.html',
@@ -32,6 +32,7 @@ Package.on_use(function(api) {
     'autoform.html',
     'utility.js',
     'form-preserve.js',
+    'hooks.js',
     'autoform.js'
   ], 'client');
 });

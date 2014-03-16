@@ -1,48 +1,8 @@
 var defaultFormId = "_afGenericID";
 var formPreserve = new FormPreserve("autoforms");
-var formHooks = {};
-var globalFormHooks = {
-  before: {},
-  after: {},
-  formToDoc: [],
-  docToForm: [],
-  onSubmit: [],
-  onSuccess: [],
-  onError: []
-};
 var formSchemas = {}; //keep a reference to simplify resetting validation
 
 AutoForm = {};
-
-function addHooksToList(hooksList, hooks) {
-  // Add before hooks
-  hooks.before && _.each(hooks.before, function autoFormBeforeHooksEach(func, type) {
-    if (typeof func !== "function") {
-      throw new Error("AutoForm before hook must be a function, not " + typeof func);
-    }
-    hooksList.before[type] = hooksList.before[type] || [];
-    hooksList.before[type].push(func);
-  });
-
-  // Add after hooks
-  hooks.after && _.each(hooks.after, function autoFormAfterHooksEach(func, type) {
-    if (typeof func !== "function") {
-      throw new Error("AutoForm after hook must be a function, not " + typeof func);
-    }
-    hooksList.after[type] = hooksList.after[type] || [];
-    hooksList.after[type].push(func);
-  });
-
-  // Add all other hooks
-  _.each(['formToDoc', 'docToForm', 'onSubmit', 'onSuccess', 'onError'], function autoFormHooksEach(name) {
-    if (hooks[name]) {
-      if (typeof hooks[name] !== "function") {
-        throw new Error("AutoForm " + name + " hook must be a function, not " + typeof hooks[name]);
-      }
-      hooksList[name].push(hooks[name]);
-    }
-  });
-}
 
 /**
  * @method AutoForm.addHooks
@@ -61,12 +21,12 @@ AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) {
 
   // If formIds is null, add global hooks
   if (!formIds) {
-    addHooksToList(globalFormHooks, hooks);
+    Hooks.addHooksToList(Hooks.global, hooks);
   } else {
     _.each(formIds, function (formId) {
 
       // Init the hooks object if not done yet
-      formHooks[formId] = formHooks[formId] || {
+      Hooks.form[formId] = Hooks.form[formId] || {
         before: {},
         after: {},
         formToDoc: [],
@@ -76,7 +36,7 @@ AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) {
         onError: []
       };
 
-      addHooksToList(formHooks[formId], hooks);
+      Hooks.addHooksToList(Hooks.form[formId], hooks);
     });
   }
 };
@@ -96,19 +56,9 @@ AutoForm.hooks = function autoFormHooks(hooks) {
   });
 };
 
-function getHooks(formId, type, subtype) {
-  var f, g;
-  if (subtype) {
-    f = formHooks[formId] && formHooks[formId][type] && formHooks[formId][type][subtype] || [];
-    g = globalFormHooks[type] && globalFormHooks[type][subtype] || [];
-  } else {
-    f = formHooks[formId] && formHooks[formId][type] || [];
-    g = globalFormHooks[type] || [];
-  }
-  return f.concat(g);
-}
-
 /**
+ * @method AutoForm.resetForm
+ * @public
  * @param {String} formId
  * @returns {undefined}
  *
@@ -245,7 +195,7 @@ Template.autoForm.innerContext = function autoFormTplInnerContext() {
     // Clone doc
     var copy = _.clone(context.doc);
     // Pass doc through docToForm hooks
-    _.each(getHooks(formId, 'docToForm'), function autoFormEachDocToForm(func) {
+    _.each(Hooks.getHooks(formId, 'docToForm'), function autoFormEachDocToForm(func) {
       copy = func(copy);
     });
     // Create a "flat doc" that can be used to easily get values for corresponding
@@ -686,17 +636,17 @@ Template.autoForm.events({
     }
 
     // Gather hooks
-    var beforeInsert = getHooks(formId, 'before', 'insert');
-    var beforeUpdate = getHooks(formId, 'before', 'update');
-    var beforeRemove = getHooks(formId, 'before', 'remove');
-    var beforeMethod = method && getHooks(formId, 'before', method);
-    var afterInsert = getHooks(formId, 'after', 'insert');
-    var afterUpdate = getHooks(formId, 'after', 'update');
-    var afterRemove = getHooks(formId, 'after', 'remove');
-    var afterMethod = method && getHooks(formId, 'after', method);
-    var onSuccess = getHooks(formId, 'onSuccess');
-    var onError = getHooks(formId, 'onError');
-    var onSubmit = getHooks(formId, 'onSubmit');
+    var beforeInsert = Hooks.getHooks(formId, 'before', 'insert');
+    var beforeUpdate = Hooks.getHooks(formId, 'before', 'update');
+    var beforeRemove = Hooks.getHooks(formId, 'before', 'remove');
+    var beforeMethod = method && Hooks.getHooks(formId, 'before', method);
+    var afterInsert = Hooks.getHooks(formId, 'after', 'insert');
+    var afterUpdate = Hooks.getHooks(formId, 'after', 'update');
+    var afterRemove = Hooks.getHooks(formId, 'after', 'remove');
+    var afterMethod = method && Hooks.getHooks(formId, 'after', method);
+    var onSuccess = Hooks.getHooks(formId, 'onSuccess');
+    var onError = Hooks.getHooks(formId, 'onError');
+    var onSubmit = Hooks.getHooks(formId, 'onSubmit');
 
     // Prevent browser form submission if we're planning to do our own thing
     if (!isNormalSubmit) {
@@ -774,7 +724,7 @@ Template.autoForm.events({
     }
 
     // Gather all form values
-    var form = formValues(template, getHooks(formId, 'formToDoc'), ss);
+    var form = formValues(template, Hooks.getHooks(formId, 'formToDoc'), ss);
 
     // Execute some before hooks
     var insertDoc = isInsert ? doBefore(null, form.insertDoc, beforeInsert, 'before.insert hook') : form.insertDoc;
@@ -888,7 +838,7 @@ Template.autoForm.events({
       var formId = afContext.formId;
       var ss = afContext.ss;
       formId && ss && formPreserve.registerForm(formId, function autoFormRegFormCallback() {
-        return formValues(template, getHooks(formId, 'formToDoc'), ss).insertDoc;
+        return formValues(template, Hooks.getHooks(formId, 'formToDoc'), ss).insertDoc;
       });
     }
     var validationType = template.data.validation || 'submitThenKeyup';
@@ -1491,7 +1441,7 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   }
 
   // Create a document based on all the values of all the inputs on the form
-  var form = formValues(template, getHooks(formId, 'formToDoc'), ss);
+  var form = formValues(template, Hooks.getHooks(formId, 'formToDoc'), ss);
 
   // Clean and validate doc
   if (context.type === "update") {
