@@ -63,6 +63,14 @@
   {{/with}}
 </template>
 
+<template name="afFieldSelect_plain">
+  {{#with inputInfo}}
+  <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" {{atts}}>
+    {{> ../contentBlock}}
+  </select>
+  {{/with}}
+</template>
+
 <template name="afSelect_plain">
   {{#with inputInfo}}
   <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" {{atts}}>

@@ -20,6 +20,7 @@ If you've been using AutoForm and are now switching to the Blaze rendering engin
 * Instead of using a submit button `data-meteor-method` attribute to identify the method name, use a `meteormethod` attribute on the `autoForm` or `quickForm` component.
 * There is no `AutoForm` instance. [How to add hooks.](#callbackshooks) There is also now support for global hooks and multiple hooks of the same type per form. (Adding hooks multiple times will extend the list of hooks rather than overwriting the previous hook.)
 * Again, there is no `AutoForm` instance. The `autoForm` component can take a `schema` attribute that supplies a `SimpleSchema` instance or a `collection` attribute that supplies a `Meteor.Collection` instance with an attached schema. You can also specify both attributes, in which case form generation and validation will be based on the schema, but insert/update (and final validation) will happen on the collection. In this way, you can use slightly different validation logic or add additional constraints to a form that are not actual constraints on the collection's schema.
+* New `afFieldSelect` block component that supports optgroups. [Read about it.](#affieldselect)
 * Read about [choosing and customizing templates](#templates).
 * You may find the new [Common Questions](#common-questions) section helpful. 
 
