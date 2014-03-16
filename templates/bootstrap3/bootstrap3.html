@@ -61,6 +61,14 @@
   {{> afContenteditable_plain}}
 </template>
 
+<template name="afFieldSelect_bootstrap3">
+  {{#with inputInfo}}
+  <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" {{atts}}>
+    {{> ../contentBlock}}
+  </select>
+  {{/with}}
+</template>
+
 <template name="afSelect_bootstrap3">
   {{#with inputInfo}}
   <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" {{atts}}>

@@ -167,6 +167,7 @@ specific templates and helpers:
 * afFieldIsInvalid
 * afFieldLabel
 * afFieldInput
+* afFieldSelect
 * afFieldMessage
 
 Here's an example:
@@ -338,6 +339,35 @@ Handlebars.registerHelper("yearOptions", function() {
     ];
 });
 ```
+
+As an alternative to passing options, or if you need optgroups, you can use an `afFieldSelect`
+block helper. Refer to the next section.
+
+### afFieldSelect
+
+Renders a `select` element with the given block content. This is basically the same as
+using `afFieldInput` with `options` attribute, except that you can define your select options
+in the HTML and optgroups are supported.
+
+```html
+{{#afFieldSelect name="year"}}
+  <optgroup label="Fun Years">
+    <option value="2013">2013</option>
+    <option value="2012">2012</option>
+  </optgroup>
+  <optgroup label="Boring Years">
+    <option value="2011">2011</option>
+    <option value="2010">2010</option>
+  </optgroup>
+{{/afFieldSelect}}
+```
+
+The following attributes are recognized:
+
+* `name`: Required. The name of the schema key this field is for.
+* `template` (default="bootstrap3"): Specify the name of a different built-in or
+custom template to use.
+* `autoform`: Optional. Refer to "Using Block Helpers Within an AutoForm".
 
 ### afFieldLabel
 
@@ -987,6 +1017,7 @@ Here's the list of possible types you can use for the first argument of
 * afDeleteButton
 * afQuickField
 * afFieldLabel
+* afFieldSelect
 * afCheckbox
 * afCheckboxGroup
 * afRadio

@@ -145,6 +145,7 @@ AutoForm.getDefaultTemplate = function autoFormGetDefaultTemplate() {
 var defaultTypeTemplates = {
   quickForm: null,
   afFieldLabel: null,
+  afFieldSelect: null,
   afCheckboxGroup: null,
   afRadioGroup: null,
   afSelect: null,
@@ -159,6 +160,7 @@ var defaultTypeTemplates = {
 deps.defaultTypeTemplates = {
   quickForm: new Deps.Dependency,
   afFieldLabel: new Deps.Dependency,
+  afFieldSelect: new Deps.Dependency,
   afCheckboxGroup: new Deps.Dependency,
   afRadioGroup: new Deps.Dependency,
   afSelect: new Deps.Dependency,
@@ -295,7 +297,7 @@ Template.afFieldLabel.label = function getLabel() {
   return c.af.ss.label(c.atts.name);
 };
 
-Handlebars.registerHelper("_afFieldLabel", function autoFormFieldLabel(context) {
+Handlebars.registerHelper("_afFieldLabel", function autoFormFieldLabel() {
   var c = AutoForm._normalizeContext(this, "afFieldLabel");
 
   var template = c.atts.template || AutoForm.getDefaultTemplateForType("afFieldLabel") || AutoForm.getDefaultTemplate();
@@ -305,6 +307,45 @@ Handlebars.registerHelper("_afFieldLabel", function autoFormFieldLabel(context) 
   var result = Template['afFieldLabel_' + template];
   if (!result) {
     throw new Error("afFieldLabel: \"" + template + "\" is not a valid template name");
+  }
+  return result;
+});
+
+Handlebars.registerHelper("_afFieldSelect", function autoFormFieldLabel() {
+  var c = AutoForm._normalizeContext(this, "afFieldSelect");
+
+  var ss = c.af.ss;
+  var defs = getDefs(ss, c.atts.name); //defs will not be undefined
+
+  // Get schema type
+  var schemaType = defs.type;
+  // Adjust for array fields if necessary
+  var expectsArray = false;
+  var defaultValue = defs.defaultValue; //make sure to use pre-adjustment defaultValue for arrays
+  if (schemaType === Array) {
+    defs = ss.schema(c.atts.name + ".$");
+    schemaType = defs.type;
+    expectsArray = true;
+  }
+
+  // Get input value
+  var value = getInputValue(c.atts.name, c.atts.value, c.af.mDoc, expectsArray, defaultValue);
+
+  // Add empty options to the hash, which will trigger the correct input data for a select
+  var hash = _.extend({}, c.atts, {options: []});
+
+  // Cache some info for use by helpers
+  _.extend(this, {
+    inputInfo: getInputData(defs, hash, value, "select", ss.label(c.atts.name), expectsArray)
+  });
+
+  var template = c.atts.template || AutoForm.getDefaultTemplateForType("afFieldSelect") || AutoForm.getDefaultTemplate();
+
+  // Return the template instance that we want to use, which will be
+  // built with the same 'this' value
+  var result = Template['afFieldSelect_' + template];
+  if (!result) {
+    throw new Error("afFieldSelect: \"" + template + "\" is not a valid template name");
   }
   return result;
 });
@@ -331,7 +372,7 @@ Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
   }
 
   // Get input value
-  var value = getInputValue(c.atts.name, c.atts, c.af.mDoc, expectsArray, defs.type, defaultValue);
+  var value = getInputValue(c.atts.name, c.atts.value, c.af.mDoc, expectsArray, defaultValue);
 
   // Get type
   var type = getInputType(c.atts, defs, value);
@@ -1108,9 +1149,11 @@ function isValidNormalizedLocalDateAndTimeString(dtString) {
   return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart);
 }
 
-function getInputValue(name, hash, mDoc, expectsArray, schemaType, defaultValue) {
-  var value;
-  if (typeof hash.value === "undefined") {
+/**
+ *
+ */
+function getInputValue(name, value, mDoc, expectsArray, defaultValue) {
+  if (typeof value === "undefined") {
     // Get the value for this key in the current document
     if (mDoc) {
       var valueInfo = mDoc.getInfoForKey(name);
@@ -1123,42 +1166,44 @@ function getInputValue(name, hash, mDoc, expectsArray, schemaType, defaultValue)
     else if (defaultValue !== null && defaultValue !== undefined) {
       value = defaultValue;
     }
-  } else {
-    value = hash.value;
   }
 
   // Change null or undefined to an empty string
   value = (value == null) ? '' : value;
 
-  // If we're expecting value to be an array
-  if (expectsArray) {
-    // If value is array, loop through and convert to strings
-    if (_.isArray(value)) {
-      if (schemaType === Date) {
-        value = _.map(value, function (v) {
-          return dateToDateStringUTC(v);
-        });
+  function stringValue(val, skipDates) {
+    if (val instanceof Date) {
+      if (skipDates) {
+        return val;
       } else {
-        value = _.map(value, function (v) {
-          return v.toString();
-        });
+        return dateToDateStringUTC(val);
       }
-    }
-    // If value is not array, try to make it one
-    else {
-      if (typeof value === "string") {
-        value = value.split(',');
-      } else {
-        value = [value.toString()];
-      }
+    } else if (val.toString) {
+      return val.toString();
+    } else {
+      return val;
     }
   }
-  // If we're not expecting an array and it's not an instance of Date, convert to string
-  else if (!(value instanceof Date)) {
+
+  // If we're expecting value to be an array, and it's not, make it one
+  if (expectsArray && !_.isArray(value)) {
+    if (typeof value === "string") {
+      value = value.split(',');
+    } else {
+      value = [value];
+    }
+  }
+
+  // Convert to strings
+  if (_.isArray(value)) {
+    value = _.map(value, function (v) {
+      return stringValue(v);
+    });
+  } else {
     // We will convert dates to a string later, after we
     // know what the field type will be.
     // Convert everything else to a string now.
-    value = value.toString();
+    value = stringValue(value, true);
   }
 
   // We return either a string, an array of strings, or an instance of Date
