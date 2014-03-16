@@ -122,6 +122,13 @@ deps.defaultTypeTemplates = {
   afDeleteButton: new Deps.Dependency,
   afQuickField: new Deps.Dependency
 };
+
+/**
+ * @method AutoForm.setDefaultTemplateForType
+ * @public
+ * @param {String} type
+ * @param {String} template
+ */
 AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(type, template) {
   if (!deps.defaultTypeTemplates[type]) {
     throw new Error("invalid template type: " + type);
@@ -133,6 +140,14 @@ AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(
   deps.defaultTypeTemplates[type].changed();
 };
 
+/**
+ * @method AutoForm.getDefaultTemplateForType
+ * @public
+ * @param {String} type
+ * @return {String} Template name
+ *
+ * Reactive.
+ */
 AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(type) {
   if (!deps.defaultTypeTemplates[type]) {
     throw new Error("invalid template type: " + type);
@@ -285,9 +300,7 @@ Handlebars.registerHelper("_afFieldSelect", function autoFormFieldLabel() {
   var hash = _.extend({}, c.atts, {options: []});
 
   // Cache some info for use by helpers
-  _.extend(this, {
-    inputInfo: getInputData(defs, hash, value, "select", ss.label(c.atts.name), expectsArray)
-  });
+  _.extend(this, getInputData(defs, hash, value, "select", ss.label(c.atts.name), expectsArray));
 
   var template = c.atts.template || AutoForm.getDefaultTemplateForType("afFieldSelect") || AutoForm.getDefaultTemplate();
 
@@ -328,9 +341,7 @@ Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
   var type = getInputType(c.atts, defs, value);
 
   // Cache some info for use by helpers
-  _.extend(this, {
-    inputInfo: getInputData(defs, c.atts, value, type, ss.label(c.atts.name), expectsArray)
-  });
+  _.extend(this, getInputData(defs, c.atts, value, type, ss.label(c.atts.name), expectsArray));
 
   // Construct template name
   var templateType = getInputTemplateType(c.atts, type, expectsArray);
@@ -545,7 +556,6 @@ function quickFieldFormFields(fieldList, autoform, ss) {
     return infoForField(field, extendedAtts);
   });
 }
-;
 
 Template.autoForm.destroyed = function autoFormDestroyed() {
   var self = this;
@@ -982,7 +992,9 @@ function formValues(template, transforms, ss) {
   };
   return result;
 }
-;
+
+
+// TODO move most beyond this point to Utility and write tests
 
 // TODO should make this a static method in MongoObject
 function objAffectsKey(obj, key) {
@@ -1099,9 +1111,6 @@ function isValidNormalizedLocalDateAndTimeString(dtString) {
   return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart);
 }
 
-/**
- *
- */
 function getInputValue(name, value, mDoc, expectsArray, defaultValue) {
   if (typeof value === "undefined") {
     // Get the value for this key in the current document

@@ -26,17 +26,13 @@
 </template>
 
 <template name="afCheckbox_bootstrap3">
-  {{#with inputInfo}}
   {{> _afCheckbox_bootstrap3}}
-  {{/with}}
 </template>
 
 <template name="afCheckboxGroup_bootstrap3">
-  {{#with inputInfo}}
-    {{#each items}}
-      {{> _afCheckbox_bootstrap3}}
-    {{/each}}
-  {{/with}}
+  {{#each items}}
+    {{> _afCheckbox_bootstrap3}}
+  {{/each}}
 </template>
 
 <template name="_afRadio_bootstrap3">
@@ -44,17 +40,13 @@
 </template>
 
 <template name="afRadio_bootstrap3">
-  {{#with inputInfo}}
   {{> _afRadio_bootstrap3}}
-  {{/with}}
 </template>
 
 <template name="afRadioGroup_bootstrap3">
-  {{#with inputInfo}}
-    {{#each items}}
-    {{> _afRadio_bootstrap3}}
-    {{/each}}
-  {{/with}}
+  {{#each items}}
+  {{> _afRadio_bootstrap3}}
+  {{/each}}
 </template>
 
 <template name="afContenteditable_bootstrap3">
@@ -62,15 +54,12 @@
 </template>
 
 <template name="afFieldSelect_bootstrap3">
-  {{#with inputInfo}}
   <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" {{atts}}>
-    {{> ../contentBlock}}
+    {{> contentBlock}}
   </select>
-  {{/with}}
 </template>
 
 <template name="afSelect_bootstrap3">
-  {{#with inputInfo}}
   <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" {{atts}}>
     {{#if firstOption}}
     <option value="">{{firstOption}}</option>
@@ -79,19 +68,14 @@
       <option value="{{value}}" {{selected}}>{{label}}</option>
     {{/each}}
   </select>
-  {{/with}}
 </template>
 
 <template name="afTextarea_bootstrap3">
-  {{#with inputInfo}}
   <textarea data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" {{atts}}>{{value}}</textarea>
-  {{/with}}
 </template>
 
 <template name="afInput_bootstrap3">
-  {{#with inputInfo}}
   <input type="{{type}}" data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" value="{{value}}" {{atts}}/>
-  {{/with}}
 </template>
 
 <template name="afDeleteButton_bootstrap3">

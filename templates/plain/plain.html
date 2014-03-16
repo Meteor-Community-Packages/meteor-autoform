@@ -26,17 +26,13 @@
 </template>
 
 <template name="afCheckbox_plain">
-  {{#with inputInfo}}
   {{> _afCheckbox_plain}}
-  {{/with}}
 </template>
 
 <template name="afCheckboxGroup_plain">
-  {{#with inputInfo}}
-    {{#each items}}
-    {{> _afCheckbox_plain}}
-    {{/each}}
-  {{/with}}
+  {{#each items}}
+  {{> _afCheckbox_plain}}
+  {{/each}}
 </template>
 
 <template name="_afRadio_plain">
@@ -44,35 +40,26 @@
 </template>
 
 <template name="afRadio_plain">
-  {{#with inputInfo}}
   {{> _afRadio_plain}}
-  {{/with}}
 </template>
 
 <template name="afRadioGroup_plain">
-  {{#with inputInfo}}
-    {{#each items}}
-    {{> _afRadio_plain}}
-    {{/each}}
-  {{/with}}
+  {{#each items}}
+  {{> _afRadio_plain}}
+  {{/each}}
 </template>
 
 <template name="afContenteditable_plain">
-  {{#with inputInfo}}
   <div contenteditable="true" data-schema-key="{{name}}" name="{{name}}" {{atts}}>{{value}}</div>
-  {{/with}}
 </template>
 
 <template name="afFieldSelect_plain">
-  {{#with inputInfo}}
   <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" {{atts}}>
-    {{> ../contentBlock}}
+    {{> contentBlock}}
   </select>
-  {{/with}}
 </template>
 
 <template name="afSelect_plain">
-  {{#with inputInfo}}
   <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" {{atts}}>
     {{#if firstOption}}
     <option value="">{{firstOption}}</option>
@@ -81,19 +68,14 @@
     <option value="{{value}}" {{selected}}>{{label}}</option>
     {{/each}}
   </select>
-  {{/with}}
 </template>
 
 <template name="afTextarea_plain">
-  {{#with inputInfo}}
   <textarea data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" {{atts}}>{{value}}</textarea>
-  {{/with}}
 </template>
 
 <template name="afInput_plain">
-  {{#with inputInfo}}
   <input type="{{type}}" data-schema-key="{{name}}" name="{{name}}" class="{{cls}}" value="{{value}}" {{atts}}/>
-  {{/with}}
 </template>
 
 <template name="afDeleteButton_plain">
