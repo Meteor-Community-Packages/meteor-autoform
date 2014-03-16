@@ -1,6 +1,7 @@
 var defaultFormId = "_afGenericID";
 var formPreserve = new FormPreserve("autoforms");
 var formSchemas = {}; //keep a reference to simplify resetting validation
+var templatesById = {}; //keep a reference of autoForm templates by form `id` for AutoForm.getFormValues
 
 AutoForm = {};
 
@@ -557,10 +558,24 @@ function quickFieldFormFields(fieldList, autoform, ss) {
   });
 }
 
+Template.autoForm.created = function autoFormCreated() {
+  var self = this;
+  var formId = self.data.id || defaultFormId;
+  // Add to templatesById list
+  templatesById[formId] = self;
+};
+
 Template.autoForm.destroyed = function autoFormDestroyed() {
   var self = this;
   self._notInDOM = true;
   var formId = self.data.id || defaultFormId;
+
+  // Remove from templatesById list
+  if (templatesById[formId]) {
+    delete templatesById[formId];
+  }
+
+  // Unregister form preservation
   formPreserve.unregisterForm(formId);
 };
 
@@ -734,7 +749,7 @@ Template.autoForm.events({
     }
 
     // Gather all form values
-    var form = formValues(template, Hooks.getHooks(formId, 'formToDoc'), ss);
+    var form = getFormValues(template, formId, ss);
 
     // Execute some before hooks
     var insertDoc = isInsert ? doBefore(null, form.insertDoc, beforeInsert, 'before.insert hook') : form.insertDoc;
@@ -848,7 +863,7 @@ Template.autoForm.events({
       var formId = afContext.formId;
       var ss = afContext.ss;
       formId && ss && formPreserve.registerForm(formId, function autoFormRegFormCallback() {
-        return formValues(template, Hooks.getHooks(formId, 'formToDoc'), ss).insertDoc;
+        return getFormValues(template, formId, ss).insertDoc;
       });
     }
     var validationType = template.data.validation || 'submitThenKeyup';
@@ -869,7 +884,7 @@ Template.autoForm.events({
   }
 });
 
-function formValues(template, transforms, ss) {
+function getFormValues(template, formId, ss) {
   var fields = template.findAll("[data-schema-key]");
   var doc = {};
   _.each(fields, function formValuesEach(field) {
@@ -972,6 +987,7 @@ function formValues(template, transforms, ss) {
   doc = expandObj(doc);
 
   // Pass expanded doc through formToDoc hooks
+  var transforms = Hooks.getHooks(formId, 'formToDoc');
   _.each(transforms, function formValuesTransform(transform) {
     doc = transform(doc);
   });
@@ -993,6 +1009,28 @@ function formValues(template, transforms, ss) {
   return result;
 }
 
+/**
+ * @method AutoForm.getFormValues
+ * @public
+ * @param {String} formId The `id` attribute of the `autoForm` you want current values for.
+ * @return {Object}
+ *
+ * Returns an object representing the current values of all schema-based fields in the form.
+ * The returned object contains two properties, "insertDoc" and "updateDoc", which represent
+ * the field values as a normal object and as a MongoDB modifier, respectively.
+ */
+AutoForm.getFormValues = function (formId) {
+  var template = templatesById[formId];
+  if (!template || template._notInDOM) {
+    throw new Error("getFormValues: There is currently no autoForm template rendered for the form with id " + formId);
+  }
+  // Get a reference to the SimpleSchema instance that should be used for
+  // determining what types we want back for each field.
+  var context = template.data;
+  var collection = lookup(context.collection);
+  var ss = lookup(context.schema) || collection && collection.simpleSchema();
+  return getFormValues(template, formId, ss);
+};
 
 // TODO move most beyond this point to Utility and write tests
 
@@ -1450,7 +1488,7 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   }
 
   // Create a document based on all the values of all the inputs on the form
-  var form = formValues(template, Hooks.getHooks(formId, 'formToDoc'), ss);
+  var form = getFormValues(template, formId, ss);
 
   // Clean and validate doc
   if (context.type === "update") {
@@ -1460,7 +1498,7 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
     if (skipEmpty && !objAffectsKey(form.updateDoc, key))
       return; //skip validation
 
-    // formValues did some cleaning but didn't add auto values; add them now
+    // getFormValues did some cleaning but didn't add auto values; add them now
     ss.clean(form.updateDoc, {
       isModifier: true,
       filter: false,
@@ -1482,7 +1520,7 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
     if (skipEmpty && !objAffectsKey(form.insertDoc, key))
       return; //skip validation
 
-    // formValues did some cleaning but didn't add auto values; add them now
+    // getFormValues did some cleaning but didn't add auto values; add them now
     ss.clean(form.insertDoc, {
       filter: false,
       autoConvert: false,
