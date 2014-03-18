@@ -482,11 +482,11 @@ function quickFieldFormFields(fieldList, autoform, ss) {
     var fieldDefs = ss.schema(field);
 
     // Don't include fields with denyInsert=true when it's an insert form
-    if (fieldDefs.denyInsert && autoform._af.formType === "insert")
+    if (fieldDefs.denyInsert && autoform._af.submitType === "insert")
       return false;
 
     // Don't include fields with denyUpdate=true when it's an update form
-    if (fieldDefs.denyUpdate && context.type === "update")
+    if (fieldDefs.denyUpdate && autoform._af.submitType === "update")
       return false;
 
     // Don't include fields with array placeholders
