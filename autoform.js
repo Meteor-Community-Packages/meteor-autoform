@@ -762,7 +762,11 @@ Template.autoForm.events({
       filter: false,
       autoConvert: false,
       extendAutoValueContext: {
-        userId: (Meteor.userId && Meteor.userId()) || null
+        userId: (Meteor.userId && Meteor.userId()) || null,
+        isInsert: true,
+        isUpdate: false,
+        isUpsert: false,
+        isFromTrustedCode: false
       }
     });
 
@@ -772,7 +776,11 @@ Template.autoForm.events({
       var result = validationType === 'none' || ss.namedContext(formId).validate(doc, {
         modifier: isModifier,
         extendedCustomContext: {
-          userId: (Meteor.userId && Meteor.userId()) || null
+          userId: (Meteor.userId && Meteor.userId()) || null,
+          isInsert: !isModifier,
+          isUpdate: !!isModifier,
+          isUpsert: false,
+          isFromTrustedCode: false
         }
       });
       if (!result && !validationErrorTriggered) {
@@ -832,7 +840,11 @@ Template.autoForm.events({
         filter: false,
         autoConvert: false,
         extendAutoValueContext: {
-          userId: (Meteor.userId && Meteor.userId()) || null
+          userId: (Meteor.userId && Meteor.userId()) || null,
+          isInsert: true, //methodDoc should be treated like insertDoc
+          isUpdate: false,
+          isUpsert: false,
+          isFromTrustedCode: false
         }
       });
       // Validate first
@@ -1504,13 +1516,21 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
       filter: false,
       autoConvert: false,
       extendAutoValueContext: {
-        userId: (Meteor.userId && Meteor.userId()) || null
+        userId: (Meteor.userId && Meteor.userId()) || null,
+        isInsert: false,
+        isUpdate: true,
+        isUpsert: false,
+        isFromTrustedCode: false
       }
     });
     ss.namedContext(formId).validateOne(form.updateDoc, key, {
       modifier: true,
       extendedCustomContext: {
-        userId: (Meteor.userId && Meteor.userId()) || null
+        userId: (Meteor.userId && Meteor.userId()) || null,
+        isInsert: false,
+        isUpdate: true,
+        isUpsert: false,
+        isFromTrustedCode: false
       }
     });
   } else {
@@ -1525,13 +1545,21 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
       filter: false,
       autoConvert: false,
       extendAutoValueContext: {
-        userId: (Meteor.userId && Meteor.userId()) || null
+        userId: (Meteor.userId && Meteor.userId()) || null,
+        isInsert: true,
+        isUpdate: false,
+        isUpsert: false,
+        isFromTrustedCode: false
       }
     });
     ss.namedContext(formId).validateOne(form.insertDoc, key, {
       modifier: false,
       extendedCustomContext: {
-        userId: (Meteor.userId && Meteor.userId()) || null
+        userId: (Meteor.userId && Meteor.userId()) || null,
+        isInsert: true,
+        isUpdate: false,
+        isUpsert: false,
+        isFromTrustedCode: false
       }
     });
   }
