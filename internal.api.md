@@ -10,6 +10,7 @@ __File: ["utility.js"](utility.js) Where: {client}__
 
 ### <a name="Utility.cleanNulls"></a>*utility*.cleanNulls(doc)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
 
+*This method is private*
 *This method __cleanNulls__ is defined in `Utility`*
 
 __Arguments__
@@ -25,13 +26,14 @@ __Returns__  *{Object}*
 Returns an object in which all properties with null, undefined, or empty
 string values have been removed, recursively.
 
-> ```cleanNulls: function cleanNulls(doc) { ...``` [utility.js:10](utility.js#L10)
+> ```cleanNulls: function cleanNulls(doc) { ...``` [utility.js:11](utility.js#L11)
 
 
 -
 
 ### <a name="Utility.reportNulls"></a>*utility*.reportNulls(flatDoc)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
 
+*This method is private*
 *This method __reportNulls__ is defined in `Utility`*
 
 __Arguments__
@@ -47,13 +49,14 @@ An object in which the keys represent the keys in the
 original object that were null, undefined, or empty strings, and the value
 of each key is "".
 
-> ```reportNulls: function reportNulls(flatDoc) { ...``` [utility.js:31](utility.js#L31)
+> ```reportNulls: function reportNulls(flatDoc) { ...``` [utility.js:33](utility.js#L33)
 
 
 -
 
 ### <a name="Utility.docToModifier"></a>*utility*.docToModifier(doc)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
 
+*This method is private*
 *This method __docToModifier__ is defined in `Utility`*
 
 __Arguments__
@@ -71,13 +74,14 @@ Converts an object into a modifier by flattening it, putting keys with
 null, undefined, and empty string values into `modifier.$unset`, and
 putting the rest of the keys into `modifier.$set`.
 
-> ```docToModifier: function docToModifier(doc) { ...``` [utility.js:49](utility.js#L49)
+> ```docToModifier: function docToModifier(doc) { ...``` [utility.js:52](utility.js#L52)
 
 
 -
 
 ### <a name="Utility.getSelectValues"></a>*utility*.getSelectValues(select)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
 
+*This method is private*
 *This method __getSelectValues__ is defined in `Utility`*
 
 __Arguments__
@@ -92,13 +96,14 @@ __Returns__  *{string[]}*
 
 Gets a string array of all the selected values in a given `select` DOM element.
 
-> ```getSelectValues: function getSelectValues(select) { ...``` [utility.js:102](utility.js#L102)
+> ```getSelectValues: function getSelectValues(select) { ...``` [utility.js:106](utility.js#L106)
 
 
 -
 
 ### <a name="Utility.maybeNum"></a>*utility*.maybeNum(val)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
 
+*This method is private*
 *This method __maybeNum__ is defined in `Utility`*
 
 __Arguments__
@@ -111,7 +116,299 @@ __Returns__  *{String|Number}*
 If the given string can be converted to a number, returns the number.
 Otherwise returns the string.
 
-> ```maybeNum: function maybeNum(val) { ...``` [utility.js:124](utility.js#L124)
+> ```maybeNum: function maybeNum(val) { ...``` [utility.js:129](utility.js#L129)
+
+
+-
+
+### <a name="Utility.lookup"></a>*utility*.lookup(obj)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+*This method __lookup__ is defined in `Utility`*
+
+__Arguments__
+
+* __obj__ *{Any}*  
+
+__Returns__  *{Any}*
+
+
+If `obj` is a string, returns the value of the property with that
+name on the `window` object. Otherwise returns `obj`.
+
+> ```lookup: function lookup(obj) { ...``` [utility.js:147](utility.js#L147)
+
+
+-
+
+### <a name="Utility.getDefs"></a>*utility*.getDefs(ss, name)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+*This method __getDefs__ is defined in `Utility`*
+
+__Arguments__
+
+* __ss__ *{[SimpleSchema](#SimpleSchema)}*  
+* __name__ *{String}*  
+
+__Returns__  *{Object}*
+Schema definitions object
+
+
+Returns the schema definitions object from a SimpleSchema instance. Equivalent to calling
+`ss.schema(name)` but handles throwing errors if `name` is not a string or is not a valid
+field name for this SimpleSchema instance.
+
+> ```getDefs: function getDefs(ss, name) { ...``` [utility.js:167](utility.js#L167)
+
+
+-
+
+### <a name="Utility.objAffectsKey"></a>*utility*.objAffectsKey({Object}, {String})&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+*This method __objAffectsKey__ is defined in `Utility`*
+
+__Arguments__
+
+* __{Object}__ *{any}*  
+
+ obj
+
+* __{String}__ *{any}*  
+
+ key
+
+
+__Returns__  *{Boolean}*
+
+__TODO__
+```
+* should make this a static method in MongoObject
+```
+
+
+> ```objAffectsKey: function objAffectsKey(obj, key) { ...``` [utility.js:185](utility.js#L185)
+
+
+-
+
+### <a name="Utility.expandObj"></a>*utility*.expandObj({Object})&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+*This method __expandObj__ is defined in `Utility`*
+
+__Arguments__
+
+* __{Object}__ *{any}*  
+
+ doc
+
+
+__Returns__  *{Object}*
+
+
+Takes a flat object and returns an expanded version of it.
+
+> ```expandObj: function expandObj(doc) { ...``` [utility.js:197](utility.js#L197)
+
+
+-
+
+### <a name="Utility.isValidDateString"></a>*utility*.isValidDateString({String})&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+*This method __isValidDateString__ is defined in `Utility`*
+
+__Arguments__
+
+* __{String}__ *{any}*  
+
+ dateString
+
+
+__Returns__  *{Boolean}*
+
+
+Returns `true` if dateString is a "valid date string"
+
+> ```isValidDateString: function isValidDateString(dateString) { ...``` [utility.js:234](utility.js#L234)
+
+
+-
+
+### <a name="Utility.isValidTimeString"></a>*utility*.isValidTimeString({String})&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+*This method __isValidTimeString__ is defined in `Utility`*
+
+__Arguments__
+
+* __{String}__ *{any}*  
+
+ timeString
+
+
+__Returns__  *{Boolean}*
+
+
+Returns `true` if timeString is a "valid time string"
+
+> ```isValidTimeString: function isValidTimeString(timeString) { ...``` [utility.js:246](utility.js#L246)
+
+
+-
+
+### <a name=""></a>({Date})&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+
+__Arguments__
+
+* __{Date}__ *{any}*  
+
+ date
+
+
+__Returns__  *{String}*
+
+
+Returns a "valid date string" representing the local date.
+
+> ```dateToDateString: function dateToDateString(date) { ...``` [utility.js:263](utility.js#L263)
+
+
+-
+
+### <a name=""></a>({Date})&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+
+__Arguments__
+
+* __{Date}__ *{any}*  
+
+ date
+
+
+__Returns__  *{String}*
+
+
+Returns a "valid date string" representing the date converted to the UTC time zone.
+
+> ```dateToDateStringUTC: function dateToDateStringUTC(date) { ...``` [utility.js:282](utility.js#L282)
+
+
+-
+
+### <a name=""></a>({Date})&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+
+__Arguments__
+
+* __{Date}__ *{any}*  
+
+ date
+
+
+__Returns__  *{String}*
+
+
+Returns a "valid normalized forced-UTC global date and time string" representing the time
+converted to the UTC time zone and expressed as the shortest possible string for the given
+time (e.g. omitting the seconds component entirely if the given time is zero seconds past the minute).
+
+http:
+http:
+
+> ```dateToNormalizedForcedUtcGlobalDateAndTimeString: function dateToNormalizedForcedUtcGlobalDateAndTimeString(date) { ...``` [utility.js:306](utility.js#L306)
+
+
+-
+
+### <a name=""></a>({String})&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+
+__Arguments__
+
+* __{String}__ *{any}*  
+
+ dateString
+
+
+__Returns__  *{Boolean}*
+
+
+Returns true if dateString is a "valid normalized forced-UTC global date and time string"
+
+> ```isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString(dateString) { ...``` [utility.js:317](utility.js#L317)
+
+
+-
+
+### <a name="Utility.dateToNormalizedLocalDateAndTimeString"></a>*utility*.dateToNormalizedLocalDateAndTimeString(date, offset)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+*This method __dateToNormalizedLocalDateAndTimeString__ is defined in `Utility`*
+
+__Arguments__
+
+* __date__ *{[Date](#Date)}*  
+* __offset__ *{String}*  
+
+ A valid offset string (to pass to moment.zone)
+
+
+__Returns__  *{String}*
+
+
+Returns a "valid normalized local date and time string".
+
+> ```dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString(date, offset) { ...``` [utility.js:336](utility.js#L336)
+
+
+-
+
+### <a name=""></a>({String})&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+
+__Arguments__
+
+* __{String}__ *{any}*  
+
+ dtString
+
+
+__Returns__  *{Boolean}*
+
+
+Returns true if dtString is a "valid normalized local date and time string"
+
+> ```isValidNormalizedLocalDateAndTimeString: function isValidNormalizedLocalDateAndTimeString(dtString) { ...``` [utility.js:349](utility.js#L349)
+
+
+***
+
+__File: ["form-preserve.js"](form-preserve.js) Where: {client}__
+
+***
+
+### <a name="FormPreserve"></a>new FormPreserve(migrationName)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+
+__Arguments__
+
+* __migrationName__ *{String}*  
+
+
+Internal helper object to preserve form inputs across Hot Code Push
+and across "pages" navigation if the option is enabled.
+
+> ```FormPreserve = function formPreserveConstructor(migrationName) { ...``` [form-preserve.js:9](form-preserve.js#L9)
 
 
 ***
@@ -235,15 +532,6 @@ Returns an object representing the current values of all schema-based fields in 
 The returned object contains two properties, "insertDoc" and "updateDoc", which represent
 the field values as a normal object and as a MongoDB modifier, respectively.
 
-> ```AutoForm.getFormValues = function (formId) { ...``` [autoform.js:1022](autoform.js#L1022)
+> ```AutoForm.getFormValues = function (formId) { ...``` [autoform.js:1034](autoform.js#L1034)
 
 
-
--
-TODO move most beyond this point to Utility and write tests
-TODO should make this a static method in MongoObject
-
--
-returns a "valid normalized forced-UTC global date and time string" representing the time converted to the UTC time zone and expressed as the shortest possible string for the given time (e.g. omitting the seconds component entirely if the given time is zero seconds past the minute)
-http:www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#date-and-time-state-(type=datetime)
-http:www.whatwg.org/specs/web-apps/current-work/multipage/common-microsyntaxes.html#valid-normalized-forced-utc-global-date-and-time-string
