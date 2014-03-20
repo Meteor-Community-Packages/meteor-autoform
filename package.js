@@ -1,4 +1,5 @@
 Package.describe({
+  name: "autoform",
   summary: "A smart package for Meteor that adds handlebars helpers to easily create basic forms with automatic insert and update events, and automatic reactive validation."
 });
 

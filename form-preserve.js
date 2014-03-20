@@ -1,7 +1,12 @@
-// Intern `FormPreserve` object helper to preserve form inputs across Hot 
-// Code Push and across "pages" navigation if the option is enabled.
-
-FormPreserve = function(migrationName) {
+/**
+ * @constructor
+ * @private
+ * @param {String} migrationName
+ *
+ * Internal helper object to preserve form inputs across Hot Code Push
+ * and across "pages" navigation if the option is enabled.
+ */
+FormPreserve = function formPreserveConstructor(migrationName) {
   var self = this;
   if (! _.isString(migrationName))
     throw Error("You must define an unique migration name of type String");
@@ -10,7 +15,7 @@ FormPreserve = function(migrationName) {
   if (Package.reload) {
     var Reload = Package.reload.Reload;
     self.retrievedDocuments = Reload._migrationData(migrationName) || {};
-    Reload._onMigrate(migrationName, function () { 
+    Reload._onMigrate(migrationName, function () {
       return [true, self._retrieveRegisteredDocuments()];
     });
   }
@@ -19,7 +24,7 @@ FormPreserve = function(migrationName) {
 FormPreserve.prototype.getDocument = function (formId) {
   var self = this;
   if (! _.has(self.retrievedDocuments, formId))
-    return false; 
+    return false;
   else
     return self.retrievedDocuments[formId];
 };

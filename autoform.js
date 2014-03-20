@@ -189,10 +189,10 @@ Template.autoForm.innerContext = function autoFormTplInnerContext() {
   var context = this;
   var formId = context.id || defaultFormId;
 
-  var collection = lookup(context.collection);
+  var collection = Utility.lookup(context.collection);
   check(collection, Match.Optional(Meteor.Collection));
 
-  var ss = lookup(context.schema) || collection && collection.simpleSchema();
+  var ss = Utility.lookup(context.schema) || collection && collection.simpleSchema();
   if (!Match.test(ss, SimpleSchema)) {
     throw new Error("autoForm with id " + formId + " needs either 'schema' or 'collection' attribute");
   }
@@ -281,7 +281,7 @@ Handlebars.registerHelper("_afFieldSelect", function autoFormFieldLabel() {
   var c = AutoForm._normalizeContext(this, "afFieldSelect");
 
   var ss = c.af.ss;
-  var defs = getDefs(ss, c.atts.name); //defs will not be undefined
+  var defs = Utility.getDefs(ss, c.atts.name); //defs will not be undefined
 
   // Get schema type
   var schemaType = defs.type;
@@ -318,7 +318,7 @@ Handlebars.registerHelper("_afFieldInput", function autoFormFieldInput() {
   var c = AutoForm._normalizeContext(this, "afFieldInput");
 
   var ss = c.af.ss;
-  var defs = getDefs(ss, c.atts.name); //defs will not be undefined
+  var defs = Utility.getDefs(ss, c.atts.name); //defs will not be undefined
 
   // Get schema type
   var schemaType = defs.type;
@@ -417,7 +417,7 @@ Handlebars.registerHelper("_afQuickField", function autoFormFieldLabel() {
 
   formFields = quickFieldFormFields(fields, c.afc, ss);
 
-  var defs = getDefs(ss, c.atts.name); //defs will not be undefined
+  var defs = Utility.getDefs(ss, c.atts.name); //defs will not be undefined
   _.extend(this, {
     skipLabel: (c.atts.label === false || (defs.type === Boolean && !("select" in c.atts) && !("radio" in c.atts))),
     labelAtts: quickFieldLabelAtts(c.atts, c.afc),
@@ -592,7 +592,7 @@ Handlebars.registerHelper("afFieldMessage", function autoFormFieldMessage(option
     throw new Error("afFieldMessage helper must be used within an autoForm block");
   }
 
-  getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
+  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
   return ss.namedContext(afContext.formId).keyErrorMessage(hash.name);
 });
 
@@ -609,7 +609,7 @@ Handlebars.registerHelper("afFieldIsInvalid", function autoFormFieldIsInvalid(op
     throw new Error("afFieldIsInvalid helper must be used within an autoForm block");
   }
 
-  getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
+  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
   return ss.namedContext(afContext.formId).keyIsInvalid(hash.name);
 });
 
@@ -649,8 +649,8 @@ Template.autoForm.events({
 
     //init
     var validationType = context.validation || "submitThenKeyup";
-    var collection = lookup(context.collection);
-    var ss = lookup(context.schema) || collection && collection.simpleSchema();
+    var collection = Utility.lookup(context.collection);
+    var ss = Utility.lookup(context.schema) || collection && collection.simpleSchema();
     var formId = context.id || defaultFormId;
     var currentDoc = context.doc || null;
     var docId = currentDoc ? currentDoc._id : null;
@@ -957,7 +957,7 @@ function getFormValues(template, formId, ss) {
 
     // Handle date inputs
     if (type === "date") {
-      if (isValidDateString(val)) {
+      if (Utility.isValidDateString(val)) {
         //Date constructor will interpret val as UTC and create
         //date at mignight in the morning of val date in UTC time zone
         doc[name] = new Date(val);
@@ -970,7 +970,7 @@ function getFormValues(template, formId, ss) {
     // Handle date inputs
     if (type === "datetime") {
       val = (typeof val === "string") ? val.replace(/ /g, "T") : val;
-      if (isValidNormalizedForcedUtcGlobalDateAndTimeString(val)) {
+      if (Utility.isValidNormalizedForcedUtcGlobalDateAndTimeString(val)) {
         //Date constructor will interpret val as UTC due to ending "Z"
         doc[name] = new Date(val);
       } else {
@@ -983,7 +983,7 @@ function getFormValues(template, formId, ss) {
     if (type === "datetime-local") {
       val = (typeof val === "string") ? val.replace(/ /g, "T") : val;
       var offset = field.getAttribute("data-offset") || "Z";
-      if (isValidNormalizedLocalDateAndTimeString(val)) {
+      if (Utility.isValidNormalizedLocalDateAndTimeString(val)) {
         doc[name] = new Date(val + offset);
       } else {
         doc[name] = null;
@@ -996,7 +996,7 @@ function getFormValues(template, formId, ss) {
   });
 
   // Expand the object
-  doc = expandObj(doc);
+  doc = Utility.expandObj(doc);
 
   // Pass expanded doc through formToDoc hooks
   var transforms = Hooks.getHooks(formId, 'formToDoc');
@@ -1039,127 +1039,10 @@ AutoForm.getFormValues = function (formId) {
   // Get a reference to the SimpleSchema instance that should be used for
   // determining what types we want back for each field.
   var context = template.data;
-  var collection = lookup(context.collection);
-  var ss = lookup(context.schema) || collection && collection.simpleSchema();
+  var collection = Utility.lookup(context.collection);
+  var ss = Utility.lookup(context.schema) || collection && collection.simpleSchema();
   return getFormValues(template, formId, ss);
 };
-
-// TODO move most beyond this point to Utility and write tests
-
-// TODO should make this a static method in MongoObject
-function objAffectsKey(obj, key) {
-  var mDoc = new MongoObject(obj);
-  return mDoc.affectsKey(key);
-}
-
-function expandObj(doc) {
-  var newDoc = {}, subkeys, subkey, subkeylen, nextPiece, current;
-  _.each(doc, function(val, key) {
-    subkeys = key.split(".");
-    subkeylen = subkeys.length;
-    current = newDoc;
-    for (var i = 0; i < subkeylen; i++) {
-      subkey = subkeys[i];
-      if (typeof current[subkey] !== "undefined" && !_.isObject(current[subkey])) {
-        break; //already set for some reason; leave it alone
-      }
-      if (i === subkeylen - 1) {
-        //last iteration; time to set the value
-        current[subkey] = val;
-      } else {
-        //see if the next piece is a number
-        nextPiece = subkeys[i + 1];
-        nextPiece = parseInt(nextPiece, 10);
-        if (isNaN(nextPiece) && !_.isObject(current[subkey])) {
-          current[subkey] = {};
-        } else if (!isNaN(nextPiece) && !_.isArray(current[subkey])) {
-          current[subkey] = [];
-        }
-      }
-      current = current[subkey];
-    }
-  });
-  return newDoc;
-}
-
-//returns true if dateString is a "valid date string"
-function isValidDateString(dateString) {
-  var m = moment(dateString, 'YYYY-MM-DD', true);
-  return m && m.isValid();
-}
-
-//returns true if timeString is a "valid time string"
-function isValidTimeString(timeString) {
-  if (typeof timeString !== "string")
-    return false;
-
-  //this reg ex actually allows a few invalid hours/minutes/seconds, but
-  //we can catch that when parsing
-  var regEx = /^[0-2][0-9]:[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
-  return regEx.test(timeString);
-}
-
-//returns a "valid date string" representing the local date
-function dateToDateString(date) {
-  var m = (date.getMonth() + 1);
-  if (m < 10) {
-    m = "0" + m;
-  }
-  var d = date.getDate();
-  if (d < 10) {
-    d = "0" + d;
-  }
-  return date.getFullYear() + '-' + m + '-' + d;
-}
-
-//returns a "valid date string" representing the date converted to the UTC time zone
-function dateToDateStringUTC(date) {
-  var m = (date.getUTCMonth() + 1);
-  if (m < 10) {
-    m = "0" + m;
-  }
-  var d = date.getUTCDate();
-  if (d < 10) {
-    d = "0" + d;
-  }
-  return date.getUTCFullYear() + '-' + m + '-' + d;
-}
-
-//returns a "valid normalized forced-UTC global date and time string" representing the time converted to the UTC time zone and expressed as the shortest possible string for the given time (e.g. omitting the seconds component entirely if the given time is zero seconds past the minute)
-//http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#date-and-time-state-(type=datetime)
-//http://www.whatwg.org/specs/web-apps/current-work/multipage/common-microsyntaxes.html#valid-normalized-forced-utc-global-date-and-time-string
-function dateToNormalizedForcedUtcGlobalDateAndTimeString(date) {
-  return moment(date).utc().format("YYYY-MM-DD[T]HH:mm:ss.SSS[Z]");
-}
-
-//returns true if dateString is a "valid normalized forced-UTC global date and time string"
-function isValidNormalizedForcedUtcGlobalDateAndTimeString(dateString) {
-  if (typeof dateString !== "string")
-    return false;
-
-  var datePart = dateString.substring(0, 10);
-  var tPart = dateString.substring(10, 11);
-  var timePart = dateString.substring(11, dateString.length - 1);
-  var zPart = dateString.substring(dateString.length - 1);
-  return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart) && zPart === "Z";
-}
-
-//returns a "valid normalized local date and time string"
-function dateToNormalizedLocalDateAndTimeString(date, offset) {
-  var m = moment(date);
-  m.zone(offset);
-  return m.format("YYYY-MM-DD[T]hh:mm:ss.SSS");
-}
-
-function isValidNormalizedLocalDateAndTimeString(dtString) {
-  if (typeof dtString !== "string")
-    return false;
-
-  var datePart = dtString.substring(0, 10);
-  var tPart = dtString.substring(10, 11);
-  var timePart = dtString.substring(11, dtString.length);
-  return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart);
-}
 
 function getInputValue(name, value, mDoc, expectsArray, defaultValue) {
   if (typeof value === "undefined") {
@@ -1185,7 +1068,7 @@ function getInputValue(name, value, mDoc, expectsArray, defaultValue) {
       if (skipDates) {
         return val;
       } else {
-        return dateToDateStringUTC(val);
+        return Utility.dateToDateStringUTC(val);
       }
     } else if (val.toString) {
       return val.toString();
@@ -1232,11 +1115,11 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
   //convert Date value to required string value based on field type
   if (value instanceof Date) {
     if (type === "date") {
-      value = dateToDateStringUTC(value);
+      value = Utility.dateToDateStringUTC(value);
     } else if (type === "datetime") {
-      value = dateToNormalizedForcedUtcGlobalDateAndTimeString(value);
+      value = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(value);
     } else if (type === "datetime-local") {
-      value = dateToNormalizedLocalDateAndTimeString(value, hash["data-offset"]);
+      value = Utility.dateToNormalizedLocalDateAndTimeString(value, hash["data-offset"]);
     }
   }
 
@@ -1381,26 +1264,26 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
         break;
       case "date":
         if (typeof hash.max === "undefined" && max instanceof Date) {
-          hash.max = dateToDateStringUTC(max);
+          hash.max = Utility.dateToDateStringUTC(max);
         }
         if (typeof hash.min === "undefined" && min instanceof Date) {
-          hash.min = dateToDateStringUTC(min);
+          hash.min = Utility.dateToDateStringUTC(min);
         }
         break;
       case "datetime":
         if (typeof hash.max === "undefined" && max instanceof Date) {
-          hash.max = dateToNormalizedForcedUtcGlobalDateAndTimeString(max);
+          hash.max = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(max);
         }
         if (typeof hash.min === "undefined" && min instanceof Date) {
-          hash.min = dateToNormalizedForcedUtcGlobalDateAndTimeString(min);
+          hash.min = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(min);
         }
         break;
       case "datetime-local":
         if (typeof hash.max === "undefined" && max instanceof Date) {
-          hash.max = dateToNormalizedLocalDateAndTimeString(max, hash["data-offset"]);
+          hash.max = Utility.dateToNormalizedLocalDateAndTimeString(max, hash["data-offset"]);
         }
         if (typeof hash.min === "undefined" && min instanceof Date) {
-          hash.min = dateToNormalizedLocalDateAndTimeString(min, hash["data-offset"]);
+          hash.min = Utility.dateToNormalizedLocalDateAndTimeString(min, hash["data-offset"]);
         }
         break;
     }
@@ -1491,8 +1374,8 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   }
 
   var context = template.data;
-  var collection = lookup(context.collection);
-  var ss = lookup(context.schema) || collection && collection.simpleSchema();
+  var collection = Utility.lookup(context.collection);
+  var ss = Utility.lookup(context.schema) || collection && collection.simpleSchema();
   var formId = context.id || defaultFormId;
 
   if (onlyIfAlreadyInvalid && ss.namedContext(formId).isValid()) {
@@ -1507,7 +1390,7 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
 
     // Skip validation if skipEmpty is true and the field we're validating
     // has no value.
-    if (skipEmpty && !objAffectsKey(form.updateDoc, key))
+    if (skipEmpty && !Utility.objAffectsKey(form.updateDoc, key))
       return; //skip validation
 
     // getFormValues did some cleaning but didn't add auto values; add them now
@@ -1537,7 +1420,7 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
 
     // Skip validation if skipEmpty is true and the field we're validating
     // has no value.
-    if (skipEmpty && !objAffectsKey(form.insertDoc, key))
+    if (skipEmpty && !Utility.objAffectsKey(form.insertDoc, key))
       return; //skip validation
 
     // getFormValues did some cleaning but didn't add auto values; add them now
@@ -1578,25 +1461,4 @@ function validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   }
   vok[key] = false;
   _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
-}
-
-function getDefs(ss, name) {
-  if (typeof name !== "string") {
-    throw new Error("Invalid field name: (not a string)");
-  }
-
-  var defs = ss.schema(name);
-  if (!defs)
-    throw new Error("Invalid field name: " + name);
-  return defs;
-}
-
-function lookup(obj) {
-  if (typeof obj === "string") {
-    if (!window || !window[obj]) {
-      throw new Error(obj + " is not in the window scope");
-    }
-    return window[obj];
-  }
-  return obj;
 }
