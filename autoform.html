@@ -1,25 +1,71 @@
 <template name="autoForm">
   <form {{atts}}>
-    {{> UI.contentBlock innerContext}}
+  	{{#with innerContext ..}}
+    {{> UI.contentBlock this}}
+    {{/with}}
   </form>
 </template>
 
 <template name="quickForm">
-  {{> _quickForm}}
+  {{#with getTemplate "quickForm" template}}
+    {{#with ..}}
+      {{> ..}}
+    {{/with}}
+  {{/with}}
 </template>
 
 <template name="afQuickField">
-  {{> _afQuickField autoform=.. atts=this}}
+  {{#with getTemplate "afQuickField" template}}
+    {{! find autoform context up to 5 levels back}}
+    {{#with _af_findAutoForm 'afFieldLabel' ../.. ../../.. ../../../.. ../../../../.. ../../../../../..}}
+      {{#with innerContext autoform=this atts=../..}}
+        {{> ../..}}
+      {{/with}}
+    {{/with}}
+  {{/with}}
 </template>
 
 <template name="afFieldInput">
-  {{> _afFieldInput autoform=.. atts=this}}
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afFieldInput' .. ../.. ../../.. ../../../.. ../../../../..}}
+	  {{#with inputOuterContext autoform=this atts=..}}
+	    {{#with getTemplate templateType atts.template}}
+	      {{#with inputContext outerContext=..}}
+	        {{> ..}}
+	      {{/with}}
+	    {{/with}}
+	  {{/with}}
+  {{/with}}
 </template>
 
 <template name="afFieldSelect">
-  {{> _afFieldSelect autoform=.. atts=this contentBlock=UI.contentBlock}}
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afFieldSelect' .. ../.. ../../.. ../../../.. ../../../../..}}
+	  {{#with inputOuterContext autoform=this atts=..}}
+	    {{#with getTemplate "afFieldSelect" atts.template}}
+	      {{#with inputContext outerContext=.. contentBlock=UI.contentBlock}}
+	        {{> ..}}
+	      {{/with}}
+	    {{/with}}
+	  {{/with}}
+  {{/with}}
 </template>
 
 <template name="afFieldLabel">
-  {{> _afFieldLabel autoform=.. atts=this}}
+  {{#with getTemplate "afFieldLabel" template}}
+    {{! find autoform context up to 5 levels back}}
+    {{#with _af_findAutoForm 'afFieldLabel' ../.. ../../.. ../../../.. ../../../../.. ../../../../../..}}
+      {{#with autoform=this atts=../..}}
+        {{> ../..}}
+      {{/with}}
+    {{/with}}
+  {{/with}}
+</template>
+
+<template name="afDeleteButton">
+  {{#with getTemplate "afDeleteButton" template}}
+    {{#with innerContext .. UI.contentBlock}}
+      {{> ..}}
+    {{/with}}
+  {{/with}}
 </template>

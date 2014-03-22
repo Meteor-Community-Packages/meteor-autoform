@@ -80,7 +80,7 @@
 
 <template name="afDeleteButton_bootstrap3">
   {{#autoForm collection=collection type="remove" doc=doc}}
-  <button type="submit" class="btn btn-danger">{{#if UI.contentBlock}}{{> UI.contentBlock}}{{else}}Delete{{/if}}</button>
+  <button type="submit" {{atts}}>{{#if ../contentBlock}}{{> ../contentBlock}}{{else}}Delete{{/if}}</button>
   {{/autoForm}}
 </template>
 
@@ -93,12 +93,12 @@
     {{/each}}
   </fieldset>
   {{else}}
-  <div class="form-group {{#if afFieldIsInvalid name=atts.name autoform=autoform}}has-error{{/if}}">
+  <div class="form-group {{#if afFieldIsInvalid name=afFieldIsInvalidAtts.name autoform=afFieldIsInvalidAtts.autoform}}has-error{{/if}}">
     {{#unless skipLabel}}
-    {{> afFieldLabel labelAtts}}
+    {{> afFieldLabel afFieldLabelAtts}}
     {{/unless}}
-    {{> afFieldInput inputAtts}}
-    <span class="help-block">{{{afFieldMessage name=atts.name autoform=autoform}}}</span>
+    {{> afFieldInput afFieldInputAtts}}
+    <span class="help-block">{{{afFieldMessage name=afFieldMessageAtts.name autoform=afFieldMessageAtts.autoform}}}</span>
   </div>
   {{/if}}
 </template>

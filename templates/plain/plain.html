@@ -1,19 +1,19 @@
 <template name="quickForm_plain">
   {{#autoForm afContext}}
-  {{#each formFields}}
-  {{> afQuickField name=name autoform=autoform}}
-  {{/each}}
-  {{#if needsButton}}
-  <div>
-    <button {{submitButtonAtts}}>
+    {{#each formFields}}
+    {{> afQuickField}}
+    {{/each}}
+    {{#if needsButton}}
+    <div>
+      <button {{submitButtonAtts}}>
       {{#with buttonContent}}
       {{this}}
       {{else}}
       Submit
       {{/with}}
-    </button>
-  </div>
-  {{/if}}
+      </button>
+    </div>
+    {{/if}}
   {{/autoForm}}
 </template>
 
@@ -79,8 +79,8 @@
 </template>
 
 <template name="afDeleteButton_plain">
-  {{#autoForm collection=atts.collection type="remove" doc=atts.doc}}
-  <button type="submit">{{#with content}}this{{else}}Delete{{/with}}</button>
+  {{#autoForm collection=collection type="remove" doc=doc}}
+  <button type="submit" {{atts}}>{{#if ../contentBlock}}{{> ../contentBlock}}{{else}}Delete{{/if}}</button>
   {{/autoForm}}
 </template>
 
@@ -93,12 +93,12 @@
     {{/each}}
   </fieldset>
   {{else}}
-  <div class="{{#if afFieldIsInvalid name=atts.name autoform=autoform}}has-error{{/if}}">
+  <div class="{{#if afFieldIsInvalid name=afFieldIsInvalidAtts.name autoform=afFieldIsInvalidAtts.autoform}}has-error{{/if}}">
     {{#unless skipLabel}}
-    {{> afFieldLabel labelAtts}}
+    {{> afFieldLabel afFieldLabelAtts}}
     {{/unless}}
-    {{> afFieldInput inputAtts}}
-    <span>{{{afFieldMessage name=atts.name autoform=autoform}}}</span>
+    {{> afFieldInput afFieldInputAtts}}
+    <span>{{{afFieldMessage name=afFieldMessageAtts.name autoform=afFieldMessageAtts.autoform}}}</span>
   </div>
   {{/if}}
 </template>

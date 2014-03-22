@@ -354,5 +354,31 @@ Utility = {
     var tPart = dtString.substring(10, 11);
     var timePart = dtString.substring(11, dtString.length);
     return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart);
+  },
+  /**
+   * @method Utility.normalizeContext
+   * @private
+   * @param  {Object} context A context object, potentially with an `atts` or `autoform` property.
+   * @param {String} name The name of the helper or component we're calling from, for in a potential error message.
+   * @return {Object} Normalized context object
+   *
+   * Returns an object with `afc`, `af`, and `atts` properties, normalized from whatever object is passed in.
+   * This helps deal with the fact that we have to pass the ancestor autoform's context to different
+   * helpers and components in different ways, but in all cases we want to get access to it and throw
+   * an error if we can't find an autoform context.
+   */
+  normalizeContext: function autoFormNormalizeContext(context, name) {
+    context = context || {};
+    var atts = context.atts || context;
+    var afContext = atts.autoform || context.autoform;
+    if (!afContext || !afContext._af) {
+      throw new Error(name + " must be used within an autoForm block");
+    }
+
+    return {
+      afc: afContext,
+      af: afContext._af,
+      atts: atts
+    };
   }
 };
