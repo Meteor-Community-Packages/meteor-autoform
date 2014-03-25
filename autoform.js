@@ -307,6 +307,10 @@ Template.autoForm.destroyed = function autoFormDestroyed() {
  * quickForm
  */
 
+UI.registerHelper('quickForm', function () {
+  throw new Error('Use the new syntax {{> quickForm}} rather than {{quickForm}}');
+});
+
 Template.quickForm.formFields = function quickFormFields() {
   var context = this;
   var ss = context._af.ss;
@@ -466,7 +470,7 @@ Template.quickForm.afContext = function autoFormContext() {
  * afFieldLabel
  */
 
-Handlebars.registerHelper('afFieldLabel', function () {
+UI.registerHelper('afFieldLabel', function () {
   throw new Error('Use the new syntax {{> afFieldLabel name="name"}} rather than {{afFieldLabel "name"}}');
 });
 
@@ -479,7 +483,7 @@ Template.afFieldLabel.label = function getLabel() {
  * afFieldSelect
  */
 
-Handlebars.registerHelper('afFieldSelect', function () {
+UI.registerHelper('afFieldSelect', function () {
   throw new Error('Use the new syntax {{> afFieldSelect name="name"}} rather than {{afFieldSelect "name"}}');
 });
 
@@ -494,7 +498,7 @@ Template.afFieldSelect.inputContext = function afFieldSelectInputContext(options
  * afFieldInput
  */
 
-Handlebars.registerHelper('afFieldInput', function () {
+UI.registerHelper('afFieldInput', function () {
   throw new Error('Use the new syntax {{> afFieldInput name="name"}} rather than {{afFieldInput "name"}}');
 });
 
@@ -550,7 +554,7 @@ Template.afFieldInput.inputContext = function (options) {
  * afDeleteButton
  */
 
-Handlebars.registerHelper('afDeleteButton', function () {
+UI.registerHelper('afDeleteButton', function () {
   throw new Error('Use the syntax {{> afDeleteButton collection=collection doc=doc}}');
 });
 
@@ -562,7 +566,7 @@ Template.afDeleteButton.innerContext = function afDeleteButtonInnerContext(ctx, 
  * afQuickField
  */
 
-Handlebars.registerHelper('afQuickField', function () {
+UI.registerHelper('afQuickField', function () {
   throw new Error('Use the new syntax {{> afQuickField name="name"}} rather than {{afQuickField "name"}}');
 });
 
