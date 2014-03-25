@@ -7,7 +7,7 @@
 </template>
 
 <template name="quickForm">
-  {{#with getTemplate "quickForm" template}}
+  {{#with getTemplate "quickForm" this.template}}
     {{#with ..}}
       {{> ..}}
     {{/with}}
@@ -15,7 +15,7 @@
 </template>
 
 <template name="afQuickField">
-  {{#with getTemplate "afQuickField" template}}
+  {{#with getTemplate "afQuickField" this.template}}
     {{! find autoform context up to 5 levels back}}
     {{#with _af_findAutoForm 'afFieldLabel' ../.. ../../.. ../../../.. ../../../../.. ../../../../../..}}
       {{#with innerContext autoform=this atts=../..}}
@@ -52,7 +52,7 @@
 </template>
 
 <template name="afFieldLabel">
-  {{#with getTemplate "afFieldLabel" template}}
+  {{#with getTemplate "afFieldLabel" this.template}}
     {{! find autoform context up to 5 levels back}}
     {{#with _af_findAutoForm 'afFieldLabel' ../.. ../../.. ../../../.. ../../../../.. ../../../../../..}}
       {{#with autoform=this atts=../..}}
@@ -63,7 +63,7 @@
 </template>
 
 <template name="afDeleteButton">
-  {{#with getTemplate "afDeleteButton" template}}
+  {{#with getTemplate "afDeleteButton" this.template}}
     {{#with innerContext .. UI.contentBlock}}
       {{> ..}}
     {{/with}}
