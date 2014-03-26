@@ -8,7 +8,7 @@
 
 <template name="quickForm">
   {{#with getTemplate "quickForm" this.template}}
-    {{#with ..}}
+    {{#with qfContext ..}}
       {{> ..}}
     {{/with}}
   {{/with}}
@@ -55,7 +55,7 @@
   {{#with getTemplate "afFieldLabel" this.template}}
     {{! find autoform context up to 5 levels back}}
     {{#with _af_findAutoForm 'afFieldLabel' ../.. ../../.. ../../../.. ../../../../.. ../../../../../..}}
-      {{#with autoform=this atts=../..}}
+      {{#with labelContext this ../..}}
         {{> ../..}}
       {{/with}}
     {{/with}}

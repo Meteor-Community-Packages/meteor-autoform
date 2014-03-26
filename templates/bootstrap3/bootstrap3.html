@@ -1,9 +1,9 @@
 <template name="quickForm_bootstrap3">
-  {{#autoForm afContext}}
-    {{#each formFields}}
+  {{#autoForm qfAutoFormContext}}
+    {{#each qfFormFields}}
     {{> afQuickField}}
     {{/each}}
-    {{#if needsButton}}
+    {{#if qfNeedsButton}}
     <div>
       <button {{submitButtonAtts}}>
       {{#with buttonContent}}

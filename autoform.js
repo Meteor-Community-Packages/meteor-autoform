@@ -184,7 +184,7 @@ AutoForm.getFormValues = function (formId) {
  * Shared
  */
 
-UI.body._af_findAutoForm = function afFindAutoForm(name) {
+UI.registerHelper('_af_findAutoForm', function afFindAutoForm(name) {
   var afContext, i = 1;
 
   do {
@@ -196,7 +196,7 @@ UI.body._af_findAutoForm = function afFindAutoForm(name) {
     throw new Error(name + " must be used within an autoForm block");
 
   return afContext;
-};
+});
 
 Template.afFieldInput.getTemplate =
 Template.afFieldLabel.getTemplate =
@@ -311,7 +311,19 @@ UI.registerHelper('quickForm', function () {
   throw new Error('Use the new syntax {{> quickForm}} rather than {{quickForm}}');
 });
 
-Template.quickForm.formFields = function quickFormFields() {
+Template.quickForm.qfContext = function (atts) {
+  // Pass along quickForm context to autoForm context, minus a few
+  // properties that are specific to quickForms.
+  var qfAutoFormContext = _.omit(atts, "buttonContent", "buttonClasses", "fields");
+
+  return _.extend({
+    qfFormFields: qfFormFields,
+    qfNeedsButton: qfNeedsButton,
+    qfAutoFormContext: qfAutoFormContext
+  }, atts);
+};
+
+function qfFormFields() {
   var context = this;
   var ss = context._af.ss;
 
@@ -327,7 +339,7 @@ Template.quickForm.formFields = function quickFormFields() {
   fieldList = fieldList || ss.firstLevelSchemaKeys();
 
   return quickFieldFormFields(fieldList, context._af);
-};
+}
 
 function quickFieldFormFields(fieldList, afContext) {
   var ss = afContext.ss;
@@ -412,7 +424,7 @@ function quickFieldFormFields(fieldList, afContext) {
   });
 }
 
-Template.quickForm.needsButton = function autoFormNeedsButton() {
+function qfNeedsButton() {
   var context = this;
   var needsButton = true;
 
@@ -427,13 +439,7 @@ Template.quickForm.needsButton = function autoFormNeedsButton() {
   }
 
   return needsButton;
-};
-
-Template.quickForm.afContext = function autoFormContext() {
-  // Pass along quickForm context to autoForm context, minus a few
-  // properties that are specific to quickForms.
-  return _.omit(this, "buttonContent", "buttonClasses", "fields");
-};
+}
 
 // findComponentWithProp = function (id, comp) {
 //   while (comp) {
@@ -474,9 +480,17 @@ UI.registerHelper('afFieldLabel', function () {
   throw new Error('Use the new syntax {{> afFieldLabel name="name"}} rather than {{afFieldLabel "name"}}');
 });
 
-Template.afFieldLabel.label = function getLabel() {
+function getLabel() {
   var c = Utility.normalizeContext(this, "afFieldLabel");
   return c.af.ss.label(c.atts.name);
+}
+
+Template.afFieldLabel.labelContext = function getLabelContext(autoform, atts) {
+  return {
+    autoform: autoform,
+    atts: atts,
+    label: getLabel
+  };
 };
 
 /*
@@ -634,7 +648,7 @@ Template.afQuickField.innerContext = function afQuickFieldInnerContext(options) 
  * afFieldMessage
  */
 
-UI.body.afFieldMessage = function autoFormFieldMessage(options) {
+UI.registerHelper('afFieldMessage', function autoFormFieldMessage(options) {
   //help users transition from positional name arg
   if (typeof options === "string") {
     throw new Error('Use the new syntax {{afFieldMessage name="name"}} rather than {{afFieldMessage "name"}}');
@@ -649,13 +663,14 @@ UI.body.afFieldMessage = function autoFormFieldMessage(options) {
 
   Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
   return ss.namedContext(afContext.formId).keyErrorMessage(hash.name);
-};
+});
 
 /*
  * afFieldIsInvalid
  */
 
-UI.body.afFieldIsInvalid = function autoFormFieldIsInvalid(options) {
+
+UI.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
   //help users transition from positional name arg
   if (typeof options === "string") {
     throw new Error('Use the new syntax {{#if afFieldIsInvalid name="name"}} rather than {{#if afFieldIsInvalid "name"}}');
@@ -670,7 +685,7 @@ UI.body.afFieldIsInvalid = function autoFormFieldIsInvalid(options) {
 
   Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
   return ss.namedContext(afContext.formId).keyIsInvalid(hash.name);
-};
+});
 
 /*
  * Events
