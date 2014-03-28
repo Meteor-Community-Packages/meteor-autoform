@@ -96,7 +96,7 @@ __Returns__  *{string[]}*
 
 Gets a string array of all the selected values in a given `select` DOM element.
 
-> ```getSelectValues: function getSelectValues(select) { ...``` [utility.js:106](utility.js#L106)
+> ```getSelectValues: function getSelectValues(select) { ...``` [utility.js:135](utility.js#L135)
 
 
 -
@@ -116,7 +116,7 @@ __Returns__  *{String|Number}*
 If the given string can be converted to a number, returns the number.
 Otherwise returns the string.
 
-> ```maybeNum: function maybeNum(val) { ...``` [utility.js:129](utility.js#L129)
+> ```maybeNum: function maybeNum(val) { ...``` [utility.js:158](utility.js#L158)
 
 
 -
@@ -136,7 +136,7 @@ __Returns__  *{Any}*
 If `obj` is a string, returns the value of the property with that
 name on the `window` object. Otherwise returns `obj`.
 
-> ```lookup: function lookup(obj) { ...``` [utility.js:147](utility.js#L147)
+> ```lookup: function lookup(obj) { ...``` [utility.js:176](utility.js#L176)
 
 
 -
@@ -159,7 +159,7 @@ Returns the schema definitions object from a SimpleSchema instance. Equivalent t
 `ss.schema(name)` but handles throwing errors if `name` is not a string or is not a valid
 field name for this SimpleSchema instance.
 
-> ```getDefs: function getDefs(ss, name) { ...``` [utility.js:167](utility.js#L167)
+> ```getDefs: function getDefs(ss, name) { ...``` [utility.js:196](utility.js#L196)
 
 
 -
@@ -188,7 +188,7 @@ __TODO__
 ```
 
 
-> ```objAffectsKey: function objAffectsKey(obj, key) { ...``` [utility.js:185](utility.js#L185)
+> ```objAffectsKey: function objAffectsKey(obj, key) { ...``` [utility.js:214](utility.js#L214)
 
 
 -
@@ -210,7 +210,29 @@ __Returns__  *{Object}*
 
 Takes a flat object and returns an expanded version of it.
 
-> ```expandObj: function expandObj(doc) { ...``` [utility.js:197](utility.js#L197)
+> ```expandObj: function expandObj(doc) { ...``` [utility.js:226](utility.js#L226)
+
+
+-
+
+### <a name="Utility.compactArrays"></a>*utility*.compactArrays({Object})&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+*This method __compactArrays__ is defined in `Utility`*
+
+__Arguments__
+
+* __{Object}__ *{any}*  
+
+ obj
+
+
+__Returns__  *{undefined}*
+
+
+Edits the object by reference, compacting any arrays at any level recursively.
+
+> ```compactArrays: function compactArrays(obj) { ...``` [utility.js:263](utility.js#L263)
 
 
 -
@@ -232,7 +254,7 @@ __Returns__  *{Boolean}*
 
 Returns `true` if dateString is a "valid date string"
 
-> ```isValidDateString: function isValidDateString(dateString) { ...``` [utility.js:234](utility.js#L234)
+> ```isValidDateString: function isValidDateString(dateString) { ...``` [utility.js:284](utility.js#L284)
 
 
 -
@@ -254,7 +276,7 @@ __Returns__  *{Boolean}*
 
 Returns `true` if timeString is a "valid time string"
 
-> ```isValidTimeString: function isValidTimeString(timeString) { ...``` [utility.js:246](utility.js#L246)
+> ```isValidTimeString: function isValidTimeString(timeString) { ...``` [utility.js:296](utility.js#L296)
 
 
 -
@@ -275,7 +297,7 @@ __Returns__  *{String}*
 
 Returns a "valid date string" representing the local date.
 
-> ```dateToDateString: function dateToDateString(date) { ...``` [utility.js:263](utility.js#L263)
+> ```dateToDateString: function dateToDateString(date) { ...``` [utility.js:313](utility.js#L313)
 
 
 -
@@ -296,7 +318,7 @@ __Returns__  *{String}*
 
 Returns a "valid date string" representing the date converted to the UTC time zone.
 
-> ```dateToDateStringUTC: function dateToDateStringUTC(date) { ...``` [utility.js:282](utility.js#L282)
+> ```dateToDateStringUTC: function dateToDateStringUTC(date) { ...``` [utility.js:332](utility.js#L332)
 
 
 -
@@ -322,7 +344,7 @@ time (e.g. omitting the seconds component entirely if the given time is zero sec
 http:
 http:
 
-> ```dateToNormalizedForcedUtcGlobalDateAndTimeString: function dateToNormalizedForcedUtcGlobalDateAndTimeString(date) { ...``` [utility.js:306](utility.js#L306)
+> ```dateToNormalizedForcedUtcGlobalDateAndTimeString: function dateToNormalizedForcedUtcGlobalDateAndTimeString(date) { ...``` [utility.js:356](utility.js#L356)
 
 
 -
@@ -343,7 +365,7 @@ __Returns__  *{Boolean}*
 
 Returns true if dateString is a "valid normalized forced-UTC global date and time string"
 
-> ```isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString(dateString) { ...``` [utility.js:317](utility.js#L317)
+> ```isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString(dateString) { ...``` [utility.js:367](utility.js#L367)
 
 
 -
@@ -366,7 +388,7 @@ __Returns__  *{String}*
 
 Returns a "valid normalized local date and time string".
 
-> ```dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString(date, offset) { ...``` [utility.js:336](utility.js#L336)
+> ```dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString(date, offset) { ...``` [utility.js:386](utility.js#L386)
 
 
 -
@@ -387,7 +409,37 @@ __Returns__  *{Boolean}*
 
 Returns true if dtString is a "valid normalized local date and time string"
 
-> ```isValidNormalizedLocalDateAndTimeString: function isValidNormalizedLocalDateAndTimeString(dtString) { ...``` [utility.js:349](utility.js#L349)
+> ```isValidNormalizedLocalDateAndTimeString: function isValidNormalizedLocalDateAndTimeString(dtString) { ...``` [utility.js:399](utility.js#L399)
+
+
+-
+
+### <a name="Utility.normalizeContext"></a>*utility*.normalizeContext({Object}, name)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+*This method __normalizeContext__ is defined in `Utility`*
+
+__Arguments__
+
+* __{Object}__ *{any}*  
+
+ context A context object, potentially with an `atts` or `autoform` property.
+
+* __name__ *{String}*  
+
+ The name of the helper or component we're calling from, for in a potential error message.
+
+
+__Returns__  *{Object}*
+Normalized context object
+
+
+Returns an object with `afc`, `af`, and `atts` properties, normalized from whatever object is passed in.
+This helps deal with the fact that we have to pass the ancestor autoform's context to different
+helpers and components in different ways, but in all cases we want to get access to it and throw
+an error if we can't find an autoform context.
+
+> ```normalizeContext: function autoFormNormalizeContext(context, name) { ...``` [utility.js:420](utility.js#L420)
 
 
 ***
@@ -438,7 +490,7 @@ __Returns__  *{undefined}*
 Defines hooks to be used by one or more forms. Extends hooks lists if called multiple times for the same
 form.
 
-> ```AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) { ...``` [autoform.js:18](autoform.js#L18)
+> ```AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) { ...``` [autoform.js:19](autoform.js#L19)
 
 
 -
@@ -457,7 +509,7 @@ __Returns__  *{undefined}*
 Defines hooks by form id. Extends hooks lists if called multiple times for the same
 form.
 
-> ```AutoForm.hooks = function autoFormHooks(hooks) { ...``` [autoform.js:54](autoform.js#L54)
+> ```AutoForm.hooks = function autoFormHooks(hooks) { ...``` [autoform.js:55](autoform.js#L55)
 
 
 -
@@ -475,7 +527,7 @@ __Returns__  *{undefined}*
 
 Resets validation for an autoform.
 
-> ```AutoForm.resetForm = function autoFormResetForm(formId) { ...``` [autoform.js:68](autoform.js#L68)
+> ```AutoForm.resetForm = function autoFormResetForm(formId) { ...``` [autoform.js:69](autoform.js#L69)
 
 
 -
@@ -490,7 +542,7 @@ __Arguments__
 * __template__ *{String}*  
 
 
-> ```AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(type, template) { ...``` [autoform.js:133](autoform.js#L133)
+> ```AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(type, template) { ...``` [autoform.js:137](autoform.js#L137)
 
 
 -
@@ -509,7 +561,7 @@ Template name
 
 Reactive.
 
-> ```AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(type) { ...``` [autoform.js:152](autoform.js#L152)
+> ```AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(type) { ...``` [autoform.js:156](autoform.js#L156)
 
 
 -
@@ -532,6 +584,10 @@ Returns an object representing the current values of all schema-based fields in 
 The returned object contains two properties, "insertDoc" and "updateDoc", which represent
 the field values as a normal object and as a MongoDB modifier, respectively.
 
-> ```AutoForm.getFormValues = function (formId) { ...``` [autoform.js:1034](autoform.js#L1034)
+> ```AutoForm.getFormValues = function (formId) { ...``` [autoform.js:174](autoform.js#L174)
 
 
+
+-
+Returns schema keys that are direct children of the given schema key
+XXX this could be a method on ss
