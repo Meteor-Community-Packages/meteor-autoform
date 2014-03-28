@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.5.1
+
+Minor fix
+
 ### 0.5.0
 
 Blaze/0.8.0 support and lots more, including breaking changes. Refer to the transition notes at the top of the README. If you're still using Spark (pre-0.8.0), use the 0.4.x version. The old version of autoform can be found on the `spark` branch. It won't receive any more changes, except for critical fixes. Onward!

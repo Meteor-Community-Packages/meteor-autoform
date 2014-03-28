@@ -114,8 +114,6 @@ Utility = {
       }
     });
 
-    console.log(flatDoc);
-
     if (!_.isEmpty(flatDoc)) {
       modifier.$set = flatDoc;
     }
