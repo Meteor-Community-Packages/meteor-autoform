@@ -1,0 +1,129 @@
+<template name="quickForm_bootstrap3">
+  {{#autoForm qfAutoFormContext}}
+    {{#each qfFormFields}}
+    {{> afQuickField}}
+    {{/each}}
+    {{#if qfNeedsButton}}
+    <div>
+      <button {{submitButtonAtts}}>
+      {{#with buttonContent}}
+      {{this}}
+      {{else}}
+      Submit
+      {{/with}}
+      </button>
+    </div>
+    {{/if}}
+  {{/autoForm}}
+</template>
+
+<template name="afFieldLabel_bootstrap3">
+  <label {{atts}}>{{label}}</label>
+</template>
+
+<template name="_afCheckbox_bootstrap3">
+  <div class="checkbox"><label><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+</template>
+
+<template name="afCheckbox_bootstrap3">
+  {{> _afCheckbox_bootstrap3}}
+</template>
+
+<template name="afCheckboxGroup_bootstrap3">
+  {{#each items}}
+    {{> _afCheckbox_bootstrap3}}
+  {{/each}}
+</template>
+
+<template name="_afRadio_bootstrap3">
+  <div class="radio"><label for="{{name}}"><input type="radio" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+</template>
+
+<template name="afRadio_bootstrap3">
+  {{> _afRadio_bootstrap3}}
+</template>
+
+<template name="afRadioGroup_bootstrap3">
+  {{#each items}}
+  {{> _afRadio_bootstrap3}}
+  {{/each}}
+</template>
+
+<template name="afContenteditable_bootstrap3">
+  {{> afContenteditable_plain}}
+</template>
+
+<template name="afFieldSelect_bootstrap3">
+  <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" {{atts}}>
+    {{> contentBlock}}
+  </select>
+</template>
+
+<template name="afSelect_bootstrap3">
+  <select data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" {{atts}}>
+    {{#if firstOption}}
+    <option value="">{{firstOption}}</option>
+    {{/if}}
+    {{#each items}}
+      <option value="{{value}}" {{selected}}>{{label}}</option>
+    {{/each}}
+  </select>
+</template>
+
+<template name="afTextarea_bootstrap3">
+  <textarea data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" {{atts}}>{{value}}</textarea>
+</template>
+
+<template name="afInput_bootstrap3">
+  <input type="{{type}}" data-schema-key="{{name}}" name="{{name}}" class="{{cls}} form-control" value="{{value}}" {{atts}}/>
+</template>
+
+<template name="afDeleteButton_bootstrap3">
+  {{#autoForm collection=collection type="remove" doc=doc}}
+  <button type="submit" {{atts}}>{{#if ../contentBlock}}{{> ../contentBlock}}{{else}}Delete{{/if}}</button>
+  {{/autoForm}}
+</template>
+
+<template name="afQuickField_bootstrap3">
+  <div class="form-group {{#if afFieldIsInvalid name=atts.name autoform=atts.autoform}}has-error{{/if}}">
+    {{#unless skipLabel}}
+    {{> afFieldLabel afFieldLabelAtts}}
+    {{/unless}}
+    {{> afFieldInput afFieldInputAtts}}
+    <span class="help-block">{{{afFieldMessage name=atts.name autoform=atts.autoform}}}</span>
+  </div>
+</template>
+
+<template name="afObjectField_bootstrap3">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">{{label}}</h3>
+    </div>
+    <div class="panel-body">
+      {{#each fields}}
+      {{> afQuickField this}}
+      {{/each}}
+    </div>
+  </div>
+</template>
+
+<template name="afArrayField_bootstrap3">
+  <div class="panel panel-default">
+    <div class="panel-heading">{{this.label}}</div>
+    <ul class="list-group">
+      {{#afEachArrayItem name=this.name}}
+      <li class="list-group-item autoform-array-item">
+        <div class="media">
+          <button class="btn btn-primary autoform-remove-item pull-left" data-autoform-field="{{../name}}"><span class="glyphicon glyphicon-minus"></span></button>
+          <div class="media-body">
+            {{> afQuickField}}
+          </div>
+        </div>
+      </li>
+      {{/afEachArrayItem}}
+      <li class="list-group-item">
+        <button class="btn btn-primary autoform-add-item" data-autoform-field="{{this.name}}"><span class="glyphicon glyphicon-plus"></span></button>
+      </li>
+    </ul>
+  </div>
+</template>

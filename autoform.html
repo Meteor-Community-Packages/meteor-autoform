@@ -1,63 +1,114 @@
-<template name="_autoForm">
-  <form{{{atts}}}>
-    {{{content}}}
+<template name="autoForm">
+  <form {{atts}}>
+  	{{#with innerContext ..}}
+    {{> UI.contentBlock this}}
+    {{/with}}
   </form>
 </template>
 
-<template name="_quickForm">
-  {{#autoForm qfHash=qfHash}}
-  {{#each ../formFields}}
-  {{#if ../../isReadOnly}}
-  {{afQuickField ../this.name autoform=../../this options=../this.options template=../../../template readonly=""}}
-  {{else}}
-  {{#if ../../../isDisabled}}
-  {{afQuickField ../../this.name autoform=../../../this options=../../this.options template=../../../../template disabled=""}}
-  {{else}}
-  {{#if ../../this.isGroup}}
-  <fieldset>
-  <legend>{{../../../this.label}}</legend>
-  {{#each ../../../this.formFields}}
-  {{afQuickField this.name autoform=../../../../../this options=../../../../this.options template=../../../../../../template}}
-  {{/each}}
-  </fieldset>
-  {{else}}
-  {{afQuickField ../../../this.name autoform=../../../../this options=../../../this.options template=../../../../../template}}
-  {{/if}}
-  {{/if}}
-  {{/if}}
-  {{/each}}
-  <div>
-    {{#if ../doInsert}}
-    <button type="submit" class="{{../../buttonClasses}} insert">{{../../buttonContent}}</button>
-    {{/if}}
-    {{#if ../doUpdate}}
-    <button type="submit" class="{{../../buttonClasses}} update">{{../../buttonContent}}</button>
-    {{/if}}
-    {{#if ../doRemove}}
-    <button type="submit" class="{{../../buttonClasses}} remove">{{../../buttonContent}}</button>
-    {{/if}}
-    {{#if ../doMethod}}
-    <button type="submit" data-meteor-method="{{../../method}}" class="{{../../buttonClasses}}">{{../../buttonContent}}</button>
-    {{/if}}
-    {{#if ../doNormal}}
-    <button type="submit" class="{{../../buttonClasses}}">{{../../buttonContent}}</button>
-    {{/if}}
-  </div>
-  {{/autoForm}}
+<template name="quickForm">
+  {{#with getTemplate "quickForm" this.template}}
+    {{#with qfContext ..}}
+      {{> ..}}
+    {{/with}}
+  {{/with}}
 </template>
 
-<template name="_afQuickField">
-  {{#if useFrameworkBootstrap3}}
-  <div class="form-group{{#if afFieldIsInvalid name autoform=autoform}} has-error{{/if}}">
-    {{{labelHtml}}}
-    {{{inputHtml}}}
-    <span class="help-block">{{{afFieldMessage name autoform=autoform}}}</span>
-  </div>
+<template name="afQuickField">
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afQuickField' .. ../.. ../../.. ../../../.. ../../../../..}}
+  {{#if isGroup autoform=this atts=..}}
+    {{> afObjectField ..}}
   {{else}}
-  <div>
-    {{{labelHtml}}}
-    {{{inputHtml}}}
-    <span>{{{afFieldMessage name autoform=autoform}}}</span>
-  </div>
+    {{#if isFieldArray autoform=this atts=..}}
+      {{> afArrayField ..}}
+    {{else}}
+      {{#with innerContext autoform=this atts=..}}
+        {{#with getTemplate "afQuickField" ../../template}}
+          {{#with ..}}
+            {{> ..}}
+          {{/with}}
+        {{/with}}
+      {{/with}}
+    {{/if}}
   {{/if}}
+  {{/with}}
+</template>
+
+<template name="afObjectField">
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afObjectField' .. ../.. ../../.. ../../../.. ../../../../..}}
+    {{#with getTemplate "afObjectField" ../template}}
+      {{#with innerContext autoform=.. atts=../..}}
+        {{> ..}}
+      {{/with}}
+    {{/with}}
+  {{/with}}
+</template>
+
+<template name="afArrayField">
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afArrayField' .. ../.. ../../.. ../../../.. ../../../../..}}
+    {{#with getTemplate "afArrayField" ../template}}
+      {{#with innerContext autoform=.. atts=../..}}
+        {{> ..}}
+      {{/with}}
+    {{/with}}
+  {{/with}}
+</template>
+
+<template name="afFieldInput">
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afFieldInput' .. ../.. ../../.. ../../../.. ../../../../..}}
+	  {{#with inputOuterContext autoform=this atts=..}}
+	    {{#with getTemplate templateType atts.template}}
+	      {{#with inputContext outerContext=..}}
+	        {{> ..}}
+	      {{/with}}
+	    {{/with}}
+	  {{/with}}
+  {{/with}}
+</template>
+
+<template name="afFieldSelect">
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afFieldSelect' .. ../.. ../../.. ../../../.. ../../../../..}}
+	  {{#with inputOuterContext autoform=this atts=..}}
+	    {{#with getTemplate "afFieldSelect" atts.template}}
+	      {{#with inputContext outerContext=.. contentBlock=UI.contentBlock}}
+	        {{> ..}}
+	      {{/with}}
+	    {{/with}}
+	  {{/with}}
+  {{/with}}
+</template>
+
+<template name="afFieldLabel">
+  {{#with getTemplate "afFieldLabel" this.template}}
+    {{! find autoform context up to 5 levels back}}
+    {{#with _af_findAutoForm 'afFieldLabel' ../.. ../../.. ../../../.. ../../../../.. ../../../../../..}}
+      {{#with labelContext this ../..}}
+        {{> ../..}}
+      {{/with}}
+    {{/with}}
+  {{/with}}
+</template>
+
+<template name="afDeleteButton">
+  {{#with getTemplate "afDeleteButton" this.template}}
+    {{#with innerContext .. UI.contentBlock}}
+      {{> ..}}
+    {{/with}}
+  {{/with}}
+</template>
+
+<template name="afEachArrayItem">
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afEachArrayItem' .. ../.. ../../.. ../../../.. ../../../../..}}
+    {{#with innerContext ../name this}}
+      {{#each this}}
+      {{> UI.contentBlock this}}
+      {{/each}}
+    {{/with}}
+  {{/with}}
 </template>
