@@ -1,9 +1,10 @@
 var defaultFormId = "_afGenericID";
 var formPreserve = new FormPreserve("autoforms");
-var formSchemas = {}; //keep a reference to simplify resetting validation
+var formData = {}; //for looking up autoform data by form ID
 var templatesById = {}; //keep a reference of autoForm templates by form `id` for AutoForm.getFormValues
+var arrayFields = {}; //track # of array fields per form
 
-AutoForm = {};
+AutoForm = {}; //exported
 
 /**
  * @method AutoForm.addHooks
@@ -72,8 +73,7 @@ AutoForm.resetForm = function autoFormResetForm(formId) {
 
   formPreserve.unregisterForm(formId);
 
-  var simpleSchema = formSchemas[formId];
-  simpleSchema && simpleSchema.namedContext(formId).resetValidation();
+  formData[formId] && formData[formId].ss && formData[formId].ss.namedContext(formId).resetValidation();
   // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
   // there is no need to reset validation for it. No error need be thrown.
 };
@@ -106,7 +106,9 @@ var defaultTypeTemplates = {
   afRadio: null,
   afInput: null,
   afDeleteButton: null,
-  afQuickField: null
+  afQuickField: null,
+  afObjectField: null,
+  afArrayField: null
 };
 deps.defaultTypeTemplates = {
   quickForm: new Deps.Dependency,
@@ -121,7 +123,9 @@ deps.defaultTypeTemplates = {
   afRadio: new Deps.Dependency,
   afInput: new Deps.Dependency,
   afDeleteButton: new Deps.Dependency,
-  afQuickField: new Deps.Dependency
+  afQuickField: new Deps.Dependency,
+  afObjectField: new Deps.Dependency,
+  afArrayField: new Deps.Dependency
 };
 
 /**
@@ -203,16 +207,30 @@ Template.afFieldLabel.getTemplate =
 Template.afFieldSelect.getTemplate =
 Template.afDeleteButton.getTemplate =
 Template.afQuickField.getTemplate =
+Template.afObjectField.getTemplate =
+Template.afArrayField.getTemplate =
 Template.quickForm.getTemplate =
 function afGenericGetTemplate(templateType, templateName) {
+  var result;
+
+  var defaultTemplate = AutoForm.getDefaultTemplateForType(templateType) || AutoForm.getDefaultTemplate();
+
   // Determine template name
-  var template = templateName || AutoForm.getDefaultTemplateForType(templateType) || AutoForm.getDefaultTemplate();
+  if (templateName) {
+    var result = Template[templateType + '_' + templateName];
+    if (!result) {
+      console.warn(templateType + ': "' + templateName + '" is not a valid template name. Falling back to default template, "' + defaultTemplate + '".');
+    }
+  }
+
+  if (!result) {
+    result = Template[templateType + '_' + defaultTemplate];
+    if (!result) {
+      throw new Error(templateType + ': "' + defaultTemplate + '" is not a valid template name');
+    }
+  }
 
   // Return the template instance that we want to use
-  var result = Template[templateType + '_' + template];
-  if (!result) {
-    throw new Error(templateType + ': "' + template + '" is not a valid template name');
-  }
   return result;
 };
 
@@ -230,7 +248,7 @@ Template.autoForm.atts = function autoFormTplAtts() {
   }
   // After removing all of the props we know about, everything else should
   // become a form attribute.
-  return _.omit(context, "schema", "collection", "validation", "doc", "resetOnSuccess");
+  return _.omit(context, "schema", "collection", "validation", "doc", "resetOnSuccess", "type");
 };
 
 Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) {
@@ -244,9 +262,6 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
   if (!Match.test(ss, SimpleSchema)) {
     throw new Error("autoForm with id " + formId + " needs either 'schema' or 'collection' attribute");
   }
-
-  // Cache a reference to help with resetting validation later
-  formSchemas[formId] = ss;
 
   // Retain doc values after a "hot code push", if possible
   var retrievedDoc = formPreserve.getDocument(formId);
@@ -268,15 +283,20 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
   }
 
   // Set up the context to be used for everything within the autoform.
-  var innerContext = {_af: {}};
-  innerContext._af.formId = formId;
-  innerContext._af.collection = collection;
-  innerContext._af.ss = ss;
-  innerContext._af.doc = context.doc;
-  innerContext._af.mDoc = mDoc;
-  innerContext._af.validationType = context.validation || "submitThenKeyup";
-  innerContext._af.submitType = context.type;
-  innerContext._af.resetOnSuccess = context.resetOnSuccess;
+  var innerContext = {_af: {
+    formId: formId,
+    collection: collection,
+    ss: ss,
+    doc: context.doc,
+    mDoc: mDoc,
+    validationType: context.validation || "submitThenKeyup",
+    submitType: context.type,
+    resetOnSuccess: context.resetOnSuccess
+  }};
+
+  // Cache context for lookup by formId
+  formData[formId] = innerContext._af;
+
   // Preserve outer context, allowing access within autoForm block without needing ..
   _.extend(innerContext, outerContext);
   return innerContext;
@@ -299,6 +319,16 @@ Template.autoForm.destroyed = function autoFormDestroyed() {
     delete templatesById[formId];
   }
 
+  // Remove from data list
+  if (formData[formId]) {
+    delete formData[formId];
+  }
+
+  // Remove from array fields list
+  if (arrayFields[formId]) {
+    delete arrayFields[formId];
+  }
+
   // Unregister form preservation
   formPreserve.unregisterForm(formId);
 };
@@ -307,11 +337,11 @@ Template.autoForm.destroyed = function autoFormDestroyed() {
  * quickForm
  */
 
-UI.registerHelper('quickForm', function () {
+UI.registerHelper('quickForm', function quickFormHelper() {
   throw new Error('Use the new syntax {{> quickForm}} rather than {{quickForm}}');
 });
 
-Template.quickForm.qfContext = function (atts) {
+Template.quickForm.qfContext = function quickFormContext(atts) {
   // Pass along quickForm context to autoForm context, minus a few
   // properties that are specific to quickForms.
   var qfAutoFormContext = _.omit(atts, "buttonContent", "buttonClasses", "fields");
@@ -338,13 +368,15 @@ function qfFormFields() {
   }
   fieldList = fieldList || ss.firstLevelSchemaKeys();
 
-  return quickFieldFormFields(fieldList, context._af);
+  return quickFieldFormFields(fieldList, context._af, true);
 }
 
-function quickFieldFormFields(fieldList, afContext) {
+function quickFieldFormFields(fieldList, afContext, useAllowedValuesAsOptions) {
   var ss = afContext.ss;
+  var addedFields = [];
 
-  function shouldIncludeField(field) {
+  // Filter out fields we truly don't want
+  fieldList = _.filter(fieldList, function shouldIncludeField(field) {
     var fieldDefs = ss.schema(field);
 
     // Don't include fields with denyInsert=true when it's an insert form
@@ -355,59 +387,14 @@ function quickFieldFormFields(fieldList, afContext) {
     if (fieldDefs.denyUpdate && afContext.submitType === "update")
       return false;
 
-    // Don't include fields with array placeholders
-    if (field.indexOf("$") !== -1)
-      return false;
-
-    // Don't include fields with more than one level of descendents
-    if (field.split(".").length > 2)
-      return false;
-
     return true;
-  }
+  });
 
-  var addedFields = [];
-  function infoForField(field, extendedProps) {
-
-    if (_.contains(addedFields, field))
-      return;
-
-    var fieldDefs = ss.schema(field);
-
-    var info;
-    if (fieldDefs.type === Object) {
-      info = {
-        name: field,
-        label: ss.label(field)
-      };
-
-      var fields = _.filter(ss._schemaKeys, function autoFormFormFieldsSchemaEach(key) {
-        if (key.indexOf(field + ".") === 0) {
-          return true;
-        }
-      });
-
-      info.formFields = quickFieldFormFields(fields, afContext);
-      addedFields = addedFields.concat(fields);
-    } else {
-      info = {name: field};
-      // If there are allowedValues defined, use them as select element options
-      var av = fieldDefs.type === Array ? ss.schema(field + ".$").allowedValues : fieldDefs.allowedValues;
-      if (_.isArray(av)) {
-        info.options = "allowed";
-      }
-      addedFields.push(field);
-    }
-
-    return _.extend(info, extendedProps);
-  }
-
-  // Filter out fields we truly don't want
-  fieldList = _.filter(fieldList, shouldIncludeField);
-
+  // If we've filtered out all fields, we're done
   if (!fieldList || !fieldList.length)
     return [];
 
+  // Define extra properties to be added to all fields
   var extendedAtts = {
     autoform: {_af: afContext}
   };
@@ -416,6 +403,33 @@ function quickFieldFormFields(fieldList, afContext) {
     extendedAtts.disabled = "";
   } else if (afContext.submitType === "readonly") {
     extendedAtts.readonly = "";
+  }
+
+  // Define a function to get the necessary info for each requested field
+  function infoForField(field, extendedProps) {
+
+    // Ensure fields are not added more than once
+    if (_.contains(addedFields, field))
+      return;
+
+    // Get schema definitions for this field
+    var fieldDefs = ss.schema(field);
+
+    var info = {name: field};
+
+    // If there are allowedValues defined, use them as select element options
+    if (useAllowedValuesAsOptions) {
+      var av = fieldDefs.type === Array ? ss.schema(field + ".$").allowedValues : fieldDefs.allowedValues;
+      if (_.isArray(av)) {
+        info.options = "allowed";
+      }
+    }
+
+    addedFields.push(field);
+
+    // Return the field info along with the extra properties that
+    // all fields should have
+    return _.extend(info, extendedProps);
   }
 
   // Return info for all requested fields
@@ -441,42 +455,11 @@ function qfNeedsButton() {
   return needsButton;
 }
 
-// findComponentWithProp = function (id, comp) {
-//   while (comp) {
-//     if (typeof comp[id] !== 'undefined')
-//       return comp;
-//     comp = comp.parent;
-//   }
-//   return null;
-// };
-
-// getAutoFormData = function (comp) {
-//   comp = findComponentWithProp('data', comp);
-//   if (!comp) {
-//     return null;
-//   }
-//   var data = (typeof comp.data === 'function' ? comp.data() : comp.data);
-//   if (data._af) {
-//     return data;
-//   } else if (comp.parent) {
-//     return getAutoFormData(comp.parent);
-//   } else {
-//     return null;
-//   }
-// };
-
-// Template.afFieldLabel.created = function () {
-//   var af = getAutoFormData(this.__component__);
-//   if (this.data) {
-//     this.data.autoform = af;
-//   }
-// };
-
 /*
  * afFieldLabel
  */
 
-UI.registerHelper('afFieldLabel', function () {
+UI.registerHelper('afFieldLabel', function afFieldLabelHelper() {
   throw new Error('Use the new syntax {{> afFieldLabel name="name"}} rather than {{afFieldLabel "name"}}');
 });
 
@@ -497,7 +480,7 @@ Template.afFieldLabel.labelContext = function getLabelContext(autoform, atts) {
  * afFieldSelect
  */
 
-UI.registerHelper('afFieldSelect', function () {
+UI.registerHelper('afFieldSelect', function afFieldSelectHelper() {
   throw new Error('Use the new syntax {{> afFieldSelect name="name"}} rather than {{afFieldSelect "name"}}');
 });
 
@@ -512,7 +495,7 @@ Template.afFieldSelect.inputContext = function afFieldSelectInputContext(options
  * afFieldInput
  */
 
-UI.registerHelper('afFieldInput', function () {
+UI.registerHelper('afFieldInput', function afFieldInputHelper() {
   throw new Error('Use the new syntax {{> afFieldInput name="name"}} rather than {{afFieldInput "name"}}');
 });
 
@@ -568,7 +551,7 @@ Template.afFieldInput.inputContext = function (options) {
  * afDeleteButton
  */
 
-UI.registerHelper('afDeleteButton', function () {
+UI.registerHelper('afDeleteButton', function afDeleteButtonHelper() {
   throw new Error('Use the syntax {{> afDeleteButton collection=collection doc=doc}}');
 });
 
@@ -577,10 +560,59 @@ Template.afDeleteButton.innerContext = function afDeleteButtonInnerContext(ctx, 
 };
 
 /*
+ * afArrayField
+ */
+
+UI.registerHelper('afArrayField', function afArrayFieldHelper() {
+  throw new Error('Use the syntax {{> afArrayField name="name"}} rather than {{afArrayField "name"}}');
+});
+
+Template.afArrayField.innerContext = function (options) {
+  var c = Utility.normalizeContext(options.hash, "afArrayField");
+  var name = c.atts.name;
+  var ss = c.af.ss;
+
+  return {
+    name: name,
+    label: ss.label(name)
+  };
+};
+
+/*
+ * afObjectField
+ */
+
+UI.registerHelper('afObjectField', function afObjectFieldHelper() {
+  throw new Error('Use the syntax {{> afObjectField name="name"}} rather than {{afObjectField "name"}}');
+});
+
+Template.afObjectField.innerContext = function (options) {
+  var c = Utility.normalizeContext(options.hash, "afObjectField");
+  var name = c.atts.name;
+  var ss = c.af.ss;
+
+  // Get list of field names that are descendants of this field's name
+  var fields = autoFormChildKeys(ss, name);
+
+  // Tack child field name on to end of parent field name. This
+  // ensures that we keep the desired array index for array items.
+  fields = _.map(fields, function (field) {
+    return name + "." + field;
+  });
+
+  var formFields = quickFieldFormFields(fields, c.af, true);
+
+  return {
+    fields: formFields,
+    label: ss.label(name)
+  };
+};
+
+/*
  * afQuickField
  */
 
-UI.registerHelper('afQuickField', function () {
+UI.registerHelper('afQuickField', function afQuickFieldHelper() {
   throw new Error('Use the new syntax {{> afQuickField name="name"}} rather than {{afQuickField "name"}}');
 });
 
@@ -622,26 +654,77 @@ Template.afQuickField.innerContext = function afQuickFieldInnerContext(options) 
   var c = Utility.normalizeContext(options.hash, "afQuickField");
   var ss = c.af.ss;
 
-  var fields = _.filter(ss._schemaKeys, function autoFormFormFieldsSchemaEach(key) {
-    if (key.indexOf(c.atts.name + ".") === 0) {
-      return true;
-    }
-  });
-
-  var formFields = quickFieldFormFields(fields, c.af);
   var labelAtts = quickFieldLabelAtts(c.atts, c.afc);
   var inputAtts = quickFieldInputAtts(c.atts, c.afc);
-
   var defs = Utility.getDefs(ss, c.atts.name); //defs will not be undefined
+
   return {
     skipLabel: (c.atts.label === false || (defs.type === Boolean && !("select" in c.atts) && !("radio" in c.atts))),
     afFieldLabelAtts: labelAtts,
     afFieldInputAtts: inputAtts,
-    afFieldMessageAtts: {name: inputAtts.name, autoform: inputAtts.autoform},
-    afFieldIsInvalidAtts: {name: inputAtts.name, autoform: inputAtts.autoform},
-    isGroup: !!(formFields && formFields.length),
-    formFields: formFields
+    atts: {name: inputAtts.name, autoform: inputAtts.autoform}
   };
+};
+
+Template.afQuickField.isGroup = function afQuickFieldIsGroup(options) {
+  var c = Utility.normalizeContext(options.hash, "afQuickField");
+  var ss = c.af.ss;
+  var defs = Utility.getDefs(ss, c.atts.name); //defs will not be undefined
+
+  return (defs.type === Object);
+};
+
+Template.afQuickField.isFieldArray = function afQuickFieldIsFieldArray(options) {
+  var c = Utility.normalizeContext(options.hash, "afQuickField");
+  var ss = c.af.ss;
+  var defs = Utility.getDefs(ss, c.atts.name); //defs will not be undefined
+
+  // Render an array of fields if we expect an array and we don't have options
+  return (defs.type === Array && !c.atts.options);
+};
+
+/*
+ * afEachArrayItem
+ */
+
+Template.afEachArrayItem.innerContext = function afEachArrayItemInnerContext(name, af) {
+  if (!af || !af._af) {
+    throw new Error(name + " must be used within an autoForm block");
+  }
+
+  var afContext = af._af;
+  var arrayCount = arrayFieldCount(afContext.formId, name);
+  if (afContext.mDoc) {
+    var keyInfo = afContext.mDoc.getInfoForKey(name);
+    if (keyInfo && _.isArray(keyInfo.value)) {
+      arrayCount = Math.max(arrayCount, keyInfo.value.length);
+    }
+  }
+
+  var ss = afContext.ss;
+
+  // If this is an array of objects, collect names of object props
+  var childKeys = [];
+  if (ss.schema(name + '.$').type === Object) {
+    childKeys = autoFormChildKeys(ss, name + '.$');
+  }
+
+  var loopArray = [];
+  for (var i = 0; i < arrayCount; i++) {
+    var loopCtx = {name: name + '.' + i, index: i};
+
+    // If this is an array of objects, add child key names under loopCtx.current[childName] = fullKeyName
+    if (childKeys.length) {
+      loopCtx.current = {};
+      _.each(childKeys, function (k) {
+        loopCtx.current[k] = name + '.' + i + '.' + k;
+      });
+    }
+
+    loopArray.push(loopCtx);
+  };
+
+  return loopArray;
 };
 
 /*
@@ -971,6 +1054,56 @@ Template.autoForm.events({
       event.preventDefault();
       template['__component__'].render();
     }
+  },
+  'click .autoform-remove-item': function autoFormClickRemoveItem(event, template) {
+    var self = this;
+
+    event.preventDefault();
+
+    var button = template.$(event.currentTarget);
+    var name = button.attr('data-autoform-field');
+    var index = self.index;
+    var data = template.data;
+    var formId = data && data.id || defaultFormId;
+    var fData = formData[formId];
+    if (!fData) {
+      throw new Error('AutoForm: Can\'t find form data for form with ID "' + formId + '"');
+    }
+
+    //if update, make sure we remove from source doc so that values are correct
+    //XXX seems not necessary but do further testing
+    // var mDoc = fData.mDoc;
+    // if (mDoc) {
+    //   var keyInfo = mDoc.getInfoForKey(name);
+    //   if (keyInfo && _.isArray(keyInfo.value)) {
+    //     var newArray = _.reject(keyInfo.value, function (v, i) {
+    //       return (i === index);
+    //     });
+    //     mDoc.setValueForKey(name, newArray);
+    //   }
+    // }
+
+    var thisItem = button.closest('.autoform-array-item');
+    var itemCount = thisItem.siblings('.autoform-array-item').length + 1;
+    var minCount = getMinMax(formId, name).minCount;
+
+    // remove the item we clicked
+    if (itemCount > minCount) {
+      thisItem.remove();
+      removeArrayField(formId, name);
+    }
+  },
+  'click .autoform-add-item': function autoFormClickAddItem(event, template) {
+    event.preventDefault();
+
+    var button = template.$(event.currentTarget);
+    var name = button.attr('data-autoform-field');
+    var data = template.data;
+    var formId = data && data.id || defaultFormId;
+
+    var thisItem = button.closest('.autoform-array-item');
+    var itemCount = thisItem.siblings('.autoform-array-item').length + 1;
+    addArrayField(formId, name);
   }
 });
 
@@ -1079,6 +1212,11 @@ function getFormValues(template, formId, ss) {
 
   // Expand the object
   doc = Utility.expandObj(doc);
+
+  // As array items are removed, gaps can appear in the numbering,
+  // which results in arrays that have undefined items. Here we
+  // remove any array items that are undefined.
+  Utility.compactArrays(doc);
 
   // Pass expanded doc through formToDoc hooks
   var transforms = Hooks.getHooks(formId, 'formToDoc');
@@ -1523,4 +1661,81 @@ function validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   }
   vok[key] = false;
   _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
+}
+
+// Returns schema keys that are direct children of the given schema key
+// XXX this could be a method on ss
+function autoFormChildKeys(ss, name) {
+  name = SimpleSchema._makeGeneric(name);
+  var prefix = name + ".";
+
+  var childKeys = [];
+  _.each(ss._schemaKeys, function (key) {
+    // If it's a direct child, add it to the list
+    if (key.indexOf(prefix) === 0) {
+      var ending = key.slice(prefix.length);
+      if (ending.indexOf('.') === -1) {
+        childKeys.push(ending);
+      }
+    }
+  });
+  return childKeys;
+}
+
+/*
+ * Array Fields Helper Functions
+ */
+
+function getMinMax(formId, name) {
+  var ss = formData[formId] && formData[formId].ss;
+  if (!ss) {
+    return {minCount: 0};
+  }
+  var defs = Utility.getDefs(ss, name);
+  return {minCount: defs.minCount || 0, maxCount: defs.maxCount};
+}
+
+function arrayFieldCount(formId, name) {
+  initArrayFieldCount(formId, name);
+  arrayFields[formId][name].deps.depend();
+  return arrayFields[formId][name].count;
+}
+
+function initArrayFieldCount(formId, name) {
+  var range = getMinMax(formId, name);
+
+  arrayFields[formId] = arrayFields[formId] || {};
+  arrayFields[formId][name] = arrayFields[formId][name] || {};
+  arrayFields[formId][name].deps = arrayFields[formId][name].deps || new Deps.Dependency;
+  arrayFields[formId][name].removedCount = arrayFields[formId][name].removedCount || 0;
+  if (typeof arrayFields[formId][name].count !== "number") {
+    arrayFields[formId][name].count = Math.max(1, range.minCount); //respect minCount from schema
+    arrayFields[formId][name].deps.changed();
+  }
+}
+
+function setArrayFieldCount(formId, name, count) {
+  initArrayFieldCount(formId, name);
+
+  //respect minCount and maxCount from schema
+  var range = getMinMax(formId, name);
+  if (range.maxCount) {
+    count = Math.min(count, range.maxCount + arrayFields[formId][name].removedCount);
+  }
+  count = Math.max(count, range.minCount + arrayFields[formId][name].removedCount);
+
+
+  arrayFields[formId][name].count = count;
+  arrayFields[formId][name].deps.changed();
+}
+
+function addArrayField(formId, name) {
+  initArrayFieldCount(formId, name);
+  setArrayFieldCount(formId, name, arrayFields[formId][name].count + 1);
+}
+
+function removeArrayField(formId, name) {
+  initArrayFieldCount(formId, name);
+  arrayFields[formId][name].removedCount++;
+  arrayFields[formId][name].deps.changed();
 }

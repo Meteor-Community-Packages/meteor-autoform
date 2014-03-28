@@ -85,20 +85,45 @@
 </template>
 
 <template name="afQuickField_bootstrap3">
-  {{#if isGroup}}
-  <fieldset>
-    <legend>{{label}}</legend>
-    {{#each formFields}}
-    {{> afQuickField}}
-    {{/each}}
-  </fieldset>
-  {{else}}
-  <div class="form-group {{#if afFieldIsInvalid name=afFieldIsInvalidAtts.name autoform=afFieldIsInvalidAtts.autoform}}has-error{{/if}}">
+  <div class="form-group {{#if afFieldIsInvalid name=atts.name autoform=atts.autoform}}has-error{{/if}}">
     {{#unless skipLabel}}
     {{> afFieldLabel afFieldLabelAtts}}
     {{/unless}}
     {{> afFieldInput afFieldInputAtts}}
-    <span class="help-block">{{{afFieldMessage name=afFieldMessageAtts.name autoform=afFieldMessageAtts.autoform}}}</span>
+    <span class="help-block">{{{afFieldMessage name=atts.name autoform=atts.autoform}}}</span>
   </div>
-  {{/if}}
+</template>
+
+<template name="afObjectField_bootstrap3">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">{{label}}</h3>
+    </div>
+    <div class="panel-body">
+      {{#each fields}}
+      {{> afQuickField this}}
+      {{/each}}
+    </div>
+  </div>
+</template>
+
+<template name="afArrayField_bootstrap3">
+  <div class="panel panel-default">
+    <div class="panel-heading">{{this.label}}</div>
+    <ul class="list-group">
+      {{#afEachArrayItem name=this.name}}
+      <li class="list-group-item autoform-array-item">
+        <div class="media">
+          <button class="btn btn-primary autoform-remove-item pull-left" data-autoform-field="{{../name}}"><span class="glyphicon glyphicon-minus"></span></button>
+          <div class="media-body">
+            {{> afQuickField}}
+          </div>
+        </div>
+      </li>
+      {{/afEachArrayItem}}
+      <li class="list-group-item">
+        <button class="btn btn-primary autoform-add-item" data-autoform-field="{{this.name}}"><span class="glyphicon glyphicon-plus"></span></button>
+      </li>
+    </ul>
+  </div>
 </template>

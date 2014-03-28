@@ -1,14 +1,10 @@
 {
   "name": "autoform",
-  "description": "A smart package for Meteor that adds handlebars helpers to easily create basic forms with automatic insert and update events, and automatic reactive validation.",
+  "description": "Provides UI components that allow you to easily create forms with automatic insert and update events, and automatic reactive validation.",
   "homepage": "https://github.com/aldeed/meteor-autoform",
   "author": "Eric Dobbertin (http://dairystatedesigns.com)",
   "version": "0.4.17",
   "git": "https://github.com/aldeed/meteor-autoform.git",
-  "meteor": {
-    "git": "https://github.com/meteor/meteor.git",
-    "branch": "shark"
-  },
   "packages": {
     "simple-schema": {},
     "collection2": {},

@@ -15,11 +15,43 @@
 </template>
 
 <template name="afQuickField">
-  {{#with getTemplate "afQuickField" this.template}}
-    {{! find autoform context up to 5 levels back}}
-    {{#with _af_findAutoForm 'afFieldLabel' ../.. ../../.. ../../../.. ../../../../.. ../../../../../..}}
-      {{#with innerContext autoform=this atts=../..}}
-        {{> ../..}}
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afQuickField' .. ../.. ../../.. ../../../.. ../../../../..}}
+  {{#if isGroup autoform=this atts=..}}
+    {{> afObjectField ..}}
+  {{else}}
+    {{#if isFieldArray autoform=this atts=..}}
+      {{> afArrayField ..}}
+    {{else}}
+      {{#with innerContext autoform=this atts=..}}
+        {{#with getTemplate "afQuickField" ../../template}}
+          {{#with ..}}
+            {{> ..}}
+          {{/with}}
+        {{/with}}
+      {{/with}}
+    {{/if}}
+  {{/if}}
+  {{/with}}
+</template>
+
+<template name="afObjectField">
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afObjectField' .. ../.. ../../.. ../../../.. ../../../../..}}
+    {{#with getTemplate "afObjectField" ../template}}
+      {{#with innerContext autoform=.. atts=../..}}
+        {{> ..}}
+      {{/with}}
+    {{/with}}
+  {{/with}}
+</template>
+
+<template name="afArrayField">
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afArrayField' .. ../.. ../../.. ../../../.. ../../../../..}}
+    {{#with getTemplate "afArrayField" ../template}}
+      {{#with innerContext autoform=.. atts=../..}}
+        {{> ..}}
       {{/with}}
     {{/with}}
   {{/with}}
@@ -66,6 +98,17 @@
   {{#with getTemplate "afDeleteButton" this.template}}
     {{#with innerContext .. UI.contentBlock}}
       {{> ..}}
+    {{/with}}
+  {{/with}}
+</template>
+
+<template name="afEachArrayItem">
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afEachArrayItem' .. ../.. ../../.. ../../../.. ../../../../..}}
+    {{#with innerContext ../name this}}
+      {{#each this}}
+      {{> UI.contentBlock this}}
+      {{/each}}
     {{/with}}
   {{/with}}
 </template>

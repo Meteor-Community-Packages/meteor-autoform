@@ -22,6 +22,7 @@ If you've been using AutoForm and are now switching to the Blaze rendering engin
 * Again, there is no `AutoForm` instance. The `autoForm` component can take a `schema` attribute that supplies a `SimpleSchema` instance or a `collection` attribute that supplies a `Meteor.Collection` instance with an attached schema. You can also specify both attributes, in which case form generation and validation will be based on the schema, but insert/update (and final validation) will happen on the collection. In this way, you can use slightly different validation logic or add additional constraints to a form that are not actual constraints on the collection's schema.
 * New `afFieldSelect` block component that supports optgroups. [Read about it.](#affieldselect)
 * Read about [choosing and customizing templates](#templates).
+* Experimental support for array fields, including arrays of objects with add/remove buttons. Documentation coming soon.
 * You may find the new [Common Questions](#common-questions) section helpful. 
 
 ## Installation

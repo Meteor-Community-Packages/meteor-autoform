@@ -76,16 +76,45 @@ Utility = {
     // client, then we could set the array to [] if it is null, ensuring
     // that MongoDB would know it's supposed to be an array.
     _.each(flatDoc, function(flatVal, flatKey) {
-      var lastDot = flatKey.lastIndexOf(".");
-      var beginning = flatKey.slice(0, lastDot);
-      var end = flatKey.slice(lastDot + 1);
-      var intEnd = parseInt(end, 10);
-      if (!isNaN(intEnd)) {
-        flatDoc[beginning] = flatDoc[beginning] || [];
-        flatDoc[beginning][intEnd] = flatVal;
-        delete flatDoc[flatKey];
+      var subkeys = flatKey.split(".");
+      var subkeylen = subkeys.length;
+      var nextPiece, subkey, passedKeys = [], remainingKeys = [], beginning, ending, objToExpand = {}, isArrayItem = false, getEnding;
+      for (var i = 0; i < subkeylen; i++) {
+        subkey = subkeys[i];
+
+        if (isArrayItem) {
+          isArrayItem = false;
+          getEnding = true;
+        } else if (getEnding) {
+          remainingKeys.push(subkey);
+          if (i === subkeylen - 1) {
+            ending = remainingKeys.join('.');
+            objToExpand[ending] = flatVal;
+            if (_.isObject(flatDoc[beginning][nextPiece])) {
+              _.extend(flatDoc[beginning][nextPiece], Utility.expandObj(objToExpand));
+            } else {
+              flatDoc[beginning][nextPiece] = Utility.expandObj(objToExpand);
+            }
+            delete flatDoc[flatKey];
+          }
+        } else {
+          passedKeys.push(subkey);
+          //see if the next piece is a number
+          nextPiece = parseInt(subkeys[i + 1], 10);
+          if (!isNaN(nextPiece)) {
+            isArrayItem = true;
+            beginning = passedKeys.join('.');
+            flatDoc[beginning] = flatDoc[beginning] || [];
+            if (i + 2 === subkeylen) {
+              flatDoc[beginning][nextPiece] = flatVal;
+              delete flatDoc[flatKey];
+            }
+          }
+        }
       }
     });
+
+    console.log(flatDoc);
 
     if (!_.isEmpty(flatDoc)) {
       modifier.$set = flatDoc;
@@ -222,6 +251,27 @@ Utility = {
       }
     });
     return newDoc;
+  },
+  /**
+   * @method Utility.compactArrays
+   * @private
+   * @param  {Object} obj
+   * @return {undefined}
+   *
+   * Edits the object by reference, compacting any arrays at any level recursively.
+   */
+  compactArrays: function compactArrays(obj) {
+    _.each(obj, function (val, key) {
+      if (_.isArray(val)) {
+        obj[key] = _.without(val, void 0);
+        _.each(obj[key], function (arrayItem) {
+          compactArrays(arrayItem);
+        });
+      } else if (!(val instanceof Date) && _.isObject(val)) {
+        //recurse into objects
+        compactArrays(val);
+      }
+    });
   },
   /**
    * @method Utility.isValidDateString
