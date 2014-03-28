@@ -1,10 +1,10 @@
 Package.describe({
   name: "autoform",
-  summary: "A smart package for Meteor that adds handlebars helpers to easily create basic forms with automatic insert and update events, and automatic reactive validation."
+  summary: "Provides UI components that allow you to easily create forms with automatic insert and update events, and automatic reactive validation."
 });
 
 Package.on_use(function(api) {
-  api.use(['underscore', 'deps', 'templating', 'handlebars', 'moment'], 'client');
+  api.use(['underscore', 'deps', 'templating', 'handlebars', 'moment', 'ui'], 'client');
   api.use('reload', 'client', {weak: true});
   api.use('collection2', ['client', 'server'], {weak: true});
   api.use('simple-schema', ['client', 'server']);

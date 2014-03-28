@@ -459,6 +459,7 @@ securely and accurately on the server.
 *common.js:*
 
 ```js
+Schema = {};
 Schema.contact = new SimpleSchema({
     name: {
         type: String,
@@ -477,6 +478,8 @@ Schema.contact = new SimpleSchema({
     }
 });
 ```
+
+Note that we've created an object `Schema` in which to store all of our app's schemas.
 
 *html:*
 
@@ -609,7 +612,7 @@ AutoForm.hooks({
       remove: function(error, result, template) {},
       "methodName": function(error, result, template) {}
     },
-    onSubmit: function(error, result, template) {},
+    onSubmit: function(insertDoc, updateDoc, currentDoc) {},
 
     //called when any operation succeeds, where operation will be
     //"insert", "update", "remove", or the method name.
