@@ -817,10 +817,6 @@ Template.autoForm.events({
     var docId = currentDoc ? currentDoc._id : null;
     var resetOnSuccess = context.resetOnSuccess;
 
-    if ((isInsert || isUpdate || isRemove) && !collection) {
-      throw new Error("AutoForm: You must specify a collection when form type is insert, update, or remove.");
-    }
-
     // Gather hooks
     var beforeInsert = Hooks.getHooks(formId, 'before', 'insert');
     var beforeUpdate = Hooks.getHooks(formId, 'before', 'update');
@@ -833,6 +829,10 @@ Template.autoForm.events({
     var onSuccess = Hooks.getHooks(formId, 'onSuccess');
     var onError = Hooks.getHooks(formId, 'onError');
     var onSubmit = Hooks.getHooks(formId, 'onSubmit');
+
+    if ((isRemove || (onSubmit.length === 0 && (isInsert || isUpdate))) && !collection) {
+      throw new Error("AutoForm: You must specify a collection when form type is remove, or when the form type is insert or update and no onSubmit hook is provided.");
+    }
 
     // Prevent browser form submission if we're planning to do our own thing
     if (!isNormalSubmit) {
