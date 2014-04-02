@@ -16,14 +16,14 @@ AutoForm = {}; //exported
  * Defines hooks to be used by one or more forms. Extends hooks lists if called multiple times for the same
  * form.
  */
-AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) {
+AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) {
   if (typeof formIds === "string") {
     formIds = [formIds];
   }
 
   // If formIds is null, add global hooks
   if (!formIds) {
-    Hooks.addHooksToList(Hooks.global, hooks);
+    Hooks.addHooksToList(Hooks.global, hooks, replace);
   } else {
     _.each(formIds, function (formId) {
 
@@ -38,7 +38,7 @@ AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) {
         onError: []
       };
 
-      Hooks.addHooksToList(Hooks.form[formId], hooks);
+      Hooks.addHooksToList(Hooks.form[formId], hooks, replace);
     });
   }
 };
@@ -52,9 +52,9 @@ AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) {
  * Defines hooks by form id. Extends hooks lists if called multiple times for the same
  * form.
  */
-AutoForm.hooks = function autoFormHooks(hooks) {
+AutoForm.hooks = function autoFormHooks(hooks, replace) {
   _.each(hooks, function(hooksObj, formId) {
-    AutoForm.addHooks(formId, hooksObj);
+    AutoForm.addHooks(formId, hooksObj, replace);
   });
 };
 

@@ -11,13 +11,13 @@ Hooks = {
   }
 };
 
-Hooks.addHooksToList = function addHooksToList(hooksList, hooks) {
+Hooks.addHooksToList = function addHooksToList(hooksList, hooks, replace) {
   // Add before hooks
   hooks.before && _.each(hooks.before, function autoFormBeforeHooksEach(func, type) {
     if (typeof func !== "function") {
       throw new Error("AutoForm before hook must be a function, not " + typeof func);
     }
-    hooksList.before[type] = hooksList.before[type] || [];
+    hooksList.before[type] = (!replace && hooksList.before[type]) ? hooksList.before[type] : [];
     hooksList.before[type].push(func);
   });
 
@@ -26,7 +26,7 @@ Hooks.addHooksToList = function addHooksToList(hooksList, hooks) {
     if (typeof func !== "function") {
       throw new Error("AutoForm after hook must be a function, not " + typeof func);
     }
-    hooksList.after[type] = hooksList.after[type] || [];
+    hooksList.after[type] = (!replace && hooksList.after[type]) ? hooksList.after[type] : [];
     hooksList.after[type].push(func);
   });
 
@@ -36,6 +36,11 @@ Hooks.addHooksToList = function addHooksToList(hooksList, hooks) {
       if (typeof hooks[name] !== "function") {
         throw new Error("AutoForm " + name + " hook must be a function, not " + typeof hooks[name]);
       }
+
+      if(replace) {
+          hooksList[name] = [];
+      }
+
       hooksList[name].push(hooks[name]);
     }
   });
