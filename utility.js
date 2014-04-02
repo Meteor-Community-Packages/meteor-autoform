@@ -78,7 +78,7 @@ Utility = {
     _.each(flatDoc, function(flatVal, flatKey) {
       var subkeys = flatKey.split(".");
       var subkeylen = subkeys.length;
-      var nextPiece, subkey, passedKeys = [], remainingKeys = [], beginning, ending, objToExpand = {}, isArrayItem = false, getEnding;
+      var nextPiece, subkey, passedKeys = [], remainingKeys = [], beginning, ending, objToExpand = {}, isArrayItem = false, getEnding, toMerge;
       for (var i = 0; i < subkeylen; i++) {
         subkey = subkeys[i];
 
@@ -88,13 +88,23 @@ Utility = {
         } else if (getEnding) {
           remainingKeys.push(subkey);
           if (i === subkeylen - 1) {
-            ending = remainingKeys.join('.');
-            objToExpand[ending] = flatVal;
-            if (_.isObject(flatDoc[beginning][nextPiece])) {
-              _.extend(flatDoc[beginning][nextPiece], Utility.expandObj(objToExpand));
-            } else {
-              flatDoc[beginning][nextPiece] = Utility.expandObj(objToExpand);
+            toMerge = flatDoc[beginning][nextPiece];
+            if(!_.isObject(toMerge)) {
+                ending = remainingKeys.join('.');
+                objToExpand[ending] = flatVal;
+                flatDoc[beginning][nextPiece] = Utility.expandObj(objToExpand);
             }
+            else {
+                // Deep merge of keys into sub-objects
+                while(remainingKeys.length > 1 && _.isObject(toMerge[remainingKeys[0]])) {
+                    toMerge = toMerge[remainingKeys.splice(0,1)];
+                }
+
+                ending = remainingKeys.join('.');
+                objToExpand[ending] = flatVal;
+                toMerge = _.extend(toMerge, Utility.expandObj(objToExpand));
+            }
+
             delete flatDoc[flatKey];
           }
         } else {
