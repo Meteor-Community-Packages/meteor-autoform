@@ -529,7 +529,7 @@ function (options) {
   var type = getInputType(c.atts, defs, value);
 
   // Get template type
-  var templateType = getInputTemplateType(c.atts, type, schemaType);
+  var templateType = getInputTemplateType(c.atts, type, schemaType, expectsArray);
 
   return {
     defs: defs,
@@ -1528,13 +1528,12 @@ function getInputType(hash, defs, value) {
   return type;
 }
 
-function getInputTemplateType(atts, type, schemaType) {
+function getInputTemplateType(atts, type, schemaType, expectsArray) {
   // Extract settings from attributes
   var radio = atts.radio;
   var select = atts.select;
   var noselect = atts.noselect;
   var selectOptions = atts.options;
-  var expectsArray = (schemaType === Array && !atts.type)
 
   // Determine which template to render
   var templateType;
