@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.5.2
+
+Fix issue with datetime fields
+
 ### 0.5.1
 
 Minor fix
