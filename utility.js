@@ -380,7 +380,7 @@ Utility = {
     var tPart = dateString.substring(10, 11);
     var timePart = dateString.substring(11, dateString.length - 1);
     var zPart = dateString.substring(dateString.length - 1);
-    return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart) && zPart === "Z";
+    return Utility.isValidDateString(datePart) && tPart === "T" && Utility.isValidTimeString(timePart) && zPart === "Z";
   },
   /**
    * @method Utility.dateToNormalizedLocalDateAndTimeString
@@ -411,7 +411,7 @@ Utility = {
     var datePart = dtString.substring(0, 10);
     var tPart = dtString.substring(10, 11);
     var timePart = dtString.substring(11, dtString.length);
-    return isValidDateString(datePart) && tPart === "T" && isValidTimeString(timePart);
+    return Utility.isValidDateString(datePart) && tPart === "T" && Utility.isValidTimeString(timePart);
   },
   /**
    * @method Utility.normalizeContext
