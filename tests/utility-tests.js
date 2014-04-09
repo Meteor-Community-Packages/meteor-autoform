@@ -20,7 +20,7 @@ if (Meteor.isClient) {
     });
     test.equal(cleaned, {e: "keep me", f: {e: "keep me"}});
   });
-  
+
   Tinytest.add('AutoForm - Utility - reportNulls', function(test) {
     var report = Utility.reportNulls({
       a: void 0,
@@ -36,7 +36,7 @@ if (Meteor.isClient) {
       d: ""
     });
   });
-  
+
   Tinytest.add('AutoForm - Utility - docToModifier', function(test) {
     var date = new Date;
     var mod = Utility.docToModifier({
@@ -69,10 +69,14 @@ if (Meteor.isClient) {
         'd.a': 1,
         'd.b': "foo",
         'd.c': date,
-        'd.d.0.a': 1,
-        'd.d.0.b': "foo",
-        'd.d.0.c': date,
-        'd.d.0.d.a': 1,
+        'd.d': [ //array of objects should remain array
+          {
+            a: 1,
+            b: "foo",
+            c: date,
+            d: {a: 1}
+          }
+        ],
         'd.e': [1, 2] //array of non-objects should remain array
       },
       $unset: {
@@ -81,13 +85,13 @@ if (Meteor.isClient) {
       }
     });
   });
-  
+
   Tinytest.add('AutoForm - Utility - maybeNum', function(test) {
     function testMaybeNum(val, expect) {
       var mod = Utility.maybeNum(val);
       test.equal(mod, expect);
     }
-    
+
     testMaybeNum(1, 1);
     testMaybeNum(1.1, 1.1);
     testMaybeNum("1", 1);
