@@ -660,6 +660,16 @@ If you want to add the same hook for multiple forms or for all forms, use the
   });
 ```
 
+Pass `true` as an optional third argument to `AutoForm.hooks` or `AutoForm.addHooks` to replace existing hooks.
+
+```js
+  AutoForm.addHooks('form1', {
+    onSubmit: function () {
+      console.log("Only this onSubmit");
+    }
+  }, true);
+```
+
 Notes:
 
 * It's safe to call the hooks methods multiple times and even to call them for the same

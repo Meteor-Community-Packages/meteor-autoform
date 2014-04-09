@@ -830,7 +830,7 @@ Template.autoForm.events({
     var onError = Hooks.getHooks(formId, 'onError');
     var onSubmit = Hooks.getHooks(formId, 'onSubmit');
 
-    if ((isRemove || (onSubmit.length === 0 && (isInsert || isUpdate))) && !collection) {
+    if (!collection && (isRemove || (onSubmit.length === 0 && (isInsert || isUpdate)))) {
       throw new Error("AutoForm: You must specify a collection when form type is remove, or when the form type is insert or update and no onSubmit hook is provided.");
     }
 
