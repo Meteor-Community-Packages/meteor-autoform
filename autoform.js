@@ -830,10 +830,6 @@ Template.autoForm.events({
     var onError = Hooks.getHooks(formId, 'onError');
     var onSubmit = Hooks.getHooks(formId, 'onSubmit');
 
-    if (!collection && (isRemove || (onSubmit.length === 0 && (isInsert || isUpdate)))) {
-      throw new Error("AutoForm: You must specify a collection when form type is remove, or when the form type is insert or update and no onSubmit hook is provided.");
-    }
-
     // Prevent browser form submission if we're planning to do our own thing
     if (!isNormalSubmit) {
       event.preventDefault();
@@ -904,6 +900,9 @@ Template.autoForm.events({
       });
       if (shouldStop) {
         return haltSubmission();
+      }
+      if(!collection) {
+          throw new Error("AutoForm: You must specify a collection when form type is remove.");
       }
       collection.remove(docId, makeCallback('remove', afterRemove));
       return;
@@ -981,6 +980,9 @@ Template.autoForm.events({
     // because collection2 validation catches additional stuff like unique and
     // because our form schema need not be the same as our collection schema.
     if (isInsert) {
+      if(!collection) {
+         throw new Error("AutoForm: You must specify a collection when form type is insert.");
+      }
       collection.insert(insertDoc, {validationContext: formId}, makeCallback('insert', afterInsert));
     } else if (isUpdate) {
       var updateCallback = makeCallback('update', afterUpdate);
@@ -988,6 +990,9 @@ Template.autoForm.events({
         // Nothing to update. Just treat it as a successful update.
         updateCallback(null, 0);
       } else {
+        if(!collection) {
+          throw new Error("AutoForm: You must specify a collection when form type is update.");
+        }
         collection.update(docId, updateDoc, {validationContext: formId}, updateCallback);
       }
     }
