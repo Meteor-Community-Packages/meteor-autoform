@@ -16,14 +16,14 @@ AutoForm = {}; //exported
  * Defines hooks to be used by one or more forms. Extends hooks lists if called multiple times for the same
  * form.
  */
-AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) {
+AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) {
   if (typeof formIds === "string") {
     formIds = [formIds];
   }
 
   // If formIds is null, add global hooks
   if (!formIds) {
-    Hooks.addHooksToList(Hooks.global, hooks);
+    Hooks.addHooksToList(Hooks.global, hooks, replace);
   } else {
     _.each(formIds, function (formId) {
 
@@ -38,7 +38,7 @@ AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) {
         onError: []
       };
 
-      Hooks.addHooksToList(Hooks.form[formId], hooks);
+      Hooks.addHooksToList(Hooks.form[formId], hooks, replace);
     });
   }
 };
@@ -52,9 +52,9 @@ AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) {
  * Defines hooks by form id. Extends hooks lists if called multiple times for the same
  * form.
  */
-AutoForm.hooks = function autoFormHooks(hooks) {
+AutoForm.hooks = function autoFormHooks(hooks, replace) {
   _.each(hooks, function(hooksObj, formId) {
-    AutoForm.addHooks(formId, hooksObj);
+    AutoForm.addHooks(formId, hooksObj, replace);
   });
 };
 
@@ -529,7 +529,7 @@ function (options) {
   var type = getInputType(c.atts, defs, value);
 
   // Get template type
-  var templateType = getInputTemplateType(c.atts, type, schemaType);
+  var templateType = getInputTemplateType(c.atts, type, schemaType, expectsArray);
 
   return {
     defs: defs,
@@ -817,10 +817,6 @@ Template.autoForm.events({
     var docId = currentDoc ? currentDoc._id : null;
     var resetOnSuccess = context.resetOnSuccess;
 
-    if ((isInsert || isUpdate || isRemove) && !collection) {
-      throw new Error("AutoForm: You must specify a collection when form type is insert, update, or remove.");
-    }
-
     // Gather hooks
     var beforeInsert = Hooks.getHooks(formId, 'before', 'insert');
     var beforeUpdate = Hooks.getHooks(formId, 'before', 'update');
@@ -905,6 +901,9 @@ Template.autoForm.events({
       if (shouldStop) {
         return haltSubmission();
       }
+      if(!collection) {
+          throw new Error("AutoForm: You must specify a collection when form type is remove.");
+      }
       collection.remove(docId, makeCallback('remove', afterRemove));
       return;
     }
@@ -981,6 +980,9 @@ Template.autoForm.events({
     // because collection2 validation catches additional stuff like unique and
     // because our form schema need not be the same as our collection schema.
     if (isInsert) {
+      if(!collection) {
+         throw new Error("AutoForm: You must specify a collection when form type is insert.");
+      }
       collection.insert(insertDoc, {validationContext: formId}, makeCallback('insert', afterInsert));
     } else if (isUpdate) {
       var updateCallback = makeCallback('update', afterUpdate);
@@ -988,6 +990,9 @@ Template.autoForm.events({
         // Nothing to update. Just treat it as a successful update.
         updateCallback(null, 0);
       } else {
+        if(!collection) {
+          throw new Error("AutoForm: You must specify a collection when form type is update.");
+        }
         collection.update(docId, updateDoc, {validationContext: formId}, updateCallback);
       }
     }
@@ -1528,13 +1533,12 @@ function getInputType(hash, defs, value) {
   return type;
 }
 
-function getInputTemplateType(atts, type, schemaType) {
+function getInputTemplateType(atts, type, schemaType, expectsArray) {
   // Extract settings from attributes
   var radio = atts.radio;
   var select = atts.select;
   var noselect = atts.noselect;
   var selectOptions = atts.options;
-  var expectsArray = (schemaType === Array && !atts.type)
 
   // Determine which template to render
   var templateType;

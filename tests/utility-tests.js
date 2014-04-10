@@ -52,7 +52,11 @@ if (Meteor.isClient) {
             a: 1,
             b: "foo",
             c: date,
-            d: {a: 1}
+            d: {
+              a: 1,
+              b: "foo",
+              c: date
+            }
           }
         ],
         e: [1, 2]
@@ -74,7 +78,11 @@ if (Meteor.isClient) {
             a: 1,
             b: "foo",
             c: date,
-            d: {a: 1}
+            d: {
+              a: 1,
+              b: "foo",
+              c: date
+            }
           }
         ],
         'd.e': [1, 2] //array of non-objects should remain array
