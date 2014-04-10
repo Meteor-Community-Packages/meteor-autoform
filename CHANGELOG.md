@@ -6,6 +6,17 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.6.0
+
+* Add `omitFields` attribute for `quickForm`. Similar to the `fields` attribute but for blacklisting instead of whitelisting.
+
+Much thanks to @gdhuse for the following fixes and enhancements:
+
+* Add option to replace hooks instead of extending the current list when calling `hooks` or `addHook`.
+* Allow insert/update forms without a `collection` attribute if there is at least one `onSubmit` hook and at least one `onSubmit` hook returns `false`.
+* Fix issue with array fields
+* Fix issue with update modifiers created from autoform field values.
+
 ### 0.5.2
 
 Fix issue with datetime fields

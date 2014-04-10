@@ -344,7 +344,7 @@ UI.registerHelper('quickForm', function quickFormHelper() {
 Template.quickForm.qfContext = function quickFormContext(atts) {
   // Pass along quickForm context to autoForm context, minus a few
   // properties that are specific to quickForms.
-  var qfAutoFormContext = _.omit(atts, "buttonContent", "buttonClasses", "fields");
+  var qfAutoFormContext = _.omit(atts, "buttonContent", "buttonClasses", "fields", "omitFields");
 
   return _.extend({
     qfFormFields: qfFormFields,
@@ -360,13 +360,29 @@ function qfFormFields() {
   // Get the list of fields we want included
   var fieldList;
   if (context.fields) {
-    if (_.isArray(context.fields)) {
-      fieldList = context.fields;
-    } else if (typeof context.fields === "string") {
-      fieldList = context.fields.replace(/ /g, '').split(',');
+    fieldList = context.fields;
+    if (typeof fieldList === "string") {
+      fieldList = fieldList.replace(/ /g, '').split(',');
     }
+    if (!_.isArray(fieldList)) {
+      throw new Error('AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
+    }
+  } else {
+    // If we weren't given a fieldList, use all first level schema keys by default
+    fieldList = ss.firstLevelSchemaKeys() || [];
   }
-  fieldList = fieldList || ss.firstLevelSchemaKeys();
+
+  // If user wants to omit some fields, remove those from the array
+  if (context.omitFields) {
+    var omitFields = context.omitFields;
+    if (typeof omitFields === "string") {
+      omitFields = omitFields.replace(/ /g, '').split(',');
+    }
+    if (!_.isArray(omitFields)) {
+      throw new Error('AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
+    }
+    fieldList = _.difference(fieldList, omitFields);
+  }
 
   return quickFieldFormFields(fieldList, context._af, true);
 }

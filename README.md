@@ -1,4 +1,4 @@
-AutoForm
+AutoForm [![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
 =========================
 
 AutoForm is a smart package for Meteor that adds handlebars helpers to easily
@@ -259,6 +259,9 @@ attributes:
 * `fields`: Optional. Bind an array or specify a comma-delimited string of field
 names to include. Only the listed fields (and their subfields, if any) will be
 included, and they'll appear in the order you specify.
+* `omitFields`: Optional. Bind an array or specify a comma-delimited string of field
+names to omit from the generated form. All first-level schema fields *except* the
+fields listed here (and their subfields, if any) will be included.
 
 Any other attributes you specify will be output as attributes of the `<form>`
 element, just like when using the `autoForm` component.
