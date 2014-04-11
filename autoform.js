@@ -179,8 +179,7 @@ AutoForm.getFormValues = function (formId) {
   // Get a reference to the SimpleSchema instance that should be used for
   // determining what types we want back for each field.
   var context = template.data;
-  var collection = Utility.lookup(context.collection);
-  var ss = Utility.lookup(context.schema) || collection && collection.simpleSchema();
+  var ss = Utility.getSimpleSchemaFromContext(context, formId);
   return getFormValues(template, formId, ss);
 };
 
@@ -254,14 +253,8 @@ Template.autoForm.atts = function autoFormTplAtts() {
 Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) {
   var context = this;
   var formId = context.id || defaultFormId;
-
   var collection = Utility.lookup(context.collection);
-  check(collection, Match.Optional(Meteor.Collection));
-
-  var ss = Utility.lookup(context.schema) || collection && collection.simpleSchema();
-  if (!Match.test(ss, SimpleSchema)) {
-    throw new Error("autoForm with id " + formId + " needs either 'schema' or 'collection' attribute");
-  }
+  var ss = Utility.getSimpleSchemaFromContext(context, formId);
 
   // Retain doc values after a "hot code push", if possible
   var retrievedDoc = formPreserve.getDocument(formId);
@@ -826,9 +819,9 @@ Template.autoForm.events({
 
     //init
     var validationType = context.validation || "submitThenKeyup";
-    var collection = Utility.lookup(context.collection);
-    var ss = Utility.lookup(context.schema) || collection && collection.simpleSchema();
     var formId = context.id || defaultFormId;
+    var collection = Utility.lookup(context.collection);
+    var ss = Utility.getSimpleSchemaFromContext(context, formId);
     var currentDoc = context.doc || null;
     var docId = currentDoc ? currentDoc._id : null;
     var resetOnSuccess = context.resetOnSuccess;
@@ -1594,9 +1587,8 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   }
 
   var context = template.data;
-  var collection = Utility.lookup(context.collection);
-  var ss = Utility.lookup(context.schema) || collection && collection.simpleSchema();
   var formId = context.id || defaultFormId;
+  var ss = Utility.getSimpleSchemaFromContext(context, formId);
 
   if (onlyIfAlreadyInvalid && ss.namedContext(formId).isValid()) {
     return; //skip validation

@@ -282,6 +282,41 @@ Utility = {
     });
   },
   /**
+   * @method Utility.getSimpleSchemaFromContext
+   * @private
+   * @param  {Object} context
+   * @return {SimpleSchema}
+   *
+   * Given a context object that may or may not have schema and collection properties,
+   * returns a SimpleSchema instance or throws an error if one cannot be obtained.
+   */
+  getSimpleSchemaFromContext: function getSimpleSchemaFromContext(context, formId) {
+    // If schema attribute, use that
+    var ss = Utility.lookup(context.schema);
+    if (ss) {
+      if (ss instanceof SimpleSchema) {
+        return ss;
+      } else {
+        throw new Error('AutoForm: schema attribute for form with id "' + formId + '" is not a SimpleSchema instance');
+      }
+    }
+    // If no schema attribute, use the schema attached to the collection
+    var collection = Utility.lookup(context.collection);
+    if (collection) {
+      if (collection instanceof Meteor.Collection) {
+        if (typeof collection.simpleSchema === 'function') {
+          return collection.simpleSchema();
+        } else {
+          throw new Error('AutoForm: collection attribute for form with id "' + formId + '" refers to a collection that does not have a schema. You might have forgotten to attach a schema to the collection or you might need to add the collection2 package to your app.');
+        }
+      } else {
+        throw new Error('AutoForm: collection attribute for form with id "' + formId + '" is not a Meteor.Collection instance');
+      }
+    }
+    // If we got this far, we have no schema so throw an error
+    throw new Error('AutoForm: form with id "' + formId + '" needs either "schema" or "collection" attribute');
+  },
+  /**
    * @method Utility.isValidDateString
    * @private
    * @param  {String}  dateString

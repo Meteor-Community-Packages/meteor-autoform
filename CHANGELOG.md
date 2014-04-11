@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.6.1
+
+Improve some error messages
+
 ### 0.6.0
 
 * Add `omitFields` attribute for `quickForm`. Similar to the `fields` attribute but for blacklisting instead of whitelisting.
