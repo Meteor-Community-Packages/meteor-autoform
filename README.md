@@ -1044,6 +1044,8 @@ Here's the list of possible types you can use for the first argument of
 * afTextarea
 * afContenteditable
 * afInput
+* afObjectField
+* afArrayField
 
 Note that there is not a single "afFieldInput" type but rather various types
 corresponding to the different elements or element groups that `afFieldInput`

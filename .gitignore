@@ -4,3 +4,4 @@
 .meteor*
 smart.lock
 nbproject*
+/packages/
