@@ -36,7 +36,9 @@ $ mrt add autoform
 ## Example
 
 Let's say you have the following Meteor.Collection instance, with schema support
-provided by the collection2 package:
+provided by the collection2 package. (Adding `autoform` to your app does not add
+`collection2` by default so you need to run `mrt add collection2` for this example
+to work.)
 
 ```js
 Books = new Meteor.Collection("books", {
