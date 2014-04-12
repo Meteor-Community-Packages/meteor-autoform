@@ -336,7 +336,7 @@ Here's an example of passing `options` to generate a `select` field:
 *client.js:*
 
 ```js
-Handlebars.registerHelper("yearOptions", function() {
+UI.registerHelper("yearOptions", function() {
     return [
         {label: "2013", value: 2013},
         {label: "2014", value: 2014},
