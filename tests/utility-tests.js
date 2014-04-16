@@ -55,7 +55,8 @@ if (Meteor.isClient) {
             d: {
               a: 1,
               b: "foo",
-              c: date
+              c: date,
+              d: null // make sure that null, empty, etc. don't end up in $unset when under an array
             }
           }
         ],
@@ -82,6 +83,7 @@ if (Meteor.isClient) {
               a: 1,
               b: "foo",
               c: date
+              // null should have been removed, too
             }
           }
         ],

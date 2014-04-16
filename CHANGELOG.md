@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.6.2
+
+Fix an issue where generated modifiers sometimes had the same field listed in both `$set` and `$unset`.
+
 ### 0.6.1
 
 Improve some error messages
