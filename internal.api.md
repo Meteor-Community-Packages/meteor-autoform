@@ -26,7 +26,7 @@ __Returns__  *{Object}*
 Returns an object in which all properties with null, undefined, or empty
 string values have been removed, recursively.
 
-> ```cleanNulls: function cleanNulls(doc) { ...``` [utility.js:11](utility.js#L11)
+> ```cleanNulls: function cleanNulls(doc, isArray) { ...``` [utility.js:11](utility.js#L11)
 
 
 -
@@ -49,7 +49,7 @@ An object in which the keys represent the keys in the
 original object that were null, undefined, or empty strings, and the value
 of each key is "".
 
-> ```reportNulls: function reportNulls(flatDoc) { ...``` [utility.js:33](utility.js#L33)
+> ```reportNulls: function reportNulls(flatDoc) { ...``` [utility.js:38](utility.js#L38)
 
 
 -
@@ -74,7 +74,7 @@ Converts an object into a modifier by flattening it, putting keys with
 null, undefined, and empty string values into `modifier.$unset`, and
 putting the rest of the keys into `modifier.$set`.
 
-> ```docToModifier: function docToModifier(doc) { ...``` [utility.js:52](utility.js#L52)
+> ```docToModifier: function docToModifier(doc) { ...``` [utility.js:57](utility.js#L57)
 
 
 -
@@ -96,7 +96,7 @@ __Returns__  *{string[]}*
 
 Gets a string array of all the selected values in a given `select` DOM element.
 
-> ```getSelectValues: function getSelectValues(select) { ...``` [utility.js:135](utility.js#L135)
+> ```getSelectValues: function getSelectValues(select) { ...``` [utility.js:84](utility.js#L84)
 
 
 -
@@ -116,7 +116,7 @@ __Returns__  *{String|Number}*
 If the given string can be converted to a number, returns the number.
 Otherwise returns the string.
 
-> ```maybeNum: function maybeNum(val) { ...``` [utility.js:158](utility.js#L158)
+> ```maybeNum: function maybeNum(val) { ...``` [utility.js:107](utility.js#L107)
 
 
 -
@@ -136,7 +136,7 @@ __Returns__  *{Any}*
 If `obj` is a string, returns the value of the property with that
 name on the `window` object. Otherwise returns `obj`.
 
-> ```lookup: function lookup(obj) { ...``` [utility.js:176](utility.js#L176)
+> ```lookup: function lookup(obj) { ...``` [utility.js:125](utility.js#L125)
 
 
 -
@@ -159,7 +159,7 @@ Returns the schema definitions object from a SimpleSchema instance. Equivalent t
 `ss.schema(name)` but handles throwing errors if `name` is not a string or is not a valid
 field name for this SimpleSchema instance.
 
-> ```getDefs: function getDefs(ss, name) { ...``` [utility.js:196](utility.js#L196)
+> ```getDefs: function getDefs(ss, name) { ...``` [utility.js:145](utility.js#L145)
 
 
 -
@@ -188,7 +188,7 @@ __TODO__
 ```
 
 
-> ```objAffectsKey: function objAffectsKey(obj, key) { ...``` [utility.js:214](utility.js#L214)
+> ```objAffectsKey: function objAffectsKey(obj, key) { ...``` [utility.js:163](utility.js#L163)
 
 
 -
@@ -210,7 +210,7 @@ __Returns__  *{Object}*
 
 Takes a flat object and returns an expanded version of it.
 
-> ```expandObj: function expandObj(doc) { ...``` [utility.js:226](utility.js#L226)
+> ```expandObj: function expandObj(doc) { ...``` [utility.js:175](utility.js#L175)
 
 
 -
@@ -232,7 +232,30 @@ __Returns__  *{undefined}*
 
 Edits the object by reference, compacting any arrays at any level recursively.
 
-> ```compactArrays: function compactArrays(obj) { ...``` [utility.js:263](utility.js#L263)
+> ```compactArrays: function compactArrays(obj) { ...``` [utility.js:212](utility.js#L212)
+
+
+-
+
+### <a name="Utility.getSimpleSchemaFromContext"></a>*utility*.getSimpleSchemaFromContext({Object})&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method is private*
+*This method __getSimpleSchemaFromContext__ is defined in `Utility`*
+
+__Arguments__
+
+* __{Object}__ *{any}*  
+
+ context
+
+
+__Returns__  *{SimpleSchema}*
+
+
+Given a context object that may or may not have schema and collection properties,
+returns a SimpleSchema instance or throws an error if one cannot be obtained.
+
+> ```getSimpleSchemaFromContext: function getSimpleSchemaFromContext(context, formId) { ...``` [utility.js:234](utility.js#L234)
 
 
 -
@@ -254,7 +277,7 @@ __Returns__  *{Boolean}*
 
 Returns `true` if dateString is a "valid date string"
 
-> ```isValidDateString: function isValidDateString(dateString) { ...``` [utility.js:284](utility.js#L284)
+> ```isValidDateString: function isValidDateString(dateString) { ...``` [utility.js:268](utility.js#L268)
 
 
 -
@@ -276,7 +299,7 @@ __Returns__  *{Boolean}*
 
 Returns `true` if timeString is a "valid time string"
 
-> ```isValidTimeString: function isValidTimeString(timeString) { ...``` [utility.js:296](utility.js#L296)
+> ```isValidTimeString: function isValidTimeString(timeString) { ...``` [utility.js:280](utility.js#L280)
 
 
 -
@@ -297,7 +320,7 @@ __Returns__  *{String}*
 
 Returns a "valid date string" representing the local date.
 
-> ```dateToDateString: function dateToDateString(date) { ...``` [utility.js:313](utility.js#L313)
+> ```dateToDateString: function dateToDateString(date) { ...``` [utility.js:297](utility.js#L297)
 
 
 -
@@ -318,7 +341,7 @@ __Returns__  *{String}*
 
 Returns a "valid date string" representing the date converted to the UTC time zone.
 
-> ```dateToDateStringUTC: function dateToDateStringUTC(date) { ...``` [utility.js:332](utility.js#L332)
+> ```dateToDateStringUTC: function dateToDateStringUTC(date) { ...``` [utility.js:316](utility.js#L316)
 
 
 -
@@ -344,7 +367,7 @@ time (e.g. omitting the seconds component entirely if the given time is zero sec
 http:
 http:
 
-> ```dateToNormalizedForcedUtcGlobalDateAndTimeString: function dateToNormalizedForcedUtcGlobalDateAndTimeString(date) { ...``` [utility.js:356](utility.js#L356)
+> ```dateToNormalizedForcedUtcGlobalDateAndTimeString: function dateToNormalizedForcedUtcGlobalDateAndTimeString(date) { ...``` [utility.js:340](utility.js#L340)
 
 
 -
@@ -365,7 +388,7 @@ __Returns__  *{Boolean}*
 
 Returns true if dateString is a "valid normalized forced-UTC global date and time string"
 
-> ```isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString(dateString) { ...``` [utility.js:367](utility.js#L367)
+> ```isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString(dateString) { ...``` [utility.js:351](utility.js#L351)
 
 
 -
@@ -388,7 +411,7 @@ __Returns__  *{String}*
 
 Returns a "valid normalized local date and time string".
 
-> ```dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString(date, offset) { ...``` [utility.js:386](utility.js#L386)
+> ```dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString(date, offset) { ...``` [utility.js:370](utility.js#L370)
 
 
 -
@@ -409,7 +432,7 @@ __Returns__  *{Boolean}*
 
 Returns true if dtString is a "valid normalized local date and time string"
 
-> ```isValidNormalizedLocalDateAndTimeString: function isValidNormalizedLocalDateAndTimeString(dtString) { ...``` [utility.js:399](utility.js#L399)
+> ```isValidNormalizedLocalDateAndTimeString: function isValidNormalizedLocalDateAndTimeString(dtString) { ...``` [utility.js:383](utility.js#L383)
 
 
 -
@@ -439,7 +462,7 @@ This helps deal with the fact that we have to pass the ancestor autoform's conte
 helpers and components in different ways, but in all cases we want to get access to it and throw
 an error if we can't find an autoform context.
 
-> ```normalizeContext: function autoFormNormalizeContext(context, name) { ...``` [utility.js:420](utility.js#L420)
+> ```normalizeContext: function autoFormNormalizeContext(context, name) { ...``` [utility.js:404](utility.js#L404)
 
 
 ***
@@ -490,7 +513,7 @@ __Returns__  *{undefined}*
 Defines hooks to be used by one or more forms. Extends hooks lists if called multiple times for the same
 form.
 
-> ```AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) { ...``` [autoform.js:19](autoform.js#L19)
+> ```AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) { ...``` [autoform.js:20](autoform.js#L20)
 
 
 -
@@ -509,7 +532,7 @@ __Returns__  *{undefined}*
 Defines hooks by form id. Extends hooks lists if called multiple times for the same
 form.
 
-> ```AutoForm.hooks = function autoFormHooks(hooks) { ...``` [autoform.js:55](autoform.js#L55)
+> ```AutoForm.hooks = function autoFormHooks(hooks, replace) { ...``` [autoform.js:56](autoform.js#L56)
 
 
 -
@@ -527,7 +550,7 @@ __Returns__  *{undefined}*
 
 Resets validation for an autoform.
 
-> ```AutoForm.resetForm = function autoFormResetForm(formId) { ...``` [autoform.js:69](autoform.js#L69)
+> ```AutoForm.resetForm = function autoFormResetForm(formId) { ...``` [autoform.js:70](autoform.js#L70)
 
 
 -
@@ -542,7 +565,7 @@ __Arguments__
 * __template__ *{String}*  
 
 
-> ```AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(type, template) { ...``` [autoform.js:137](autoform.js#L137)
+> ```AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(type, template) { ...``` [autoform.js:138](autoform.js#L138)
 
 
 -
@@ -561,7 +584,7 @@ Template name
 
 Reactive.
 
-> ```AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(type) { ...``` [autoform.js:156](autoform.js#L156)
+> ```AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(type) { ...``` [autoform.js:157](autoform.js#L157)
 
 
 -
@@ -584,7 +607,7 @@ Returns an object representing the current values of all schema-based fields in 
 The returned object contains two properties, "insertDoc" and "updateDoc", which represent
 the field values as a normal object and as a MongoDB modifier, respectively.
 
-> ```AutoForm.getFormValues = function (formId) { ...``` [autoform.js:174](autoform.js#L174)
+> ```AutoForm.getFormValues = function (formId) { ...``` [autoform.js:175](autoform.js#L175)
 
 
 

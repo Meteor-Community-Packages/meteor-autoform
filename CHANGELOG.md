@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.7.0
+
+Add `afFieldValueIs` helper for dynamic show/hide of form sections based on the current value of any field.
+
 ### 0.6.2
 
 Fix an issue where generated modifiers sometimes had the same field listed in both `$set` and `$unset`.

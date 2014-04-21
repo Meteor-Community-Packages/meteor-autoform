@@ -27,7 +27,7 @@ __Returns__  *{undefined}*
 Defines hooks to be used by one or more forms. Extends hooks lists if called multiple times for the same
 form.
 
-> ```AutoForm.addHooks = function autoFormAddHooks(formIds, hooks) { ...``` [autoform.js:19](autoform.js#L19)
+> ```AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) { ...``` [autoform.js:20](autoform.js#L20)
 
 
 -
@@ -46,7 +46,7 @@ __Returns__  *{undefined}*
 Defines hooks by form id. Extends hooks lists if called multiple times for the same
 form.
 
-> ```AutoForm.hooks = function autoFormHooks(hooks) { ...``` [autoform.js:55](autoform.js#L55)
+> ```AutoForm.hooks = function autoFormHooks(hooks, replace) { ...``` [autoform.js:56](autoform.js#L56)
 
 
 -
@@ -64,7 +64,7 @@ __Returns__  *{undefined}*
 
 Resets validation for an autoform.
 
-> ```AutoForm.resetForm = function autoFormResetForm(formId) { ...``` [autoform.js:69](autoform.js#L69)
+> ```AutoForm.resetForm = function autoFormResetForm(formId) { ...``` [autoform.js:70](autoform.js#L70)
 
 
 -
@@ -79,7 +79,7 @@ __Arguments__
 * __template__ *{String}*  
 
 
-> ```AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(type, template) { ...``` [autoform.js:137](autoform.js#L137)
+> ```AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(type, template) { ...``` [autoform.js:138](autoform.js#L138)
 
 
 -
@@ -98,7 +98,7 @@ Template name
 
 Reactive.
 
-> ```AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(type) { ...``` [autoform.js:156](autoform.js#L156)
+> ```AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(type) { ...``` [autoform.js:157](autoform.js#L157)
 
 
 -
@@ -121,7 +121,7 @@ Returns an object representing the current values of all schema-based fields in 
 The returned object contains two properties, "insertDoc" and "updateDoc", which represent
 the field values as a normal object and as a MongoDB modifier, respectively.
 
-> ```AutoForm.getFormValues = function (formId) { ...``` [autoform.js:174](autoform.js#L174)
+> ```AutoForm.getFormValues = function (formId) { ...``` [autoform.js:175](autoform.js#L175)
 
 
 

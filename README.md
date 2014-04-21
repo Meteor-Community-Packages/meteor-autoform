@@ -434,6 +434,48 @@ any remaining attributes are forwarded to `afFieldInput`.
 {{> afQuickField name="decimal" step="0.01"}}
 ```
 
+### afFieldValueIs
+
+Use this helper with `#if` to dynamically show and hide sections of a form based on the current value of any field in the form.
+
+Here's an example where we want the user to select a type, and if he selects the "Other" type, we want to show an additional field where the other type can be entered as text.
+
+```html
+{{#autoForm id="itemEditForm" type="update" collection="Items" doc=itemEditFormDoc}}
+    {{> afQuickField name="type" options="allowed"}}
+    {{#if afFieldValueIs name="type" value="Other"}}
+    {{> afQuickField name="customType"}}
+    {{/if}}
+    ...
+{{/autoForm}}
+```
+
+In an example like this, you would probably also want "customType" to be required when type="Other". This can be done with a schema similar to this:
+
+```js
+{
+    type: {
+        type: String,
+        allowedValues: ["A", "B", "Other"]
+    },
+    customType: {
+        type: String,
+        optional: true,
+        // Required for "Other" type; otherwise should not be set
+        custom: function () {
+            var type = this.field('type');
+            if (type.isSet) {
+                if (type.value === "Other" && (!this.isSet || this.operator === "$unset")) {
+                    return "required";
+                } else if (type.value !== "Other" && this.isSet && this.operator !== "$unset") {
+                    this.unset();
+                }
+            }
+        }
+    }
+}
+```
+
 ## Non-Collection Forms
 
 If you want to use an AutoForm for a form that does not relate to a collection
