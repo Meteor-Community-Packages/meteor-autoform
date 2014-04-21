@@ -3,6 +3,7 @@ var formPreserve = new FormPreserve("autoforms");
 var formData = {}; //for looking up autoform data by form ID
 var templatesById = {}; //keep a reference of autoForm templates by form `id` for AutoForm.getFormValues
 var arrayFields = {}; //track # of array fields per form
+var formValues = {}; //for reactive show/hide based on current value of a field
 
 AutoForm = {}; //exported
 
@@ -320,6 +321,11 @@ Template.autoForm.destroyed = function autoFormDestroyed() {
   // Remove from array fields list
   if (arrayFields[formId]) {
     delete arrayFields[formId];
+  }
+
+  // Remove from field values
+  if (formValues[formId]) {
+    delete formValues[formId];
   }
 
   // Unregister form preservation
@@ -761,7 +767,6 @@ UI.registerHelper('afFieldMessage', function autoFormFieldMessage(options) {
  * afFieldIsInvalid
  */
 
-
 UI.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
   //help users transition from positional name arg
   if (typeof options === "string") {
@@ -777,6 +782,23 @@ UI.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
 
   Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
   return ss.namedContext(afContext.formId).keyIsInvalid(hash.name);
+});
+
+/*
+ * afFieldValueIs
+ */
+
+
+UI.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
+  var hash = (options || {}).hash || {};
+  var afContext = hash.autoform && hash.autoform._af || this && this._af;
+  var ss = afContext.ss;
+  if (!ss) {
+    throw new Error("afFieldValueIs helper must be used within an autoForm block");
+  }
+
+  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
+  return getTrackedFieldValue(afContext.formId, hash.name) === hash.value;
 });
 
 /*
@@ -1044,19 +1066,26 @@ Template.autoForm.events({
       validateField(event.currentTarget.getAttribute("data-schema-key"), template, false, onlyIfAlreadyInvalid);
     }
   },
-  'change [data-schema-key]': function autoFormChangeHandler(event, template) {
-    var afContext = (this && this.autoform && this.autoform._af) || {};
-    if (afContext) {
-      var formId = afContext.formId;
-      var ss = afContext.ss;
-      formId && ss && formPreserve.registerForm(formId, function autoFormRegFormCallback() {
+  'change form': function autoFormChangeHandler(event, template) {
+    var key = event.target.getAttribute("data-schema-key");
+    if (!key)
+      return;
+
+    var formId = this.id;
+    var data = formData[formId];
+    if (data && data.ss) {
+      var ss = data.ss;
+      formPreserve.registerForm(formId, function autoFormRegFormCallback() {
         return getFormValues(template, formId, ss).insertDoc;
       });
+
+      // Get field's value for reactive show/hide of other fields by value
+      updateTrackedFieldValue(formId, key, getFieldValue(template, key));
     }
-    var validationType = template.data.validation || 'submitThenKeyup';
+    var validationType = data.validationType || 'submitThenKeyup';
     var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
     if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
-      validateField(event.currentTarget.getAttribute("data-schema-key"), template, false, onlyIfAlreadyInvalid);
+      validateField(key, template, false, onlyIfAlreadyInvalid);
     }
   },
   'reset form': function autoFormResetHandler(event, template) {
@@ -1125,8 +1154,7 @@ Template.autoForm.events({
  * Private Helper Functions
  */
 
-function getFormValues(template, formId, ss) {
-  var fields = template.findAll("[data-schema-key]");
+function getFieldsValues(fields) {
   var doc = {};
   _.each(fields, function formValuesEach(field) {
     var name = field.getAttribute("data-schema-key");
@@ -1223,6 +1251,17 @@ function getFormValues(template, formId, ss) {
     // Handle all other inputs
     doc[name] = val;
   });
+
+  return doc;
+}
+
+function getFieldValue(template, key) {
+  var doc = getFieldsValues(template.findAll('[data-schema-key=' + key + ']'));
+  return doc && doc[key];
+}
+
+function getFormValues(template, formId, ss) {
+  var doc = getFieldsValues(template.findAll("[data-schema-key]"));
 
   // Expand the object
   doc = Utility.expandObj(doc);
@@ -1692,6 +1731,21 @@ function autoFormChildKeys(ss, name) {
     }
   });
   return childKeys;
+}
+
+function updateTrackedFieldValue(formId, key, val) {
+  console.log("updateTrackedFieldValue", formId, key, val);
+  formValues[formId] = formValues[formId] || {};
+  formValues[formId][key] = formValues[formId][key] || {_deps: new Deps.Dependency};
+  formValues[formId][key]._val = val;
+  formValues[formId][key]._deps.changed();
+}
+
+function getTrackedFieldValue(formId, key) {
+  formValues[formId] = formValues[formId] || {};
+  formValues[formId][key] = formValues[formId][key] || {_deps: new Deps.Dependency};
+  formValues[formId][key]._deps.depend();
+  return formValues[formId][key]._val;
 }
 
 /*
