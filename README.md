@@ -1,7 +1,7 @@
 AutoForm [![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
 =========================
 
-AutoForm is a smart package for Meteor that adds handlebars helpers to easily
+AutoForm is a smart package for Meteor that adds UI components and helpers to easily
 create basic forms with automatic insert and update events, and automatic
 reactive validation. This package requires and automatically installs the
 [simple-schema](https://github.com/aldeed/meteor-simple-schema) package.
@@ -18,6 +18,7 @@ If you've been using AutoForm and are now switching to the Blaze rendering engin
 * When specifying the field name for any component or helper, add `name=`. For example, `{{afFieldMessage name="name"}}` rather than `{{afFieldMessage "name"}}`.
 * Instead of using a submit button class to determine form behavior, use a `type` attribute on the `autoForm` component.
 * Instead of using a submit button `data-meteor-method` attribute to identify the method name, use a `meteormethod` attribute on the `autoForm` or `quickForm` component.
+* The components (any that you use `>` before) no longer require an `autoform` attribute when used within an `#each` or `#with` block. The helpers *do* still require the `autoform` attribute that references the `autoForm` context.
 * There is no `AutoForm` instance. [How to add hooks.](#callbackshooks) There is also now support for global hooks and multiple hooks of the same type per form. (Adding hooks multiple times will extend the list of hooks rather than overwriting the previous hook.)
 * Again, there is no `AutoForm` instance. The `autoForm` component can take a `schema` attribute that supplies a `SimpleSchema` instance or a `collection` attribute that supplies a `Meteor.Collection` instance with an attached schema. You can also specify both attributes, in which case form generation and validation will be based on the schema, but insert/update (and final validation) will happen on the collection. In this way, you can use slightly different validation logic or add additional constraints to a form that are not actual constraints on the collection's schema.
 * New `afFieldSelect` block component that supports optgroups. [Read about it.](#affieldselect)
@@ -901,19 +902,18 @@ the validated doc arrives on the server.
 ## Using Block Helpers Within an AutoForm
 
 Because of the way the `{{#autoForm}}` block helper keeps track of data, if you use a block helper
-within an autoForm and that block helper changes the context, things won't work correctly. Examples of
-problematic block helpers are `{{#each}}` and `{{#with}}`.
+within an autoForm and that block helper changes the context (`{{#each}}` and `{{#with}}`), the `afFieldMessage` and `afFieldIsInvalid` helpers won't work correctly.
 
-To get around this issue, every "af"-prefixed helper you call within one of these "sub-blocks" must
-provide an "autoform" attribute that supplies the autoform context, which you can get by using
-the Handlebars "../" syntax.
+To get around this issue, when you use `afFieldMessage` or `afFieldIsInvalid` within one of these "sub-blocks", you must
+provide an `autoform` attribute that supplies the autoform context, which you can get by using
+the Spacebars ".." syntax. The `autoform` attribute is *not* necessary for autoform components (anything you put a `>` before), only for the helpers.
 
 An example will be clearer:
 
 ```html
 {{#autoForm collection="Books" id="myBookForm" type="insert"}}
   {{#with objectContainingName}}
-    {{> afQuickField name=name autoform=..}}
+    {{afFieldMessage name=name autoform=..}}
   {{/with}}
 {{/autoForm}}
 ```
@@ -1107,7 +1107,7 @@ and register that object as a helper:
 *common.js:*
 
 ```js
-var Schemas = {};
+Schemas = {};
 
 Schemas.ContactForm = new SimpleSchema({
   name: {
@@ -1134,7 +1134,7 @@ Schemas.ContactForm = new SimpleSchema({
 *client.js:*
 
 ```js
-Handlebars.registerHelper("Schemas", Schemas);
+UI.registerHelper("Schemas", Schemas);
 ```
 
 *html:*
