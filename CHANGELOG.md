@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.7.1
+
+Minor fixes for `afFieldValueIs` helper
+
 ### 0.7.0
 
 Add `afFieldValueIs` helper for dynamic show/hide of form sections based on the current value of any field.
