@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.7.2
+
+Remove unintentional console log
+
 ### 0.7.1
 
 Minor fixes for `afFieldValueIs` helper
