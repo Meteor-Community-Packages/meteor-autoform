@@ -540,6 +540,9 @@ function (options) {
   // Get input value
   var value = getInputValue(c.atts.name, c.atts.value, c.af.mDoc, expectsArray, defaultValue);
 
+  // Track field's value for reactive show/hide of other fields by value
+  updateTrackedFieldValue(c.af.formId, c.atts.name, value);
+
   // Get type
   var type = getInputType(c.atts, defs, value);
 
@@ -1789,7 +1792,6 @@ function setArrayFieldCount(formId, name, count) {
     count = Math.min(count, range.maxCount + arrayFields[formId][name].removedCount);
   }
   count = Math.max(count, range.minCount + arrayFields[formId][name].removedCount);
-
 
   arrayFields[formId][name].count = count;
   arrayFields[formId][name].deps.changed();
