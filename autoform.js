@@ -1737,7 +1737,6 @@ function autoFormChildKeys(ss, name) {
 }
 
 function updateTrackedFieldValue(formId, key, val) {
-  console.log("updateTrackedFieldValue", formId, key, val);
   formValues[formId] = formValues[formId] || {};
   formValues[formId][key] = formValues[formId][key] || {_deps: new Deps.Dependency};
   formValues[formId][key]._val = val;
