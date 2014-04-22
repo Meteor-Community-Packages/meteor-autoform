@@ -1256,7 +1256,7 @@ function getFieldsValues(fields) {
 }
 
 function getFieldValue(template, key) {
-  var doc = getFieldsValues(template.findAll('[data-schema-key=' + key + ']'));
+  var doc = getFieldsValues(template.findAll('[data-schema-key="' + key + '"]'));
   return doc && doc[key];
 }
 
