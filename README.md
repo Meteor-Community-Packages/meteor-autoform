@@ -476,6 +476,10 @@ In an example like this, you would probably also want "customType" to be require
 }
 ```
 
+## Public API
+
+Some public methods are exposed on the `AutoForm` object. Refer to the [API documentation](https://github.com/aldeed/meteor-autoform/blob/master/api.md).
+
 ## Non-Collection Forms
 
 If you want to use an AutoForm for a form that does not relate to a collection
@@ -1119,8 +1123,8 @@ Or tell all quickForms to use it:
 AutoForm.setDefaultTemplateForType('quickForm', 'nothing');
 ```
 
-Obviously a real example would be a bit more complex. You template will have
-access to certain helpers and properties in the data context, and you can
+Obviously a real example would be a bit more complex. Your template will have
+access to certain built-in helpers and properties in the data context, and you can
 use those to generate what you need in the format you need it. In practice,
 it is easiest to start by duplicating one of the built-in templates and then
 modify your copy as necessary.
