@@ -436,7 +436,7 @@ any remaining attributes are forwarded to `afFieldInput`.
 
 ### afFieldValueIs
 
-Use this helper with `#if` to dynamically show and hide sections of a form based on the current value of any field in the form.
+Use this helper with `#if` to dynamically show and hide sections of a form based on the current value of any non-array field on the form.
 
 Here's an example where we want the user to select a type, and if he selects the "Other" type, we want to show an additional field where the other type can be entered as text.
 
@@ -474,6 +474,39 @@ In an example like this, you would probably also want "customType" to be require
         }
     }
 }
+```
+
+### afFieldValueContains
+
+Use this helper with `#if` to dynamically show and hide sections of a form based on a value being present in the current value array of any array field on the form.
+
+```html
+<template name="containsForm">
+  <p>A "B" field is displayed only when the current value of the "A" field contains "foo".</p>
+  {{#autoForm collection="FieldValueContains" type="insert" id="FieldValueContainsForm"}}
+  {{> afQuickField name="a" options="allowed" noselect=true}}
+  {{#if afFieldValueContains name="a" value="foo"}}
+  {{> afQuickField name="b"}}
+  {{/if}}
+  <button type="submit" class="btn btn-primary">Insert</button>
+  {{/autoForm}}
+</template>
+```
+
+With the collection:
+
+```js
+FieldValueContains = new Meteor.Collection("FieldValueContains", {
+  schema: new SimpleSchema({
+    a: {
+      type: [String],
+      allowedValues: ["foo", "bar"]
+    },
+    b: {
+      type: String
+    }
+  })
+});
 ```
 
 ## Public API
@@ -642,6 +675,17 @@ In most cases, the object will be perfect for your needs. However, you might
 find that you want to modify the object in some way. For example, you might
 want to add the current user's ID to a document before it is inserted. You can
 use "before" hooks or a `formToDoc` hook to do this.
+
+### Getting Current Field Values
+
+You can get the current values of all fields on a form at any time by passing the form `id`
+to [AutoForm.getFormValues](https://github.com/aldeed/meteor-autoform/blob/master/api.md#autoformgetformvaluesformidclient). This method is *not* reactive. The form must be
+currently rendered for this to work.
+
+You can get the current value of a specific field on a specific form by passing the form
+`id` and field name to [AutoForm.getFieldValue](https://github.com/aldeed/meteor-autoform/blob/master/api.md#autoformgetformvaluesformidclient). This method *is* reactive so it can be used in
+place of the built-in `afFieldValueIs` helper to show pieces of a form based on
+custom criteria about the values of other fields on the form.
 
 ## Callbacks/Hooks
 

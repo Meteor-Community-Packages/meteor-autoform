@@ -607,7 +607,33 @@ Returns an object representing the current values of all schema-based fields in 
 The returned object contains two properties, "insertDoc" and "updateDoc", which represent
 the field values as a normal object and as a MongoDB modifier, respectively.
 
-> ```AutoForm.getFormValues = function (formId) { ...``` [autoform.js:175](autoform.js#L175)
+> ```AutoForm.getFormValues = function autoFormGetFormValues(formId) { ...``` [autoform.js:175](autoform.js#L175)
+
+
+-
+
+### <a name="AutoForm.getFieldValue"></a>*autoform*.getFieldValue(formId, fieldName)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method __getFieldValue__ is defined in `AutoForm`*
+
+__Arguments__
+
+* __formId__ *{String}*  
+
+ The `id` attribute of the `autoForm` you want current values for.
+
+* __fieldName__ *{String}*  
+
+ The name of the field for which you want the current value.
+
+
+__Returns__  *{Any}*
+
+
+Returns the value of the field (the value that would be used if the form were submitted right now).
+This is a reactive method that will rerun whenever the current value of the requested field changes.
+
+> ```AutoForm.getFieldValue = function autoFormGetFieldValue(formId, fieldName) { ...``` [autoform.js:197](autoform.js#L197)
 
 
 

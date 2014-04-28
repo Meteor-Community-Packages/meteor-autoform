@@ -172,7 +172,7 @@ AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(
  * The returned object contains two properties, "insertDoc" and "updateDoc", which represent
  * the field values as a normal object and as a MongoDB modifier, respectively.
  */
-AutoForm.getFormValues = function (formId) {
+AutoForm.getFormValues = function autoFormGetFormValues(formId) {
   var template = templatesById[formId];
   if (!template || template._notInDOM) {
     throw new Error("getFormValues: There is currently no autoForm template rendered for the form with id " + formId);
@@ -182,6 +182,20 @@ AutoForm.getFormValues = function (formId) {
   var context = template.data;
   var ss = Utility.getSimpleSchemaFromContext(context, formId);
   return getFormValues(template, formId, ss);
+};
+
+/**
+ * @method AutoForm.getFieldValue
+ * @public
+ * @param {String} formId The `id` attribute of the `autoForm` you want current values for.
+ * @param {String} fieldName The name of the field for which you want the current value.
+ * @return {Any}
+ *
+ * Returns the value of the field (the value that would be used if the form were submitted right now).
+ * This is a reactive method that will rerun whenever the current value of the requested field changes.
+ */
+AutoForm.getFieldValue = function autoFormGetFieldValue(formId, fieldName) {
+  return getTrackedFieldValue(formId, fieldName);
 };
 
 /*
@@ -248,7 +262,7 @@ Template.autoForm.atts = function autoFormTplAtts() {
   }
   // After removing all of the props we know about, everything else should
   // become a form attribute.
-  return _.omit(context, "schema", "collection", "validation", "doc", "resetOnSuccess", "type");
+  return _.omit(context, "schema", "collection", "validation", "doc", "resetOnSuccess", "type", "template");
 };
 
 Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) {
@@ -791,7 +805,6 @@ UI.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
  * afFieldValueIs
  */
 
-
 UI.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
   var hash = (options || {}).hash || {};
   var afContext = hash.autoform && hash.autoform._af || this && this._af;
@@ -802,6 +815,23 @@ UI.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
 
   Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
   return getTrackedFieldValue(afContext.formId, hash.name) === hash.value;
+});
+
+/*
+ * afFieldValueContains
+ */
+
+UI.registerHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
+  var hash = (options || {}).hash || {};
+  var afContext = hash.autoform && hash.autoform._af || this && this._af;
+  var ss = afContext.ss;
+  if (!ss) {
+    throw new Error("afFieldValueContains helper must be used within an autoForm block");
+  }
+
+  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
+  var currentValue = getTrackedFieldValue(afContext.formId, hash.name);
+  return _.isArray(currentValue) && _.contains(currentValue, hash.value);
 });
 
 /*
@@ -1423,7 +1453,8 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
           "trueLabel",
           "falseLabel",
           "options",
-          "offset");
+          "offset",
+          "template");
 
   // Add required to every type of element, if required
   if (typeof hash.required === "undefined" && !defs.optional) {

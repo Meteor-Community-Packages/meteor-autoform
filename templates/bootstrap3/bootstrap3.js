@@ -4,7 +4,7 @@
 
 Template['afFieldLabel_bootstrap3'].atts = function bsFieldLabelAtts() {
   var atts = (this || {}).atts;
-  var labelAtts = _.omit(atts, 'name', 'autoform');
+  var labelAtts = _.omit(atts, 'name', 'autoform', 'template');
   // Add bootstrap class if necessary
   if (typeof labelAtts['class'] === "string") {
     labelAtts['class'] += " control-label"; //might be added twice but that shouldn't hurt anything

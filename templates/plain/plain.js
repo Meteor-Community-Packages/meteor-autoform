@@ -4,7 +4,7 @@
 
 Template['afFieldLabel_plain'].atts = function plFieldLabelAtts() {
   var atts = (_.clone(this || {})).atts;
-  var labelAtts = _.omit(atts, 'name', 'autoform');
+  var labelAtts = _.omit(atts, 'name', 'autoform', 'template');
   // Add "for" attribute if missing
   labelAtts.for = labelAtts.for || atts.name;
   return labelAtts;
