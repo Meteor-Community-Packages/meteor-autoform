@@ -23,6 +23,9 @@ Package.on_use(function(api) {
     // bootstrap3-span Template
     'templates/bootstrap3-span/bootstrap3-span.html',
     'templates/bootstrap3-span/bootstrap3-span.js',
+    // bootstrap3-horizontal Template
+    'templates/bootstrap3-horizontal/bootstrap3-horizontal.html',
+    'templates/bootstrap3-horizontal/bootstrap3-horizontal.js',
     // plain Template
     'templates/plain/plain.html',
     'templates/plain/plain.js',
