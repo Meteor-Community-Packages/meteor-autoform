@@ -421,6 +421,8 @@ This component accepts the same attributes as `afFieldInput` and `afFieldLabel`.
 Attributes that are prefixed with `label-` are forwarded to `afFieldLabel` while
 any remaining attributes are forwarded to `afFieldInput`.
 
+When you use the `afQuickField` component for a field that is an `Object`, it is rendered using the `afObjectField` helper. When you use the `afQuickField` component for a field that is an `Array`, it is rendered using the `afArrayField` helper. Refer to the "Objects and Arrays" section for additional information.
+
 #### afQuickField Examples
 
 ```html
@@ -508,6 +510,24 @@ FieldValueContains = new Meteor.Collection("FieldValueContains", {
   })
 });
 ```
+
+## Objects and Arrays
+
+Fields with type `Object` or `Array` are treated specially.
+
+### afObjectField
+
+When you use the `afQuickField` component for a field that is an `Object`, it is rendered using the `afObjectField` component. This happens by default when you use a `quickForm` for a schema that has a field of type `Object`.
+
+The `afObjectField` component renders all of an object field's subfields together as one group. The group is labeled with the name of the object field. The actual visual representation of the group will vary based on which template you use. For the "bootstrap3" default template, the group appears in a panel with a heading.
+
+### afArrayField
+
+When you use the `afQuickField` component for a field that is an `Array`, it is rendered using the `afArrayField` component. This happens by default when you use a `quickForm` for a schema that has a field of type `Array`.
+
+The `afArrayField` component renders all of an array field's array items together as one group. The group is labeled with the name of the array field. The actual visual representation of the group will vary based on which template you use. For the "bootstrap3" default template, the group appears in a panel with a heading.
+
+Additionally, buttons for adding and removing array items are automatically added to the UI. This is also done by the template, which means that you can easily make your own "afArrayField" template if you don't like the default appearance of the add/remove buttons.
 
 ## Public API
 
