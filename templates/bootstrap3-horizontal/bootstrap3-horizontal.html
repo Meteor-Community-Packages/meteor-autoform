@@ -1,14 +1,14 @@
 <template name="quickForm_bootstrap3-horizontal">
-  {{#autoForm qfAutoFormContext}}
-    {{#each qfFormFields}}
+  {{#autoForm this.qfAutoFormContext}}
+    {{#each this.qfFormFields}}
     {{#with qfHorizontalAdjust ..}}
     {{> afQuickField}}
     {{/with}}
     {{/each}}
-    {{#if qfNeedsButton}}
+    {{#if this.qfNeedsButton}}
     <div>
       <button {{submitButtonAtts}}>
-      {{#with buttonContent}}
+      {{#with this.buttonContent}}
       {{this}}
       {{else}}
       Submit
@@ -20,13 +20,13 @@
 </template>
 
 <template name="afQuickField_bootstrap3-horizontal">
-  <div class="form-group {{#if afFieldIsInvalid name=atts.name autoform=atts.autoform}}has-error{{/if}}">
-    {{#unless skipLabel}}
+  <div class="form-group {{#if afFieldIsInvalid name=this.atts.name autoform=this.atts.autoform}}has-error{{/if}}">
+    {{#unless this.skipLabel}}
     {{> afFieldLabel afFieldLabelAtts}}
     {{/unless}}
     <div class="{{rightColumnClass}}">
         {{> afFieldInput afFieldInputAtts}}
-        <span class="help-block">{{{afFieldMessage name=atts.name autoform=atts.autoform}}}</span>
+        <span class="help-block">{{{afFieldMessage name=this.atts.name autoform=this.atts.autoform}}}</span>
     </div>
   </div>
 </template>

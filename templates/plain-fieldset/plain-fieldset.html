@@ -1,17 +1,17 @@
 <template name="quickForm_plain-fieldset">
-  {{#autoForm afContext}}
+  {{#autoForm this.afContext}}
   <fieldset>
-    {{#with legend}}
+    {{#with this.legend}}
     <legend>{{this}}</legend>
     {{/with}}
-    {{#each formFields}}
-    {{> afQuickField name=name autoform=autoform}}
+    {{#each this.formFields}}
+    {{> afQuickField name=this.name autoform=this.autoform}}
     {{/each}}
   </fieldset>
-  {{#if needsButton}}
+  {{#if this.needsButton}}
   <div>
     <button {{submitButtonAtts}}>
-      {{#with buttonContent}}
+      {{#with this.buttonContent}}
       {{this}}
       {{else}}
       Submit

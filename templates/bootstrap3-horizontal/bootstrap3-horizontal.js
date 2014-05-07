@@ -6,6 +6,16 @@ Template["quickForm_bootstrap3-horizontal"].qfHorizontalAdjust = function (afCon
   return ctx;
 };
 
+Template['quickForm_bootstrap3-horizontal'].submitButtonAtts = function bsQuickFormSubmitButtonAtts() {
+  var context = this;
+  var atts = {type: "submit"};
+  atts['class'] = 'btn btn-primary';
+  if (typeof context.buttonClasses === "string") {
+    atts['class'] += ' ' + context.buttonClasses;
+  }
+  return atts;
+};
+
 Template["afQuickField_bootstrap3-horizontal"].afFieldInputAtts = function () {
   var atts = _.clone(this.afFieldInputAtts || {});
   if ('input-col-class' in atts) {

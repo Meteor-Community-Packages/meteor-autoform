@@ -61,7 +61,7 @@
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afFieldInput' .. ../.. ../../.. ../../../.. ../../../../..}}
 	  {{#with inputOuterContext autoform=this atts=..}}
-	    {{#with getTemplate templateType atts.template}}
+	    {{#with getTemplate this.templateType this.atts.template}}
 	      {{#with inputContext outerContext=..}}
 	        {{> ..}}
 	      {{/with}}
@@ -74,7 +74,7 @@
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afFieldSelect' .. ../.. ../../.. ../../../.. ../../../../..}}
 	  {{#with inputOuterContext autoform=this atts=..}}
-	    {{#with getTemplate "afFieldSelect" atts.template}}
+	    {{#with getTemplate "afFieldSelect" this.atts.template}}
 	      {{#with inputContext outerContext=.. contentBlock=UI.contentBlock}}
 	        {{> ..}}
 	      {{/with}}
