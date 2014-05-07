@@ -18,11 +18,11 @@
 </template>
 
 <template name="afFieldLabel_bootstrap3">
-  <label {{atts}}>{{label}}</label>
+  <label {{atts}}>{{this.label}}</label>
 </template>
 
 <template name="_afCheckbox_bootstrap3">
-  <div class="checkbox"><label><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+  <div class="checkbox"><label><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{this.label}}</label></div>
 </template>
 
 <template name="afCheckbox_bootstrap3">
@@ -36,7 +36,7 @@
 </template>
 
 <template name="_afRadio_bootstrap3">
-  <div class="radio"><label for="{{name}}"><input type="radio" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+  <div class="radio"><label for="{{name}}"><input type="radio" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{this.label}}</label></div>
 </template>
 
 <template name="afRadio_bootstrap3">
@@ -65,7 +65,7 @@
     <option value="">{{firstOption}}</option>
     {{/if}}
     {{#each items}}
-      <option value="{{value}}" {{selected}}>{{label}}</option>
+      <option value="{{value}}" {{selected}}>{{this.label}}</option>
     {{/each}}
   </select>
 </template>
@@ -97,7 +97,7 @@
 <template name="afObjectField_bootstrap3">
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title">{{label}}</h3>
+      <h3 class="panel-title">{{this.label}}</h3>
     </div>
     <div class="panel-body">
       {{#each fields}}

@@ -18,11 +18,11 @@
 </template>
 
 <template name="afFieldLabel_plain">
-  <label {{atts}}>{{label}}</label>
+  <label {{atts}}>{{this.label}}</label>
 </template>
 
 <template name="_afCheckbox_plain">
-  <div><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+  <div><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{this.label}}</label></div>
 </template>
 
 <template name="afCheckbox_plain">
@@ -36,7 +36,7 @@
 </template>
 
 <template name="_afRadio_plain">
-  <div><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{label}}</label></div>
+  <div><label for="{{name}}"><input type="checkbox" data-schema-key="{{name}}" name="{{name}}" value="{{value}}" {{checked}} {{atts}} />{{this.label}}</label></div>
 </template>
 
 <template name="afRadio_plain">
@@ -65,7 +65,7 @@
     <option value="">{{firstOption}}</option>
     {{/if}}
     {{#each items}}
-    <option value="{{value}}" {{selected}}>{{label}}</option>
+    <option value="{{value}}" {{selected}}>{{this.label}}</option>
     {{/each}}
   </select>
 </template>
@@ -96,7 +96,7 @@
 
 <template name="afObjectField_plain">
   <fieldset>
-    <legend>{{label}}</legend>
+    <legend>{{this.label}}</legend>
     {{#each fields}}
     {{> afQuickField this}}
     {{/each}}
