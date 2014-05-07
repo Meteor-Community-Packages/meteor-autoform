@@ -6,6 +6,12 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.8.1
+
+* Disabled fields are no longer submitted or included in the generated insert or update object.
+* Changes that prevent global helpers from potentially interfering with correct autoform generation. (Thanks @mjgallag)
+* Fix contenteditable field. (Thanks @chrisbutler)
+
 ### 0.8.0
 
 * Ensure that `template` attribute is not added to the DOM element for all components
