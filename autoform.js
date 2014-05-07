@@ -1289,12 +1289,12 @@ function getFieldsValues(fields) {
 }
 
 function getFieldValue(template, key) {
-  var doc = getFieldsValues(template.findAll('[data-schema-key="' + key + '"]'));
+  var doc = getFieldsValues(template.$('[data-schema-key="' + key + '"]'));
   return doc && doc[key];
 }
 
 function getFormValues(template, formId, ss) {
-  var doc = getFieldsValues(template.findAll("[data-schema-key]"));
+  var doc = getFieldsValues(template.$("[data-schema-key]").not("[disabled]"));
 
   // Expand the object
   doc = Utility.expandObj(doc);
