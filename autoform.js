@@ -1179,6 +1179,8 @@ Template.autoForm.events({
 
     var thisItem = button.closest('.autoform-array-item');
     var itemCount = thisItem.siblings('.autoform-array-item').length + 1;
+
+    setArrayFieldCount(formId, name, itemCount)
     addArrayField(formId, name);
   }
 });
