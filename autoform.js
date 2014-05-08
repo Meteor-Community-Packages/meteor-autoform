@@ -1177,8 +1177,7 @@ Template.autoForm.events({
     var data = template.data;
     var formId = data && data.id || defaultFormId;
 
-    var thisItem = button.closest('.autoform-array-item');
-    var itemCount = thisItem.siblings('.autoform-array-item').length + 1;
+    var itemCount = $('#'+name+' .list-group .autoform-array-item').size();
 
     setArrayFieldCount(formId, name, itemCount)
     addArrayField(formId, name);
