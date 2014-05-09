@@ -396,7 +396,6 @@ function qfFormFields() {
     }
     fieldList = _.difference(fieldList, omitFields);
   }
-
   return quickFieldFormFields(fieldList, context._af, true);
 }
 
@@ -632,6 +631,12 @@ Template.afObjectField.innerContext = function (options) {
     return name + "." + field;
   });
 
+  // Get rid of nested fields specified in omitFields
+  if(typeof options.hash.autoform.omitFields !== "undefined"){
+    var omitFields = options.hash.autoform.omitFields.split(/[\s,]+/);
+    fields = _.map(fields, function(item){return item.replace(/.[0-9]/,'.$');});
+    fields = _.difference(fields, omitFields);
+  }
   var formFields = quickFieldFormFields(fields, c.af, true);
 
   return {
