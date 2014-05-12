@@ -627,7 +627,7 @@ Template.afObjectField.innerContext = function (options) {
   fields = _.map(fields, function (field) {
     return name + "." + field;
   });
-  console.log(c.afc.omitFields);
+
   // Get rid of nested fields specified in omitFields
   if(typeof c.afc.omitFields !== "undefined"){
     var omitFields = stringToArray(c.afc.omitFields);
