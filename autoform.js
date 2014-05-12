@@ -387,10 +387,7 @@ function qfFormFields() {
 
   // If user wants to omit some fields, remove those from the array
   if (context.omitFields) {
-    var omitFields = context.omitFields;
-    if (typeof omitFields === "string") {
-      omitFields = omitFields.replace(/ /g, '').split(',');
-    }
+    var omitFields = stringToArray(context.omitFields);
     if (!_.isArray(omitFields)) {
       throw new Error('AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
     }
@@ -630,12 +627,13 @@ Template.afObjectField.innerContext = function (options) {
   fields = _.map(fields, function (field) {
     return name + "." + field;
   });
-
+  console.log(c.afc.omitFields);
   // Get rid of nested fields specified in omitFields
-  if(typeof options.hash.autoform.omitFields !== "undefined"){
-    var omitFields = options.hash.autoform.omitFields.split(/[\s,]+/);
-    fields = _.map(fields, function(item){return item.replace(/.[0-9]/,'.$');});
-    fields = _.difference(fields, omitFields);
+  if(typeof c.afc.omitFields !== "undefined"){
+    var omitFields = stringToArray(c.afc.omitFields);
+    fields = _.reject(fields,function(f){
+       return _.contains(omitFields,SimpleSchema._makeGeneric(f))
+    });
   }
   var formFields = quickFieldFormFields(fields, c.af, true);
 
@@ -643,6 +641,14 @@ Template.afObjectField.innerContext = function (options) {
     fields: formFields,
     label: ss.label(name)
   };
+};
+
+function stringToArray(s){
+  if (typeof s === "string") {
+    return s.replace(/ /g, '').split(',');
+  }else{
+    return s;
+  }
 };
 
 /*
