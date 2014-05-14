@@ -239,10 +239,9 @@ set.
 else will result in normal browser form submission after validation.
 * `meteormethod`: Optional. When `type` is "method", indicate the name of the
 Meteor method in this attribute.
-* `resetOnSuccess`: Optional. In most cases, the form is automatically reset
-for you after a successful submission action. For update forms, the form is
-*not* automatically reset. You can replace this default behavior with explicit
-behavior by setting this attribute to `true` or `false`.
+* `resetOnSuccess`: Optional. The form is automatically reset
+for you after a successful submission action. You can skip this by setting this
+attribute to `false`.
 * `id`: Required. This is used as the `id` attribute on the rendered `form`
 element, so it must be unique within your entire application. It's required
 because we use it to set up a form-specific validation context and to preserve
