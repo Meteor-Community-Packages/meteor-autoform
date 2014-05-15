@@ -210,17 +210,19 @@ Utility = {
    * Edits the object by reference, compacting any arrays at any level recursively.
    */
   compactArrays: function compactArrays(obj) {
-    _.each(obj, function (val, key) {
-      if (_.isArray(val)) {
-        obj[key] = _.without(val, void 0);
-        _.each(obj[key], function (arrayItem) {
-          compactArrays(arrayItem);
-        });
-      } else if (!(val instanceof Date) && _.isObject(val)) {
-        //recurse into objects
-        compactArrays(val);
-      }
-    });
+    if (_.isObject(obj)) {
+      _.each(obj, function (val, key) {
+        if (_.isArray(val)) {
+          obj[key] = _.without(val, void 0);
+          _.each(obj[key], function (arrayItem) {
+            compactArrays(arrayItem);
+          });
+        } else if (!(val instanceof Date) && _.isObject(val)) {
+          //recurse into objects
+          compactArrays(val);
+        }
+      });
+    }
   },
   /**
    * @method Utility.getSimpleSchemaFromContext
