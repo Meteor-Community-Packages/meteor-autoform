@@ -12,7 +12,7 @@ Template['afFieldLabel_bootstrap3'].atts = function bsFieldLabelAtts() {
     labelAtts['class'] = "control-label";
   }
   // Add "for" attribute if missing
-  labelAtts.for = labelAtts.for || atts.name;
+  labelAtts['for'] = labelAtts['for'] || atts['name'];
   return labelAtts;
 };
 
