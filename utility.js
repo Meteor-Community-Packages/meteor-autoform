@@ -38,7 +38,7 @@ Utility = {
   reportNulls: function reportNulls(flatDoc) {
     var nulls = {};
     _.each(flatDoc, function(val, key) {
-      if (val === void 0 || val === null || (typeof val === "string" && val.length === 0)) {
+      if (val === void 0 || val === null || (typeof val === "string" && val.length === 0) || (_.isArray(val) && val.length === 0)) {
         nulls[key] = "";
       }
     });

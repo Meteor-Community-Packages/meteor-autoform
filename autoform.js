@@ -1227,11 +1227,16 @@ function getFieldsValues(fields) {
     if (type === "checkbox") {
       if (val === "true") { //boolean checkbox
         doc[name] = field.checked;
-      } else if (field.checked) { //array checkbox
+      } else { //array checkbox
+        // Add empty array no matter what,
+        // to ensure that unchecking all boxes
+        // will empty the array.
         if (!_.isArray(doc[name])) {
           doc[name] = [];
         }
-        doc[name].push(val);
+        // Add the value to the array only
+        // if checkbox is selected.
+        field.checked && doc[name].push(val);
       }
       return;
     }
