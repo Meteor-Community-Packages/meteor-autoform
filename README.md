@@ -528,6 +528,10 @@ The `afArrayField` component renders all of an array field's array items togethe
 
 Additionally, buttons for adding and removing array items are automatically added to the UI. This is also done by the template, which means that you can easily make your own "afArrayField" template if you don't like the default appearance of the add/remove buttons.
 
+An `afArrayField` (or an `afQuickField` for an array) supports the additional attributes `minCount` and `maxCount`. Normally, by default, you cannot remove items below the schema-defined `minCount` and you cannot add items above the schema-defined `maxCount`. However, sometimes you don't want a minimum or maximum count defined in the schema, but you *do* want to limit the number of items on a certain form. To do this, use the `minCount` and `maxCount` attributes. Note, however, that you may *not* override the `minCount` to be less than the schema-defined `minCount`, and you may not override the `maxCount` to be more than the schema-defined `maxCount`.
+
+At the moment, the add and remove buttons disappear when you can't use them. This could be changed to make them disabled. You can do this yourself with a custom template, but if you have thoughts about how it should work out of the box, submit an issue to discuss.
+
 ## Public API
 
 Some public methods are exposed on the `AutoForm` object. Refer to the [API documentation](https://github.com/aldeed/meteor-autoform/blob/master/api.md).

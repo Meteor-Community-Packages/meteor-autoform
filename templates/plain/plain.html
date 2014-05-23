@@ -109,11 +109,15 @@
     {{#afEachArrayItem name=this.name}}
     <div class="autoform-array-item">
       {{> afQuickField}}
+      {{#if ../hasMoreThanMinimum}}
       <button class="autoform-remove-item" data-autoform-field="{{../name}}">Remove</button>
+      {{/if}}
     </div>
     {{/afEachArrayItem}}
+    {{#if this.hasLessThanMaximum}}
     <div style="margin-top: 20px;">
       <button class="autoform-add-item" data-autoform-field="{{this.name}}">Add</button>
     </div>
+    {{/if}}
   </fieldset>
 </template>

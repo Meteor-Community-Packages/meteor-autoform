@@ -105,7 +105,7 @@
 <template name="afEachArrayItem">
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afEachArrayItem' .. ../.. ../../.. ../../../.. ../../../../..}}
-    {{#with innerContext ../name this}}
+    {{#with innerContext ../name this ../minCount ../maxCount}}
       {{#each this}}
       {{> UI.contentBlock this}}
       {{/each}}

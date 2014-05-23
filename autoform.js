@@ -598,11 +598,23 @@ UI.registerHelper('afArrayField', function afArrayFieldHelper() {
 Template.afArrayField.innerContext = function (options) {
   var c = Utility.normalizeContext(options.hash, "afArrayField");
   var name = c.atts.name;
+  var fieldMinCount = c.atts.minCount || 0;
+  var fieldMaxCount = c.atts.maxCount || Infinity;
   var ss = c.af.ss;
+  var formId = c.af.formId;
+
+  var range = getMinMax(formId, name, fieldMinCount, fieldMaxCount);
+  var currentCount = arrayFieldCount(formId, name, fieldMinCount, fieldMaxCount) - arrayFields[formId][name].removedCount;
+  var hasMoreThanMinimum = (currentCount > range.minCount);
+  var hasLessThanMaximum = (currentCount < range.maxCount);
 
   return {
     name: name,
-    label: ss.label(name)
+    label: ss.label(name),
+    hasMoreThanMinimum: hasMoreThanMinimum,
+    hasLessThanMaximum: hasLessThanMaximum,
+    overrideMinCount: fieldMinCount,
+    overrideMaxCount: fieldMaxCount
   };
 };
 
@@ -730,13 +742,13 @@ Template.afQuickField.isFieldArray = function afQuickFieldIsFieldArray(options) 
  * afEachArrayItem
  */
 
-Template.afEachArrayItem.innerContext = function afEachArrayItemInnerContext(name, af) {
+Template.afEachArrayItem.innerContext = function afEachArrayItemInnerContext(name, af, minCount, maxCount) {
   if (!af || !af._af) {
     throw new Error(name + " must be used within an autoForm block");
   }
 
   var afContext = af._af;
-  var arrayCount = arrayFieldCount(afContext.formId, name);
+  var arrayCount = arrayFieldCount(afContext.formId, name, minCount, maxCount);
   if (afContext.mDoc) {
     var keyInfo = afContext.mDoc.getInfoForKey(name);
     if (keyInfo && _.isArray(keyInfo.value)) {
@@ -754,7 +766,7 @@ Template.afEachArrayItem.innerContext = function afEachArrayItemInnerContext(nam
 
   var loopArray = [];
   for (var i = 0; i < arrayCount; i++) {
-    var loopCtx = {name: name + '.' + i, index: i};
+    var loopCtx = {name: name + '.' + i, index: i, minCount: minCount, maxCount: maxCount};
 
     // If this is an array of objects, add child key names under loopCtx.current[childName] = fullKeyName
     if (childKeys.length) {
@@ -1172,15 +1184,17 @@ Template.autoForm.events({
 
     var thisItem = button.closest('.autoform-array-item');
     var itemCount = thisItem.siblings('.autoform-array-item').length + 1;
-    var minCount = getMinMax(formId, name).minCount;
+    var minCount = getMinMax(formId, name, self.minCount, self.maxCount).minCount;
 
     // remove the item we clicked
     if (itemCount > minCount) {
       thisItem.remove();
-      removeArrayField(formId, name);
+      removeArrayField(formId, name, self.minCount, self.maxCount);
     }
   },
   'click .autoform-add-item': function autoFormClickAddItem(event, template) {
+    var self = this;
+
     event.preventDefault();
 
     var button = template.$(event.currentTarget);
@@ -1188,9 +1202,7 @@ Template.autoForm.events({
     var data = template.data;
     var formId = data && data.id || defaultFormId;
 
-    var thisItem = button.closest('.autoform-array-item');
-    var itemCount = thisItem.siblings('.autoform-array-item').length + 1;
-    addArrayField(formId, name);
+    addArrayField(formId, name, self.overrideMinCount, self.overrideMaxCount);
   }
 });
 
@@ -1801,23 +1813,34 @@ function getTrackedFieldValue(formId, key) {
  * Array Fields Helper Functions
  */
 
-function getMinMax(formId, name) {
+function getMinMax(formId, name, overrideMinCount, overrideMaxCount) {
   var ss = formData[formId] && formData[formId].ss;
   if (!ss) {
     return {minCount: 0};
   }
   var defs = Utility.getDefs(ss, name);
-  return {minCount: defs.minCount || 0, maxCount: defs.maxCount};
+
+  // minCount is set by the schema, but can be set higher on the field attribute
+  overrideMinCount = overrideMinCount || 0;
+  var minCount = defs.minCount || 0;
+  minCount = (overrideMinCount > minCount) ? overrideMinCount : minCount;
+
+  // maxCount is set by the schema, but can be set lower on the field attribute
+  overrideMaxCount = overrideMaxCount || Infinity;
+  var maxCount = defs.maxCount || Infinity;
+  maxCount = (overrideMaxCount < maxCount) ? overrideMaxCount : maxCount;
+
+  return {minCount: minCount, maxCount: maxCount};
 }
 
-function arrayFieldCount(formId, name) {
-  initArrayFieldCount(formId, name);
+function arrayFieldCount(formId, name, overrideMinCount, overrideMaxCount) {
+  initArrayFieldCount(formId, name, overrideMinCount, overrideMaxCount);
   arrayFields[formId][name].deps.depend();
   return arrayFields[formId][name].count;
 }
 
-function initArrayFieldCount(formId, name) {
-  var range = getMinMax(formId, name);
+function initArrayFieldCount(formId, name, overrideMinCount, overrideMaxCount) {
+  var range = getMinMax(formId, name, overrideMinCount, overrideMaxCount);
 
   arrayFields[formId] = arrayFields[formId] || {};
   arrayFields[formId][name] = arrayFields[formId][name] || {};
@@ -1829,11 +1852,11 @@ function initArrayFieldCount(formId, name) {
   }
 }
 
-function setArrayFieldCount(formId, name, count) {
-  initArrayFieldCount(formId, name);
+function setArrayFieldCount(formId, name, count, overrideMinCount, overrideMaxCount) {
+  initArrayFieldCount(formId, name, overrideMinCount, overrideMaxCount);
 
   //respect minCount and maxCount from schema
-  var range = getMinMax(formId, name);
+  var range = getMinMax(formId, name, overrideMinCount, overrideMaxCount);
   if (range.maxCount) {
     count = Math.min(count, range.maxCount + arrayFields[formId][name].removedCount);
   }
@@ -1843,13 +1866,13 @@ function setArrayFieldCount(formId, name, count) {
   arrayFields[formId][name].deps.changed();
 }
 
-function addArrayField(formId, name) {
-  initArrayFieldCount(formId, name);
-  setArrayFieldCount(formId, name, arrayFields[formId][name].count + 1);
+function addArrayField(formId, name, overrideMinCount, overrideMaxCount) {
+  initArrayFieldCount(formId, name, overrideMinCount, overrideMaxCount);
+  setArrayFieldCount(formId, name, arrayFields[formId][name].count + 1, overrideMinCount, overrideMaxCount);
 }
 
-function removeArrayField(formId, name) {
-  initArrayFieldCount(formId, name);
+function removeArrayField(formId, name, overrideMinCount, overrideMaxCount) {
+  initArrayFieldCount(formId, name, overrideMinCount, overrideMaxCount);
   arrayFields[formId][name].removedCount++;
   arrayFields[formId][name].deps.changed();
 }
