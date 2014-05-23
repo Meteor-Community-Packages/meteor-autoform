@@ -6,6 +6,14 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.9.0
+
+* Support for limiting the number of items in an array field. See "afArrayField" section in the README.
+* In the default templates, when you can't add or remove array items, the corresponding buttons are hidden.
+* You can now specify fields that are in objects within arrays in the `omitFields` attribute on a `quickForm`. For example, `names.$.first`. (Thanks @picsoung!)
+* Clearing all check boxes for an optional array field will now properly unset the field.
+* Other bug fixes (Thanks @jfols and @BasilPH)
+
 ### 0.8.1
 
 * Disabled fields are no longer submitted or included in the generated insert or update object.
