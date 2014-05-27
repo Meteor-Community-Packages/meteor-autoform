@@ -6,6 +6,11 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.10.0
+
+* Before hooks are now passed the template instance
+* `formToDoc` and `docToForm` hooks are now passed the SimpleSchema instance and form `id`, which is useful if you define them globally (pass `null` for the first argument of `AutoForm.addHooks`)
+
 ### 0.9.0
 
 * Support for limiting the number of items in an array field. See "afArrayField" section in the README.
