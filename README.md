@@ -720,10 +720,10 @@ all the supported hooks:
 AutoForm.hooks({
   myFormId: {
     before: {
-      insert: function(doc) {},
-      update: function(docId, modifier) {},
-      remove: function(docId) {},
-      "methodName": function(doc) {}
+      insert: function(doc, template) {},
+      update: function(docId, modifier, template) {},
+      remove: function(docId, template) {},
+      "methodName": function(doc, template) {}
     },
     after: {
       insert: function(error, result, template) {},
@@ -740,8 +740,8 @@ AutoForm.hooks({
     //called when any operation fails, where operation will be
     //"validation", "insert", "update", "remove", or the method name.
     onError: function(operation, error, template) {},
-    formToDoc: function(doc) {},
-    docToForm: function(doc) {}
+    formToDoc: function(doc, ss, formId) {},
+    docToForm: function(doc, ss, formId) {}
   }
 });
 ```

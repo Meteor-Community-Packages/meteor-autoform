@@ -283,7 +283,7 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
     var copy = _.clone(context.doc);
     // Pass doc through docToForm hooks
     _.each(Hooks.getHooks(formId, 'docToForm'), function autoFormEachDocToForm(func) {
-      copy = func(copy);
+      copy = func(copy, ss, formId);
     });
     // Create a "flat doc" that can be used to easily get values for corresponding
     // form fields.
@@ -861,13 +861,15 @@ UI.registerHelper('afFieldValueContains', function autoFormFieldValueContains(op
  * Events
  */
 
-function doBefore(docId, doc, hooks, name) {
+function doBefore(docId, doc, hooks, template, name) {
+  // We pass the template instance in case the hook
+  // needs the data context
   _.each(hooks, function doBeforeHook(hook) {
     if (hook) {
       if (docId) {
-        doc = hook(docId, doc);
+        doc = hook(docId, doc, template);
       } else {
-        doc = hook(doc);
+        doc = hook(doc, template);
       }
       if (!_.isObject(doc)) {
         throw new Error(name + " must return an object");
@@ -877,14 +879,29 @@ function doBefore(docId, doc, hooks, name) {
   return doc;
 }
 
+function beginSubmit(template) {
+  // TODO eventually allow users to customize beginSubmit behavior
+  if (!template)
+    return;
+  var submitButton = template.find("button[type=submit]") || template.find("input[type=submit]");
+  if (submitButton) {
+    submitButton.disabled = true;
+  }
+}
+
+function endSubmit(template) {
+  // TODO eventually allow users to customize endSubmit behavior
+  if (!template)
+    return;
+  var submitButton = template.find("button[type=submit]") || template.find("input[type=submit]");
+  if (submitButton) {
+    submitButton.disabled = false;
+  }
+}
+
 Template.autoForm.events({
   'submit form': function autoFormSubmitHandler(event, template) {
-    var submitButton = template.find("button[type=submit]") || template.find("input[type=submit]");
-    if (!submitButton) {
-      return;
-    }
-
-    submitButton.disabled = true;
+    beginSubmit(template);
 
     //determine what we want to do
     var context = this;
@@ -926,7 +943,7 @@ Template.autoForm.events({
     function haltSubmission() {
       event.preventDefault();
       event.stopPropagation();
-      submitButton.disabled = false;
+      endSubmit(template);
     }
 
     // Prep function to select the focus the first field with an error
@@ -974,7 +991,7 @@ Template.autoForm.events({
         _.each(afterHook, function afterHookEach(hook) {
           hook(error, result, template);
         });
-        submitButton.disabled = false;
+        endSubmit(template);
       };
     }
 
@@ -983,7 +1000,7 @@ Template.autoForm.events({
     if (isRemove) {
       // Call beforeRemove hooks if present, and stop if any return false
       var shouldStop = _.any(beforeRemove, function eachBeforeRemove(hook) {
-        return (hook(docId) === false);
+        return (hook(docId, template) === false);
       });
       if (shouldStop) {
         return haltSubmission();
@@ -999,8 +1016,8 @@ Template.autoForm.events({
     var form = getFormValues(template, formId, ss);
 
     // Execute some before hooks
-    var insertDoc = isInsert ? doBefore(null, form.insertDoc, beforeInsert, 'before.insert hook') : form.insertDoc;
-    var updateDoc = isUpdate && !_.isEmpty(form.updateDoc) ? doBefore(docId, form.updateDoc, beforeUpdate, 'before.update hook') : form.updateDoc;
+    var insertDoc = isInsert ? doBefore(null, form.insertDoc, beforeInsert, template, 'before.insert hook') : form.insertDoc;
+    var updateDoc = isUpdate && !_.isEmpty(form.updateDoc) ? doBefore(docId, form.updateDoc, beforeUpdate, template, 'before.update hook') : form.updateDoc;
 
     // Get a version of the doc that has auto values to validate here. We
     // don't want to actually send any auto values to the server because
@@ -1087,7 +1104,7 @@ Template.autoForm.events({
     // We won't do an else here so that a method could be called in
     // addition to another action on the same submit
     if (method) {
-      var methodDoc = doBefore(null, form.insertDoc, beforeMethod, 'before.method hook');
+      var methodDoc = doBefore(null, form.insertDoc, beforeMethod, template, 'before.method hook');
       // Get a copy of the doc with auto values added to use for validation
       var methodDocForValidation = ss.clean(_.clone(methodDoc), {
         filter: false,
@@ -1335,7 +1352,7 @@ function getFormValues(template, formId, ss) {
   // Pass expanded doc through formToDoc hooks
   var transforms = Hooks.getHooks(formId, 'formToDoc');
   _.each(transforms, function formValuesTransform(transform) {
-    doc = transform(doc);
+    doc = transform(doc, ss, formId);
   });
 
   // We return doc, insertDoc, and updateDoc.
