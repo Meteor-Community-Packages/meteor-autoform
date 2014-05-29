@@ -1515,6 +1515,10 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
         name: data.name,
         label: opt.label,
         value: opt.value,
+        // _id must be included because it is a special property that
+        // #each uses to track unique list items when adding and removing them
+        // See https://github.com/meteor/meteor/issues/2174
+        _id: opt.value,
         checked: selected ? "checked" : "",
         selected: selected ? "selected" : "",
         atts: hash
