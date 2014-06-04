@@ -38,20 +38,13 @@ ArrayTracker.prototype.ensureField = function atEnsureField(formId, field) {
 	var self = this;
 	self.initForm(formId);
 
-	if (self.info[formId][field])
-		return;
-
-	self.info[formId][field] = {
-		deps: new Deps.Dependency,
-		array: null,
-		count: 0,
-		visibleCount: 0
-	};
+	if (!self.info[formId][field]) {
+		self.resetField(formId, field);
+	}
 };
 
 ArrayTracker.prototype.initField = function atInitField(formId, field, ss, docCount, overrideMinCount, overrideMaxCount) {
 	var self = this;
-	self.initForm(formId);
 	self.ensureField(formId, field);
 
 	if (self.info[formId][field].array != null)
@@ -93,20 +86,35 @@ ArrayTracker.prototype.initField = function atInitField(formId, field, ss, docCo
 ArrayTracker.prototype.resetField = function atResetField(formId, field) {
 	var self = this;
 	self.initForm(formId);
-	if (self.info[formId][field]) {
-	    delete self.info[formId][field];
+
+	if (!self.info[formId][field]) {
+		self.info[formId][field] = {
+			deps: new Deps.Dependency
+		};
 	}
+
+	self.info[formId][field].array = null;
+	self.info[formId][field].count = 0;
+	self.info[formId][field].visibleCount = 0;
+	self.info[formId][field].deps.changed();
 };
 
 ArrayTracker.prototype.resetForm = function atResetForm(formId) {
+	var self = this;
+	_.each(self.info[formId], function (info, field) {
+		self.resetField(formId, field);
+	});
+};
+
+ArrayTracker.prototype.untrackForm = function atUntrackForm(formId) {
 	var self = this;
 	self.info[formId] = {};
 };
 
 ArrayTracker.prototype.tracksField = function atTracksField(formId, field) {
 	var self = this;
-	self.initForm(formId);
 	self.ensureField(formId, field);
+	self.info[formId][field].deps.depend();
 	return !!self.info[formId][field].array;
 };
 
@@ -120,7 +128,6 @@ ArrayTracker.prototype.getField = function atGetField(formId, field) {
 ArrayTracker.prototype.getCount = function atGetCount(formId, field) {
 	var self = this;
 	self.ensureField(formId, field);
-
 	self.info[formId][field].deps.depend();
 	return self.info[formId][field].count;
 };
@@ -128,7 +135,6 @@ ArrayTracker.prototype.getCount = function atGetCount(formId, field) {
 ArrayTracker.prototype.getVisibleCount = function atGetVisibleCount(formId, field) {
 	var self = this;
 	self.ensureField(formId, field);
-
 	self.info[formId][field].deps.depend();
 	return self.info[formId][field].visibleCount;
 };

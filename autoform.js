@@ -76,10 +76,10 @@ AutoForm.resetForm = function autoFormResetForm(formId) {
 
   formPreserve.unregisterForm(formId);
 
-  if (formData[formId]) {
-    // Reset array counts
-    arrayTracker.resetForm(formId);
+  // Reset array counts
+  arrayTracker.resetForm(formId);
 
+  if (formData[formId]) {
     formData[formId].ss && formData[formId].ss.namedContext(formId).resetValidation();
     // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
     // there is no need to reset validation for it. No error need be thrown.
@@ -347,7 +347,7 @@ Template.autoForm.destroyed = function autoFormDestroyed() {
   }
 
   // Remove from array fields list
-  arrayTracker.resetForm(formId);
+  arrayTracker.untrackForm(formId);
 
   // Remove from field values
   if (formValues[formId]) {
@@ -615,6 +615,10 @@ Template.afArrayField.innerContext = function (options) {
   var ss = c.af.ss;
   var formId = c.af.formId;
 
+  var docCount = fd.getDocCountForField(formId, name);
+
+  arrayTracker.initField(formId, name, ss, docCount, fieldMinCount, fieldMaxCount);
+
   var range = arrayTracker.getMinMax(ss, name, fieldMinCount, fieldMaxCount);
   var visibleCount = arrayTracker.getVisibleCount(formId, name);
   var hasMoreThanMinimum = (visibleCount > range.minCount);
@@ -760,25 +764,12 @@ Template.afEachArrayItem.innerContext = function afEachArrayItemInnerContext(nam
     throw new Error(name + " must be used within an autoForm block");
   }
 
-  minCount = minCount || 0;
-  maxCount = maxCount || Infinity;
-
   var afContext = af._af;
   var ss = afContext.ss;
   var formId = afContext.formId;
+  var docCount = fd.getDocCountForField(formId, name);
 
-  var mDoc = fd.sourceDoc(formId);
-  var docCount;
-  if (mDoc) {
-    var keyInfo = mDoc.getInfoForKey(name);
-    if (keyInfo && _.isArray(keyInfo.value)) {
-      docCount = keyInfo.value.length
-    }
-  }
-
-  if (!arrayTracker.tracksField(formId, name)) {
-    arrayTracker.initField(formId, name, ss, docCount, minCount, maxCount);
-  }
+  arrayTracker.initField(formId, name, ss, docCount, minCount, maxCount);
   
   return arrayTracker.getField(formId, name);
 };
@@ -1091,7 +1082,6 @@ Template.autoForm.events({
       collection.insert(insertDoc, {validationContext: formId}, makeCallback('insert', afterInsert));
     } else if (isUpdate) {
       var updateCallback = makeCallback('update', afterUpdate);
-      console.log(updateDoc);
       if (_.isEmpty(updateDoc)) {
         // Nothing to update. Just treat it as a successful update.
         updateCallback(null, 0);
@@ -1171,6 +1161,14 @@ Template.autoForm.events({
       //reload form values from doc
       event.preventDefault();
       template['__component__'].render();
+    }
+  },
+  'keydown .autoform-array-item input': function (event, template) {
+    // When enter is pressed in an array item field, default behavior
+    // seems to be to "click" the remove item button. This doesn't make
+    // sense so we stop it.
+    if (event.keyCode === 13) {
+      event.preventDefault();
     }
   },
   'click .autoform-remove-item': function autoFormClickRemoveItem(event, template) {

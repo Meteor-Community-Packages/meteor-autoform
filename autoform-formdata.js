@@ -31,3 +31,16 @@ FormData.prototype.sourceDoc = function fdSourceDoc(formId, sourceDoc) {
 		return self.forms[formId].sourceDoc;
 	}
 };
+
+FormData.prototype.getDocCountForField = function fdGetDocCountForField(formId, field) {
+	var self = this;
+	var mDoc = self.sourceDoc(formId);
+	var docCount;
+	if (mDoc) {
+		var keyInfo = mDoc.getInfoForKey(field);
+		if (keyInfo && _.isArray(keyInfo.value)) {
+			docCount = keyInfo.value.length
+		}
+	}
+	return docCount;
+};

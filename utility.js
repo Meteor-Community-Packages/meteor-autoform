@@ -21,7 +21,7 @@ Utility = {
         if (!_.isEmpty(val)) {
           newDoc[key] = val;
         }
-      } else if (val !== void 0 && val !== null && !(typeof val === "string" && val.length === 0)) {
+      } else if (!Utility.isNullUndefinedOrEmptyString(val)) {
         newDoc[key] = val;
       }
     });
@@ -37,8 +37,14 @@ Utility = {
    */
   reportNulls: function reportNulls(flatDoc) {
     var nulls = {};
+    // Loop through the flat doc
     _.each(flatDoc, function(val, key) {
-      if (val === void 0 || val === null || (typeof val === "string" && val.length === 0) || (_.isArray(val) && val.length === 0)) {
+      // If value is undefined, null, or an empty string, report this as null so it will be unset
+      if (Utility.isNullUndefinedOrEmptyString(val)) {
+        nulls[key] = "";
+      }
+      // If value is an array in which all the values recursively are undefined, null, or an empty string, report this as null so it will be unset
+      else if (_.isArray(val) && Utility.cleanNulls(val, true).length === 0) {
         nulls[key] = "";
       }
     });
@@ -213,7 +219,7 @@ Utility = {
     if (_.isObject(obj)) {
       _.each(obj, function (val, key) {
         if (_.isArray(val)) {
-          obj[key] = _.without(val, void 0);
+          obj[key] = _.without(val, void 0, null);
           _.each(obj[key], function (arrayItem) {
             compactArrays(arrayItem);
           });
@@ -258,6 +264,17 @@ Utility = {
     }
     // If we got this far, we have no schema so throw an error
     throw new Error('AutoForm: form with id "' + formId + '" needs either "schema" or "collection" attribute');
+  },
+  /**
+   * @method Utility.isNullUndefinedOrEmptyString
+   * @private
+   * @param  {Any} val
+   * @return {Boolean}
+   *
+   * Returns `true` if the value is null, undefined, or an empty string
+   */
+  isNullUndefinedOrEmptyString: function isNullUndefinedOrEmptyString(val) {
+    return (val === void 0 || val === null || (typeof val === "string" && val.length === 0));
   },
   /**
    * @method Utility.isValidDateString

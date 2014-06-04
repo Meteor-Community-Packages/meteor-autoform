@@ -107,9 +107,11 @@
   {{#with _af_findAutoForm 'afEachArrayItem' .. ../.. ../../.. ../../../.. ../../../../..}}
     {{#with innerContext ../name this ../minCount ../maxCount}}
       {{#each this}}
-      {{#unless this.removed}}
+      {{#if this.removed}}
+      <input type="hidden" name="{{this.name}}" data-schema-key="{{this.name}}" value="">
+      {{else}}
       {{> UI.contentBlock this}}
-      {{/unless}}
+      {{/if}}
       {{/each}}
     {{/with}}
   {{/with}}
