@@ -114,6 +114,87 @@ if (Meteor.isClient) {
     testMaybeNum({}, {});
   });
 
+  Tinytest.add('AutoForm - Utility - expandObj', function(test) {
+    function testExpandObj(val, expect) {
+      var mod = Utility.expandObj(val);
+      test.equal(JSON.stringify(mod), JSON.stringify(expect));
+    }
+
+    testExpandObj({}, {});
+    testExpandObj({foo: "bar"}, {foo: "bar"});
+    testExpandObj({foo: "bar", baz: 1}, {foo: "bar", baz: 1});
+    testExpandObj({
+      'foo.bar': "baz",
+      baz: 1
+    }, {
+      foo: {bar: "baz"},
+      baz: 1
+    });
+    testExpandObj({
+      'foo.bar.0': "foo",
+      'foo.bar.1': "baz",
+      baz: 1
+    }, {
+      foo: {bar: ["foo", "baz"]},
+      baz: 1
+    });
+    testExpandObj({
+      'foo.bar.1': "baz",
+      baz: 1
+    }, {
+      foo: {bar: [null, "baz"]},
+      baz: 1
+    });
+    testExpandObj({
+      'foo.bar.1.bam': "baz",
+      baz: 1
+    }, {
+      foo: {bar: [null, {bam: "baz"}]},
+      baz: 1
+    });
+    testExpandObj({
+      'foo.bar.0': null,
+      'foo.bar.1.bam': "baz",
+      baz: 1
+    }, {
+      foo: {bar: [null, {bam: "baz"}]},
+      baz: 1
+    });
+    testExpandObj({
+      'foo.bar.0': "baz",
+      'foo.bar.1.bam': "baz",
+      baz: 1
+    }, {
+      foo: {bar: ["baz", {bam: "baz"}]},
+      baz: 1
+    });
+    testExpandObj({
+      'foo.bar.0': "baz",
+      'foo.bar.1.bam': "baz",
+      'foo.bar.1.boo': "foo",
+      baz: 1
+    }, {
+      foo: {bar: ["baz", {bam: "baz", boo: "foo"}]},
+      baz: 1
+    });
+    testExpandObj({
+      'foo.0': null,
+      'foo.1.bar': "baz",
+      baz: 1
+    }, {
+      foo: [null, {bar: "baz"}],
+      baz: 1
+    });
+    testExpandObj({
+      'foo.0': null,
+      'foo.1.bar': null,
+      baz: 1
+    }, {
+      foo: [null, {bar: null}],
+      baz: 1
+    });
+  });
+
 }
 
 //Test API:
