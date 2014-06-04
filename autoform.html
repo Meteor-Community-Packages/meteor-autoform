@@ -107,7 +107,9 @@
   {{#with _af_findAutoForm 'afEachArrayItem' .. ../.. ../../.. ../../../.. ../../../../..}}
     {{#with innerContext ../name this ../minCount ../maxCount}}
       {{#each this}}
+      {{#unless this.removed}}
       {{> UI.contentBlock this}}
+      {{/unless}}
       {{/each}}
     {{/with}}
   {{/with}}

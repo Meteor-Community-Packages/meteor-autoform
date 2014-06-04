@@ -85,7 +85,7 @@
 </template>
 
 <template name="afQuickField_plain">
-  <div class="form-group {{#if afFieldIsInvalid name=this.atts.name autoform=this.atts.autoform}}has-error{{/if}}">
+  <div class="{{#if afFieldIsInvalid name=this.atts.name autoform=this.atts.autoform}}has-error{{/if}}">
     {{#unless this.skipLabel}}
     {{> afFieldLabel this.afFieldLabelAtts}}
     {{/unless}}
@@ -106,17 +106,22 @@
 <template name="afArrayField_plain">
   <fieldset>
     <legend>{{this.label}}</legend>
+    {{#if afFieldIsInvalid name=this.name autoform=this.autoform}}
+    <div class="autoform-array-field-error">
+      {{{afFieldMessage name=this.name autoform=this.autoform}}}
+    </div>
+    {{/if}}
     {{#afEachArrayItem name=this.name}}
     <div class="autoform-array-item">
       {{> afQuickField}}
       {{#if ../hasMoreThanMinimum}}
-      <button class="autoform-remove-item" data-autoform-field="{{../name}}">Remove</button>
+      <button class="autoform-remove-item">Remove</button>
       {{/if}}
     </div>
     {{/afEachArrayItem}}
     {{#if this.hasLessThanMaximum}}
     <div style="margin-top: 20px;">
-      <button class="autoform-add-item" data-autoform-field="{{this.name}}">Add</button>
+      <button class="autoform-add-item">Add</button>
     </div>
     {{/if}}
   </fieldset>

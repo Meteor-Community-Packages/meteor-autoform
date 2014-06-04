@@ -37,6 +37,8 @@ Package.on_use(function(api) {
     'utility.js',
     'form-preserve.js',
     'hooks.js',
+    'autoform-formdata.js',
+    'autoform-arrays.js',
     'autoform.js'
   ], 'client');
 });

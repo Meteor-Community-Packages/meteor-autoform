@@ -4,6 +4,8 @@ var formData = {}; //for looking up autoform data by form ID
 var templatesById = {}; //keep a reference of autoForm templates by form `id` for AutoForm.getFormValues
 var arrayFields = {}; //track # of array fields per form
 var formValues = {}; //for reactive show/hide based on current value of a field
+var fd = new FormData();
+var arrayTracker = new ArrayTracker();
 
 AutoForm = {}; //exported
 
@@ -74,9 +76,14 @@ AutoForm.resetForm = function autoFormResetForm(formId) {
 
   formPreserve.unregisterForm(formId);
 
-  formData[formId] && formData[formId].ss && formData[formId].ss.namedContext(formId).resetValidation();
-  // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
-  // there is no need to reset validation for it. No error need be thrown.
+  if (formData[formId]) {
+    // Reset array counts
+    arrayTracker.resetForm(formId);
+
+    formData[formId].ss && formData[formId].ss.namedContext(formId).resetValidation();
+    // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
+    // there is no need to reset validation for it. No error need be thrown.
+  }
 };
 
 var deps = {};
@@ -288,6 +295,9 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
     // Create a "flat doc" that can be used to easily get values for corresponding
     // form fields.
     mDoc = new MongoObject(copy);
+    fd.sourceDoc(formId, mDoc);
+  } else {
+    fd.sourceDoc(formId, null);
   }
 
   // Set up the context to be used for everything within the autoform.
@@ -304,6 +314,10 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
 
   // Cache context for lookup by formId
   formData[formId] = innerContext._af;
+
+  // When we change the form, loading a different doc, reloading the current doc, etc.,
+  // we also want to reset the array counts for the form
+  arrayTracker.resetForm(formId);
 
   // Preserve outer context, allowing access within autoForm block without needing ..
   _.extend(innerContext, outerContext);
@@ -333,9 +347,7 @@ Template.autoForm.destroyed = function autoFormDestroyed() {
   }
 
   // Remove from array fields list
-  if (arrayFields[formId]) {
-    delete arrayFields[formId];
-  }
+  arrayTracker.resetForm(formId);
 
   // Remove from field values
   if (formValues[formId]) {
@@ -603,14 +615,15 @@ Template.afArrayField.innerContext = function (options) {
   var ss = c.af.ss;
   var formId = c.af.formId;
 
-  var range = getMinMax(formId, name, fieldMinCount, fieldMaxCount);
-  var currentCount = arrayFieldCount(formId, name, fieldMinCount, fieldMaxCount) - arrayFields[formId][name].removedCount;
-  var hasMoreThanMinimum = (currentCount > range.minCount);
-  var hasLessThanMaximum = (currentCount < range.maxCount);
+  var range = arrayTracker.getMinMax(ss, name, fieldMinCount, fieldMaxCount);
+  var visibleCount = arrayTracker.getVisibleCount(formId, name);
+  var hasMoreThanMinimum = (visibleCount > range.minCount);
+  var hasLessThanMaximum = (visibleCount < range.maxCount);
 
   return {
     name: name,
     label: ss.label(name),
+    autoform: c.afc,
     hasMoreThanMinimum: hasMoreThanMinimum,
     hasLessThanMaximum: hasLessThanMaximum,
     overrideMinCount: fieldMinCount,
@@ -747,39 +760,27 @@ Template.afEachArrayItem.innerContext = function afEachArrayItemInnerContext(nam
     throw new Error(name + " must be used within an autoForm block");
   }
 
+  minCount = minCount || 0;
+  maxCount = maxCount || Infinity;
+
   var afContext = af._af;
-  var arrayCount = arrayFieldCount(afContext.formId, name, minCount, maxCount);
-  if (afContext.mDoc) {
-    var keyInfo = afContext.mDoc.getInfoForKey(name);
-    if (keyInfo && _.isArray(keyInfo.value)) {
-      arrayCount = Math.max(arrayCount, keyInfo.value.length);
-    }
-  }
-
   var ss = afContext.ss;
+  var formId = afContext.formId;
 
-  // If this is an array of objects, collect names of object props
-  var childKeys = [];
-  if (ss.schema(name + '.$').type === Object) {
-    childKeys = autoFormChildKeys(ss, name + '.$');
+  var mDoc = fd.sourceDoc(formId);
+  var docCount;
+  if (mDoc) {
+    var keyInfo = mDoc.getInfoForKey(name);
+    if (keyInfo && _.isArray(keyInfo.value)) {
+      docCount = keyInfo.value.length
+    }
   }
 
-  var loopArray = [];
-  for (var i = 0; i < arrayCount; i++) {
-    var loopCtx = {name: name + '.' + i, index: i, minCount: minCount, maxCount: maxCount};
-
-    // If this is an array of objects, add child key names under loopCtx.current[childName] = fullKeyName
-    if (childKeys.length) {
-      loopCtx.current = {};
-      _.each(childKeys, function (k) {
-        loopCtx.current[k] = name + '.' + i + '.' + k;
-      });
-    }
-
-    loopArray.push(loopCtx);
-  };
-
-  return loopArray;
+  if (!arrayTracker.tracksField(formId, name)) {
+    arrayTracker.initField(formId, name, ss, docCount, minCount, maxCount);
+  }
+  
+  return arrayTracker.getField(formId, name);
 };
 
 /*
@@ -1090,6 +1091,7 @@ Template.autoForm.events({
       collection.insert(insertDoc, {validationContext: formId}, makeCallback('insert', afterInsert));
     } else if (isUpdate) {
       var updateCallback = makeCallback('update', afterUpdate);
+      console.log(updateDoc);
       if (_.isEmpty(updateDoc)) {
         // Nothing to update. Just treat it as a successful update.
         updateCallback(null, 0);
@@ -1176,50 +1178,26 @@ Template.autoForm.events({
 
     event.preventDefault();
 
-    var button = template.$(event.currentTarget);
-    var name = button.attr('data-autoform-field');
+    var name = self.arrayFieldName;
     var index = self.index;
     var data = template.data;
     var formId = data && data.id || defaultFormId;
-    var fData = formData[formId];
-    if (!fData) {
-      throw new Error('AutoForm: Can\'t find form data for form with ID "' + formId + '"');
-    }
-
-    //if update, make sure we remove from source doc so that values are correct
-    //XXX seems not necessary but do further testing
-    // var mDoc = fData.mDoc;
-    // if (mDoc) {
-    //   var keyInfo = mDoc.getInfoForKey(name);
-    //   if (keyInfo && _.isArray(keyInfo.value)) {
-    //     var newArray = _.reject(keyInfo.value, function (v, i) {
-    //       return (i === index);
-    //     });
-    //     mDoc.setValueForKey(name, newArray);
-    //   }
-    // }
-
-    var thisItem = button.closest('.autoform-array-item');
-    var itemCount = thisItem.siblings('.autoform-array-item').length + 1;
-    var minCount = getMinMax(formId, name, self.minCount, self.maxCount).minCount;
+    data = formData[formId];
 
     // remove the item we clicked
-    if (itemCount > minCount) {
-      thisItem.remove();
-      removeArrayField(formId, name, self.minCount, self.maxCount);
-    }
+    arrayTracker.removeFromFieldAtIndex(formId, name, index, data.ss, self.minCount, self.maxCount)
   },
   'click .autoform-add-item': function autoFormClickAddItem(event, template) {
     var self = this;
 
     event.preventDefault();
 
-    var button = template.$(event.currentTarget);
-    var name = button.attr('data-autoform-field');
+    var name = self.name;
     var data = template.data;
     var formId = data && data.id || defaultFormId;
+    data = formData[formId];
 
-    addArrayField(formId, name, self.overrideMinCount, self.overrideMaxCount);
+    arrayTracker.addOneToField(formId, name, data.ss, self.overrideMinCount, self.overrideMaxCount);
   }
 });
 
@@ -1797,25 +1775,6 @@ function validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
 }
 
-// Returns schema keys that are direct children of the given schema key
-// XXX this could be a method on ss
-function autoFormChildKeys(ss, name) {
-  name = SimpleSchema._makeGeneric(name);
-  var prefix = name + ".";
-
-  var childKeys = [];
-  _.each(ss._schemaKeys, function (key) {
-    // If it's a direct child, add it to the list
-    if (key.indexOf(prefix) === 0) {
-      var ending = key.slice(prefix.length);
-      if (ending.indexOf('.') === -1) {
-        childKeys.push(ending);
-      }
-    }
-  });
-  return childKeys;
-}
-
 function updateTrackedFieldValue(formId, key, val) {
   formValues[formId] = formValues[formId] || {};
   formValues[formId][key] = formValues[formId][key] || {_deps: new Deps.Dependency};
@@ -1828,72 +1787,4 @@ function getTrackedFieldValue(formId, key) {
   formValues[formId][key] = formValues[formId][key] || {_deps: new Deps.Dependency};
   formValues[formId][key]._deps.depend();
   return formValues[formId][key]._val;
-}
-
-/*
- * Array Fields Helper Functions
- */
-
-function getMinMax(formId, name, overrideMinCount, overrideMaxCount) {
-  var ss = formData[formId] && formData[formId].ss;
-  if (!ss) {
-    return {minCount: 0};
-  }
-  var defs = Utility.getDefs(ss, name);
-
-  // minCount is set by the schema, but can be set higher on the field attribute
-  overrideMinCount = overrideMinCount || 0;
-  var minCount = defs.minCount || 0;
-  minCount = (overrideMinCount > minCount) ? overrideMinCount : minCount;
-
-  // maxCount is set by the schema, but can be set lower on the field attribute
-  overrideMaxCount = overrideMaxCount || Infinity;
-  var maxCount = defs.maxCount || Infinity;
-  maxCount = (overrideMaxCount < maxCount) ? overrideMaxCount : maxCount;
-
-  return {minCount: minCount, maxCount: maxCount};
-}
-
-function arrayFieldCount(formId, name, overrideMinCount, overrideMaxCount) {
-  initArrayFieldCount(formId, name, overrideMinCount, overrideMaxCount);
-  arrayFields[formId][name].deps.depend();
-  return arrayFields[formId][name].count;
-}
-
-function initArrayFieldCount(formId, name, overrideMinCount, overrideMaxCount) {
-  var range = getMinMax(formId, name, overrideMinCount, overrideMaxCount);
-
-  arrayFields[formId] = arrayFields[formId] || {};
-  arrayFields[formId][name] = arrayFields[formId][name] || {};
-  arrayFields[formId][name].deps = arrayFields[formId][name].deps || new Deps.Dependency;
-  arrayFields[formId][name].removedCount = arrayFields[formId][name].removedCount || 0;
-  if (typeof arrayFields[formId][name].count !== "number") {
-    arrayFields[formId][name].count = Math.max(1, range.minCount); //respect minCount from schema
-    arrayFields[formId][name].deps.changed();
-  }
-}
-
-function setArrayFieldCount(formId, name, count, overrideMinCount, overrideMaxCount) {
-  initArrayFieldCount(formId, name, overrideMinCount, overrideMaxCount);
-
-  //respect minCount and maxCount from schema
-  var range = getMinMax(formId, name, overrideMinCount, overrideMaxCount);
-  if (range.maxCount) {
-    count = Math.min(count, range.maxCount + arrayFields[formId][name].removedCount);
-  }
-  count = Math.max(count, range.minCount + arrayFields[formId][name].removedCount);
-
-  arrayFields[formId][name].count = count;
-  arrayFields[formId][name].deps.changed();
-}
-
-function addArrayField(formId, name, overrideMinCount, overrideMaxCount) {
-  initArrayFieldCount(formId, name, overrideMinCount, overrideMaxCount);
-  setArrayFieldCount(formId, name, arrayFields[formId][name].count + 1, overrideMinCount, overrideMaxCount);
-}
-
-function removeArrayField(formId, name, overrideMinCount, overrideMaxCount) {
-  initArrayFieldCount(formId, name, overrideMinCount, overrideMaxCount);
-  arrayFields[formId][name].removedCount++;
-  arrayFields[formId][name].deps.changed();
 }
