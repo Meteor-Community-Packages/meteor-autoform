@@ -1453,6 +1453,17 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
     hash.placeholder = label;
   }
 
+  // To enable reactively toggling boolean attributes
+  // in a simple way, we add the attributes to the HTML
+  // only if their value is `true`. That is, unlike in
+  // HTML, their mere presence does not matter.
+  _.each(["disabled", "readonly", "checked", "required"], function (booleanProp) {
+    // For historical reasons, we treat the string "true" and an empty string as `true`, too
+    if (_.has(hash, booleanProp) && hash[booleanProp] !== true && hash[booleanProp] !== "true" && hash[booleanProp] !== "") {
+      delete hash[booleanProp];
+    }
+  });
+
   // Determine what options to use
   var data = {};
 
