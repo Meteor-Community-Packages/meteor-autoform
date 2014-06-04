@@ -6,6 +6,13 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.11.0
+
+* API Change: boolean attributes on inputs are now passed through to the generated HTML *only if* the value is `true` or `"true"` or `""`. This is different from HTML in which boolean attributes take effect simply by being present. This change allows you to reactively add or remove a boolean attribute in a simple way, for example, `{{> afQuickField name='status' disabled=canEditStatus}}`. You should review any boolean attributes you use on autoform fields to ensure that they have the correct value, or they may no longer show up in the HTML.
+* Fixed an issue where reactive lists of check box inputs would have incorrect check boxes selected after the list changed
+* Removed `for` attribute from radio labels in the bootstrap3 template, since it should not be there; makes the labels correctly clickable
+* Completely rewrote behind-the-scenes array field tracking, fixing a number of issues with adding and removing array fields and correctly updating arrays
+
 ### 0.10.0
 
 * Before hooks are now passed the template instance
