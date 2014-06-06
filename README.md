@@ -1,3 +1,15 @@
+AutoForm [![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
+=========================
+
+AutoForm is a smart package for Meteor that adds UI components and helpers to easily
+create basic forms with automatic insert and update events, and automatic
+reactive validation. This package requires and automatically installs the
+[simple-schema](https://github.com/aldeed/meteor-simple-schema) package.
+You can optionally use it with the
+[collection2](https://github.com/aldeed/meteor-collection2) package, which you
+have to add to your app yourself.
+
+## Table of Contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
@@ -56,17 +68,6 @@
   - [Contributing](#contributing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-AutoForm [![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
-=========================
-
-AutoForm is a smart package for Meteor that adds UI components and helpers to easily
-create basic forms with automatic insert and update events, and automatic
-reactive validation. This package requires and automatically installs the
-[simple-schema](https://github.com/aldeed/meteor-simple-schema) package.
-You can optionally use it with the
-[collection2](https://github.com/aldeed/meteor-collection2) package, which you
-have to add to your app yourself.
 
 ## Blaze Transition
 
