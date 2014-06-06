@@ -9,6 +9,66 @@ You can optionally use it with the
 [collection2](https://github.com/aldeed/meteor-collection2) package, which you
 have to add to your app yourself.
 
+## Table of Contents
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [AutoForm [![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)](#autoform-!build-statushttpstravis-ciorgaldeedmeteor-autoformsvghttpstravis-ciorgaldeedmeteor-autoform)
+  - [Blaze Transition](#blaze-transition)
+  - [Installation](#installation)
+  - [Example](#example)
+    - [A Basic Insert Form](#a-basic-insert-form)
+    - [A Basic Update Form](#a-basic-update-form)
+    - [A Basic Remove Form](#a-basic-remove-form)
+    - [A Custom Insert Form](#a-custom-insert-form)
+    - [Another Custom Insert Form](#another-custom-insert-form)
+  - [Component and Helper Reference](#component-and-helper-reference)
+    - [autoForm](#autoform)
+    - [quickForm](#quickform)
+    - [afFieldInput](#affieldinput)
+    - [afFieldSelect](#affieldselect)
+    - [afFieldLabel](#affieldlabel)
+    - [afFieldMessage](#affieldmessage)
+    - [afFieldIsInvalid](#affieldisinvalid)
+    - [afQuickField](#afquickfield)
+      - [afQuickField Examples](#afquickfield-examples)
+    - [afFieldValueIs](#affieldvalueis)
+    - [afFieldValueContains](#affieldvaluecontains)
+  - [Objects and Arrays](#objects-and-arrays)
+    - [afObjectField](#afobjectfield)
+    - [afArrayField](#afarrayfield)
+  - [Public API](#public-api)
+  - [Non-Collection Forms](#non-collection-forms)
+    - [An Example Contact Form](#an-example-contact-form)
+  - [Fine Tuning Validation](#fine-tuning-validation)
+  - [Resetting Validation](#resetting-validation)
+  - [The Form Document](#the-form-document)
+    - [Getting Current Field Values](#getting-current-field-values)
+  - [Callbacks/Hooks](#callbackshooks)
+    - [onSubmit](#onsubmit)
+    - [formToDoc and docToForm](#formtodoc-and-doctoform)
+  - [Complex Schemas](#complex-schemas)
+  - [Complex Controls](#complex-controls)
+  - [Using Block Helpers Within an AutoForm](#using-block-helpers-within-an-autoform)
+  - [Dates](#dates)
+    - [type=date](#type=date)
+    - [type=datetime](#type=datetime)
+    - [type=datetime-local](#type=datetime-local)
+  - [Templates](#templates)
+    - [Using a Different Template](#using-a-different-template)
+    - [Creating a Custom Template](#creating-a-custom-template)
+  - [Common Questions](#common-questions)
+    - [Should the value of `schema` and `collection` have quotation marks around it?](#should-the-value-of-schema-and-collection-have-quotation-marks-around-it)
+    - [Which components should I use?](#which-components-should-i-use)
+    - [Can I reuse the same `quickForm` or `autoForm` for both inserts and updates?](#can-i-reuse-the-same-quickform-or-autoform-for-both-inserts-and-updates)
+    - [Can I put HTML in my error messages?](#can-i-put-html-in-my-error-messages)
+  - [Examples](#examples)
+  - [Troubleshooting](#troubleshooting)
+  - [Contributing](#contributing)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Blaze Transition
 
 If you've been using AutoForm and are now switching to the Blaze rendering engine, here's what you need to know to transition your app:
