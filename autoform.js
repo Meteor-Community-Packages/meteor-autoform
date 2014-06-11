@@ -7,7 +7,7 @@ var formValues = {}; //for reactive show/hide based on current value of a field
 var fd = new FormData();
 var arrayTracker = new ArrayTracker();
 
-AutoForm = {}; //exported
+AutoForm = AutoForm || {}; //exported
 
 /**
  * @method AutoForm.addHooks
@@ -1205,112 +1205,45 @@ Template.autoForm.events({
 
 function getFieldsValues(fields) {
   var doc = {};
-  _.each(fields, function formValuesEach(field) {
-    var name = field.getAttribute("data-schema-key");
-    var val = field.value || field.getAttribute('contenteditable') && field.innerHTML; //value is undefined for contenteditable
-    var type = field.getAttribute("type") || "";
-    type = type.toLowerCase();
-    var tagName = field.tagName || "";
-    tagName = tagName.toLowerCase();
+  fields.each(function formValuesEach() {
+    var field = $(this);
+    var fieldName = field.attr("data-schema-key");
 
-    // Handle select
-    if (tagName === "select") {
-      if (val === "true") { //boolean select
-        doc[name] = true;
-      } else if (val === "false") { //boolean select
-        doc[name] = false;
-      } else if (field.hasAttribute("multiple")) {
-        //multiple select, so we want an array value
-        doc[name] = Utility.getSelectValues(field);
-      } else {
-        doc[name] = val;
-      }
-      return;
-    }
-
-    // Handle checkbox
-    if (type === "checkbox") {
-      if (val === "true") { //boolean checkbox
-        doc[name] = field.checked;
-      } else { //array checkbox
-        // Add empty array no matter what,
-        // to ensure that unchecking all boxes
-        // will empty the array.
-        if (!_.isArray(doc[name])) {
-          doc[name] = [];
+    // use custom handlers first, and then use built-in handlers
+    _.every([customInputValueHandlers, defaultInputValueHandlers], function (handlerList) {
+      return _.every(handlerList, function (handler, selector) {
+        if (field.filter(selector).length === 1) {
+          // Special handling for checkboxes that create arrays
+          // XXX maybe there is a way to do this better
+          var isArrayCheckBox = (field.hasClass("autoform-array-item"));
+          if (isArrayCheckBox) {
+            // Add empty array no matter what,
+            // to ensure that unchecking all boxes
+            // will empty the array.
+            if (!_.isArray(doc[fieldName])) {
+              doc[fieldName] = [];
+            }
+          }
+          var val = handler.call(field);
+          if (val !== void 0) {
+            if (isArrayCheckBox) {
+              doc[fieldName].push(val);
+            } else {
+              doc[fieldName] = val;
+            }
+          }
+          return false;
         }
-        // Add the value to the array only
-        // if checkbox is selected.
-        field.checked && doc[name].push(val);
-      }
-      return;
-    }
-
-    // Handle radio
-    if (type === "radio") {
-      if (field.checked) {
-        if (val === "true") { //boolean radio
-          doc[name] = true;
-        } else if (val === "false") { //boolean radio
-          doc[name] = false;
-        } else {
-          doc[name] = val;
-        }
-      }
-      return;
-    }
-
-    // Handle number
-    if (type === "select") {
-      doc[name] = Utility.maybeNum(val);
-      return;
-    }
-
-    // Handle date inputs
-    if (type === "date") {
-      if (Utility.isValidDateString(val)) {
-        //Date constructor will interpret val as UTC and create
-        //date at mignight in the morning of val date in UTC time zone
-        doc[name] = new Date(val);
-      } else {
-        doc[name] = null;
-      }
-      return;
-    }
-
-    // Handle date inputs
-    if (type === "datetime") {
-      val = (typeof val === "string") ? val.replace(/ /g, "T") : val;
-      if (Utility.isValidNormalizedForcedUtcGlobalDateAndTimeString(val)) {
-        //Date constructor will interpret val as UTC due to ending "Z"
-        doc[name] = new Date(val);
-      } else {
-        doc[name] = null;
-      }
-      return;
-    }
-
-    // Handle date inputs
-    if (type === "datetime-local") {
-      val = (typeof val === "string") ? val.replace(/ /g, "T") : val;
-      var offset = field.getAttribute("data-offset") || "Z";
-      if (Utility.isValidNormalizedLocalDateAndTimeString(val)) {
-        doc[name] = new Date(val + offset);
-      } else {
-        doc[name] = null;
-      }
-      return;
-    }
-
-    // Handle all other inputs
-    doc[name] = val;
+        return true;
+      });
+    });
   });
 
   return doc;
 }
 
 function getFieldValue(template, key) {
-  var doc = getFieldsValues(template.$('[data-schema-key="' + key + '"]'));
+  var doc = getFieldsValues(template.$('[data-schema-key="' + key + '"], [data-schema-key^="' + key + '."]'));
   return doc && doc[key];
 }
 
@@ -1496,6 +1429,10 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
   if (selectOptions) {
     // Build anything that should be a select, which is anything with options
     data.items = [];
+    // For check boxes, we add the "autoform-array-item" class
+    if (noselect && expectsArray) {
+      hash["class"] = (hash["class"] || "") + " autoform-array-item";
+    }
     _.each(selectOptions, function(opt) {
       var selected = expectsArray ? _.contains(value, opt.value.toString()) : (opt.value.toString() === value.toString());
       data.items.push({
@@ -1553,13 +1490,16 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
         label: trueLabel
       }
     ];
+    // add autoform-boolean class, which we use when building object
+    // from form values later
+    hash["class"] = (hash["class"] || "") + " autoform-boolean";
     if (radio) {
       data.items = items;
       data.items[0].atts = hash;
       data.items[1].atts = hash;
     } else if (select) {
       data.items = items;
-      data.cls = hash["class"] || "";
+      data.cls = hash["class"];
       hash = _.omit(hash, "class");
       data.atts = hash;
     } else {

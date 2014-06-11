@@ -89,7 +89,7 @@ Utility = {
    */
   getSelectValues: function getSelectValues(select) {
     var result = [];
-    var options = select && select.options;
+    var options = select && select.options || [];
     var opt;
 
     for (var i = 0, ln = options.length; i < ln; i++) {
