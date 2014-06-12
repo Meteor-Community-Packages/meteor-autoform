@@ -119,7 +119,7 @@
       {{#afEachArrayItem name=this.name}}
       <li class="list-group-item autoform-array-item">
         <div class="media">
-          {{#if ../hasMoreThanMinimum}}
+          {{#if afArrayFieldHasMoreThanMinimum name=../name autoform=../autoform minCount=../minCount maxCount=../maxCount}}
           <button class="btn btn-primary autoform-remove-item pull-left"><span class="glyphicon glyphicon-minus"></span></button>
           {{/if}}
           <div class="media-body">
@@ -128,9 +128,9 @@
         </div>
       </li>
       {{/afEachArrayItem}}
-      {{#if this.hasLessThanMaximum}}
+      {{#if afArrayFieldHasLessThanMaximum name=this.name autoform=this.autoform minCount=this.minCount maxCount=this.maxCount}}
       <li class="list-group-item">
-        <button class="btn btn-primary autoform-add-item"><span class="glyphicon glyphicon-plus"></span></button>
+        <button class="btn btn-primary autoform-add-item"><span class="glyphicon glyphicon-plus" data-autoform-field="{{this.name}}"></span></button>
       </li>
       {{/if}}
     </ul>

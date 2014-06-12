@@ -114,14 +114,14 @@
     {{#afEachArrayItem name=this.name}}
     <div class="autoform-array-item">
       {{> afQuickField}}
-      {{#if ../hasMoreThanMinimum}}
+      {{#if afArrayFieldHasMoreThanMinimum name=../name autoform=../autoform minCount=../minCount maxCount=../maxCount}}
       <button class="autoform-remove-item">Remove</button>
       {{/if}}
     </div>
     {{/afEachArrayItem}}
-    {{#if this.hasLessThanMaximum}}
+    {{#if afArrayFieldHasLessThanMaximum name=this.name autoform=this.autoform minCount=this.minCount maxCount=this.maxCount}}
     <div style="margin-top: 20px;">
-      <button class="autoform-add-item">Add</button>
+      <button class="autoform-add-item" data-autoform-field="{{this.name}}">Add</button>
     </div>
     {{/if}}
   </fieldset>

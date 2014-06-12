@@ -335,7 +335,7 @@ Template.autoForm.events({
 
     event.preventDefault();
 
-    var name = self.name;
+    var name = $(event.currentTarget).attr("data-autoform-field") || self.name;
     var data = template.data;
     var formId = data && data.id || defaultFormId;
     data = formData[formId];

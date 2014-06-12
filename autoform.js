@@ -615,23 +615,14 @@ Template.afArrayField.innerContext = function (options) {
   var ss = c.af.ss;
   var formId = c.af.formId;
 
+  // Init the array tracking for this field
   var docCount = fd.getDocCountForField(formId, name);
-
   arrayTracker.initField(formId, name, ss, docCount, fieldMinCount, fieldMaxCount);
-
-  var range = arrayTracker.getMinMax(ss, name, fieldMinCount, fieldMaxCount);
-  var visibleCount = arrayTracker.getVisibleCount(formId, name);
-  var hasMoreThanMinimum = (visibleCount > range.minCount);
-  var hasLessThanMaximum = (visibleCount < range.maxCount);
 
   return {
     name: name,
     label: ss.label(name),
-    autoform: c.afc,
-    hasMoreThanMinimum: hasMoreThanMinimum,
-    hasLessThanMaximum: hasLessThanMaximum,
-    overrideMinCount: fieldMinCount,
-    overrideMaxCount: fieldMaxCount
+    autoform: c.afc
   };
 };
 
@@ -814,6 +805,44 @@ UI.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
 
   Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
   return ss.namedContext(afContext.formId).keyIsInvalid(hash.name);
+});
+
+/*
+ * afArrayFieldHasMoreThanMinimum
+ */
+
+UI.registerHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreThanMinimum(options) {
+  var hash = (options || {}).hash || {};
+  var afContext = hash.autoform && hash.autoform._af || this && this._af;
+  var ss = afContext.ss;
+  if (!ss) {
+    throw new Error("afArrayFieldHasMoreThanMinimum helper must be used within an autoForm block");
+  }
+
+  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
+  
+  var range = arrayTracker.getMinMax(ss, hash.name, hash.minCount, hash.maxCount);
+  var visibleCount = arrayTracker.getVisibleCount(afContext.formId, hash.name);
+  return (visibleCount > range.minCount);
+});
+
+/*
+ * afArrayFieldHasLessThanMaximum
+ */
+
+UI.registerHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessThanMaximum(options) {
+  var hash = (options || {}).hash || {};
+  var afContext = hash.autoform && hash.autoform._af || this && this._af;
+  var ss = afContext.ss;
+  if (!ss) {
+    throw new Error("afArrayFieldHasLessThanMaximum helper must be used within an autoForm block");
+  }
+
+  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
+  
+  var range = arrayTracker.getMinMax(ss, hash.name, hash.minCount, hash.maxCount);
+  var visibleCount = arrayTracker.getVisibleCount(afContext.formId, hash.name);
+  return (visibleCount < range.maxCount);
 });
 
 /*
