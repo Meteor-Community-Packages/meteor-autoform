@@ -12,7 +12,7 @@ Template['afFieldLabel_plain'].atts = function plFieldLabelAtts() {
 
 Template['afDeleteButton_plain'].atts = function plDeleteButtonAtts() {
   var atts = this || {};
-  return _.omit(atts, '_af', 'collection', 'doc', 'contentBlock', 'type');
+  return _.omit(atts, '_af', 'collection', 'doc', 'contentBlock', 'type', 'id');
 };
 
 Template['quickForm_plain'].submitButtonAtts = function plQuickFormSubmitButtonAtts() {

@@ -1,4 +1,4 @@
-var defaultFormId = "_afGenericID";
+defaultFormId = "_afGenericID";
 formPreserve = new FormPreserve("autoforms");
 formData = {}; //for looking up autoform data by form ID
 var templatesById = {}; //keep a reference of autoForm templates by form `id` for AutoForm.getFormValues
