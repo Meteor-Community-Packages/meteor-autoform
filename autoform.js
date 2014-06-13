@@ -38,7 +38,9 @@ AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) {
         docToForm: [],
         onSubmit: [],
         onSuccess: [],
-        onError: []
+        onError: [],
+        beginSubmit: [],
+        endSubmit: []
       };
 
       Hooks.addHooksToList(Hooks.form[formId], hooks, replace);

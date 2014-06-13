@@ -793,15 +793,23 @@ AutoForm.hooks({
     },
     onSubmit: function(insertDoc, updateDoc, currentDoc) {},
 
-    //called when any operation succeeds, where operation will be
-    //"insert", "update", "remove", or the method name.
+    // Called when any operation succeeds, where operation will be
+    // "insert", "update", "remove", or the method name.
     onSuccess: function(operation, result, template) {}, 
 
-    //called when any operation fails, where operation will be
-    //"validation", "insert", "update", "remove", or the method name.
+    // Called when any operation fails, where operation will be
+    // "validation", "insert", "update", "remove", or the method name.
     onError: function(operation, error, template) {},
     formToDoc: function(doc, ss, formId) {},
-    docToForm: function(doc, ss, formId) {}
+    docToForm: function(doc, ss, formId) {},
+
+    // Called at the beginning and end of submission, respectively.
+    // This is the place to disable/enable buttons or the form,
+    // show/hide a "Please wait" message, etc. If these hooks are
+    // not defined, then by default the submit button is disabled
+    // during submission.
+    beginSubmit: function(formId, template) {},
+    endSubmit: function(formId, template) {}
   }
 });
 ```

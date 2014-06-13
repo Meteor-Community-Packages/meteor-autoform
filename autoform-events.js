@@ -16,30 +16,44 @@ function doBefore(docId, doc, hooks, template, name) {
   return doc;
 }
 
-function beginSubmit(template) {
-  // TODO eventually allow users to customize beginSubmit behavior
+function beginSubmit(formId, template) {
   if (!template)
     return;
-  var submitButton = template.find("button[type=submit]") || template.find("input[type=submit]");
-  if (submitButton) {
-    submitButton.disabled = true;
+  // Get user-defined hooks
+  var hooks = Hooks.getHooks(formId, 'beginSubmit');
+  if (hooks.length) {
+    _.each(hooks, function beginSubmitHooks(hook) {
+      hook(formId, template);
+    });
+  } else {
+    // If there are no user-defined hooks, by default we disable the submit button during submission
+    var submitButton = template.find("button[type=submit]") || template.find("input[type=submit]");
+    if (submitButton) {
+      submitButton.disabled = true;
+    }
   }
 }
 
-function endSubmit(template) {
-  // TODO eventually allow users to customize endSubmit behavior
+function endSubmit(formId, template) {
   if (!template)
     return;
-  var submitButton = template.find("button[type=submit]") || template.find("input[type=submit]");
-  if (submitButton) {
-    submitButton.disabled = false;
-  }
+  // Get user-defined hooks
+  var hooks = Hooks.getHooks(formId, 'endSubmit');
+  if (hooks.length) {
+    _.each(hooks, function endSubmitHooks(hook) {
+      hook(formId, template);
+    });
+  } else {
+    // If there are no user-defined hooks, by default we disable the submit button during submission
+    var submitButton = template.find("button[type=submit]") || template.find("input[type=submit]");
+    if (submitButton) {
+      submitButton.disabled = false;
+    }
+  } 
 }
 
 Template.autoForm.events({
   'submit form': function autoFormSubmitHandler(event, template) {
-    beginSubmit(template);
-
     //determine what we want to do
     var context = this;
     var isInsert = (context.type === "insert");
@@ -80,7 +94,8 @@ Template.autoForm.events({
     function haltSubmission() {
       event.preventDefault();
       event.stopPropagation();
-      endSubmit(template);
+      // Run endSubmit hooks (re-enabled submit button or form, etc.)
+      endSubmit(formId, template);
     }
 
     // Prep function to select the focus the first field with an error
@@ -128,13 +143,17 @@ Template.autoForm.events({
         _.each(afterHook, function afterHookEach(hook) {
           hook(error, result, template);
         });
-        endSubmit(template);
+        // Run endSubmit hooks (re-enabled submit button or form, etc.)
+        endSubmit(formId, template);
       };
     }
 
     // If type is "remove", do that right away since we don't need to gather
     // form values or validate.
     if (isRemove) {
+      // Run beginSubmit hooks (disable submit button or form, etc.)
+      beginSubmit(formId, template);
+
       // Call beforeRemove hooks if present, and stop if any return false
       var shouldStop = _.any(beforeRemove, function eachBeforeRemove(hook) {
         return (hook(docId, template) === false);
@@ -151,6 +170,13 @@ Template.autoForm.events({
 
     // Gather all form values
     var form = getFormValues(template, formId, ss);
+
+    // Run beginSubmit hooks (disable submit button or form, etc.)
+    // NOTE: This needs to stay after getFormValues in case a
+    // beginSubmit hook disables inputs. We don't get values for
+    // disabled inputs, but if they are just disabling during submission,
+    // then we actually do want the values.
+    beginSubmit(formId, template);
 
     // Execute some before hooks
     var insertDoc = isInsert ? doBefore(null, form.insertDoc, beforeInsert, template, 'before.insert hook') : form.insertDoc;
