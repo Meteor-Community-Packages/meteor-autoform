@@ -4,18 +4,16 @@ Package.describe({
 });
 
 Package.on_use(function(api) {
-  api.use(['underscore', 'deps', 'templating', 'handlebars', 'moment', 'ui'], 'client');
-  api.use('reload', 'client', {weak: true});
-  api.use('collection2', ['client', 'server'], {weak: true});
-  api.use('simple-schema', ['client', 'server']);
-
-  if (typeof api.export !== 'undefined') {
-    api.use('livedata', 'client');
-    api.imply('simple-schema', 'client');
-    api.export('AutoForm', 'client');
-    api.export('Utility', 'client', {testOnly: true});
-  }
-
+  // Dependencies
+  api.use(['simple-schema', 'livedata', 'underscore', 'deps', 'templating', 'handlebars', 'moment', 'ui', 'check'], 'client');
+  // Weak dependencies
+  api.use(['collection2', 'reload'], ['client'], {weak: true});
+  // Imply SS to make sure SimpleSchema object is available to app
+  api.imply('simple-schema', 'client');
+  // Exports
+  api.export('AutoForm', 'client');
+  api.export('Utility', 'client', {testOnly: true});
+  // Files
   api.add_files([
     // bootstrap3 Template
     'templates/bootstrap3/bootstrap3.html',
@@ -36,7 +34,7 @@ Package.on_use(function(api) {
     'autoform.html',
     'utility.js',
     'form-preserve.js',
-    'hooks.js',
+    'autoform-hooks.js',
     'autoform-inputs.js',
     'autoform-formdata.js',
     'autoform-arrays.js',

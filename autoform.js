@@ -9,6 +9,11 @@ arrayTracker = new ArrayTracker();
 
 AutoForm = AutoForm || {}; //exported
 
+// Extend the schema options allowed by SimpleSchema
+SimpleSchema.extendOptions({
+  autoform: Match.Optional(Object)
+});
+
 /**
  * @method AutoForm.addHooks
  * @public

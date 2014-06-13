@@ -21,31 +21,23 @@
   <label {{atts}}>{{this.label}}</label>
 </template>
 
-<template name="_afCheckbox_plain">
-  <div><input type="checkbox" data-schema-key="{{this.name}}" name="{{this.name}}" value="{{this.value}}" {{this.checked}} {{this.atts}} /> <label for="{{this.name}}">{{this.label}}</label></div>
-</template>
-
 <template name="afCheckbox_plain">
-  {{> _afCheckbox_plain}}
+  <div><input type="checkbox" data-schema-key="{{this.name}}" name="{{this.name}}" value="{{this.value}}" {{this.checked}} {{this.atts}} /> <label for="{{this.name}}">{{this.label}}</label></div>
 </template>
 
 <template name="afCheckboxGroup_plain">
   {{#each this.items}}
-  {{> _afCheckbox_plain}}
+    {{> afCheckbox_plain}}
   {{/each}}
 </template>
 
-<template name="_afRadio_plain">
-  <div><input type="checkbox" data-schema-key="{{this.name}}" name="{{this.name}}" value="{{this.value}}" {{this.checked}} {{this.atts}} /> <label for="{{this.name}}">{{this.label}}</label></div>
-</template>
-
 <template name="afRadio_plain">
-  {{> _afRadio_plain}}
+  <div><input type="checkbox" data-schema-key="{{this.name}}" name="{{this.name}}" value="{{this.value}}" {{this.checked}} {{this.atts}} /> <label for="{{this.name}}">{{this.label}}</label></div>
 </template>
 
 <template name="afRadioGroup_plain">
   {{#each this.items}}
-  {{> _afRadio_plain}}
+    {{> afRadio_plain}}
   {{/each}}
 </template>
 

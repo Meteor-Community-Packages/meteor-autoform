@@ -17,7 +17,7 @@ function doBefore(docId, doc, hooks, template, name) {
 }
 
 function beginSubmit(formId, template) {
-  if (!template)
+  if (!template || template._notInDOM)
     return;
   // Get user-defined hooks
   var hooks = Hooks.getHooks(formId, 'beginSubmit');
