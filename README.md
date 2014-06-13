@@ -368,7 +368,8 @@ custom template to use.
 and a `value` property. By specifying options, you cause the generated DOM
 element to be a `select` element with these options, unless you also use
 `noselect`. To use the `allowedValues` from the schema as the options, set
-`options="allowed"`.
+`options="allowed"`. To specify a label to be displayed when there is no
+option selected, set `firstOption="(My Select One Label)"`.
 * `capitalize`: Used only when you've set `options="allowed"`. Set this to `true`
 to capitalize the labels generated from `allowedValues`.
 * `noselect`: Use in conjunction with `options` attribute. Set this attribute
