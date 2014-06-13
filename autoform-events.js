@@ -35,7 +35,7 @@ function beginSubmit(formId, template) {
 }
 
 function endSubmit(formId, template) {
-  if (!template)
+  if (!template || template._notInDOM)
     return;
   // Get user-defined hooks
   var hooks = Hooks.getHooks(formId, 'endSubmit');
