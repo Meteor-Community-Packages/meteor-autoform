@@ -1020,12 +1020,33 @@ function getInputValue(name, value, mDoc, expectsArray, defaultValue) {
 
 function getInputData(defs, hash, value, type, label, expectsArray) {
   var schemaType = defs.type;
+  // We don't want to alter the original hash, so we clone it and
+  // remove some stuff that should not be HTML attributes
+  var inputAtts = _.omit(hash,
+          "name",
+          "autoform",
+          "value",
+          "data-schema-key",
+          "firstOption",
+          "radio",
+          "select",
+          "noselect",
+          "trueLabel",
+          "falseLabel",
+          "options",
+          "offset",
+          "template");
+
+  // Add required to every type of element, if required
+  if (typeof inputAtts.required === "undefined" && !defs.optional) {
+    inputAtts.required = "";
+  }
 
   var min = (typeof defs.min === "function") ? defs.min() : defs.min;
   var max = (typeof defs.max === "function") ? defs.max() : defs.max;
 
   if (type === "datetime-local") {
-    hash["data-offset"] = hash.offset || "Z";
+    inputAtts["data-offset"] = hash.offset || "Z";
   }
 
   //convert Date value to required string value based on field type
@@ -1035,7 +1056,7 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
     } else if (type === "datetime") {
       value = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(value);
     } else if (type === "datetime-local") {
-      value = Utility.dateToNormalizedLocalDateAndTimeString(value, hash["data-offset"]);
+      value = Utility.dateToNormalizedLocalDateAndTimeString(value, inputAtts["data-offset"]);
     }
   }
 
@@ -1062,7 +1083,7 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
 
   // Set placeholder to label from schema if requested
   if (hash.placeholder === "schemaLabel") {
-    hash.placeholder = label;
+    inputAtts.placeholder = label;
   }
 
   // To enable reactively toggling boolean attributes
@@ -1072,7 +1093,7 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
   _.each(["disabled", "readonly", "checked", "required"], function (booleanProp) {
     // For historical reasons, we treat the string "true" and an empty string as `true`, too
     if (_.has(hash, booleanProp) && hash[booleanProp] !== true && hash[booleanProp] !== "true" && hash[booleanProp] !== "") {
-      delete hash[booleanProp];
+      delete inputAtts[booleanProp];
     }
   });
 
@@ -1080,37 +1101,17 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
   var data = {};
 
   // Add name to every type of element
+  // XXX Could probably leave name in inputAtts and simplify all templates
   data.name = hash.name;
 
   data.expectsArray = expectsArray;
-
-  // Clean hash so that we can add anything remaining as attributes
-  hash = _.omit(hash,
-          "name",
-          "autoform",
-          "value",
-          "data-schema-key",
-          "firstOption",
-          "radio",
-          "select",
-          "noselect",
-          "trueLabel",
-          "falseLabel",
-          "options",
-          "offset",
-          "template");
-
-  // Add required to every type of element, if required
-  if (typeof hash.required === "undefined" && !defs.optional) {
-    hash.required = "";
-  }
 
   if (selectOptions) {
     // Build anything that should be a select, which is anything with options
     data.items = [];
     // For check boxes, we add the "autoform-array-item" class
     if (noselect && expectsArray) {
-      hash["class"] = (hash["class"] || "") + " autoform-array-item";
+      inputAtts["class"] = (inputAtts["class"] || "") + " autoform-array-item";
     }
     _.each(selectOptions, function(opt) {
       var selected = expectsArray ? _.contains(value, opt.value.toString()) : (opt.value.toString() === value.toString());
@@ -1124,32 +1125,34 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
         _id: opt.value,
         checked: selected ? "checked" : "",
         selected: selected ? "selected" : "",
-        atts: hash
+        atts: inputAtts
       });
     });
     if (!noselect) {
-      hash.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
+      inputAtts.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
       if (expectsArray) {
-        hash.multiple = "";
+        inputAtts.multiple = "";
       }
       data.firstOption = (firstOption && !expectsArray) ? firstOption : "";
-      data.cls = hash["class"] || "";
-      hash = _.omit(hash, "class");
-      data.atts = hash;
+      // XXX should rework all templates to extend class attr rather than
+      // using separate cls
+      data.cls = inputAtts["class"] || "";
+      inputAtts = _.omit(inputAtts, "class");
+      data.atts = inputAtts;
     }
   } else if (type === "textarea") {
-    if (typeof hash.maxlength === "undefined" && typeof max === "number") {
-      hash.maxlength = max;
+    if (typeof inputAtts.maxlength === "undefined" && typeof max === "number") {
+      inputAtts.maxlength = max;
     }
-    data.cls = hash["class"] || "";
-    hash = _.omit(hash, "class");
-    data.atts = hash;
+    data.cls = inputAtts["class"] || "";
+    inputAtts = _.omit(inputAtts, "class");
+    data.atts = inputAtts;
     data.value = value;
   } else if (type === "contenteditable") {
-    if (typeof hash['data-maxlength'] === "undefined" && typeof max === "number") {
-      hash['data-maxlength'] = max;
+    if (typeof inputAtts['data-maxlength'] === "undefined" && typeof max === "number") {
+      inputAtts['data-maxlength'] = max;
     }
-    data.atts = hash;
+    data.atts = inputAtts;
     data.value = value;
   } else if (type === "boolean") {
     value = (value === "true") ? true : false;
@@ -1171,76 +1174,76 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
     ];
     // add autoform-boolean class, which we use when building object
     // from form values later
-    hash["class"] = (hash["class"] || "") + " autoform-boolean";
+    inputAtts["class"] = (inputAtts["class"] || "") + " autoform-boolean";
     if (radio) {
       data.items = items;
-      data.items[0].atts = hash;
-      data.items[1].atts = hash;
+      data.items[0].atts = inputAtts;
+      data.items[1].atts = inputAtts;
     } else if (select) {
       data.items = items;
-      data.cls = hash["class"];
-      hash = _.omit(hash, "class");
-      data.atts = hash;
+      data.cls = inputAtts["class"];
+      inputAtts = _.omit(inputAtts, "class");
+      data.atts = inputAtts;
     } else {
       //don't add required attribute to this one because some browsers assume that to mean that it must be checked, which is not what we mean by "required"
-      delete hash.required;
+      delete inputAtts.required;
       data.label = label;
       data.value = "true";
       data.checked = value ? "checked" : "";
-      data.atts = hash;
+      data.atts = inputAtts;
     }
   } else {
     // All other input types
     switch (type) {
       case "number":
-        if (typeof hash.max === "undefined" && typeof max === "number") {
-          hash.max = max;
+        if (typeof inputAtts.max === "undefined" && typeof max === "number") {
+          inputAtts.max = max;
         }
-        if (typeof hash.min === "undefined" && typeof min === "number") {
-          hash.min = min;
+        if (typeof inputAtts.min === "undefined" && typeof min === "number") {
+          inputAtts.min = min;
         }
-        if (typeof hash.step === "undefined" && defs.decimal) {
-          hash.step = '0.01';
+        if (typeof inputAtts.step === "undefined" && defs.decimal) {
+          inputAtts.step = '0.01';
         }
         break;
       case "date":
-        if (typeof hash.max === "undefined" && max instanceof Date) {
-          hash.max = Utility.dateToDateStringUTC(max);
+        if (typeof inputAtts.max === "undefined" && max instanceof Date) {
+          inputAtts.max = Utility.dateToDateStringUTC(max);
         }
-        if (typeof hash.min === "undefined" && min instanceof Date) {
-          hash.min = Utility.dateToDateStringUTC(min);
+        if (typeof inputAtts.min === "undefined" && min instanceof Date) {
+          inputAtts.min = Utility.dateToDateStringUTC(min);
         }
         break;
       case "datetime":
-        if (typeof hash.max === "undefined" && max instanceof Date) {
-          hash.max = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(max);
+        if (typeof inputAtts.max === "undefined" && max instanceof Date) {
+          inputAtts.max = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(max);
         }
-        if (typeof hash.min === "undefined" && min instanceof Date) {
-          hash.min = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(min);
+        if (typeof inputAtts.min === "undefined" && min instanceof Date) {
+          inputAtts.min = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(min);
         }
         break;
       case "datetime-local":
-        if (typeof hash.max === "undefined" && max instanceof Date) {
-          hash.max = Utility.dateToNormalizedLocalDateAndTimeString(max, hash["data-offset"]);
+        if (typeof inputAtts.max === "undefined" && max instanceof Date) {
+          inputAtts.max = Utility.dateToNormalizedLocalDateAndTimeString(max, hash["data-offset"]);
         }
-        if (typeof hash.min === "undefined" && min instanceof Date) {
-          hash.min = Utility.dateToNormalizedLocalDateAndTimeString(min, hash["data-offset"]);
+        if (typeof inputAtts.min === "undefined" && min instanceof Date) {
+          inputAtts.min = Utility.dateToNormalizedLocalDateAndTimeString(min, hash["data-offset"]);
         }
         break;
     }
 
-    if (typeof hash.maxlength === "undefined"
+    if (typeof inputAtts.maxlength === "undefined"
             && typeof max === "number"
             && _.contains(["text", "email", "search", "password", "tel", "url"], type)
             ) {
-      hash.maxlength = max;
+      inputAtts.maxlength = max;
     }
 
     data.type = type;
     data.value = value;
-    data.cls = hash["class"] || "";
-    hash = _.omit(hash, "class");
-    data.atts = hash;
+    data.cls = inputAtts["class"] || "";
+    inputAtts = _.omit(inputAtts, "class");
+    data.atts = inputAtts;
   }
 
   return data;
