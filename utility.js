@@ -428,10 +428,18 @@ Utility = {
       throw new Error(name + " must be used within an autoForm block");
     }
 
+    var defs = Utility.getDefs(afContext._af.ss, atts.name); //defs will not be undefined
+
+    if (name !== "afFieldLabel") {
+      // "autoform" option in the schema provides default atts
+      atts = _.extend({}, defs.autoform || {}, atts);
+    }
+
     return {
       afc: afContext,
       af: afContext._af,
-      atts: atts
+      atts: atts,
+      defs: defs
     };
   }
 };

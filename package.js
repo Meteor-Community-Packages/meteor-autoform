@@ -5,7 +5,8 @@ Package.describe({
 
 Package.on_use(function(api) {
   // Dependencies
-  api.use(['simple-schema', 'livedata', 'underscore', 'deps', 'templating', 'handlebars', 'moment', 'ui', 'check'], 'client');
+  api.use(['simple-schema', 'check']);
+  api.use(['livedata', 'underscore', 'deps', 'templating', 'handlebars', 'moment', 'ui'], 'client');
   // Weak dependencies
   api.use(['collection2', 'reload'], ['client'], {weak: true});
   // Imply SS to make sure SimpleSchema object is available to app
@@ -14,6 +15,7 @@ Package.on_use(function(api) {
   api.export('AutoForm', 'client');
   api.export('Utility', 'client', {testOnly: true});
   // Files
+  api.add_files(['autoform-common.js']);
   api.add_files([
     // bootstrap3 Template
     'templates/bootstrap3/bootstrap3.html',

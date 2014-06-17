@@ -35,7 +35,7 @@
       {{#if isFieldArray autoform=this atts=..}}
         {{> afArrayField ..}}
       {{else}}
-        {{#with getTemplate "afQuickField" ../template}}
+        {{#with getTemplate "afQuickField" ../template ../name this}}
           {{#with innerContext autoform=.. atts=../..}}
               {{> ..}}
           {{/with}}
@@ -48,7 +48,7 @@
 <template name="afObjectField">
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afObjectField' .. ../.. ../../.. ../../../.. ../../../../..}}
-    {{#with getTemplate "afObjectField" ../template}}
+    {{#with getTemplate "afObjectField" ../template ../name this}}
       {{#with innerContext autoform=.. atts=../..}}
         {{> ..}}
       {{/with}}
@@ -59,7 +59,7 @@
 <template name="afArrayField">
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afArrayField' .. ../.. ../../.. ../../../.. ../../../../..}}
-    {{#with getTemplate "afArrayField" ../template}}
+    {{#with getTemplate "afArrayField" ../template ../name this}}
       {{#with innerContext autoform=.. atts=../..}}
         {{> ..}}
       {{/with}}
@@ -71,7 +71,7 @@
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afFieldInput' .. ../.. ../../.. ../../../.. ../../../../..}}
 	  {{#with inputOuterContext autoform=this atts=..}}
-	    {{#with getTemplate this.templateType ../../template}}
+	    {{#with getTemplate this.templateType ../../template ../../name ..}}
 	      {{#with inputContext outerContext=..}}
 	        {{> ..}}
 	      {{/with}}
@@ -84,7 +84,7 @@
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afFieldSelect' .. ../.. ../../.. ../../../.. ../../../../..}}
 	  {{#with inputOuterContext autoform=this atts=..}}
-	    {{#with getTemplate "afFieldSelect" ../../template}}
+	    {{#with getTemplate "afFieldSelect" ../../template ../../name ..}}
 	      {{#with inputContext outerContext=.. contentBlock=UI.contentBlock}}
 	        {{> ..}}
 	      {{/with}}
@@ -96,7 +96,7 @@
 <template name="afFieldLabel">
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afFieldLabel' .. ../.. ../../.. ../../../.. ../../../../..}}
-    {{#with getTemplate "afFieldLabel" ../template}}
+    {{#with getTemplate "afFieldLabel" ../template ../name this}}
       {{#with innerContext autoform=.. atts=../..}}
         {{> ..}}
       {{/with}}

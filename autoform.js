@@ -9,11 +9,6 @@ arrayTracker = new ArrayTracker();
 
 AutoForm = AutoForm || {}; //exported
 
-// Extend the schema options allowed by SimpleSchema
-SimpleSchema.extendOptions({
-  autoform: Match.Optional(Object)
-});
-
 /**
  * @method AutoForm.addHooks
  * @public
@@ -241,9 +236,17 @@ Template.afQuickField.getTemplate =
 Template.afObjectField.getTemplate =
 Template.afArrayField.getTemplate =
 Template.quickForm.getTemplate =
-function afGenericGetTemplate(templateType, templateName) {
+function afGenericGetTemplate(templateType, templateName, fieldName, autoform) {
   var result;
 
+  // Template may be specified in schema.
+  // Skip for quickForm and afDeleteButton because they render a form
+  // and not a field.
+  if (fieldName && autoform) {
+    var defs = Utility.getDefs(autoform._af.ss, fieldName); //defs will not be undefined
+    templateName = templateName || (defs.autoform && defs.autoform.template);
+  }
+  
   var defaultTemplate = AutoForm.getDefaultTemplateForType(templateType) || AutoForm.getDefaultTemplate();
 
   // Determine template name
@@ -416,10 +419,10 @@ function qfFormFields() {
     }
     fieldList = _.difference(fieldList, omitFields);
   }
-  return quickFieldFormFields(fieldList, context._af, true);
+  return quickFieldFormFields(fieldList, context._af);
 }
 
-function quickFieldFormFields(fieldList, afContext, useAllowedValuesAsOptions) {
+function quickFieldFormFields(fieldList, afContext) {
   var ss = afContext.ss;
   var addedFields = [];
 
@@ -465,8 +468,8 @@ function quickFieldFormFields(fieldList, afContext, useAllowedValuesAsOptions) {
 
     var info = {name: field};
 
-    // If there are allowedValues defined, use them as select element options
-    if (useAllowedValuesAsOptions) {
+    // If there are allowedValues defined and there are not options in the schema, use them as select element options
+    if (!fieldDefs.autoform || !fieldDefs.autoform.options) {
       var av = fieldDefs.type === Array ? ss.schema(field + ".$").allowedValues : fieldDefs.allowedValues;
       if (_.isArray(av)) {
         info.options = "allowed";
@@ -554,7 +557,7 @@ function (options) {
   var c = Utility.normalizeContext(options.hash, "afFieldInput");
 
   var ss = c.af.ss;
-  var defs = Utility.getDefs(ss, c.atts.name); //defs will not be undefined
+  var defs = c.defs;
 
   // Get schema type
   var schemaType = defs.type;
@@ -667,7 +670,7 @@ Template.afObjectField.innerContext = function (options) {
        return _.contains(omitFields,SimpleSchema._makeGeneric(f))
     });
   }
-  var formFields = quickFieldFormFields(fields, c.af, true);
+  var formFields = quickFieldFormFields(fields, c.af);
 
   return {
     fields: formFields,
@@ -731,10 +734,9 @@ Template.afQuickField.innerContext = function afQuickFieldInnerContext(options) 
 
   var labelAtts = quickFieldLabelAtts(c.atts, c.afc);
   var inputAtts = quickFieldInputAtts(c.atts, c.afc);
-  var defs = Utility.getDefs(ss, c.atts.name); //defs will not be undefined
 
   return {
-    skipLabel: (c.atts.label === false || (defs.type === Boolean && !("select" in c.atts) && !("radio" in c.atts))),
+    skipLabel: (c.atts.label === false || (c.defs.type === Boolean && !("select" in c.atts) && !("radio" in c.atts))),
     afFieldLabelAtts: labelAtts,
     afFieldInputAtts: inputAtts,
     atts: {name: inputAtts.name, autoform: inputAtts.autoform}
@@ -743,19 +745,14 @@ Template.afQuickField.innerContext = function afQuickFieldInnerContext(options) 
 
 Template.afQuickField.isGroup = function afQuickFieldIsGroup(options) {
   var c = Utility.normalizeContext(options.hash, "afQuickField");
-  var ss = c.af.ss;
-  var defs = Utility.getDefs(ss, c.atts.name); //defs will not be undefined
-
-  return (defs.type === Object);
+  // Render a group of fields if we expect an Object
+  return (c.defs.type === Object);
 };
 
 Template.afQuickField.isFieldArray = function afQuickFieldIsFieldArray(options) {
   var c = Utility.normalizeContext(options.hash, "afQuickField");
-  var ss = c.af.ss;
-  var defs = Utility.getDefs(ss, c.atts.name); //defs will not be undefined
-
-  // Render an array of fields if we expect an array and we don't have options
-  return (defs.type === Array && !c.atts.options);
+  // Render an array of fields if we expect an Array and we don't have options
+  return (c.defs.type === Array && !c.atts.options);
 };
 
 /*
@@ -855,6 +852,14 @@ getFormValues = function getFormValues(template, formId, ss) {
   return result;
 };
 
+/*
+ * Gets the value that should be shown/selected in the input. Returns
+ * a string, an array of strings, or a Date instance. The value used,
+ * in order of preference, is one of:
+ * * The `value` attribute provided
+ * * The value that is set in the `doc` provided on the containing autoForm
+ * * The `defaultValue` from the schema
+ */
 function getInputValue(name, value, mDoc, expectsArray, defaultValue) {
   if (typeof value === "undefined") {
     // Get the value for this key in the current document
@@ -915,6 +920,7 @@ function getInputValue(name, value, mDoc, expectsArray, defaultValue) {
 
 function getInputData(defs, hash, value, type, label, expectsArray) {
   var schemaType = defs.type;
+
   // We don't want to alter the original hash, so we clone it and
   // remove some stuff that should not be HTML attributes
   // XXX It would be better to use a whitelist of allowed attributes
@@ -942,7 +948,9 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
   var max = (typeof defs.max === "function") ? defs.max() : defs.max;
 
   if (type === "datetime-local") {
+    // `offset` is deprecated and replaced by `timezoneId`
     inputAtts["data-offset"] = hash.offset || "Z";
+    inputAtts["data-timezoneId"] = hash.timezoneId || "UTC";
   }
 
   //convert Date value to required string value based on field type
