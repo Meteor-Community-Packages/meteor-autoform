@@ -209,7 +209,10 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId) {
  * This is a reactive method that will rerun whenever the current value of the requested field changes.
  */
 AutoForm.getFieldValue = function autoFormGetFieldValue(formId, fieldName) {
-  return getTrackedFieldValue(formId, fieldName);
+  formValues[formId] = formValues[formId] || {};
+  formValues[formId][fieldName] = formValues[formId][fieldName] || {_deps: new Deps.Dependency};
+  formValues[formId][fieldName]._deps.depend();
+  return formValues[formId][fieldName]._val;
 };
 
 /*
@@ -276,6 +279,7 @@ Template.autoForm.atts = function autoFormTplAtts() {
   }
   // After removing all of the props we know about, everything else should
   // become a form attribute.
+  // XXX Would be better to use a whitelist of HTML attributes allowed on form elements
   return _.omit(context, "schema", "collection", "validation", "doc", "resetOnSuccess", "type", "template");
 };
 
@@ -507,16 +511,17 @@ UI.registerHelper('afFieldLabel', function afFieldLabelHelper() {
   throw new Error('Use the new syntax {{> afFieldLabel name="name"}} rather than {{afFieldLabel "name"}}');
 });
 
-function getLabel() {
-  var c = Utility.normalizeContext(this, "afFieldLabel");
-  return c.af.ss.label(c.atts.name);
-}
+Template.afFieldLabel.innerContext = function afFieldLabelInnerContext(options) {
+  var c = Utility.normalizeContext(options.hash, "afFieldLabel");
+  var ss = c.af.ss;
+  var name = c.atts.name;
 
-Template.afFieldLabel.labelContext = function getLabelContext(autoform, atts) {
   return {
-    autoform: autoform,
-    atts: atts,
-    label: getLabel
+    autoform: c.afc,
+    atts: c.atts,
+    label: function getLabel() {
+      return ss.label(name);
+    }
   };
 };
 
@@ -757,133 +762,16 @@ Template.afQuickField.isFieldArray = function afQuickFieldIsFieldArray(options) 
  * afEachArrayItem
  */
 
-Template.afEachArrayItem.innerContext = function afEachArrayItemInnerContext(name, af, minCount, maxCount) {
-  if (!af || !af._af) {
-    throw new Error(name + " must be used within an autoForm block");
-  }
-
-  var afContext = af._af;
-  var ss = afContext.ss;
-  var formId = afContext.formId;
+Template.afEachArrayItem.innerContext = function afEachArrayItemInnerContext(options) {
+  var c = Utility.normalizeContext(options.hash, "afEachArrayItem");
+  var formId = c.af.formId;
+  var name = c.atts.name;
   var docCount = fd.getDocCountForField(formId, name);
 
-  arrayTracker.initField(formId, name, ss, docCount, minCount, maxCount);
+  arrayTracker.initField(formId, name, c.af.ss, docCount, c.atts.minCount, c.atts.maxCount);
   
   return arrayTracker.getField(formId, name);
 };
-
-/*
- * afFieldMessage
- */
-
-UI.registerHelper('afFieldMessage', function autoFormFieldMessage(options) {
-  //help users transition from positional name arg
-  if (typeof options === "string") {
-    throw new Error('Use the new syntax {{afFieldMessage name="name"}} rather than {{afFieldMessage "name"}}');
-  }
-
-  var hash = (options || {}).hash || {};
-  var afContext = hash.autoform && hash.autoform._af || this && this._af;
-  var ss = afContext.ss;
-  if (!ss) {
-    throw new Error("afFieldMessage helper must be used within an autoForm block");
-  }
-
-  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
-  return ss.namedContext(afContext.formId).keyErrorMessage(hash.name);
-});
-
-/*
- * afFieldIsInvalid
- */
-
-UI.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
-  //help users transition from positional name arg
-  if (typeof options === "string") {
-    throw new Error('Use the new syntax {{#if afFieldIsInvalid name="name"}} rather than {{#if afFieldIsInvalid "name"}}');
-  }
-
-  var hash = (options || {}).hash || {};
-  var afContext = hash.autoform && hash.autoform._af || this && this._af;
-  var ss = afContext.ss;
-  if (!ss) {
-    throw new Error("afFieldIsInvalid helper must be used within an autoForm block");
-  }
-
-  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
-  return ss.namedContext(afContext.formId).keyIsInvalid(hash.name);
-});
-
-/*
- * afArrayFieldHasMoreThanMinimum
- */
-
-UI.registerHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreThanMinimum(options) {
-  var hash = (options || {}).hash || {};
-  var afContext = hash.autoform && hash.autoform._af || this && this._af;
-  var ss = afContext.ss;
-  if (!ss) {
-    throw new Error("afArrayFieldHasMoreThanMinimum helper must be used within an autoForm block");
-  }
-
-  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
-  
-  var range = arrayTracker.getMinMax(ss, hash.name, hash.minCount, hash.maxCount);
-  var visibleCount = arrayTracker.getVisibleCount(afContext.formId, hash.name);
-  return (visibleCount > range.minCount);
-});
-
-/*
- * afArrayFieldHasLessThanMaximum
- */
-
-UI.registerHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessThanMaximum(options) {
-  var hash = (options || {}).hash || {};
-  var afContext = hash.autoform && hash.autoform._af || this && this._af;
-  var ss = afContext.ss;
-  if (!ss) {
-    throw new Error("afArrayFieldHasLessThanMaximum helper must be used within an autoForm block");
-  }
-
-  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
-  
-  var range = arrayTracker.getMinMax(ss, hash.name, hash.minCount, hash.maxCount);
-  var visibleCount = arrayTracker.getVisibleCount(afContext.formId, hash.name);
-  return (visibleCount < range.maxCount);
-});
-
-/*
- * afFieldValueIs
- */
-
-UI.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
-  var hash = (options || {}).hash || {};
-  var afContext = hash.autoform && hash.autoform._af || this && this._af;
-  var ss = afContext.ss;
-  if (!ss) {
-    throw new Error("afFieldValueIs helper must be used within an autoForm block");
-  }
-
-  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
-  return getTrackedFieldValue(afContext.formId, hash.name) === hash.value;
-});
-
-/*
- * afFieldValueContains
- */
-
-UI.registerHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
-  var hash = (options || {}).hash || {};
-  var afContext = hash.autoform && hash.autoform._af || this && this._af;
-  var ss = afContext.ss;
-  if (!ss) {
-    throw new Error("afFieldValueContains helper must be used within an autoForm block");
-  }
-
-  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
-  var currentValue = getTrackedFieldValue(afContext.formId, hash.name);
-  return _.isArray(currentValue) && _.contains(currentValue, hash.value);
-});
 
 /*
  * Private Helper Functions
@@ -1029,6 +917,7 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
   var schemaType = defs.type;
   // We don't want to alter the original hash, so we clone it and
   // remove some stuff that should not be HTML attributes
+  // XXX It would be better to use a whitelist of allowed attributes
   var inputAtts = _.omit(hash,
           "name",
           "autoform",
@@ -1097,9 +986,17 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
   // in a simple way, we add the attributes to the HTML
   // only if their value is `true`. That is, unlike in
   // HTML, their mere presence does not matter.
-  _.each(["disabled", "readonly", "checked", "required"], function (booleanProp) {
-    // For historical reasons, we treat the string "true" and an empty string as `true`, too
-    if (_.has(hash, booleanProp) && hash[booleanProp] !== true && hash[booleanProp] !== "true" && hash[booleanProp] !== "") {
+  _.each(["disabled", "readonly", "checked", "required", "autofocus"], function (booleanProp) {
+    if (!_.has(hash, booleanProp))
+      return;
+
+    // For historical reasons, we treat the string "true" and an empty string as `true`, too.
+    // But an empty string value results in the cleanest rendered output for boolean props,
+    // so we standardize as that.
+    if (hash[booleanProp] === true || hash[booleanProp] === "true" || hash[booleanProp] === "") {
+      inputAtts[booleanProp] = "";
+    } else {
+      // If the value is anything else, we don't render it
       delete inputAtts[booleanProp];
     }
   });
@@ -1337,65 +1234,43 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
 
   // Clean and validate doc
   if (context.type === "update") {
-
-    // Skip validation if skipEmpty is true and the field we're validating
-    // has no value.
-    if (skipEmpty && !Utility.objAffectsKey(form.updateDoc, key))
-      return; //skip validation
-
-    // getFormValues did some cleaning but didn't add auto values; add them now
-    ss.clean(form.updateDoc, {
-      isModifier: true,
-      filter: false,
-      autoConvert: false,
-      extendAutoValueContext: {
-        userId: (Meteor.userId && Meteor.userId()) || null,
-        isInsert: false,
-        isUpdate: true,
-        isUpsert: false,
-        isFromTrustedCode: false
-      }
-    });
-    ss.namedContext(formId).validateOne(form.updateDoc, key, {
-      modifier: true,
-      extendedCustomContext: {
-        userId: (Meteor.userId && Meteor.userId()) || null,
-        isInsert: false,
-        isUpdate: true,
-        isUpsert: false,
-        isFromTrustedCode: false
-      }
-    });
+    var docToValidate = form.updateDoc;
+    var isModifier = true;
   } else {
-
-    // Skip validation if skipEmpty is true and the field we're validating
-    // has no value.
-    if (skipEmpty && !Utility.objAffectsKey(form.insertDoc, key))
-      return; //skip validation
-
-    // getFormValues did some cleaning but didn't add auto values; add them now
-    ss.clean(form.insertDoc, {
-      filter: false,
-      autoConvert: false,
-      extendAutoValueContext: {
-        userId: (Meteor.userId && Meteor.userId()) || null,
-        isInsert: true,
-        isUpdate: false,
-        isUpsert: false,
-        isFromTrustedCode: false
-      }
-    });
-    ss.namedContext(formId).validateOne(form.insertDoc, key, {
-      modifier: false,
-      extendedCustomContext: {
-        userId: (Meteor.userId && Meteor.userId()) || null,
-        isInsert: true,
-        isUpdate: false,
-        isUpsert: false,
-        isFromTrustedCode: false
-      }
-    });
+    var docToValidate = form.insertDoc;
+    var isModifier = false;
   }
+
+  // Skip validation if skipEmpty is true and the field we're validating
+  // has no value.
+  if (skipEmpty && !Utility.objAffectsKey(docToValidate, key))
+    return; //skip validation
+
+  var userId = (Meteor.userId && Meteor.userId()) || null;
+
+  // getFormValues did some cleaning but didn't add auto values; add them now
+  ss.clean(docToValidate, {
+    isModifier: isModifier,
+    filter: false,
+    autoConvert: false,
+    extendAutoValueContext: {
+      userId: userId,
+      isInsert: !isModifier,
+      isUpdate: isModifier,
+      isUpsert: false,
+      isFromTrustedCode: false
+    }
+  });
+  ss.namedContext(formId).validateOne(docToValidate, key, {
+    modifier: isModifier,
+    extendedCustomContext: {
+      userId: userId,
+      isInsert: !isModifier,
+      isUpdate: isModifier,
+      isUpsert: false,
+      isFromTrustedCode: false
+    }
+  });
 }
 
 //throttling function that calls out to _validateField
@@ -1419,10 +1294,3 @@ updateTrackedFieldValue = function updateTrackedFieldValue(formId, key, val) {
   formValues[formId][key]._val = val;
   formValues[formId][key]._deps.changed();
 };
-
-function getTrackedFieldValue(formId, key) {
-  formValues[formId] = formValues[formId] || {};
-  formValues[formId][key] = formValues[formId][key] || {_deps: new Deps.Dependency};
-  formValues[formId][key]._deps.depend();
-  return formValues[formId][key]._val;
-}

@@ -39,6 +39,7 @@ Package.on_use(function(api) {
     'autoform-formdata.js',
     'autoform-arrays.js',
     'autoform.js',
+    'autoform-helpers.js',
     'autoform-events.js'
   ], 'client');
 });

@@ -1,3 +1,5 @@
+<!-- Templates that render a form -->
+
 <template name="autoForm">
   <form {{atts}}>
   	{{#with innerContext ..}}
@@ -14,24 +16,32 @@
   {{/with}}
 </template>
 
+<template name="afDeleteButton">
+  {{#with getTemplate "afDeleteButton" this.template}}
+    {{#with innerContext .. UI.contentBlock}}
+      {{> ..}}
+    {{/with}}
+  {{/with}}
+</template>
+
+<!-- Templates that render fields within a form -->
+
 <template name="afQuickField">
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afQuickField' .. ../.. ../../.. ../../../.. ../../../../..}}
-  {{#if isGroup autoform=this atts=..}}
-    {{> afObjectField ..}}
-  {{else}}
-    {{#if isFieldArray autoform=this atts=..}}
-      {{> afArrayField ..}}
+    {{#if isGroup autoform=this atts=..}}
+      {{> afObjectField ..}}
     {{else}}
-      {{#with innerContext autoform=this atts=..}}
-        {{#with getTemplate "afQuickField" ../../template}}
-          {{#with ..}}
-            {{> ..}}
+      {{#if isFieldArray autoform=this atts=..}}
+        {{> afArrayField ..}}
+      {{else}}
+        {{#with getTemplate "afQuickField" ../template}}
+          {{#with innerContext autoform=.. atts=../..}}
+              {{> ..}}
           {{/with}}
         {{/with}}
-      {{/with}}
+      {{/if}}
     {{/if}}
-  {{/if}}
   {{/with}}
 </template>
 
@@ -61,7 +71,7 @@
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afFieldInput' .. ../.. ../../.. ../../../.. ../../../../..}}
 	  {{#with inputOuterContext autoform=this atts=..}}
-	    {{#with getTemplate this.templateType this.atts.template}}
+	    {{#with getTemplate this.templateType ../../template}}
 	      {{#with inputContext outerContext=..}}
 	        {{> ..}}
 	      {{/with}}
@@ -74,7 +84,7 @@
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afFieldSelect' .. ../.. ../../.. ../../../.. ../../../../..}}
 	  {{#with inputOuterContext autoform=this atts=..}}
-	    {{#with getTemplate "afFieldSelect" this.atts.template}}
+	    {{#with getTemplate "afFieldSelect" ../../template}}
 	      {{#with inputContext outerContext=.. contentBlock=UI.contentBlock}}
 	        {{> ..}}
 	      {{/with}}
@@ -84,28 +94,21 @@
 </template>
 
 <template name="afFieldLabel">
-  {{#with getTemplate "afFieldLabel" this.template}}
-    {{! find autoform context up to 5 levels back}}
-    {{#with _af_findAutoForm 'afFieldLabel' ../.. ../../.. ../../../.. ../../../../.. ../../../../../..}}
-      {{#with labelContext this ../..}}
-        {{> ../..}}
+  {{! find autoform context up to 5 levels back}}
+  {{#with _af_findAutoForm 'afFieldLabel' .. ../.. ../../.. ../../../.. ../../../../..}}
+    {{#with getTemplate "afFieldLabel" ../template}}
+      {{#with innerContext autoform=.. atts=../..}}
+        {{> ..}}
       {{/with}}
     {{/with}}
   {{/with}}
 </template>
 
-<template name="afDeleteButton">
-  {{#with getTemplate "afDeleteButton" this.template}}
-    {{#with innerContext .. UI.contentBlock}}
-      {{> ..}}
-    {{/with}}
-  {{/with}}
-</template>
-
 <template name="afEachArrayItem">
+  {{! This is a block component and doesn't render anything visible, so no customizable template is needed for this}}
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afEachArrayItem' .. ../.. ../../.. ../../../.. ../../../../..}}
-    {{#with innerContext ../name this ../minCount ../maxCount}}
+    {{#with innerContext autoform=this atts=..}}
       {{#each this}}
       {{#if this.removed}}
       <input type="hidden" name="{{this.name}}" data-schema-key="{{this.name}}" value="">
