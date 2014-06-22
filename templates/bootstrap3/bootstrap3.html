@@ -1,6 +1,6 @@
 <template name="quickForm_bootstrap3">
   {{#autoForm this.qfAutoFormContext}}
-    {{#each this.qfFormFields}}
+    {{#each afFirstLevelFields}}
     {{> afQuickField}}
     {{/each}}
     {{#if this.qfNeedsButton}}
@@ -22,7 +22,12 @@
 </template>
 
 <template name="afCheckbox_bootstrap3">
-  <div class="checkbox"><label><input type="checkbox" data-schema-key="{{this.name}}" name="{{this.name}}" value="{{this.value}}" {{this.checked}} {{this.atts}} />{{this.label}}</label></div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" data-schema-key="{{this.name}}" name="{{this.name}}" value="{{this.value}}" {{this.checked}} {{this.atts}} />
+      {{this.label}}
+    </label>
+  </div>
 </template>
 
 <template name="afCheckboxGroup_bootstrap3">
@@ -32,7 +37,12 @@
 </template>
 
 <template name="afRadio_bootstrap3">
-  <div class="radio"><label><input type="radio" data-schema-key="{{this.name}}" name="{{this.name}}" value="{{this.value}}" {{this.checked}} {{this.atts}} />{{this.label}}</label></div>
+  <div class="radio">
+    <label>
+      <input type="radio" data-schema-key="{{this.name}}" name="{{this.name}}" value="{{this.value}}" {{this.checked}} {{this.atts}} />
+      {{this.label}}
+    </label>
+  </div>
 </template>
 
 <template name="afRadioGroup_bootstrap3">
@@ -92,6 +102,9 @@
       <h3 class="panel-title">{{this.label}}</h3>
     </div>
     <div class="panel-body">
+      {{#if afFieldIsInvalid name=this.name autoform=this.autoform}}
+      <span class="help-block">{{{afFieldMessage name=this.name autoform=this.autoform}}}</span>
+      {{/if}}
       {{#each this.fields}}
       {{> afQuickField this}}
       {{/each}}

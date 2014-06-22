@@ -10,7 +10,7 @@
 
 <template name="quickForm">
   {{#with getTemplate "quickForm" this.template}}
-    {{#with qfContext ..}}
+    {{#with innerContext ..}}
       {{> ..}}
     {{/with}}
   {{/with}}

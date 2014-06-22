@@ -380,7 +380,7 @@ UI.registerHelper('quickForm', function quickFormHelper() {
   throw new Error('Use the new syntax {{> quickForm}} rather than {{quickForm}}');
 });
 
-Template.quickForm.qfContext = function quickFormContext(atts) {
+Template.quickForm.innerContext = function quickFormContext(atts) {
   // Pass along quickForm context to autoForm context, minus a few
   // properties that are specific to quickForms.
   var qfAutoFormContext = _.omit(atts, "buttonContent", "buttonClasses", "fields", "omitFields");

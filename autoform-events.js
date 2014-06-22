@@ -67,6 +67,9 @@ Template.autoForm.events({
     var validationType = context.validation || "submitThenKeyup";
     var formId = context.id || defaultFormId;
     var collection = Utility.lookup(context.collection);
+    var schema = context.schema;
+    // ss will be the schema for the `schema` attribute if present,
+    // else the schema for the collection
     var ss = Utility.getSimpleSchemaFromContext(context, formId);
     var currentDoc = context.doc || null;
     var docId = currentDoc ? currentDoc._id : null;
@@ -250,6 +253,10 @@ Template.autoForm.events({
       if(!collection) {
          throw new Error("AutoForm: You must specify a collection when form type is insert.");
       }
+      // If there is an override schema supplied, validate against that first
+      if (schema && !isValid(insertDocForValidation, false, 'pre-submit validation')) {
+        return haltSubmission();
+      }
       collection.insert(insertDoc, {validationContext: formId}, makeCallback('insert', afterInsert));
     } else if (isUpdate) {
       var updateCallback = makeCallback('update', afterUpdate);
@@ -259,6 +266,26 @@ Template.autoForm.events({
       } else {
         if(!collection) {
           throw new Error("AutoForm: You must specify a collection when form type is update.");
+        }
+        // If there is an override schema supplied, validate against that first
+        if (schema) {
+          // Get a version of the doc that has auto values to validate here. We
+          // don't want to actually send any auto values to the server because
+          // we ultimately want them generated on the server
+          var updateDocForValidation = ss.clean(_.clone(updateDoc), {
+            filter: false,
+            autoConvert: false,
+            extendAutoValueContext: {
+              userId: (Meteor.userId && Meteor.userId()) || null,
+              isInsert: false,
+              isUpdate: true,
+              isUpsert: false,
+              isFromTrustedCode: false
+            }
+          });
+          if (!isValid(updateDocForValidation, true, 'pre-submit validation')) {
+            return haltSubmission();
+          }
         }
         collection.update(docId, updateDoc, {validationContext: formId}, updateCallback);
       }

@@ -69,6 +69,14 @@ UI.registerHelper('afFieldValueContains', function autoFormFieldValueContains(op
 });
 
 /*
+ * afFirstLevelFields
+ */
+UI.registerHelper("afFirstLevelFields", function autoFormFirstLevelFields(options) {
+  options = parseOptions(options, this, 'afFirstLevelFields');
+  console.log(options);
+});
+
+/*
  * PRIVATE
  */
 
