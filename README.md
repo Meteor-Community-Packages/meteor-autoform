@@ -1,5 +1,7 @@
-AutoForm [![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
+AutoForm
 =========================
+
+[![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
 
 AutoForm is a smart package for Meteor that adds UI components and helpers to easily
 create basic forms with automatic insert and update events, and automatic
@@ -41,6 +43,7 @@ have to add to your app yourself.
 - [Non-Collection Forms](#non-collection-forms)
   - [An Example Contact Form](#an-example-contact-form)
 - [Fine Tuning Validation](#fine-tuning-validation)
+- [Manual Validation](#manual-validation)
 - [Resetting Validation](#resetting-validation)
 - [The Form Document](#the-form-document)
   - [Getting Current Field Values](#getting-current-field-values)
@@ -743,6 +746,12 @@ the autofill mechanism will cause the text in the input to be selected after
 each keypress.  This has the effect of making it near impossible to
 actually type anything because you keep "overwriting" your input. To fix this,
 simply add the `autocomplete="off"` attribute to your input fields.
+
+## Manual Validation
+
+In addition to telling your form to validate on certain events, sometimes you
+need to manually validate a particular field. To do this, call `AutoForm.validateField(formId, fieldName, skipEmpty)`. It returns `true` or `false` depending on the validity
+of the field's current value, and it also causes reactive display of any errors for that field in the UI.
 
 ## Resetting Validation
 

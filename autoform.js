@@ -210,6 +210,26 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(formId, fieldName) {
   return formValues[formId][fieldName]._val;
 };
 
+/**
+ * @method AutoForm.validateField
+ * @public
+ * @param {String} formId The `id` attribute of the `autoForm` you want to validate.
+ * @param {String} fieldName The name of the field within the `autoForm` you want to validate.
+ * @param {Boolean} [skipEmpty=false] Set to `true` to skip validation if the field has no value. Useful for preventing `required` errors in form fields that the user has not yet filled out.
+ * @return {Boolean} Is it valid?
+ *
+ * In addition to returning a boolean that indicates whether the field is currently valid,
+ * this method causes the reactive validation messages to appear.
+ */
+AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipEmpty) {
+  var template = templatesById[formId];
+  if (!template || template._notInDOM) {
+    throw new Error("validateField: There is currently no autoForm template rendered for the form with id " + formId);
+  }
+
+  return _validateField(fieldName, template, skipEmpty, false);
+};
+
 /*
  * Shared
  */
@@ -1140,7 +1160,7 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
       isFromTrustedCode: false
     }
   });
-  ss.namedContext(formId).validateOne(docToValidate, key, {
+  return ss.namedContext(formId).validateOne(docToValidate, key, {
     modifier: isModifier,
     extendedCustomContext: {
       userId: userId,
