@@ -1,20 +1,25 @@
 <template name="quickForm_bootstrap3-horizontal">
   {{#autoForm qfAutoFormContext}}
-    {{#each this.qfFormFields}}
-    {{#with qfHorizontalAdjust ..}}
-    {{> afQuickField}}
-    {{/with}}
+    {{#with qfClasses ..}}
+    {{#each afFieldNames fields=../../atts.fields omitFields=../../atts.omitFields autoform=..}}
+      {{> afQuickField name=this options="auto" template="bootstrap3-horizontal" input-col-class=../inputClass label-class=../labelClass}}
     {{/each}}
-    {{#if this.qfNeedsButton}}
-    <div>
-      <button {{submitButtonAtts}}>
-      {{#with this.buttonContent}}
-      {{this}}
-      {{else}}
-      Submit
-      {{/with}}
-      </button>
+    {{/with}}
+    {{#if qfNeedsButton}}
+    {{#with qfClasses ..}}
+    <div class="form-group">
+      <div class="{{labelClass}}"></div>
+      <div class="{{inputClass}}">
+        <button {{submitButtonAtts ../..}}>
+        {{#with ../atts.buttonContent}}
+        {{this}}
+        {{else}}
+        Submit
+        {{/with}}
+        </button>
+      </div>
     </div>
+    {{/with}}
     {{/if}}
   {{/autoForm}}
 </template>
@@ -35,12 +40,45 @@
 </template>
 
 <template name="afObjectField_bootstrap3-horizontal">
-  <h3>{{this.label}}</h3>
-  {{#each this.fields}}
-    {{> afQuickField qfAtts}}
-  {{/each}}
+  <div class="form-group {{#if afFieldIsInvalid name=this.atts.name autoform=this.atts.autoform}}has-error{{/if}}">
+    {{> afFieldLabel afFieldLabelAtts}}
+    <div class="{{rightColumnClass}}">
+      <div class="panel panel-default autoform-padding-fix">
+        <div class="panel-body">
+        {{#each afFieldNames name=this.atts.name fields=this.atts.fields omitFields=this.atts.omitFields}}
+          {{> afQuickField name=this options="auto" template="bootstrap3"}}
+        {{/each}}
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <template name="afArrayField_bootstrap3-horizontal">
-  {{> afArrayField_bootstrap3}}
+  <div class="form-group {{#if afFieldIsInvalid name=this.atts.name autoform=this.autoform}}has-error{{/if}}">
+    {{> afFieldLabel afFieldLabelAtts}}
+    <div class="{{rightColumnClass}}">
+      <div class="panel panel-default autoform-padding-fix">
+        <ul class="list-group">
+          {{#afEachArrayItem name=this.atts.name}}
+          <li class="list-group-item autoform-array-item">
+            <div class="media">
+              {{#if afArrayFieldHasMoreThanMinimum name=../atts.name autoform=../autoform minCount=../atts.minCount maxCount=../atts.maxCount}}
+              <button class="btn btn-primary autoform-remove-item pull-left"><span class="glyphicon glyphicon-minus"></span></button>
+              {{/if}}
+              <div class="media-body">
+                {{> afQuickField name=this.name label=false}}
+              </div>
+            </div>
+          </li>
+          {{/afEachArrayItem}}
+          {{#if afArrayFieldHasLessThanMaximum name=this.atts.name autoform=this.autoform minCount=this.atts.minCount maxCount=this.atts.maxCount}}
+          <li class="list-group-item">
+            <button class="btn btn-primary autoform-add-item" data-autoform-field="{{this.atts.name}}"><span class="glyphicon glyphicon-plus"></span></button>
+          </li>
+          {{/if}}
+        </ul>
+      </div>
+    </div>
+  </div>
 </template>

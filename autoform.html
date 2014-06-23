@@ -49,7 +49,7 @@
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afObjectField' .. ../.. ../../.. ../../../.. ../../../../..}}
     {{#with getTemplate "afObjectField" ../template ../name this}}
-      {{#with innerContext autoform=.. atts=../..}}
+      {{#with autoform=.. atts=../..}}
         {{> ..}}
       {{/with}}
     {{/with}}
@@ -97,7 +97,7 @@
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afFieldLabel' .. ../.. ../../.. ../../../.. ../../../../..}}
     {{#with getTemplate "afFieldLabel" ../template ../name this}}
-      {{#with innerContext autoform=.. atts=../..}}
+      {{#with autoform=.. atts=../..}}
         {{> ..}}
       {{/with}}
     {{/with}}

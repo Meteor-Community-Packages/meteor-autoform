@@ -1,23 +1,23 @@
 <template name="quickForm_plain-fieldset">
-  {{#autoForm this.afContext}}
-  <fieldset>
-    {{#with this.legend}}
-    <legend>{{this}}</legend>
-    {{/with}}
-    {{#each this.formFields}}
-    {{> afQuickField name=this.name autoform=this.autoform}}
-    {{/each}}
-  </fieldset>
-  {{#if this.needsButton}}
-  <div>
-    <button {{submitButtonAtts}}>
-      {{#with this.buttonContent}}
-      {{this}}
-      {{else}}
-      Submit
+  {{#autoForm this.qfAutoFormContext}}
+    <fieldset>
+      {{#with ../atts.legend}}
+      <legend>{{this}}</legend>
       {{/with}}
-    </button>
-  </div>
-  {{/if}}
+      {{#each afFieldNames fields=../atts.fields omitFields=../atts.omitFields}}
+        {{> afQuickField name=this options="auto"}}
+      {{/each}}
+    </fieldset>
+    {{#if qfNeedsButton}}
+    <div>
+      <button {{submitButtonAtts}}>
+        {{#with ../atts.buttonContent}}
+        {{this}}
+        {{else}}
+        Submit
+        {{/with}}
+      </button>
+    </div>
+    {{/if}}
   {{/autoForm}}
 </template>

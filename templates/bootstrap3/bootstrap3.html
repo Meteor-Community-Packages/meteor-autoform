@@ -1,12 +1,12 @@
 <template name="quickForm_bootstrap3">
   {{#autoForm this.qfAutoFormContext}}
-    {{#each afFirstLevelFields}}
-    {{> afQuickField}}
+    {{#each afFieldNames fields=../atts.fields omitFields=../atts.omitFields}}
+      {{> afQuickField name=this options="auto"}}
     {{/each}}
-    {{#if this.qfNeedsButton}}
+    {{#if qfNeedsButton}}
     <div>
       <button {{submitButtonAtts}}>
-      {{#with this.buttonContent}}
+      {{#with ../atts.buttonContent}}
       {{this}}
       {{else}}
       Submit
@@ -18,36 +18,46 @@
 </template>
 
 <template name="afFieldLabel_bootstrap3">
-  <label {{atts}}>{{this.label}}</label>
+  <label {{atts}}>{{afFieldLabelText name=this.atts.name}}</label>
 </template>
 
 <template name="afCheckbox_bootstrap3">
   <div class="checkbox">
     <label>
-      <input type="checkbox" data-schema-key="{{this.name}}" name="{{this.name}}" value="{{this.value}}" {{this.checked}} {{this.atts}} />
-      {{this.label}}
+      <input type="checkbox" value="{{this.value}}" {{atts}} />
+      {{afFieldLabelText name=this.name}}
     </label>
   </div>
 </template>
 
 <template name="afCheckboxGroup_bootstrap3">
   {{#each this.items}}
-    {{> afCheckbox_bootstrap3}}
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" value="{{this.value}}" {{atts}} />
+        {{this.label}}
+      </label>
+    </div>
   {{/each}}
 </template>
 
 <template name="afRadio_bootstrap3">
   <div class="radio">
     <label>
-      <input type="radio" data-schema-key="{{this.name}}" name="{{this.name}}" value="{{this.value}}" {{this.checked}} {{this.atts}} />
-      {{this.label}}
+      <input type="radio" value="{{this.value}}" {{atts}} />
+      {{afFieldLabelText name=this.name}}
     </label>
   </div>
 </template>
 
 <template name="afRadioGroup_bootstrap3">
   {{#each this.items}}
-    {{> afRadio_bootstrap3}}
+    <div class="radio">
+      <label>
+        <input type="radio" value="{{this.value}}" {{atts}} />
+        {{this.label}}
+      </label>
+    </div>
   {{/each}}
 </template>
 
@@ -56,28 +66,25 @@
 </template>
 
 <template name="afFieldSelect_bootstrap3">
-  <select data-schema-key="{{this.name}}" name="{{this.name}}" class="{{this.cls}} form-control" {{this.atts}}>
+  <select {{atts}}>
     {{> contentBlock}}
   </select>
 </template>
 
 <template name="afSelect_bootstrap3">
-  <select data-schema-key="{{this.name}}" name="{{this.name}}" class="{{this.cls}} form-control" {{this.atts}}>
-    {{#with this.firstOption}}
-    <option value="">{{this}}</option>
-    {{/with}}
+  <select {{atts}}>
     {{#each this.items}}
-      <option value="{{this.value}}" {{this.selected}}>{{this.label}}</option>
+      <option {{optionAtts}}>{{this.label}}</option>
     {{/each}}
   </select>
 </template>
 
 <template name="afTextarea_bootstrap3">
-  <textarea data-schema-key="{{this.name}}" name="{{this.name}}" class="{{this.cls}} form-control" {{this.atts}}>{{this.value}}</textarea>
+  <textarea {{atts}}>{{this.value}}</textarea>
 </template>
 
 <template name="afInput_bootstrap3">
-  <input type="{{this.type}}" data-schema-key="{{this.name}}" name="{{this.name}}" class="{{this.cls}} form-control" value="{{this.value}}" {{this.atts}}/>
+  <input type="{{this.type}}" value="{{this.value}}" {{atts}}/>
 </template>
 
 <template name="afDeleteButton_bootstrap3">
@@ -99,14 +106,14 @@
 <template name="afObjectField_bootstrap3">
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title">{{this.label}}</h3>
+      <h3 class="panel-title">{{afFieldLabelText name=this.atts.name}}</h3>
     </div>
     <div class="panel-body">
-      {{#if afFieldIsInvalid name=this.name autoform=this.autoform}}
-      <span class="help-block">{{{afFieldMessage name=this.name autoform=this.autoform}}}</span>
+      {{#if afFieldIsInvalid name=this.atts.name autoform=this.autoform}}
+      <span class="help-block">{{{afFieldMessage name=this.atts.name autoform=this.autoform}}}</span>
       {{/if}}
-      {{#each this.fields}}
-      {{> afQuickField this}}
+      {{#each afFieldNames name=this.atts.name fields=this.atts.fields omitFields=this.atts.omitFields}}
+        {{> afQuickField name=this options="auto"}}
       {{/each}}
     </div>
   </div>
@@ -114,28 +121,28 @@
 
 <template name="afArrayField_bootstrap3">
   <div class="panel panel-default">
-    <div class="panel-heading">{{this.label}}</div>
-    {{#if afFieldIsInvalid name=this.name autoform=this.autoform}}
+    <div class="panel-heading">{{afFieldLabelText name=this.atts.name}}</div>
+    {{#if afFieldIsInvalid name=this.atts.name autoform=this.autoform}}
     <div class="panel-body has-error">
-      <span class="help-block">{{{afFieldMessage name=this.name autoform=this.autoform}}}</span>
+      <span class="help-block">{{{afFieldMessage name=this.atts.name autoform=this.autoform}}}</span>
     </div>
     {{/if}}
     <ul class="list-group">
-      {{#afEachArrayItem name=this.name}}
+      {{#afEachArrayItem name=this.atts.name}}
       <li class="list-group-item autoform-array-item">
         <div class="media">
-          {{#if afArrayFieldHasMoreThanMinimum name=../name autoform=../autoform minCount=../minCount maxCount=../maxCount}}
+          {{#if afArrayFieldHasMoreThanMinimum name=../atts.name autoform=../autoform minCount=../atts.minCount maxCount=../atts.maxCount}}
           <button class="btn btn-primary autoform-remove-item pull-left"><span class="glyphicon glyphicon-minus"></span></button>
           {{/if}}
           <div class="media-body">
-            {{> afQuickField}}
+            {{> afQuickField name=this.name label=false}}
           </div>
         </div>
       </li>
       {{/afEachArrayItem}}
-      {{#if afArrayFieldHasLessThanMaximum name=this.name autoform=this.autoform minCount=this.minCount maxCount=this.maxCount}}
+      {{#if afArrayFieldHasLessThanMaximum name=this.atts.name autoform=this.autoform minCount=this.atts.minCount maxCount=this.atts.maxCount}}
       <li class="list-group-item">
-        <button class="btn btn-primary autoform-add-item"><span class="glyphicon glyphicon-plus" data-autoform-field="{{this.name}}"></span></button>
+        <button class="btn btn-primary autoform-add-item" data-autoform-field="{{this.atts.name}}"><span class="glyphicon glyphicon-plus"></span></button>
       </li>
       {{/if}}
     </ul>

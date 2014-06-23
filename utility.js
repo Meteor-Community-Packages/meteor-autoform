@@ -430,9 +430,18 @@ Utility = {
 
     var defs = Utility.getDefs(afContext._af.ss, atts.name); //defs will not be undefined
 
+    // This is where we add default attributes specified in
+    // defs.autoform. We don't add them for afFieldLabel.
     if (name !== "afFieldLabel") {
+      // If options="auto", we want to use defs.autoform.options
+      // if specified and otherwise fall back to "allowed"
+      if ((defs.autoform || {}).options && atts.options === "auto")
+        delete atts.options;
       // "autoform" option in the schema provides default atts
       atts = _.extend({}, defs.autoform || {}, atts);
+    }
+    if (atts.options === "auto") {
+      atts.options = "allowed";
     }
 
     return {
@@ -441,5 +450,20 @@ Utility = {
       atts: atts,
       defs: defs
     };
+  },
+  /**
+   * @method Utility.stringToArray
+   * @private
+   * @param {String|Array} A variable that might be a string or an array.
+   * @return {Array} The array, building it from a comma-delimited string if necessary.
+   */
+  stringToArray: function stringToArray(s, errorMessage) {
+    if (typeof s === "string") {
+      return s.replace(/ /g, '').split(',');
+    } else if (!_.isArray(s)) {
+      throw new Error(errorMessage);
+    } else {
+      return s;
+    }
   }
 };

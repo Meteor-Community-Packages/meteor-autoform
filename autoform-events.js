@@ -388,11 +388,11 @@ Template.autoForm.events({
 
     event.preventDefault();
 
-    var name = $(event.currentTarget).attr("data-autoform-field") || self.name;
+    var name = $(event.currentTarget).attr("data-autoform-field");
     var data = template.data;
     var formId = data && data.id || defaultFormId;
     data = formData[formId];
 
-    arrayTracker.addOneToField(formId, name, data.ss, self.overrideMinCount, self.overrideMaxCount);
+    arrayTracker.addOneToField(formId, name, data.ss, self.atts.overrideMinCount, self.atts.overrideMaxCount);
   }
 });

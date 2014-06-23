@@ -385,126 +385,11 @@ Template.quickForm.innerContext = function quickFormContext(atts) {
   // properties that are specific to quickForms.
   var qfAutoFormContext = _.omit(atts, "buttonContent", "buttonClasses", "fields", "omitFields");
 
-  return _.extend({
-    qfFormFields: qfFormFields,
-    qfNeedsButton: qfNeedsButton,
-    qfAutoFormContext: qfAutoFormContext
-  }, atts);
-};
-
-function qfFormFields() {
-  var context = this;
-  var ss = context._af.ss;
-
-  // Get the list of fields we want included
-  var fieldList;
-  if (context.fields) {
-    fieldList = context.fields;
-    if (typeof fieldList === "string") {
-      fieldList = fieldList.replace(/ /g, '').split(',');
-    }
-    if (!_.isArray(fieldList)) {
-      throw new Error('AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
-    }
-  } else {
-    // If we weren't given a fieldList, use all first level schema keys by default
-    fieldList = ss.firstLevelSchemaKeys() || [];
-  }
-
-  // If user wants to omit some fields, remove those from the array
-  if (context.omitFields) {
-    var omitFields = stringToArray(context.omitFields);
-    if (!_.isArray(omitFields)) {
-      throw new Error('AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
-    }
-    fieldList = _.difference(fieldList, omitFields);
-  }
-  return quickFieldFormFields(fieldList, context._af);
-}
-
-function quickFieldFormFields(fieldList, afContext) {
-  var ss = afContext.ss;
-  var addedFields = [];
-
-  // Filter out fields we truly don't want
-  fieldList = _.filter(fieldList, function shouldIncludeField(field) {
-    var fieldDefs = ss.schema(field);
-
-    // Don't include fields with denyInsert=true when it's an insert form
-    if (fieldDefs.denyInsert && afContext.submitType === "insert")
-      return false;
-
-    // Don't include fields with denyUpdate=true when it's an update form
-    if (fieldDefs.denyUpdate && afContext.submitType === "update")
-      return false;
-
-    return true;
-  });
-
-  // If we've filtered out all fields, we're done
-  if (!fieldList || !fieldList.length)
-    return [];
-
-  // Define extra properties to be added to all fields
-  var extendedAtts = {
-    autoform: {_af: afContext}
+  return {
+    qfAutoFormContext: qfAutoFormContext,
+    atts: atts
   };
-
-  if (afContext.submitType === "disabled") {
-    extendedAtts.disabled = "";
-  } else if (afContext.submitType === "readonly") {
-    extendedAtts.readonly = "";
-  }
-
-  // Define a function to get the necessary info for each requested field
-  function infoForField(field, extendedProps) {
-
-    // Ensure fields are not added more than once
-    if (_.contains(addedFields, field))
-      return;
-
-    // Get schema definitions for this field
-    var fieldDefs = ss.schema(field);
-
-    var info = {name: field};
-
-    // If there are allowedValues defined and there are not options in the schema, use them as select element options
-    if (!fieldDefs.autoform || !fieldDefs.autoform.options) {
-      var av = fieldDefs.type === Array ? ss.schema(field + ".$").allowedValues : fieldDefs.allowedValues;
-      if (_.isArray(av)) {
-        info.options = "allowed";
-      }
-    }
-
-    addedFields.push(field);
-
-    // Return the field info along with the extra properties that
-    // all fields should have
-    return _.extend(info, extendedProps);
-  }
-
-  // Return info for all requested fields
-  return _.map(fieldList, function autoFormFormFieldsListEach(field) {
-    return infoForField(field, extendedAtts);
-  });
-}
-
-function qfNeedsButton() {
-  var context = this;
-  var needsButton = true;
-
-  switch (context._af.submitType) {
-    case "readonly":
-    case "disabled":
-      needsButton = false;
-      break;
-    default:
-      needsButton = true;
-      break;
-  }
-
-  return needsButton;
-}
+};
 
 /*
  * afFieldLabel
@@ -513,35 +398,6 @@ function qfNeedsButton() {
 UI.registerHelper('afFieldLabel', function afFieldLabelHelper() {
   throw new Error('Use the new syntax {{> afFieldLabel name="name"}} rather than {{afFieldLabel "name"}}');
 });
-
-Template.afFieldLabel.innerContext = function afFieldLabelInnerContext(options) {
-  var c = Utility.normalizeContext(options.hash, "afFieldLabel");
-  var ss = c.af.ss;
-  var name = c.atts.name;
-
-  return {
-    autoform: c.afc,
-    atts: c.atts,
-    label: function getLabel() {
-      return ss.label(name);
-    }
-  };
-};
-
-/*
- * afFieldSelect
- */
-
-UI.registerHelper('afFieldSelect', function afFieldSelectHelper() {
-  throw new Error('Use the new syntax {{> afFieldSelect name="name"}} rather than {{afFieldSelect "name"}}');
-});
-
-Template.afFieldSelect.inputContext = function afFieldSelectInputContext(options) {
-  var ctx = ((options || {}).hash || {});
-  var c = ctx.outerContext;
-  var iData = getInputData(c.defs, c.atts, c.value, "select", c.ss.label(c.atts.name), c.expectsArray);
-  return _.extend({contentBlock: ctx.contentBlock}, iData);
-};
 
 /*
  * afFieldInput
@@ -554,7 +410,7 @@ UI.registerHelper('afFieldInput', function afFieldInputHelper() {
 Template.afFieldInput.inputOuterContext =
 Template.afFieldSelect.inputOuterContext =
 function (options) {
-  var c = Utility.normalizeContext(options.hash, "afFieldInput");
+  var c = Utility.normalizeContext(options.hash, "afFieldInput and afFieldSelect");
 
   var ss = c.af.ss;
   var defs = c.defs;
@@ -584,7 +440,7 @@ function (options) {
   var type = getInputType(c.atts, defs, value);
 
   // Get template type
-  var templateType = getInputTemplateType(c.atts, type, schemaType, expectsArray);
+  var templateType = getInputTemplateType(c.atts, type, schemaType, expectsArray, defs, ss);
 
   return {
     defs: defs,
@@ -593,13 +449,32 @@ function (options) {
     type: type,
     value: value,
     expectsArray: expectsArray,
-    templateType: templateType
+    templateType: templateType,
+    submitType: c.af.submitType,
+    af: c.af
   };
 };
 
 Template.afFieldInput.inputContext = function (options) {
-  var c = ((options || {}).hash || {}).outerContext;
-  return getInputData(c.defs, c.atts, c.value, c.type, c.ss.label(c.atts.name), c.expectsArray);
+  var ctx = ((options || {}).hash || {});
+  var c = ctx.outerContext;
+  var iData = getInputData(c.defs, c.atts, c.value, c.type, c.ss.label(c.atts.name), c.expectsArray, c.submitType, c.af);
+  return _.extend({_af: c.af}, iData);
+};
+
+/*
+ * afFieldSelect
+ */
+
+UI.registerHelper('afFieldSelect', function afFieldSelectHelper() {
+  throw new Error('Use the new syntax {{> afFieldSelect name="name"}} rather than {{afFieldSelect "name"}}');
+});
+
+Template.afFieldSelect.inputContext = function afFieldSelectInputContext(options) {
+  var ctx = ((options || {}).hash || {});
+  var c = ctx.outerContext;
+  var iData = getInputData(c.defs, c.atts, c.value, "select", c.ss.label(c.atts.name), c.expectsArray, c.submitType, c.af);
+  return _.extend({_af: c.af, contentBlock: ctx.contentBlock}, iData);
 };
 
 /*
@@ -635,8 +510,7 @@ Template.afArrayField.innerContext = function (options) {
   arrayTracker.initField(formId, name, ss, docCount, fieldMinCount, fieldMaxCount);
 
   return {
-    name: name,
-    label: ss.label(name),
+    atts: c.atts,
     autoform: c.afc
   };
 };
@@ -648,43 +522,6 @@ Template.afArrayField.innerContext = function (options) {
 UI.registerHelper('afObjectField', function afObjectFieldHelper() {
   throw new Error('Use the syntax {{> afObjectField name="name"}} rather than {{afObjectField "name"}}');
 });
-
-Template.afObjectField.innerContext = function (options) {
-  var c = Utility.normalizeContext(options.hash, "afObjectField");
-  var name = c.atts.name;
-  var ss = c.af.ss;
-
-  // Get list of field names that are descendants of this field's name
-  var fields = autoFormChildKeys(ss, name);
-
-  // Tack child field name on to end of parent field name. This
-  // ensures that we keep the desired array index for array items.
-  fields = _.map(fields, function (field) {
-    return name + "." + field;
-  });
-
-  // Get rid of nested fields specified in omitFields
-  if(typeof c.afc.omitFields !== "undefined"){
-    var omitFields = stringToArray(c.afc.omitFields);
-    fields = _.reject(fields,function(f){
-       return _.contains(omitFields,SimpleSchema._makeGeneric(f))
-    });
-  }
-  var formFields = quickFieldFormFields(fields, c.af);
-
-  return {
-    fields: formFields,
-    label: ss.label(name)
-  };
-};
-
-function stringToArray(s){
-  if (typeof s === "string") {
-    return s.replace(/ /g, '').split(',');
-  }else{
-    return s;
-  }
-};
 
 /*
  * afQuickField
@@ -751,8 +588,11 @@ Template.afQuickField.isGroup = function afQuickFieldIsGroup(options) {
 
 Template.afQuickField.isFieldArray = function afQuickFieldIsFieldArray(options) {
   var c = Utility.normalizeContext(options.hash, "afQuickField");
+
+  var options = checkOptions(c.atts.options, c.defs, c.af.ss, c.atts.name);
+
   // Render an array of fields if we expect an Array and we don't have options
-  return (c.defs.type === Array && !c.atts.options);
+  return (c.defs.type === Array && !options);
 };
 
 /*
@@ -918,17 +758,15 @@ function getInputValue(name, value, mDoc, expectsArray, defaultValue) {
   return value;
 }
 
-function getInputData(defs, hash, value, type, label, expectsArray) {
+function getInputData(defs, hash, value, type, label, expectsArray, submitType, _af) {
   var schemaType = defs.type;
 
   // We don't want to alter the original hash, so we clone it and
   // remove some stuff that should not be HTML attributes
   // XXX It would be better to use a whitelist of allowed attributes
   var inputAtts = _.omit(hash,
-          "name",
           "autoform",
           "value",
-          "data-schema-key",
           "firstOption",
           "radio",
           "select",
@@ -942,6 +780,13 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
   // Add required to every type of element, if required
   if (typeof inputAtts.required === "undefined" && !defs.optional) {
     inputAtts.required = "";
+  }
+
+  // Add disabled or readonly if the form has that submit type
+  if (submitType === "disabled") {
+    inputAtts.disabled = "";
+  } else if (submitType === "readonly") {
+    inputAtts.readonly = "";
   }
 
   var min = (typeof defs.min === "function") ? defs.min() : defs.min;
@@ -972,6 +817,8 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
   var trueLabel = hash.trueLabel;
   var falseLabel = hash.falseLabel;
   var selectOptions = hash.options;
+
+  selectOptions = checkOptions(selectOptions, defs, _af.ss, hash.name);
 
   // Handle options="allowed"
   if (selectOptions === "allowed") {
@@ -1009,13 +856,13 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
     }
   });
 
+  // Add data-schema-key to every type of element
+  inputAtts['data-schema-key'] = inputAtts['name'];
+
   // Determine what options to use
   var data = {};
 
-  // Add name to every type of element
-  // XXX Could probably leave name in inputAtts and simplify all templates
-  data.name = hash.name;
-
+  data.name = inputAtts['name'];
   data.expectsArray = expectsArray;
 
   if (selectOptions) {
@@ -1025,6 +872,28 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
     if (noselect && expectsArray) {
       inputAtts["class"] = (inputAtts["class"] || "") + " autoform-array-item";
     }
+    // If rendering a select element
+    if (!noselect) {
+      inputAtts.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
+      if (expectsArray) {
+        inputAtts.multiple = "";
+      }
+      // If a firstOption was provided, add that to the items list first
+      if (firstOption && !expectsArray) {
+        data.items.push({
+          name: data.name,
+          label: firstOption,
+          value: "",
+          // _id must be included because it is a special property that
+          // #each uses to track unique list items when adding and removing them
+          // See https://github.com/meteor/meteor/issues/2174
+          _id: "",
+          selected: false,
+          atts: inputAtts
+        });
+      }
+    }
+    // Add all defined options
     _.each(selectOptions, function(opt) {
       var selected = expectsArray ? _.contains(value, opt.value.toString()) : (opt.value.toString() === value.toString());
       data.items.push({
@@ -1035,74 +904,61 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
         // #each uses to track unique list items when adding and removing them
         // See https://github.com/meteor/meteor/issues/2174
         _id: opt.value,
-        checked: selected ? "checked" : "",
-        selected: selected ? "selected" : "",
+        selected: selected,
         atts: inputAtts
       });
     });
-    if (!noselect) {
-      inputAtts.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
-      if (expectsArray) {
-        inputAtts.multiple = "";
-      }
-      data.firstOption = (firstOption && !expectsArray) ? firstOption : "";
-      // XXX should rework all templates to extend class attr rather than
-      // using separate cls
-      data.cls = inputAtts["class"] || "";
-      inputAtts = _.omit(inputAtts, "class");
-      data.atts = inputAtts;
-    }
   } else if (type === "textarea") {
     if (typeof inputAtts.maxlength === "undefined" && typeof max === "number") {
       inputAtts.maxlength = max;
     }
-    data.cls = inputAtts["class"] || "";
-    inputAtts = _.omit(inputAtts, "class");
-    data.atts = inputAtts;
     data.value = value;
   } else if (type === "contenteditable") {
     if (typeof inputAtts['data-maxlength'] === "undefined" && typeof max === "number") {
       inputAtts['data-maxlength'] = max;
     }
-    data.atts = inputAtts;
     data.value = value;
   } else if (type === "boolean") {
     value = (value === "true") ? true : false;
-    var items = [
-      {
-        name: data.name,
-        value: "false",
-        checked: !value ? "checked" : "",
-        selected: !value ? "selected" : "",
-        label: falseLabel
-      },
-      {
-        name: data.name,
-        value: "true",
-        checked: value ? "checked" : "",
-        selected: value ? "selected" : "",
-        label: trueLabel
-      }
-    ];
+
     // add autoform-boolean class, which we use when building object
     // from form values later
     inputAtts["class"] = (inputAtts["class"] || "") + " autoform-boolean";
-    if (radio) {
-      data.items = items;
-      data.items[0].atts = inputAtts;
-      data.items[1].atts = inputAtts;
-    } else if (select) {
-      data.items = items;
-      data.cls = inputAtts["class"];
-      inputAtts = _.omit(inputAtts, "class");
-      data.atts = inputAtts;
+
+    function getItems() {
+      return [
+        {
+          name: data.name,
+          value: "false",
+          // _id must be included because it is a special property that
+          // #each uses to track unique list items when adding and removing them
+          // See https://github.com/meteor/meteor/issues/2174
+          _id: "false",
+          selected: !value,
+          label: falseLabel,
+          atts: inputAtts
+        },
+        {
+          name: data.name,
+          value: "true",
+          // _id must be included because it is a special property that
+          // #each uses to track unique list items when adding and removing them
+          // See https://github.com/meteor/meteor/issues/2174
+          _id: "true",
+          selected: value,
+          label: trueLabel,
+          atts: inputAtts
+        }
+      ];
+    }
+    
+    if (radio || select) {
+      data.items = getItems();
     } else {
-      //don't add required attribute to this one because some browsers assume that to mean that it must be checked, which is not what we mean by "required"
+      //don't add required attribute to checkboxes because some browsers assume that to mean that it must be checked, which is not what we mean by "required"
       delete inputAtts.required;
-      data.label = label;
       data.value = "true";
-      data.checked = value ? "checked" : "";
-      data.atts = inputAtts;
+      data.selected = value;
     }
   } else {
     // All other input types
@@ -1153,10 +1009,10 @@ function getInputData(defs, hash, value, type, label, expectsArray) {
 
     data.type = type;
     data.value = value;
-    data.cls = inputAtts["class"] || "";
-    inputAtts = _.omit(inputAtts, "class");
-    data.atts = inputAtts;
   }
+
+  // We set this one down here because some of the code paths above alter inputAtts
+  data.atts = inputAtts;
 
   return data;
 }
@@ -1185,12 +1041,12 @@ function getInputType(hash, defs, value) {
   return type;
 }
 
-function getInputTemplateType(atts, type, schemaType, expectsArray) {
+function getInputTemplateType(atts, type, schemaType, expectsArray, defs, ss) {
   // Extract settings from attributes
   var radio = atts.radio;
   var select = atts.select;
   var noselect = atts.noselect;
-  var selectOptions = atts.options;
+  var selectOptions = checkOptions(atts.options, defs, ss, atts.name);
 
   // Determine which template to render
   var templateType;
@@ -1220,8 +1076,23 @@ function getInputTemplateType(atts, type, schemaType, expectsArray) {
     // All other input types
     templateType = "afInput";
   }
-
+  
   return templateType;
+}
+
+function checkOptions(options, defs, ss, name) {
+  // For an array field, the allowedValues are set
+  // on the array item schema definition.
+  if (defs.type === Array) {
+    defs = ss.schema(name + ".$");
+  }
+  // We handle silent stripping of `options="allowed"` if there
+  // are no allowedValues defined because that allows templates
+  // to set that without knowing whether there are any.
+  if (options === "allowed" && !_.isArray(defs.allowedValues)) {
+    return; // options should be undefined
+  }
+  return options;
 }
 
 function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {

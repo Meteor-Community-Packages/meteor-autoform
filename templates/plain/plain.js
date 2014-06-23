@@ -16,10 +16,33 @@ Template['afDeleteButton_plain'].atts = function plDeleteButtonAtts() {
 };
 
 Template['quickForm_plain'].submitButtonAtts = function plQuickFormSubmitButtonAtts() {
-  var context = this;
+  var qfAtts = this.atts;
   var atts = {type: "submit"};
-  if (typeof context.buttonClasses === "string") {
-    atts['class'] = context.buttonClasses;
+  if (typeof qfAtts.buttonClasses === "string") {
+    atts['class'] = qfAtts.buttonClasses;
+  }
+  return atts;
+};
+
+Template['quickForm_plain'].qfNeedsButton = function plQuickFormNeedsButton() {
+  var submitType = this._af.submitType;
+  return (submitType !== "readonly" && submitType !== "disabled");
+};
+
+Template["afCheckbox_plain"].atts = 
+Template["afRadio_plain"].atts = function () {
+  var atts = _.clone(this.atts);
+  atts.checked = this.selected;
+  return atts;
+};
+
+Template["afSelect_plain"].optionAtts = function () {
+  var item = this
+  var atts = {
+    value: item.value
+  };
+  if (item.selected) {
+    atts.selected = "";
   }
   return atts;
 };

@@ -69,11 +69,68 @@ UI.registerHelper('afFieldValueContains', function autoFormFieldValueContains(op
 });
 
 /*
- * afFirstLevelFields
+ * afFieldLabelText
  */
-UI.registerHelper("afFirstLevelFields", function autoFormFirstLevelFields(options) {
-  options = parseOptions(options, this, 'afFirstLevelFields');
-  console.log(options);
+UI.registerHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
+  options = parseOptions(options, this, 'afFieldLabelText');
+
+  return options.ss.label(options.name);
+});
+
+/*
+ * afFieldNames
+ */
+UI.registerHelper("afFieldNames", function autoFormFieldNames(options) {
+  options = parseOptions(options, this, 'afFieldNames');
+  var ss = options.ss;
+  var name = options.name;
+
+  // Get the list of fields we want included
+  var fieldList = options.fields;
+  if (fieldList) {
+    fieldList = Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
+  } else if (name) {
+    // If we weren't given a fieldList but were given a field name, use subfields by default
+    
+    // Get list of field names that are descendants of this field's name
+    fieldList = autoFormChildKeys(ss, name);
+
+    // Tack child field name on to end of parent field name. This
+    // ensures that we keep the desired array index for array items.
+    fieldList = _.map(fieldList, function (field) {
+      return name + "." + field;
+    });
+  } else {
+    // If we weren't given a fieldList or a field name, use all first level schema keys by default
+    fieldList = ss.firstLevelSchemaKeys() || [];
+  }
+
+  // If user wants to omit some fields, remove those from the array
+  var omitFields = options.omitFields;
+  if (omitFields) {
+    omitFields = Utility.stringToArray(omitFields, 'AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
+    fieldList = _.difference(fieldList, omitFields);
+  }
+
+  // Filter out fields we never want
+  fieldList = _.filter(fieldList, function shouldIncludeField(field) {
+    var fieldDefs = ss.schema(field);
+
+    // Don't include fields with denyInsert=true when it's an insert form
+    if (fieldDefs.denyInsert && afContext.submitType === "insert")
+      return false;
+
+    // Don't include fields with denyUpdate=true when it's an update form
+    if (fieldDefs.denyUpdate && afContext.submitType === "update")
+      return false;
+
+    return true;
+  });
+
+  // Ensure fields are not added more than once
+  fieldList = _.unique(fieldList);
+
+  return fieldList;
 });
 
 /*
@@ -82,12 +139,13 @@ UI.registerHelper("afFirstLevelFields", function autoFormFirstLevelFields(option
 
 function parseOptions(options, self, helperName) {
   var hash = (options || {}).hash || {};
-  var afContext = hash.autoform && hash.autoform._af || self && self._af;
+  // Find the autoform context
+  var afContext = hash.autoform && hash.autoform._af || self && self._af || self && self.autoform && self.autoform._af;
   var ss = afContext.ss;
   if (!ss) {
     throw new Error(helperName + " helper must be used within an autoForm block");
   }
 
-  Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
+  hash.name && Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
   return _.extend({}, afContext, hash);
 }

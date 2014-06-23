@@ -29,11 +29,51 @@ Template['afDeleteButton_bootstrap3'].atts = function bsDeleteButtonAtts() {
 };
 
 Template['quickForm_bootstrap3'].submitButtonAtts = function bsQuickFormSubmitButtonAtts() {
-  var context = this;
+  var qfAtts = this.atts;
   var atts = {type: "submit"};
   atts['class'] = 'btn btn-primary';
-  if (typeof context.buttonClasses === "string") {
-    atts['class'] += ' ' + context.buttonClasses;
+  if (typeof qfAtts.buttonClasses === "string") {
+    atts['class'] += ' ' + qfAtts.buttonClasses;
+  }
+  return atts;
+};
+
+Template['quickForm_bootstrap3'].qfNeedsButton = function bsQuickFormNeedsButton() {
+  var submitType = this._af.submitType;
+  return (submitType !== "readonly" && submitType !== "disabled");
+};
+
+function addFormControlAtts() {
+  var atts = _.clone(this.atts);
+  if (typeof atts["class"] === "string") {
+    atts["class"] += " form-control";
+  } else {
+    atts["class"] = "form-control";
+  }
+  return atts;
+}
+
+Template["afFieldSelect_bootstrap3"].atts = addFormControlAtts;
+Template["afSelect_bootstrap3"].atts = addFormControlAtts;
+Template["afTextarea_bootstrap3"].atts = addFormControlAtts;
+Template["afInput_bootstrap3"].atts = addFormControlAtts;
+
+Template["afCheckbox_bootstrap3"].atts = 
+Template["afRadio_bootstrap3"].atts = function () {
+  var atts = _.clone(this.atts);
+  if (this.selected) {
+    atts.checked = "";
+  }
+  return atts;
+};
+
+Template["afSelect_bootstrap3"].optionAtts = function () {
+  var item = this
+  var atts = {
+    value: item.value
+  };
+  if (item.selected) {
+    atts.selected = "";
   }
   return atts;
 };
