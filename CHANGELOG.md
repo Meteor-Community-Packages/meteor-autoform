@@ -6,6 +6,13 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.13.0
+
+* Many changes that simplify custom template creation. **If you have created custom templates, they will most likely need to be updated. Look at the revised built-in templates for guidance.**
+* Fixed bootstrap-horizontal template to work with object and array fields.
+* Added `AutoForm.validateField`. See the readme.
+* Fixed schema validation upon submission when using both a `schema` attribute and a `collection` attribute.
+
 ### 0.12.0
 
 * Added `AutoForm.inputValueHandlers` method. See [the readme](https://github.com/aldeed/meteor-autoform#making-autoform-ready-components).
