@@ -59,6 +59,11 @@
     {{> afFieldLabel afFieldLabelAtts}}
     <div class="{{rightColumnClass}}">
       <div class="panel panel-default autoform-padding-fix">
+        {{#if afFieldIsInvalid name=this.atts.name autoform=this.autoform}}
+        <div class="panel-body has-error">
+          <span class="help-block">{{{afFieldMessage name=this.atts.name autoform=this.autoform}}}</span>
+        </div>
+        {{/if}}
         <ul class="list-group">
           {{#afEachArrayItem name=this.atts.name}}
           <li class="list-group-item autoform-array-item">
