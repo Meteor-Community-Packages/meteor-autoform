@@ -311,7 +311,7 @@ Template.autoForm.events({
       if (!isValid(methodDocForValidation, false, method)) {
         return haltSubmission();
       }
-      Meteor.call(method, methodDoc, form.updateDoc, makeCallback(method, afterMethod));
+      Meteor.call(method, methodDoc, form.updateDoc, docId, makeCallback(method, afterMethod));
     }
   },
   'keyup [data-schema-key]': function autoFormKeyUpHandler(event, template) {
