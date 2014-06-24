@@ -35,9 +35,11 @@
       {{#if isFieldArray autoform=this atts=..}}
         {{> afArrayField ..}}
       {{else}}
-        {{#with getTemplate "afQuickField" ../template ../name this}}
-          {{#with innerContext autoform=.. atts=../..}}
-              {{> ..}}
+        {{#with innerContext autoform=this atts=..}}
+          {{#with getTemplate "afQuickField" ../../template ../../name ..}}
+            {{#with ..}}
+            {{> ..}}
+            {{/with}}
           {{/with}}
         {{/with}}
       {{/if}}
@@ -70,11 +72,11 @@
 <template name="afFieldInput">
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afFieldInput' .. ../.. ../../.. ../../../.. ../../../../..}}
-	  {{#with inputOuterContext autoform=this atts=..}}
-	    {{#with getTemplate this.templateType ../../template ../../name ..}}
-	      {{#with inputContext outerContext=..}}
-	        {{> ..}}
-	      {{/with}}
+	  {{#with innerContext autoform=this atts=..}}
+	    {{#with getTemplate getTemplateType ../../template ../../name ..}}
+        {{#with ..}}
+        {{> ..}}
+        {{/with}}
 	    {{/with}}
 	  {{/with}}
   {{/with}}
@@ -83,11 +85,11 @@
 <template name="afFieldSelect">
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afFieldSelect' .. ../.. ../../.. ../../../.. ../../../../..}}
-	  {{#with inputOuterContext autoform=this atts=..}}
+	  {{#with innerContext autoform=this atts=.. contentBlock=UI.contentBlock}}
 	    {{#with getTemplate "afFieldSelect" ../../template ../../name ..}}
-	      {{#with inputContext outerContext=.. contentBlock=UI.contentBlock}}
-	        {{> ..}}
-	      {{/with}}
+	      {{#with ..}}
+        {{> ..}}
+        {{/with}}
 	    {{/with}}
 	  {{/with}}
   {{/with}}

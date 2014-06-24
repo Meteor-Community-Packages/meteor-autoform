@@ -430,18 +430,37 @@ Utility = {
 
     var defs = Utility.getDefs(afContext._af.ss, atts.name); //defs will not be undefined
 
+    // For array fields, `allowedValues` is on the array item definition
+    if (defs.type === Array) {
+      var itemDefs = Utility.getDefs(afContext._af.ss, atts.name + ".$");
+      var allowedValues = itemDefs.allowedValues;
+    } else {
+      var allowedValues = defs.allowedValues;
+    }
+
+    var defaultAttributes = defs.autoform || {};
+
     // This is where we add default attributes specified in
     // defs.autoform. We don't add them for afFieldLabel.
-    if (name !== "afFieldLabel") {
+    if (name === "afFieldLabel") {
+      if (_.has(atts, "options")) {
+        delete atts.options;
+      }
+    } else {
       // If options="auto", we want to use defs.autoform.options
       // if specified and otherwise fall back to "allowed"
-      if ((defs.autoform || {}).options && atts.options === "auto")
+      if (defaultAttributes.options && atts.options === "auto")
         delete atts.options;
       // "autoform" option in the schema provides default atts
-      atts = _.extend({}, defs.autoform || {}, atts);
-    }
-    if (atts.options === "auto") {
-      atts.options = "allowed";
+      atts = _.extend({}, defaultAttributes, atts);
+      // If still set to "auto", then there were no options in defs, so we use "allowed"
+      if (atts.options === "auto") {
+        if (allowedValues) {
+          atts.options = "allowed";
+        } else {
+          delete atts.options;
+        }
+      }
     }
 
     return {

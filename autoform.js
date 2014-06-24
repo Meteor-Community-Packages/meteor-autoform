@@ -427,22 +427,23 @@ UI.registerHelper('afFieldInput', function afFieldInputHelper() {
   throw new Error('Use the new syntax {{> afFieldInput name="name"}} rather than {{afFieldInput "name"}}');
 });
 
-Template.afFieldInput.inputOuterContext =
-Template.afFieldSelect.inputOuterContext =
-function (options) {
+Template.afFieldInput.getTemplateType = function getTemplateType() {
+  return getInputTemplateType(this.type);
+};
+
+Template.afFieldSelect.innerContext =
+Template.afFieldInput.innerContext = function afFieldInputInnerContext(options) {
   var c = Utility.normalizeContext(options.hash, "afFieldInput and afFieldSelect");
+  var contentBlock = options.hash.contentBlock; // applies only to afFieldSelect
 
   var ss = c.af.ss;
   var defs = c.defs;
 
-  // Get schema type
-  var schemaType = defs.type;
   // Adjust for array fields if necessary
   var expectsArray = false;
   var defaultValue = defs.defaultValue; //make sure to use pre-adjustment defaultValue for arrays
-  if (schemaType === Array) {
+  if (defs.type === Array) {
     defs = ss.schema(c.atts.name + ".$");
-    schemaType = defs.type;
 
     //if the user overrides the type to anything,
     //then we won't be using a select box and
@@ -450,36 +451,20 @@ function (options) {
     expectsArray = !c.atts.type;
   }
 
+  // Get inputType
+  var inputType = getInputType(c.atts, defs, expectsArray);
+
   // Get input value
-  var value = getInputValue(c.atts.name, c.atts.value, c.af.mDoc, expectsArray, defaultValue);
+  var value = getInputValue(c.atts.name, c.atts, expectsArray, inputType, c.atts.value, c.af.mDoc, defaultValue);
 
   // Track field's value for reactive show/hide of other fields by value
   updateTrackedFieldValue(c.af.formId, c.atts.name, value);
-
-  // Get type
-  var type = getInputType(c.atts, defs, value);
-
-  // Get template type
-  var templateType = getInputTemplateType(c.atts, type, schemaType, expectsArray, defs, ss);
-
-  return {
-    defs: defs,
-    ss: ss,
-    atts: c.atts,
-    type: type,
-    value: value,
-    expectsArray: expectsArray,
-    templateType: templateType,
-    submitType: c.af.submitType,
-    af: c.af
-  };
-};
-
-Template.afFieldInput.inputContext = function (options) {
-  var ctx = ((options || {}).hash || {});
-  var c = ctx.outerContext;
-  var iData = getInputData(c.defs, c.atts, c.value, c.type, c.ss.label(c.atts.name), c.expectsArray, c.submitType, c.af);
-  return _.extend({_af: c.af}, iData);
+  
+  // Get input data context
+  var iData = getInputData(defs, c.atts, value, inputType, ss.label(c.atts.name), expectsArray, c.af.submitType, c.af);
+  
+  // Return input data context
+  return _.extend({_af: c.af, contentBlock: contentBlock, type: inputType}, iData);
 };
 
 /*
@@ -489,13 +474,6 @@ Template.afFieldInput.inputContext = function (options) {
 UI.registerHelper('afFieldSelect', function afFieldSelectHelper() {
   throw new Error('Use the new syntax {{> afFieldSelect name="name"}} rather than {{afFieldSelect "name"}}');
 });
-
-Template.afFieldSelect.inputContext = function afFieldSelectInputContext(options) {
-  var ctx = ((options || {}).hash || {});
-  var c = ctx.outerContext;
-  var iData = getInputData(c.defs, c.atts, c.value, "select", c.ss.label(c.atts.name), c.expectsArray, c.submitType, c.af);
-  return _.extend({_af: c.af, contentBlock: ctx.contentBlock}, iData);
-};
 
 /*
  * afDeleteButton
@@ -609,10 +587,8 @@ Template.afQuickField.isGroup = function afQuickFieldIsGroup(options) {
 Template.afQuickField.isFieldArray = function afQuickFieldIsFieldArray(options) {
   var c = Utility.normalizeContext(options.hash, "afQuickField");
 
-  var options = checkOptions(c.atts.options, c.defs, c.af.ss, c.atts.name);
-
   // Render an array of fields if we expect an Array and we don't have options
-  return (c.defs.type === Array && !options);
+  return (c.defs.type === Array && !c.atts.options);
 };
 
 /*
@@ -714,13 +690,13 @@ getFormValues = function getFormValues(template, formId, ss) {
 
 /*
  * Gets the value that should be shown/selected in the input. Returns
- * a string, an array of strings, or a Date instance. The value used,
+ * a string or an array of strings. The value used,
  * in order of preference, is one of:
  * * The `value` attribute provided
  * * The value that is set in the `doc` provided on the containing autoForm
  * * The `defaultValue` from the schema
  */
-function getInputValue(name, value, mDoc, expectsArray, defaultValue) {
+function getInputValue(name, atts, expectsArray, inputType, value, mDoc, defaultValue) {
   if (typeof value === "undefined") {
     // Get the value for this key in the current document
     if (mDoc) {
@@ -739,12 +715,23 @@ function getInputValue(name, value, mDoc, expectsArray, defaultValue) {
   // Change null or undefined to an empty string
   value = (value == null) ? '' : value;
 
-  function stringValue(val, skipDates) {
+  function stringValue(val) {
     if (val instanceof Date) {
-      if (skipDates) {
-        return val;
-      } else {
-        return Utility.dateToDateStringUTC(val);
+      //convert Dates to string value based on field inputType
+      if (value instanceof Date) {
+        if (inputType === "datetime") {
+          return Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(val);
+        } else if (inputType === "datetime-local") {
+          var offset = atts.offset || "Z";
+          // TODO switch to use timezoneId attribute instead of offset
+          return Utility.dateToNormalizedLocalDateAndTimeString(val, offset);
+        } else {
+          // This fallback will be used for type="date" as well
+          // as for select arrays, since it would not make much
+          // sense to do anything other than the date portion
+          // in select controls.
+          return Utility.dateToDateStringUTC(val);
+        }
       }
     } else if (val.toString) {
       return val.toString();
@@ -768,17 +755,14 @@ function getInputValue(name, value, mDoc, expectsArray, defaultValue) {
       return stringValue(v);
     });
   } else {
-    // We will convert dates to a string later, after we
-    // know what the field type will be.
-    // Convert everything else to a string now.
-    value = stringValue(value, true);
+    value = stringValue(value);
   }
 
-  // We return either a string, an array of strings, or an instance of Date
+  // We return either a string or an array of strings
   return value;
 }
 
-function getInputData(defs, hash, value, type, label, expectsArray, submitType, _af) {
+function getInputData(defs, hash, value, inputType, label, expectsArray, submitType, _af) {
   var schemaType = defs.type;
 
   // We don't want to alter the original hash, so we clone it and
@@ -795,6 +779,7 @@ function getInputData(defs, hash, value, type, label, expectsArray, submitType, 
           "falseLabel",
           "options",
           "offset",
+          "timezoneId",
           "template");
 
   // Add required to every type of element, if required
@@ -812,21 +797,10 @@ function getInputData(defs, hash, value, type, label, expectsArray, submitType, 
   var min = (typeof defs.min === "function") ? defs.min() : defs.min;
   var max = (typeof defs.max === "function") ? defs.max() : defs.max;
 
-  if (type === "datetime-local") {
+  if (inputType === "datetime-local") {
     // `offset` is deprecated and replaced by `timezoneId`
     inputAtts["data-offset"] = hash.offset || "Z";
     inputAtts["data-timezoneId"] = hash.timezoneId || "UTC";
-  }
-
-  //convert Date value to required string value based on field type
-  if (value instanceof Date) {
-    if (type === "date") {
-      value = Utility.dateToDateStringUTC(value);
-    } else if (type === "datetime") {
-      value = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(value);
-    } else if (type === "datetime-local") {
-      value = Utility.dateToNormalizedLocalDateAndTimeString(value, inputAtts["data-offset"]);
-    }
   }
 
   // Extract settings from hash
@@ -834,11 +808,9 @@ function getInputData(defs, hash, value, type, label, expectsArray, submitType, 
   var radio = hash.radio;
   var select = hash.select;
   var noselect = hash.noselect;
-  var trueLabel = hash.trueLabel;
-  var falseLabel = hash.falseLabel;
+  var trueLabel = hash.trueLabel || "True";
+  var falseLabel = hash.falseLabel || "False";
   var selectOptions = hash.options;
-
-  selectOptions = checkOptions(selectOptions, defs, _af.ss, hash.name);
 
   // Handle options="allowed"
   if (selectOptions === "allowed") {
@@ -850,6 +822,11 @@ function getInputData(defs, hash, value, type, label, expectsArray, submitType, 
 
       return {label: label, value: v};
     });
+  }
+  // If options are specified in the schema, they may be a function
+  // that has not yet been evaluated.
+  else if (typeof selectOptions === "function") {
+    selectOptions = selectOptions();
   }
 
   // Set placeholder to label from schema if requested
@@ -928,17 +905,17 @@ function getInputData(defs, hash, value, type, label, expectsArray, submitType, 
         atts: inputAtts
       });
     });
-  } else if (type === "textarea") {
+  } else if (inputType === "textarea") {
     if (typeof inputAtts.maxlength === "undefined" && typeof max === "number") {
       inputAtts.maxlength = max;
     }
     data.value = value;
-  } else if (type === "contenteditable") {
+  } else if (inputType === "contenteditable") {
     if (typeof inputAtts['data-maxlength'] === "undefined" && typeof max === "number") {
       inputAtts['data-maxlength'] = max;
     }
     data.value = value;
-  } else if (type === "boolean") {
+  } else if (inputType === "boolean-radios" || inputType === "boolean-select" || inputType === "boolean-checkbox") {
     value = (value === "true") ? true : false;
 
     // add autoform-boolean class, which we use when building object
@@ -972,7 +949,7 @@ function getInputData(defs, hash, value, type, label, expectsArray, submitType, 
       ];
     }
     
-    if (radio || select) {
+    if (inputType === "boolean-radios" || inputType === "boolean-select") {
       data.items = getItems();
     } else {
       //don't add required attribute to checkboxes because some browsers assume that to mean that it must be checked, which is not what we mean by "required"
@@ -981,8 +958,8 @@ function getInputData(defs, hash, value, type, label, expectsArray, submitType, 
       data.selected = value;
     }
   } else {
-    // All other input types
-    switch (type) {
+    // All other inputTypes
+    switch (inputType) {
       case "number":
         if (typeof inputAtts.max === "undefined" && typeof max === "number") {
           inputAtts.max = max;
@@ -1012,22 +989,22 @@ function getInputData(defs, hash, value, type, label, expectsArray, submitType, 
         break;
       case "datetime-local":
         if (typeof inputAtts.max === "undefined" && max instanceof Date) {
-          inputAtts.max = Utility.dateToNormalizedLocalDateAndTimeString(max, hash["data-offset"]);
+          inputAtts.max = Utility.dateToNormalizedLocalDateAndTimeString(max, inputAtts["data-offset"]);
         }
         if (typeof inputAtts.min === "undefined" && min instanceof Date) {
-          inputAtts.min = Utility.dateToNormalizedLocalDateAndTimeString(min, hash["data-offset"]);
+          inputAtts.min = Utility.dateToNormalizedLocalDateAndTimeString(min, inputAtts["data-offset"]);
         }
         break;
     }
 
     if (typeof inputAtts.maxlength === "undefined"
             && typeof max === "number"
-            && _.contains(["text", "email", "search", "password", "tel", "url"], type)
+            && _.contains(["text", "email", "search", "password", "tel", "url"], inputType)
             ) {
       inputAtts.maxlength = max;
     }
 
-    data.type = type;
+    data.type = inputType;
     data.value = value;
   }
 
@@ -1037,82 +1014,62 @@ function getInputData(defs, hash, value, type, label, expectsArray, submitType, 
   return data;
 }
 
-function getInputType(hash, defs, value) {
+function getInputType(atts, defs, expectsArray) {
   var schemaType = defs.type;
-  var valHasLineBreaks = typeof value === "string" ? (value.indexOf("\n") !== -1) : false;
   var max = (typeof defs.max === "function") ? defs.max() : defs.max;
 
   var type = "text";
-  if (hash.type) {
-    type = hash.type;
+  if (atts.type) {
+    type = atts.type;
+  } else if (atts.options) {
+    if (atts.noselect) {
+      if (expectsArray) {
+        type = "select-checkbox";
+      } else {
+        type = "select-radio";
+      }
+    } else {
+      type = "select";
+    }
   } else if (schemaType === String && defs.regEx === SimpleSchema.RegEx.Email) {
     type = "email";
   } else if (schemaType === String && defs.regEx === SimpleSchema.RegEx.Url) {
     type = "url";
-  } else if (schemaType === String && (hash.rows || valHasLineBreaks || max >= 150)) {
+  } else if (schemaType === String && (atts.rows || max >= 150)) {
     type = "textarea";
   } else if (schemaType === Number) {
     type = "number";
   } else if (schemaType === Date) {
     type = "date";
   } else if (schemaType === Boolean) {
-    type = "boolean";
+    if (atts.radio) {
+      type = "boolean-radios";
+    } else if (atts.select) {
+      type = "boolean-select";
+    } else {
+      type = "boolean-checkbox";
+    }
   }
   return type;
 }
 
-function getInputTemplateType(atts, type, schemaType, expectsArray, defs, ss) {
-  // Extract settings from attributes
-  var radio = atts.radio;
-  var select = atts.select;
-  var noselect = atts.noselect;
-  var selectOptions = checkOptions(atts.options, defs, ss, atts.name);
+function getInputTemplateType(type) {
+  // Special types
+  var typeMap = {
+    "select": "afSelect",
+    "select-checkbox": "afCheckboxGroup",
+    "select-radio": "afRadioGroup",
+    "textarea": "afTextarea",
+    "contenteditable": "afContenteditable",
+    "boolean-radios": "afRadioGroup",
+    "boolean-select": "afSelect",
+    "boolean-checkbox": "afCheckbox",
+  };
 
-  // Determine which template to render
-  var templateType;
-  if (selectOptions) {
-    if (noselect) {
-      if (expectsArray) {
-        templateType = "afCheckboxGroup";
-      } else {
-        templateType = "afRadioGroup";
-      }
-    } else {
-      templateType = "afSelect";
-    }
-  } else if (type === "textarea") {
-    templateType = "afTextarea";
-  } else if (type === "contenteditable") {
-    templateType = "afContenteditable";
-  } else if (type === "boolean") {
-    if (radio) {
-      templateType = "afRadioGroup";
-    } else if (select) {
-      templateType = "afSelect";
-    } else {
-      templateType = "afCheckbox";
-    }
-  } else {
-    // All other input types
-    templateType = "afInput";
-  }
+  // All other input types
+  var defaultTemplateType = "afInput";
   
-  return templateType;
-}
-
-function checkOptions(options, defs, ss, name) {
-  // For an array field, the allowedValues are set
-  // on the array item schema definition.
-  if (defs.type === Array) {
-    defs = ss.schema(name + ".$");
-  }
-  // We handle silent stripping of `options="allowed"` if there
-  // are no allowedValues defined because that allows templates
-  // to set that without knowing whether there are any.
-  if (options === "allowed" && !_.isArray(defs.allowedValues)) {
-    return; // options should be undefined
-  }
-  return options;
+  return typeMap[type] || defaultTemplateType;
 }
 
 function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
