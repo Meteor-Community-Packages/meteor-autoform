@@ -6,6 +6,11 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.13.1
+
+* The document `_id` is now passed as the third argument to your server method when you submit a form with `type="method"`. This, combined with the modifier in the second argument, allows you to do an `update` in your method.
+* More internal changes to simplify the code and guard against edge cases.
+
 ### 0.13.0
 
 * Many changes that simplify custom template creation. **If you have created custom templates, they will most likely need to be updated. Look at the revised built-in templates for guidance.**
