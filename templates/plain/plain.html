@@ -100,7 +100,7 @@
       {{{afFieldMessage name=this.atts.name autoform=this.autoform}}}
     </div>
     {{/if}}
-    {{#afEachArrayItem name=this.atts.name}}
+    {{#afEachArrayItem name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
     <div class="autoform-array-item">
       {{> afQuickField name=this.name label=false}}
       {{#if afArrayFieldHasMoreThanMinimum name=../atts.name autoform=../autoform minCount=../atts.minCount maxCount=../atts.maxCount}}
@@ -110,7 +110,7 @@
     {{/afEachArrayItem}}
     {{#if afArrayFieldHasLessThanMaximum name=this.atts.name autoform=this.autoform minCount=this.atts.minCount maxCount=this.atts.maxCount}}
     <div style="margin-top: 20px;">
-      <button class="autoform-add-item" data-autoform-field="{{this.atts.name}}">Add</button>
+      <button class="autoform-add-item" data-autoform-field="{{this.atts.name}}" data-autoform-minCount="{{this.atts.minCount}}" data-autoform-maxCount="{{this.atts.maxCount}}">Add</button>
     </div>
     {{/if}}
   </fieldset>

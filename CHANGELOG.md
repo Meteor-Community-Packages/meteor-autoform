@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.13.2
+
+Fix add array item button when used not within an afArrayItem template
+
 ### 0.13.1
 
 * The document `_id` is now passed as the third argument to your server method when you submit a form with `type="method"`. This, combined with the modifier in the second argument, allows you to do an `update` in your method.

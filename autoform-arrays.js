@@ -146,29 +146,34 @@ ArrayTracker.prototype.addOneToField = function atAddOneToField(formId, field, s
   if (!self.info[formId][field].array) {
   	return;
   }
-  
-  var i = self.info[formId][field].array.length;
 
-  // If this is an array of objects, collect names of object props
-  var childKeys = [];
-  if (ss.schema(field + '.$').type === Object) {
-    childKeys = autoFormChildKeys(ss, field + '.$');
+  var currentCount = self.info[formId][field].visibleCount
+  var maxCount = self.getMinMax(ss, field, overrideMinCount, overrideMaxCount).maxCount;
+
+  if (currentCount < maxCount) {
+	  var i = self.info[formId][field].array.length;
+
+	  // If this is an array of objects, collect names of object props
+	  var childKeys = [];
+	  if (ss.schema(field + '.$').type === Object) {
+	    childKeys = autoFormChildKeys(ss, field + '.$');
+	  }
+
+	  var loopCtx = {arrayFieldName: field, name: field + '.' + i, index: i, minCount: overrideMinCount, maxCount: overrideMaxCount};
+
+	  // If this is an array of objects, add child key names under loopCtx.current[childName] = fullKeyName
+	  if (childKeys.length) {
+	    loopCtx.current = {};
+	    _.each(childKeys, function (k) {
+	      loopCtx.current[k] = field + '.' + i + '.' + k;
+	    });
+	  }
+
+	  self.info[formId][field].array.push(loopCtx);
+	  self.info[formId][field].count++;
+	  self.info[formId][field].visibleCount++;
+	  self.info[formId][field].deps.changed();
   }
-
-  var loopCtx = {arrayFieldName: field, name: field + '.' + i, index: i, minCount: overrideMinCount, maxCount: overrideMaxCount};
-
-  // If this is an array of objects, add child key names under loopCtx.current[childName] = fullKeyName
-  if (childKeys.length) {
-    loopCtx.current = {};
-    _.each(childKeys, function (k) {
-      loopCtx.current[k] = field + '.' + i + '.' + k;
-    });
-  }
-
-  self.info[formId][field].array.push(loopCtx);
-  self.info[formId][field].count++;
-  self.info[formId][field].visibleCount++;
-  self.info[formId][field].deps.changed();
 };
 
 ArrayTracker.prototype.removeFromFieldAtIndex = function atRemoveFromFieldAtIndex(formId, field, index, ss, overrideMinCount, overrideMaxCount) {

@@ -370,29 +370,34 @@ Template.autoForm.events({
     }
   },
   'click .autoform-remove-item': function autoFormClickRemoveItem(event, template) {
-    var self = this;
+    var self = this; // This type of button must be used within an afEachArrayItem block, so we know the context
 
     event.preventDefault();
 
     var name = self.arrayFieldName;
+    var minCount = self.minCount; // optional, overrides schema
+    var maxCount = self.maxCount; // optional, overrides schema
     var index = self.index;
     var data = template.data;
     var formId = data && data.id || defaultFormId;
-    data = formData[formId];
+    var ss = formData[formId].ss;
 
     // remove the item we clicked
-    arrayTracker.removeFromFieldAtIndex(formId, name, index, data.ss, self.minCount, self.maxCount)
+    arrayTracker.removeFromFieldAtIndex(formId, name, index, ss, minCount, maxCount);
   },
   'click .autoform-add-item': function autoFormClickAddItem(event, template) {
-    var self = this;
-
     event.preventDefault();
 
-    var name = $(event.currentTarget).attr("data-autoform-field");
+    // We pull from data attributes because the button could be manually
+    // added anywhere, so we don't know the data context.
+    var btn = $(event.currentTarget);
+    var name = btn.attr("data-autoform-field");
+    var minCount = btn.attr("data-autoform-minCount"); // optional, overrides schema
+    var maxCount = btn.attr("data-autoform-maxCount"); // optional, overrides schema
     var data = template.data;
     var formId = data && data.id || defaultFormId;
-    data = formData[formId];
+    var ss = formData[formId].ss;
 
-    arrayTracker.addOneToField(formId, name, data.ss, self.atts.overrideMinCount, self.atts.overrideMaxCount);
+    arrayTracker.addOneToField(formId, name, ss, minCount, maxCount);
   }
 });
