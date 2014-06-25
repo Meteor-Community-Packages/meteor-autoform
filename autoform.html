@@ -113,7 +113,7 @@
     {{#with innerContext autoform=this atts=..}}
       {{#each this}}
       {{#if this.removed}}
-      <input type="hidden" name="{{this.name}}" data-schema-key="{{this.name}}" value="">
+      <input type="hidden" name="{{this.name}}" data-schema-key="{{this.name}}" data-null-value="true" value="">
       {{else}}
       {{> UI.contentBlock this}}
       {{/if}}

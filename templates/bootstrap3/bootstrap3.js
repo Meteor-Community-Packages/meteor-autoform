@@ -59,7 +59,9 @@ Template["afTextarea_bootstrap3"].atts = addFormControlAtts;
 Template["afInput_bootstrap3"].atts = addFormControlAtts;
 
 Template["afCheckbox_bootstrap3"].atts = 
-Template["afRadio_bootstrap3"].atts = function () {
+Template["afRadio_bootstrap3"].atts =
+Template["afCheckboxGroup_bootstrap3"].atts = 
+Template["afRadioGroup_bootstrap3"].atts = function () {
   var atts = _.clone(this.atts);
   if (this.selected) {
     atts.checked = "";

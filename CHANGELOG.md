@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.13.3
+
+Properly set `checked` state on check box and radio groups
+
 ### 0.13.2
 
 Fix add array item button when used not within an afArrayItem template

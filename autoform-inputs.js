@@ -78,6 +78,9 @@ defaultInputValueHandlers = {
 	'[contenteditable]': function () {
 		return this.html();
 	},
+	'[data-null-value]': function () {
+		return null;
+	},
 	'[data-schema-key]': function () {
 		// fallback
 		return this.val();

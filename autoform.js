@@ -341,7 +341,7 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
     ss: ss,
     doc: context.doc,
     mDoc: mDoc,
-    validationType: context.validation || "submitThenKeyup",
+    validationType: (typeof context.validation === "undefined" ? "submitThenKeyup" : context.validation),
     submitType: context.type,
     resetOnSuccess: context.resetOnSuccess
   }};
