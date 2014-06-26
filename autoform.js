@@ -655,7 +655,7 @@ getFieldValue = function getFieldValue(template, key) {
 };
 
 getFormValues = function getFormValues(template, formId, ss) {
-  var doc = getFieldsValues(template.$("[data-schema-key]").not("[disabled]"));
+  var doc = getFieldsValues(template.$("[data-schema-key]"));
 
   // Expand the object
   doc = Utility.expandObj(doc);
