@@ -139,6 +139,17 @@ ArrayTracker.prototype.getVisibleCount = function atGetVisibleCount(formId, fiel
 	return self.info[formId][field].visibleCount;
 };
 
+ArrayTracker.prototype.getVisibleFieldIndex = function atGetVisibleFieldIndex(formId, field, currentField) {
+	var self = this;
+	var visibleFields;
+	self.ensureField(formId, field);
+	self.info[formId][field].deps.depend();
+	visibleFields = _(self.info[formId][field].array).reject(function(item){ 
+	    return item.removed;
+	});
+	return _.indexOf(visibleFields, currentField);
+};
+
 ArrayTracker.prototype.addOneToField = function atAddOneToField(formId, field, ss, overrideMinCount, overrideMaxCount) {
   var self = this;
   self.ensureField(formId, field);
