@@ -130,6 +130,26 @@ ArrayTracker.prototype.getVisibleCount = function atGetVisibleCount(formId, fiel
 	return self.info[formId][field].visibleCount;
 };
 
+ArrayTracker.prototype.isFirstFieldlVisible = function atIsFirstFieldlVisible(formId, field, currentIndex) {
+	var self = this;
+	self.ensureField(formId, field);
+	self.info[formId][field].deps.depend();
+	var firstVisibleField = _.find(self.info[formId][field].array, function(currentField) {
+		return !currentField.removed;
+	});
+	return (firstVisibleField && firstVisibleField.index === currentIndex);
+};
+
+ArrayTracker.prototype.isLastFieldlVisible = function atIsLastFieldlVisible(formId, field, currentIndex) {
+	var self = this;
+	self.ensureField(formId, field);
+	self.info[formId][field].deps.depend();
+	var lastVisibleField = _.last(_.filter(self.info[formId][field].array, function(currentField) {
+		return !currentField.removed;
+	})); 
+	return (lastVisibleField && lastVisibleField.index === currentIndex);
+};
+
 ArrayTracker.prototype.addOneToField = function atAddOneToField(formId, field, ss, overrideMinCount, overrideMaxCount) {
   var self = this;
   self.ensureField(formId, field);

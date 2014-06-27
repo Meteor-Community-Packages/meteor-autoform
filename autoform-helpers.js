@@ -59,25 +59,19 @@ UI.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
 });
 
 /*
- * afArrayFieldIsFirst
+ * afArrayFieldIsFirstVisible
  */
-UI.registerHelper('afArrayFieldIsFirst', function autoFormArrayFieldIsFirst(options) {
-  var index;
-  options = parseOptions(options, this, 'afArrayFieldIsFirst');
-  index = arrayTracker.getVisibleFieldIndex(options.formId, options.name, options.currentField);
-  return (index === 0);
+UI.registerHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFirstVisible() {
+  var context = this;
+  return arrayTracker.isFirstFieldlVisible(context.formId, context.arrayFieldName, context.index);
 });
 
 /*
- * afArrayFieldIsLast
+ * afArrayFieldIsLastVisible
  */
-UI.registerHelper('afArrayFieldIsLast', function autoFormArrayFieldIsLast(options) {
-  var index;
-  var lastIndex;
-  options = parseOptions(options, this, 'afArrayFieldIsLast');
-  index = arrayTracker.getVisibleFieldIndex(options.formId, options.name, options.currentField);
-  lastIndex = arrayTracker.getVisibleCount(options.formId, options.name) - 1;
-  return (index === lastIndex);
+UI.registerHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLastVisible() {
+  var context = this;
+  return arrayTracker.isLastFieldlVisible(context.formId, context.arrayFieldName, context.index);
 });
 
 /*
