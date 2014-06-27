@@ -146,7 +146,7 @@ ArrayTracker.prototype.isLastFieldlVisible = function atIsLastFieldlVisible(form
 	self.info[formId][field].deps.depend();
 	var lastVisibleField = _.last(_.filter(self.info[formId][field].array, function(currentField) {
 		return !currentField.removed;
-	})); 
+	}));
 	return (lastVisibleField && lastVisibleField.index === currentIndex);
 };
 
