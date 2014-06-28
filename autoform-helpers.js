@@ -110,6 +110,10 @@ UI.registerHelper("afFieldNames", function autoFormFieldNames(options) {
   if (omitFields) {
     omitFields = Utility.stringToArray(omitFields, 'AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
     fieldList = _.difference(fieldList, omitFields);
+    // If omitFields contains generic field names (with $) we omit those too
+    fieldList = _.reject(fieldList, function (f) {
+      return _.contains(omitFields, SimpleSchema._makeGeneric(f));
+    });
   }
 
   // Filter out fields we never want

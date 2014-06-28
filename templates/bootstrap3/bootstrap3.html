@@ -1,7 +1,7 @@
 <template name="quickForm_bootstrap3">
   {{#autoForm this.qfAutoFormContext}}
     {{#each afFieldNames fields=../atts.fields omitFields=../atts.omitFields}}
-      {{> afQuickField name=this options="auto"}}
+      {{> afQuickField name=this options="auto" fields=../../atts.fields omitFields=../../atts.omitFields}}
     {{/each}}
     {{#if qfNeedsButton}}
     <div>
@@ -113,7 +113,7 @@
       <span class="help-block">{{{afFieldMessage name=this.atts.name autoform=this.autoform}}}</span>
       {{/if}}
       {{#each afFieldNames name=this.atts.name fields=this.atts.fields omitFields=this.atts.omitFields}}
-        {{> afQuickField name=this options="auto"}}
+        {{> afQuickField name=this options="auto" fields=../atts.fields omitFields=../atts.omitFields}}
       {{/each}}
     </div>
   </div>
@@ -135,7 +135,7 @@
           <button class="btn btn-primary autoform-remove-item pull-left"><span class="glyphicon glyphicon-minus"></span></button>
           {{/if}}
           <div class="media-body">
-            {{> afQuickField name=this.name label=false options="auto"}}
+            {{> afQuickField name=this.name label=false options="auto" fields=../atts.fields omitFields=../atts.omitFields}}
           </div>
         </div>
       </li>

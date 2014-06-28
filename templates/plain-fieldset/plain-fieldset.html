@@ -5,7 +5,7 @@
       <legend>{{this}}</legend>
       {{/with}}
       {{#each afFieldNames fields=../atts.fields omitFields=../atts.omitFields}}
-        {{> afQuickField name=this options="auto"}}
+        {{> afQuickField name=this options="auto" fields=../../atts.fields omitFields=../../atts.omitFields}}
       {{/each}}
     </fieldset>
     {{#if qfNeedsButton}}

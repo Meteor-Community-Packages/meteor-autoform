@@ -2,7 +2,7 @@
   {{#autoForm qfAutoFormContext}}
     {{#with qfClasses ..}}
     {{#each afFieldNames fields=../../atts.fields omitFields=../../atts.omitFields autoform=..}}
-      {{> afQuickField name=this options="auto" template="bootstrap3-horizontal" input-col-class=../inputClass label-class=../labelClass}}
+      {{> afQuickField name=this options="auto" template="bootstrap3-horizontal" input-col-class=../inputClass label-class=../labelClass fields=../../../atts.fields omitFields=../../../atts.omitFields}}
     {{/each}}
     {{/with}}
     {{#if qfNeedsButton}}
@@ -46,7 +46,7 @@
       <div class="panel panel-default autoform-padding-fix">
         <div class="panel-body">
         {{#each afFieldNames name=this.atts.name fields=this.atts.fields omitFields=this.atts.omitFields}}
-          {{> afQuickField name=this options="auto" template="bootstrap3"}}
+          {{> afQuickField name=this options="auto" fields=../atts.fields omitFields=../atts.omitFields template="bootstrap3"}}
         {{/each}}
         </div>
       </div>
