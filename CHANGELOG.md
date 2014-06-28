@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.13.5
+
+Fix error that occurs when `denyInsert` or `denyUpdate` is in form schema and `quickForm` or `afObjectField` is used.
+
 ### 0.13.4
 
 The ability to omit fields within objects and arrays from a quickForm is restored.
