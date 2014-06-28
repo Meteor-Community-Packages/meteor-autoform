@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.13.4
+
+The ability to omit fields within objects and arrays from a quickForm is restored.
+
 ### 0.13.3
 
 Properly set `checked` state on check box and radio groups
