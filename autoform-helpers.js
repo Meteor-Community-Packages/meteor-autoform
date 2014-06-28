@@ -121,11 +121,11 @@ UI.registerHelper("afFieldNames", function autoFormFieldNames(options) {
     var fieldDefs = ss.schema(field);
 
     // Don't include fields with denyInsert=true when it's an insert form
-    if (fieldDefs.denyInsert && afContext.submitType === "insert")
+    if (fieldDefs.denyInsert && options.submitType === "insert")
       return false;
 
     // Don't include fields with denyUpdate=true when it's an update form
-    if (fieldDefs.denyUpdate && afContext.submitType === "update")
+    if (fieldDefs.denyUpdate && options.submitType === "update")
       return false;
 
     return true;
