@@ -340,7 +340,7 @@ input types, such a `input`, `textarea`, etc. Here's an overview of the logic
 that is used to determine which type of input to use:
 
 * If type is `String`, `<input type="text">`.
-* If you include the `rows` attribute for a `String` type property or set a `max` value of greater than or equal to 150, a `<textarea>` is used instead of an `<input type="text">`.
+* If you include the `rows` attribute for a `String` type property or set a `max` value of greater than or equal to 150, a `<textarea>` is used instead of an `<input type="text">`. You may force the field to render as `<input type="text">` by adding `type="text"` as a parameter.
 * If type is `Number`, `<input type="number">`. You may specify the step, min, and max attributes to further restrict entry. The min and max values defined in your schema are automatically transferred to the DOM element, too.
 * If type is `Date`, `<input type="date">`. If you want `datetime` or `datetime-local` instead, specify your own `type`
 attribute when calling the helper.
