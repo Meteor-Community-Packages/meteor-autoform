@@ -63,16 +63,7 @@ ArrayTracker.prototype.initField = function atInitField(formId, field, ss, docCo
 
 	var loopArray = [];
 	for (var i = 0; i < arrayCount; i++) {
-		var loopCtx = {arrayFieldName: field, name: field + '.' + i, index: i, minCount: overrideMinCount, maxCount: overrideMaxCount};
-
-		// If this is an array of objects, add child key names under loopCtx.current[childName] = fullKeyName
-		if (childKeys.length) {
-		  loopCtx.current = {};
-		  _.each(childKeys, function (k) {
-		    loopCtx.current[k] = field + '.' + i + '.' + k;
-		  });
-		}
-
+		var loopCtx = createLoopCtx(formId, field, i, childKeys, overrideMinCount, overrideMaxCount);
 		loopArray.push(loopCtx);
 	};
 
@@ -139,6 +130,26 @@ ArrayTracker.prototype.getVisibleCount = function atGetVisibleCount(formId, fiel
 	return self.info[formId][field].visibleCount;
 };
 
+ArrayTracker.prototype.isFirstFieldlVisible = function atIsFirstFieldlVisible(formId, field, currentIndex) {
+	var self = this;
+	self.ensureField(formId, field);
+	self.info[formId][field].deps.depend();
+	var firstVisibleField = _.find(self.info[formId][field].array, function(currentField) {
+		return !currentField.removed;
+	});
+	return (firstVisibleField && firstVisibleField.index === currentIndex);
+};
+
+ArrayTracker.prototype.isLastFieldlVisible = function atIsLastFieldlVisible(formId, field, currentIndex) {
+	var self = this;
+	self.ensureField(formId, field);
+	self.info[formId][field].deps.depend();
+	var lastVisibleField = _.last(_.filter(self.info[formId][field].array, function(currentField) {
+		return !currentField.removed;
+	}));
+	return (lastVisibleField && lastVisibleField.index === currentIndex);
+};
+
 ArrayTracker.prototype.addOneToField = function atAddOneToField(formId, field, ss, overrideMinCount, overrideMaxCount) {
   var self = this;
   self.ensureField(formId, field);
@@ -159,15 +170,7 @@ ArrayTracker.prototype.addOneToField = function atAddOneToField(formId, field, s
 	    childKeys = autoFormChildKeys(ss, field + '.$');
 	  }
 
-	  var loopCtx = {arrayFieldName: field, name: field + '.' + i, index: i, minCount: overrideMinCount, maxCount: overrideMaxCount};
-
-	  // If this is an array of objects, add child key names under loopCtx.current[childName] = fullKeyName
-	  if (childKeys.length) {
-	    loopCtx.current = {};
-	    _.each(childKeys, function (k) {
-	      loopCtx.current[k] = field + '.' + i + '.' + k;
-	    });
-	  }
+	  var loopCtx = createLoopCtx(formId, field, i, childKeys, overrideMinCount, overrideMaxCount);
 
 	  self.info[formId][field].array.push(loopCtx);
 	  self.info[formId][field].count++;
@@ -213,3 +216,27 @@ autoFormChildKeys = function autoFormChildKeys(ss, name) {
   });
   return childKeys;
 };
+
+/*
+ * PRIVATE
+ */
+var createLoopCtx = function(formId, field, index, childKeys, overrideMinCount, overrideMaxCount) {
+  var loopCtx = {
+  	formId:         formId,
+  	arrayFieldName: field, 
+  	name:           field + '.' + index,
+  	index:          index, 
+  	minCount:       overrideMinCount,
+  	maxCount:       overrideMaxCount
+  };
+
+  // If this is an array of objects, add child key names under loopCtx.current[childName] = fullKeyName
+  if (childKeys.length) {
+    loopCtx.current = {};
+	_.each(childKeys, function (k) {
+	  loopCtx.current[k] = field + '.' + index + '.' + k;
+    });
+  }
+
+  return loopCtx;
+}

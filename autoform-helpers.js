@@ -59,6 +59,22 @@ UI.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
 });
 
 /*
+ * afArrayFieldIsFirstVisible
+ */
+UI.registerHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFirstVisible() {
+  var context = this;
+  return arrayTracker.isFirstFieldlVisible(context.formId, context.arrayFieldName, context.index);
+});
+
+/*
+ * afArrayFieldIsLastVisible
+ */
+UI.registerHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLastVisible() {
+  var context = this;
+  return arrayTracker.isLastFieldlVisible(context.formId, context.arrayFieldName, context.index);
+});
+
+/*
  * afFieldValueContains
  */
 UI.registerHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
