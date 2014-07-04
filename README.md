@@ -39,6 +39,8 @@ have to add to your app yourself.
 - [Objects and Arrays](#objects-and-arrays)
   - [afObjectField](#afobjectfield)
   - [afArrayField](#afarrayfield)
+  - [afEachArrayItem](#afeacharrayitem)
+  - [afArrayFieldIsFirstVisible and afArrayFieldIsLastVisible](#afarrayfieldisfirstvisible-and-afarrayfieldislastvisible)
 - [Public API](#public-api)
 - [Non-Collection Forms](#non-collection-forms)
   - [An Example Contact Form](#an-example-contact-form)
@@ -597,6 +599,14 @@ Additionally, buttons for adding and removing array items are automatically adde
 An `afArrayField` (or an `afQuickField` for an array) supports the additional attributes `minCount` and `maxCount`. Normally, by default, you cannot remove items below the schema-defined `minCount` and you cannot add items above the schema-defined `maxCount`. However, sometimes you don't want a minimum or maximum count defined in the schema, but you *do* want to limit the number of items on a certain form. To do this, use the `minCount` and `maxCount` attributes. Note, however, that you may *not* override the `minCount` to be less than the schema-defined `minCount`, and you may not override the `maxCount` to be more than the schema-defined `maxCount`.
 
 At the moment, the add and remove buttons disappear when you can't use them. This could be changed to make them disabled. You can do this yourself with a custom template, but if you have thoughts about how it should work out of the box, submit an issue to discuss.
+
+### afEachArrayItem
+
+This is a block helper that can be used to render specific content for each item in an array. It tracks the addition and removal of array item fields (or groups of fields) reactively for you. This allows you to customize the repeated array fields, remove buttons, etc. It's generally most useful within a custom `afArrayField` template. See the built-in `afArrayField` templates for example usage.
+
+### afArrayFieldIsFirstVisible and afArrayFieldIsLastVisible
+
+These helpers must be used within an `afEachArrayItem` block and will return `true` or `false` depending on whether the current item/field in the array is the first or last visible item, respectively.
 
 ## Public API
 
