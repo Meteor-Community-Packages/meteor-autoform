@@ -214,6 +214,11 @@ Template.autoForm.events({
       var methodCallback = makeCallback(method);
       Meteor.call(method, methodDoc, updateDoc, docId, methodCallback);
     }
+
+    if (isNormalSubmit) {
+      // Run endSubmit hooks (re-enabled submit button or form, etc.)
+      endSubmit(formId, template);
+    }
   },
   'keyup [data-schema-key]': function autoFormKeyUpHandler(event, template) {
     var validationType = template.data.validation || 'submitThenKeyup';
