@@ -40,6 +40,15 @@ defaultInputValueHandlers = {
 			return this.val();
 		}
 	},
+	'input.autoform-boolean[type=hidden]': function () {
+		// type overridden to hidden, but schema expects boolean
+		var val = this.val();
+		if (val === "true") {
+			return true;
+		} else if (val === "false") {
+			return false;
+		}
+	},
 	'[type=select]': function () {
 		return Utility.maybeNum(this.val());
 	},

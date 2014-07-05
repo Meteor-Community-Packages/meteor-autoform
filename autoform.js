@@ -800,6 +800,12 @@ function getInputData(defs, hash, value, inputType, label, expectsArray, submitT
           inputAtts.min = Utility.dateToNormalizedLocalDateAndTimeString(min, inputAtts["data-offset"]);
         }
         break;
+      case "hidden":
+        if (schemaType === Boolean) {
+          // add autoform-boolean class, which we use when building object
+          // from form values later
+          inputAtts["class"] = (inputAtts["class"] || "") + " autoform-boolean";
+        }
     }
 
     if (typeof inputAtts.maxlength === "undefined"
