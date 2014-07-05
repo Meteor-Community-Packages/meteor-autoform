@@ -6,6 +6,15 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.14.0
+
+* Added `afArrayFieldIsFirstVisible` and `afArrayFieldIsLastVisible` helpers. (Thanks @camelaissani!)
+* Added `AutoForm.validateForm(formId)` for validating the current data in a form without submitting it.
+* Added `AutoForm.getValidationContext(formId)`, which returns the form's SimpleSchema validation context. Use this to easily manually add validation errors, check current validity, etc.
+* BREAK: String fields with a schema `max` value of 150 or greater are no longer automatically rendered as `textarea`. To force a textarea, add a `rows` attribute either on the field or in the `autoform` object in the schema.
+* When you add `type` attribute to an `afQuickField` for an object or array field, the type is now correctly respected.
+* When you override the `type` attribute to `hidden` for a boolean field, the extracted field value is now correctly converted back to a boolean.
+
 ### 0.13.5
 
 Fix error that occurs when `denyInsert` or `denyUpdate` is in form schema and `quickForm` or `afObjectField` is used.
