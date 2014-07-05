@@ -820,7 +820,6 @@ function getInputData(defs, hash, value, inputType, label, expectsArray, submitT
 
 function getInputType(atts, defs, expectsArray) {
   var schemaType = defs.type;
-  var max = (typeof defs.max === "function") ? defs.max() : defs.max;
 
   var type = "text";
   if (atts.type) {
@@ -839,7 +838,7 @@ function getInputType(atts, defs, expectsArray) {
     type = "email";
   } else if (schemaType === String && defs.regEx === SimpleSchema.RegEx.Url) {
     type = "url";
-  } else if (schemaType === String && (atts.rows || max >= 150)) {
+  } else if (schemaType === String && atts.rows) {
     type = "textarea";
   } else if (schemaType === Number) {
     type = "number";
