@@ -1,7 +1,7 @@
 defaultFormId = "_afGenericID";
 formPreserve = new FormPreserve("autoforms");
 formData = {}; //for looking up autoform data by form ID
-var templatesById = {}; //keep a reference of autoForm templates by form `id` for AutoForm.getFormValues
+templatesById = {}; //keep a reference of autoForm templates by form `id` for AutoForm.getFormValues
 var arrayFields = {}; //track # of array fields per form
 var formValues = {}; //for reactive show/hide based on current value of a field
 var fd = new FormData();
@@ -210,26 +210,6 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(formId, fieldName) {
   return formValues[formId][fieldName]._val;
 };
 
-/**
- * @method AutoForm.validateField
- * @public
- * @param {String} formId The `id` attribute of the `autoForm` you want to validate.
- * @param {String} fieldName The name of the field within the `autoForm` you want to validate.
- * @param {Boolean} [skipEmpty=false] Set to `true` to skip validation if the field has no value. Useful for preventing `required` errors in form fields that the user has not yet filled out.
- * @return {Boolean} Is it valid?
- *
- * In addition to returning a boolean that indicates whether the field is currently valid,
- * this method causes the reactive validation messages to appear.
- */
-AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipEmpty) {
-  var template = templatesById[formId];
-  if (!template || template._notInDOM) {
-    throw new Error("validateField: There is currently no autoForm template rendered for the form with id " + formId);
-  }
-
-  return _validateField(fieldName, template, skipEmpty, false);
-};
-
 /*
  * Shared
  */
@@ -339,10 +319,11 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
     formId: formId,
     collection: collection,
     ss: ss,
-    doc: context.doc,
+    doc: context.doc || null,
     mDoc: mDoc,
-    validationType: (typeof context.validation === "undefined" ? "submitThenKeyup" : context.validation),
+    validationType: (context.validation == null ? "submitThenKeyup" : context.validation),
     submitType: context.type,
+    submitMethod: context.meteormethod,
     resetOnSuccess: context.resetOnSuccess
   }};
 
@@ -1071,78 +1052,6 @@ function getInputTemplateType(type) {
   
   return typeMap[type] || defaultTemplateType;
 }
-
-function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
-  if (!template || template._notInDOM) {
-    return; //skip validation
-  }
-
-  var context = template.data;
-  var formId = context.id || defaultFormId;
-  var ss = Utility.getSimpleSchemaFromContext(context, formId);
-
-  if (onlyIfAlreadyInvalid && ss.namedContext(formId).isValid()) {
-    return; //skip validation
-  }
-
-  // Create a document based on all the values of all the inputs on the form
-  var form = getFormValues(template, formId, ss);
-
-  // Clean and validate doc
-  if (context.type === "update") {
-    var docToValidate = form.updateDoc;
-    var isModifier = true;
-  } else {
-    var docToValidate = form.insertDoc;
-    var isModifier = false;
-  }
-
-  // Skip validation if skipEmpty is true and the field we're validating
-  // has no value.
-  if (skipEmpty && !Utility.objAffectsKey(docToValidate, key))
-    return; //skip validation
-
-  var userId = (Meteor.userId && Meteor.userId()) || null;
-
-  // getFormValues did some cleaning but didn't add auto values; add them now
-  ss.clean(docToValidate, {
-    isModifier: isModifier,
-    filter: false,
-    autoConvert: false,
-    extendAutoValueContext: {
-      userId: userId,
-      isInsert: !isModifier,
-      isUpdate: isModifier,
-      isUpsert: false,
-      isFromTrustedCode: false
-    }
-  });
-  return ss.namedContext(formId).validateOne(docToValidate, key, {
-    modifier: isModifier,
-    extendedCustomContext: {
-      userId: userId,
-      isInsert: !isModifier,
-      isUpdate: isModifier,
-      isUpsert: false,
-      isFromTrustedCode: false
-    }
-  });
-}
-
-//throttling function that calls out to _validateField
-var vok = {}, tm = {};
-validateField = function validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
-  if (vok[key] === false) {
-    Meteor.clearTimeout(tm[key]);
-    tm[key] = Meteor.setTimeout(function() {
-      vok[key] = true;
-      _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
-    }, 300);
-    return;
-  }
-  vok[key] = false;
-  _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
-};
 
 updateTrackedFieldValue = function updateTrackedFieldValue(formId, key, val) {
   formValues[formId] = formValues[formId] || {};
