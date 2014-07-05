@@ -157,6 +157,20 @@ UI.registerHelper("afFieldNames", function autoFormFieldNames(options) {
  * PRIVATE
  */
 
+UI.registerHelper('_af_findAutoForm', function afFindAutoForm(name) {
+  var afContext, i = 1;
+
+  do {
+    afContext = arguments[i];
+    i++;
+  } while (afContext && !afContext._af);
+
+  if (!afContext)
+    throw new Error(name + " must be used within an autoForm block");
+
+  return afContext;
+});
+
 function parseOptions(options, self, helperName) {
   var hash = (options || {}).hash || {};
   // Find the autoform context

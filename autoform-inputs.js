@@ -1,5 +1,3 @@
-AutoForm = AutoForm || {};
-
 // Default Handlers
 defaultInputValueHandlers = {
 	'select.autoform-boolean': function () {
@@ -85,11 +83,4 @@ defaultInputValueHandlers = {
 		// fallback
 		return this.val();
 	}
-};
-
-// Custom Handlers
-customInputValueHandlers = {};
-
-AutoForm.inputValueHandlers = function afInputValueHandlers(handlers) {
-  _.extend(customInputValueHandlers, handlers);
 };

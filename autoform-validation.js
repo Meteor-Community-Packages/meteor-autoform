@@ -1,58 +1,3 @@
-/**
- * @method AutoForm.validateField
- * @public
- * @param {String} formId The `id` attribute of the `autoForm` you want to validate.
- * @param {String} fieldName The name of the field within the `autoForm` you want to validate.
- * @param {Boolean} [skipEmpty=false] Set to `true` to skip validation if the field has no value. Useful for preventing `required` errors in form fields that the user has not yet filled out.
- * @return {Boolean} Is it valid?
- *
- * In addition to returning a boolean that indicates whether the field is currently valid,
- * this method causes the reactive validation messages to appear.
- */
-AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipEmpty) {
-  var template = templatesById[formId];
-  if (!template || template._notInDOM) {
-    throw new Error("validateField: There is currently no autoForm template rendered for the form with id " + formId);
-  }
-
-  return _validateField(fieldName, template, skipEmpty, false);
-};
-
-/**
- * @method AutoForm.validateForm
- * @public
- * @param {String} formId The `id` attribute of the `autoForm` you want to validate.
- * @return {Boolean} Is it valid?
- *
- * In addition to returning a boolean that indicates whether the form is currently valid,
- * this method causes the reactive validation messages to appear.
- */
-AutoForm.validateForm = function autoFormValidateForm(formId) {
-  var template = templatesById[formId];
-  if (!template || template._notInDOM) {
-    throw new Error("validateForm: There is currently no autoForm template rendered for the form with id " + formId);
-  }
-
-  var data = formData[formId];
-  // ss will be the schema for the `schema` attribute if present,
-  // else the schema for the collection
-  var ss = data.ss;
-
-  var results = _validateForm(formId, template);
-
-  if (
-    results.methodDocIsValid === false ||
-    results.updateDocIsValid === false ||
-    results.insertDocIsValid === false ||
-    results.submitDocIsValid === false
-    ) {
-    selectFirstInvalidField(formId, ss, template);
-    return false;
-  } else {
-    return true;
-  }
-};
-
 _validateForm = function _validateForm(formId, template) {
   // First gether necessary form details
   var data = formData[formId];
@@ -138,7 +83,7 @@ validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss) {
   });
 };
 
-function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
+_validateField = function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   if (!template || template._notInDOM) {
     return; //skip validation
   }
@@ -193,7 +138,7 @@ function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
       isFromTrustedCode: false
     }
   });
-}
+};
 
 //throttling function that calls out to _validateField
 var vok = {}, tm = {};
