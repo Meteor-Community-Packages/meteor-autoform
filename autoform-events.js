@@ -84,8 +84,7 @@ Template.autoForm.events({
     function autoFormDoResetForm() {
       if (!template._notInDOM) {
         template.find("form").reset();
-        var focusInput = template.find("[autofocus]");
-        focusInput && focusInput.focus();
+        template.$("[autofocus]").focus();
       }
     }
 
