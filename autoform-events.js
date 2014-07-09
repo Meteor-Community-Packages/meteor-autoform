@@ -292,14 +292,22 @@ Template.autoForm.events({
     arrayTracker.removeFromFieldAtIndex(formId, name, index, ss, minCount, maxCount);
   },
   'click .autoform-add-item': function autoFormClickAddItem(event, template) {
+    var self = this;
+    
     event.preventDefault();
 
-    // We pull from data attributes because the button could be manually
+    // We try to pull from data attributes because the button could be manually
     // added anywhere, so we don't know the data context.
     var btn = $(event.currentTarget);
     var name = btn.attr("data-autoform-field");
     var minCount = btn.attr("data-autoform-minCount"); // optional, overrides schema
     var maxCount = btn.attr("data-autoform-maxCount"); // optional, overrides schema
+    if (!name){
+        //if no attributes it should be in an afEachArrayItem block
+        name = self.arrayFieldName;
+        minCount = self.minCount; // optional, overrides schema
+        maxCount = self.maxCount; // optional, overrides schema
+    }
     var data = template.data;
     var formId = data && data.id || defaultFormId;
     var ss = formData[formId].ss;

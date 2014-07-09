@@ -74,6 +74,46 @@ UI.registerHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLast
   return arrayTracker.isLastFieldlVisible(context.formId, context.arrayFieldName, context.index);
 });
 
+
+/*
+ * afArrayFieldShowAdd
+ */
+UI.registerHelper('afArrayFieldShowAdd', function autoFormArrayFieldShowAdd(type) {
+  var context = this;
+  var last =  arrayTracker.isLastFieldlVisible(context.formId, context.arrayFieldName, context.index);
+  if (!last) return (type == 'btn') ? 'invisible' : '';
+  
+  var range = arrayTracker.getMinMax(formData[context.formId].ss, context.arrayFieldName, context.minCount, context.maxCount);
+  var visibleCount = arrayTracker.getVisibleCount(context.formId, context.arrayFieldName);
+  if (visibleCount < range.maxCount){
+    return '';
+  }else{
+    return (type == 'btn') ? 'disabled' : 'Max Limit Reached';
+  }
+});
+
+/*
+ * afArrayFieldShowRemove
+ */
+UI.registerHelper('afArrayFieldShowRemove', function autoFormArrayFieldShowRemove(type) {
+  var context = this;
+  var range = arrayTracker.getMinMax(formData[context.formId].ss, context.arrayFieldName, context.minCount, context.maxCount);
+  var visibleCount = arrayTracker.getVisibleCount(context.formId, context.arrayFieldName);
+  if (visibleCount > range.minCount){
+    return '';
+  }else{
+    return (type == 'btn') ? 'disabled' : 'Min Limit Reached';
+  }
+});
+
+/*
+ * afIsEmpty
+ */
+UI.registerHelper('afArrayFieldIsEmpty', function autoFormArrayFieldIsEmpty(options) {
+  options = parseOptions(options, this, 'afIsEmpty');
+  return arrayTracker.getVisibleCount(options.formId, options.name) === 0;
+});
+
 /*
  * afFieldValueContains
  */
