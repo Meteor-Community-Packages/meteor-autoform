@@ -96,3 +96,11 @@ Template["afArrayField_bootstrap3-horizontal"].afFieldLabelAtts = function () {
     "name": atts.name
   };
 };
+
+Template["afArrayFieldAddButton"].rendered = function() {
+   $('.tooltip-wrapper').tooltip({'placement': 'bottom'});
+};
+
+Template["afArrayFieldRemoveButton"].rendered = function() {
+   $('.tooltip-wrapper').tooltip({'placement': 'bottom'});
+};
