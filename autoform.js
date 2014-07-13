@@ -845,7 +845,7 @@ function getInputType(atts, defs, expectsArray) {
     type = "email";
   } else if (schemaType === String && defs.regEx === SimpleSchema.RegEx.Url) {
     type = "url";
-  } else if (schemaType === String && atts.rows) {
+  } else if (schemaType === String && (atts.rows || defs.rows) ) {
     type = "textarea";
   } else if (schemaType === Number) {
     type = "number";
