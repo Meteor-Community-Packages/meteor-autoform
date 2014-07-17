@@ -341,7 +341,8 @@ function quickFieldLabelAtts(context, autoform) {
   var labelContext = {
     name: context.name,
     template: context.template,
-    autoform: autoform
+    autoform: autoform,
+    description: context.description
   };
   _.each(context, function autoFormLabelContextEach(val, key) {
     if (key.indexOf("label-") === 0) {
@@ -730,7 +731,10 @@ function getInputData(defs, hash, value, inputType, label, expectsArray, submitT
     // add autoform-boolean class, which we use when building object
     // from form values later
     inputAtts["class"] = (inputAtts["class"] || "") + " autoform-boolean";
-
+    
+    // add description, which we can use to add extra details to the label
+    inputAtts.description = hash.description || null;
+    
     function getItems() {
       return [
         {
