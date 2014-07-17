@@ -60,22 +60,12 @@ AutoForm.hooks = function autoFormHooks(hooks, replace) {
  * @param {String} formId
  * @returns {undefined}
  *
- * Resets validation for an autoform.
+ * Resets an autoform, including resetting validation errors. The same as clicking the reset button for an autoform.
  */
 AutoForm.resetForm = function autoFormResetForm(formId) {
-  if (typeof formId !== "string") {
-    return;
-  }
-
-  formPreserve.unregisterForm(formId);
-
-  // Reset array counts
-  arrayTracker.resetForm(formId);
-
-  if (formData[formId]) {
-    formData[formId].ss && formData[formId].ss.namedContext(formId).resetValidation();
-    // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
-    // there is no need to reset validation for it. No error need be thrown.
+  var template = templatesById[formId];
+  if (template && !template._notInDOM) {
+    template.$("form")[0].reset();
   }
 };
 

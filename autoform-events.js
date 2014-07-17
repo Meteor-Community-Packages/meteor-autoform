@@ -257,14 +257,36 @@ Template.autoForm.events({
     }
   },
   'reset form': function autoFormResetHandler(event, template) {
-    var context = this;
-    var formId = context.id || defaultFormId;
-    AutoForm.resetForm(formId);
-    if (context.doc) {
-      //reload form values from doc
-      event.preventDefault();
-      template['__component__'].render();
+    var formId = this.id || defaultFormId;
+
+    formPreserve.unregisterForm(formId);
+
+    // Reset array counts
+    arrayTracker.resetForm(formId);
+
+    var fd = formData[formId];
+    if (fd) {
+      fd.ss && fd.ss.namedContext(formId).resetValidation();
+      // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
+      // there is no need to reset validation for it. No error need be thrown.
     }
+
+    //XXX We should ideally be able to call invalidateFormContext
+    // in all cases and that's it, but we need to figure out how
+    // to make Blaze forget about any changes the user made to the form
+    if (this.doc) {
+      event.preventDefault();
+      invalidateFormContext(formId);
+    } else {
+      // Update tracked field values
+      // This must be done after we allow this event handler to return
+      // because we have to let the browser reset all fields before we
+      // update their values for deps.
+      Meteor.setTimeout(function () {
+        updateAllTrackedFieldValues(formId);
+      }, 0);
+    }
+
   },
   'keydown .autoform-array-item input': function (event, template) {
     // When enter is pressed in an array item field, default behavior

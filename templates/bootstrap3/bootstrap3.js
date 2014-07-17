@@ -63,14 +63,12 @@ Template["afRadio_bootstrap3"].atts =
 Template["afCheckboxGroup_bootstrap3"].atts = 
 Template["afRadioGroup_bootstrap3"].atts = function () {
   var atts = _.clone(this.atts);
-  if (this.selected) {
-    atts.checked = "";
-  }
+  atts.checked = this.selected;
   return atts;
 };
 
 Template["afSelect_bootstrap3"].optionAtts = function () {
-  var item = this
+  var item = this;
   var atts = {
     value: item.value
   };

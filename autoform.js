@@ -3,6 +3,7 @@ formPreserve = new FormPreserve("autoforms");
 formData = {}; //for looking up autoform data by form ID
 templatesById = {}; //keep a reference of autoForm templates by form `id` for AutoForm.getFormValues
 formValues = {}; //for reactive show/hide based on current value of a field
+formDeps = {}; //for invalidating the form inner context and causing rerender
 var fd = new FormData();
 arrayTracker = new ArrayTracker();
 customInputValueHandlers = {};
@@ -239,6 +240,10 @@ Template.afFieldSelect.innerContext =
 Template.afFieldInput.innerContext = function afFieldInputInnerContext(options) {
   var c = Utility.normalizeContext(options.hash, "afFieldInput and afFieldSelect");
   var contentBlock = options.hash.contentBlock; // applies only to afFieldSelect
+
+  // Set up deps, allowing us to re-render the form
+  formDeps[c.af.formId] = formDeps[c.af.formId] || new Deps.Dependency;
+  formDeps[c.af.formId].depend();
 
   var ss = c.af.ss;
   var defs = c.defs;
@@ -891,4 +896,18 @@ updateTrackedFieldValue = function updateTrackedFieldValue(formId, key, val) {
   formValues[formId][key] = formValues[formId][key] || {_deps: new Deps.Dependency};
   formValues[formId][key]._val = val;
   formValues[formId][key]._deps.changed();
+};
+
+updateAllTrackedFieldValues = function updateAllTrackedFieldValues(formId) {
+  var template = templatesById[formId];
+  if (!template)
+    return;
+  _.each(formValues[formId], function (o, key) {
+    updateTrackedFieldValue(formId, key, getFieldValue(template, key));
+  });
+};
+
+invalidateFormContext = function invalidateFormContext(formId) {
+  formDeps[formId] = formDeps[formId] || new Deps.Dependency;
+  formDeps[formId].changed();
 };
