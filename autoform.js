@@ -266,7 +266,7 @@ Template.afFieldInput.innerContext = function afFieldInputInnerContext(options) 
   
   // Get input data context
   var iData = getInputData(defs, c.atts, value, inputType, ss.label(c.atts.name), expectsArray, c.af.submitType, c.af);
-  
+
   // Return input data context
   return _.extend({_af: c.af, contentBlock: contentBlock, type: inputType}, iData);
 };
@@ -495,7 +495,7 @@ getFormValues = function getFormValues(template, formId, ss) {
 
 /*
  * Gets the value that should be shown/selected in the input. Returns
- * a string or an array of strings. The value used,
+ * a string, a boolean, or an array of strings. The value used,
  * in order of preference, is one of:
  * * The `value` attribute provided
  * * The value that is set in the `doc` provided on the containing autoForm
@@ -563,7 +563,12 @@ function getInputValue(name, atts, expectsArray, inputType, value, mDoc, default
     value = stringValue(value);
   }
 
-  // We return either a string or an array of strings
+  // Switch to a boolean value for boolean fields
+  if (inputType === "boolean-radios" || inputType === "boolean-select" || inputType === "boolean-checkbox") {
+    value = (value === "true") ? true : false;
+  }
+
+  // We return either a string, a boolean, or an array of strings
   return value;
 }
 
@@ -721,7 +726,6 @@ function getInputData(defs, hash, value, inputType, label, expectsArray, submitT
     }
     data.value = value;
   } else if (inputType === "boolean-radios" || inputType === "boolean-select" || inputType === "boolean-checkbox") {
-    value = (value === "true") ? true : false;
 
     // add autoform-boolean class, which we use when building object
     // from form values later
