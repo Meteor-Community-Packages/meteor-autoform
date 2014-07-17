@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.14.1
+
+Fixed an issue where `afFieldValueIs` and `afFieldValueContains` helpers did not correctly recognize boolean values upon first form render.
+
 ### 0.14.0
 
 * Added `afArrayFieldIsFirstVisible` and `afArrayFieldIsLastVisible` helpers. (Thanks @camelaissani!)
