@@ -1,7 +1,7 @@
-_validateForm = function _validateForm(formId, template) {
+_validateForm = function _validateForm(formId, template, skipValidate) {
   // First gether necessary form details
   var data = formData[formId];
-  var skipValidate = (data.validationType === 'none');
+  skipValidate = skipValidate == null ? (data.validationType === 'none') : skipValidate;
   var ss = data.ss;
   // ss will be the schema for the `schema` attribute if present,
   // else the schema for the collection

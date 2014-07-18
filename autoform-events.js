@@ -48,6 +48,7 @@ Template.autoForm.events({
     // ss will be the schema for the `schema` attribute if present,
     // else the schema for the collection
     var ss = data.ss;
+    var ssIsOverride = data.ssIsOverride;
     var collection = data.collection;
     var currentDoc = data.doc;
     var docId = currentDoc ? currentDoc._id : null;
@@ -78,6 +79,14 @@ Template.autoForm.events({
       event.stopPropagation();
       // Run endSubmit hooks (re-enabled submit button or form, etc.)
       endSubmit(formId, template);
+    }
+
+    function failedValidation() {
+      selectFirstInvalidField(formId, ss, template);
+      _.each(onError, function onErrorEach(hook) {
+        hook('pre-submit validation', new Error('form failed validation'), template);
+      });
+      haltSubmission();
     }
 
     // Prep callback creator function
@@ -184,7 +193,6 @@ Template.autoForm.events({
         },
         done: function () {
           doneCount++;
-          console.log(doneCount, hookCount);
           if (doneCount === hookCount) {
             // Run endSubmit hooks (re-enabled submit button or form, etc.)
             endSubmit(formId, template);
@@ -229,19 +237,25 @@ Template.autoForm.events({
     }
 
     // Validate, which also gets form values.
-    // We do this even if inserting or updating, which have their
-    // own validation, because this validates against the form
-    // `schema` whereas insert/update validate against the `collection`
-    // schema, and they are sometimes different.
-    var results = _validateForm(formId, template);
+    // For inserts and updates, which have their
+    // own validation, we validate here only if
+    // there is a `schema` attribute on the form.
+    // Otherwise we let collection2 do the validation
+    // after before hooks have run.
+    var skipValidation;
+    if (ssIsOverride || isMethod || isNormalSubmit) {
+      skipValidation = false;
+      // For method forms when ssIsOverride, we will validate again, later, after before hooks
+      // but before calling the method, against the collection schema
+    } else {
+      skipValidation = true;
+    }
+
+    var results = _validateForm(formId, template, skipValidation);
 
     // If we failed pre-submit validation, we stop submission.
     if (results.insertDocIsValid === false) {
-      selectFirstInvalidField(formId, ss, template);
-      _.each(onError, function onErrorEach(hook) {
-        hook('pre-submit validation', new Error('form failed validation'), template);
-      });
-      return haltSubmission();
+      return failedValidation();
     }
 
     var insertDoc = results.insertDoc;
@@ -296,6 +310,15 @@ Template.autoForm.events({
       var beforeMethodHooks = Hooks.getHooks(formId, 'before', method);
       // Run "before.methodName" hooks
       doBefore(null, insertDoc, beforeMethodHooks, 'before.method hook', function (doc) {
+        // When both `schema` and `collection` are supplied, we do a
+        // second validation now, against the collection schema,
+        // before calling the method.
+        if (ssIsOverride && data.validationType !== 'none') {
+          var isValid = validateFormDoc(doc, false, formId, ss);
+          if (!isValid) {
+            return failedValidation();
+          }
+        }
         // Make callback for Meteor.call
         var methodCallback = makeCallback(method);
         // Call the method

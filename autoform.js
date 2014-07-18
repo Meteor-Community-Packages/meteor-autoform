@@ -143,6 +143,7 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
     formId: formId,
     collection: collection,
     ss: ss,
+    ssIsOverride: !!collection && !!context.schema,
     doc: context.doc || null,
     mDoc: mDoc,
     validationType: (context.validation == null ? "submitThenKeyup" : context.validation),
