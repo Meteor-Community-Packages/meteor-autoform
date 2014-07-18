@@ -74,44 +74,27 @@ UI.registerHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLast
   return arrayTracker.isLastFieldlVisible(context.formId, context.arrayFieldName, context.index);
 });
 
-
 /*
- * afArrayFieldShowAdd
- */
-UI.registerHelper('afArrayFieldShowAdd', function autoFormArrayFieldShowAdd(type) {
-  var context = this;
-  var last =  arrayTracker.isLastFieldlVisible(context.formId, context.arrayFieldName, context.index);
-  if (!last) return (type == 'btn') ? 'invisible' : '';
-  
-  var range = arrayTracker.getMinMax(formData[context.formId].ss, context.arrayFieldName, context.minCount, context.maxCount);
-  var visibleCount = arrayTracker.getVisibleCount(context.formId, context.arrayFieldName);
-  if (visibleCount < range.maxCount){
-    return '';
-  }else{
-    return (type == 'btn') ? 'disabled' : 'Max Limit Reached';
-  }
-});
-
-/*
- * afArrayFieldShowRemove
- */
-UI.registerHelper('afArrayFieldShowRemove', function autoFormArrayFieldShowRemove(type) {
-  var context = this;
-  var range = arrayTracker.getMinMax(formData[context.formId].ss, context.arrayFieldName, context.minCount, context.maxCount);
-  var visibleCount = arrayTracker.getVisibleCount(context.formId, context.arrayFieldName);
-  if (visibleCount > range.minCount){
-    return '';
-  }else{
-    return (type == 'btn') ? 'disabled' : 'Min Limit Reached';
-  }
-});
-
-/*
- * afIsEmpty
+ * afArrayFieldIsEmpty
  */
 UI.registerHelper('afArrayFieldIsEmpty', function autoFormArrayFieldIsEmpty(options) {
   options = parseOptions(options, this, 'afIsEmpty');
   return arrayTracker.getVisibleCount(options.formId, options.name) === 0;
+});
+
+/*
+ * afTextFromAttsOrDefault
+ */
+UI.registerHelper('afTextFromAttsOrDefault', function autoFormTextFromAttsOrDefault(options) {
+  if(!options.hash) 
+    throw new Error("afTextFromAttsOrDefault should be used passing 'fromAtts' and 'default' strings");
+  if(options.hash.fromAtts === false) 
+    return '';
+  if((typeof options.hash.fromAtts) === 'string')
+    return options.hash.fromAtts;
+  if((typeof options.hash.default) !== 'string')
+    throw new Error("afTextFromAttsOrDefault 'default' should be a string.");
+  return options.hash.default;
 });
 
 /*

@@ -313,5 +313,9 @@ Template.autoForm.events({
     var ss = formData[formId].ss;
 
     arrayTracker.addOneToField(formId, name, ss, minCount, maxCount);
+  },
+  'mouseenter .tooltip-wrapper' : function autoFormMouseenterAddItem(event, template) {
+    //Tried this in rendered event on template but it doesnt trigger when the temlate changes and the jquery events un-hook
+    $(event.currentTarget).tooltip({'placement': 'bottom'});
   }
 });

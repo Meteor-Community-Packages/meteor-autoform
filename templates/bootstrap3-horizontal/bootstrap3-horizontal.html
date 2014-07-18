@@ -73,10 +73,10 @@
           {{#afEachArrayItem name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
             <li class="list-group-item autoform-array-item">
               <div class="media">
-                {{> afArrayFieldAddButton}}
-                {{> afArrayFieldRemoveButton}}
+                {{> afArrayFieldAddButton_bootstrap3}}
+                {{> afArrayFieldRemoveButton_bootstrap3}}
                 <div class="media-body">
-                  {{> afQuickField name=this.name label=false}}
+                  {{> afQuickField name=this.name label=false options="auto" fields=../atts.fields omitFields=../atts.omitFields}}
                 </div>
               </div>
             </li>
@@ -84,17 +84,5 @@
         </ul>
       </div>
     </div>
-  </div>
-</template>
-
-<template name="afArrayFieldAddButton">
-  <div class="tooltip-wrapper pull-left" data-toggle="tooltip" data-title="{{afArrayFieldShowAdd 'tt'}}">
-    <button class="btn btn-primary autoform-add-item {{afArrayFieldShowAdd 'btn'}}"><span class="glyphicon glyphicon-plus"></span></button>
-  </div>
-</template>
-
-<template name="afArrayFieldRemoveButton">
-  <div class="tooltip-wrapper pull-left" data-toggle="tooltip" data-title="{{afArrayFieldShowRemove 'tt'}}">
-    <button class="btn btn-primary autoform-remove-item {{afArrayFieldShowRemove 'btn'}}"><span class="glyphicon glyphicon-minus"></span></button>
   </div>
 </template>

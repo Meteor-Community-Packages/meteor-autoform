@@ -70,7 +70,7 @@ Template["afRadioGroup_bootstrap3"].atts = function () {
 };
 
 Template["afSelect_bootstrap3"].optionAtts = function () {
-  var item = this
+  var item = this;
   var atts = {
     value: item.value
   };
