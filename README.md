@@ -893,9 +893,7 @@ hooks that run for every form that has been created and every form that ever wil
 in the app.
 * The before hooks are called just before the insert, update, remove, or method
 call. The `insert`, `update`, and `"methodName"` functions are passed the document or
-modifier as gathered from the form fields. They must return this same object,
-optionally modifying it first. Remember that whatever modifications you make
-must still pass SimpleSchema validation. *Also, this is run only on the client.
+modifier as gathered from the form fields. If necessary they can modify the document or modifier. These functions can perform asynchronous tasks if necessary. If asynchronicity is not needed, simply return the document or modifier, or return `false` to cancel submission. If you don't return anything, then you must call `this.result()` eventually and pass it either the document or modifier, or `false` to cancel submission. *This is run only on the client.
 Therefore, you should not assume that this will always run since a devious user
 could skip it.*
 * The `remove` before function is passed the ID of the document to be removed, and
@@ -919,13 +917,17 @@ the client? For that, you can specify an `onSubmit` hook.
 AutoForm.hooks({
   contactForm: {
     onSubmit: function (insertDoc, updateDoc, currentDoc) {
-      if (customHandler(insertDoc))
+      if (customHandler(insertDoc)) {
         this.resetForm();
+        this.done();
+      }
       return false;
     }
   }
 });
 ```
+
+`onSubmit` hooks are called only when your form does not have a `type` attribute.
 
 The arguments passed to your function are as follows:
 
@@ -938,20 +940,14 @@ This object has *not* been validated.
 
 And `this` provides the following:
 
+* A `done` method, which you must call when you are done with your custom client submission logic. This allows you to do asynchronous tasks if necessary.
 * A `resetForm` method, which you can call to reset the corresponding autoform
 if necessary
 * The form submit event, in `event`
 * The template, in `template`
 
-If you return false, no further submission will happen, and it is equivalent
-to calling `this.event.preventDefault()` and `this.event.stopPropagation()`.
-This allows you to use an `onSubmit` hook in combination with other
-submission methods to add pre-submit logic.
-
-Otherwise the onSubmit function acts pretty much like any other onSubmit function, except
-that insertDoc and updateDoc are validated before it is called. However, since
-this is client code, you should never assume that insertDoc is valid
-from a security perspective.
+If you return `false`, no further submission will happen, and it is equivalent
+to calling `this.event.preventDefault()` and `this.event.stopPropagation()`. If you return anything other than `false`, the browser will submit the form.
 
 If you use `autoValue` or `defaultValue` options, be aware that `insertDoc` and
 `updateDoc` will not yet have auto or default values added to them. If you're
@@ -966,6 +962,7 @@ AutoForm.hooks({
     onSubmit: function (doc) {
       PeopleSchema.clean(doc);
       console.log("People doc with auto values", doc);
+      this.done();
       return false;
     }
   }

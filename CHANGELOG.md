@@ -6,6 +6,19 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.15.0
+
+**BREAKING CHANGES TO FORM SUBMISSION AND HOOKS:**
+
+* You can no longer call a `meteormethod` in addition to performing other types of submission. Your `meteormethod` will be called only if `type="method"`.
+* `onSubmit` hooks can now perform async tasks if necessary. You must add a `this.done()` call to all of your `onSubmit` hooks. Refer to the hooks documentation in the readme.
+* `onSubmit` hooks are now called *only if* your form has no `type` attribute. If you have an `onSubmit` hook for a form, remove the `type` attribute from that form and be sure that your `onSubmit` hook returns `false`. If you were using `onSubmit` to cancel submission for an insert, update, or method form, you can do that by returning `false` from a "before" hook instead.
+
+Other non-breaking changes:
+
+* "before" hooks for insert, update, and method forms can now perform async tasks if necessary. Existing synchronous hooks do not need any changes. Refer to the hooks documentation in the readme.
+* Improved logic for form resetting, and `AutoForm.resetForm` method works better.
+
 ### 0.14.1
 
 Fixed an issue where `afFieldValueIs` and `afFieldValueContains` helpers did not correctly recognize boolean values upon first form render.
