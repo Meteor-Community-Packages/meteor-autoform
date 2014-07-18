@@ -1,60 +1,18 @@
 _validateForm = function _validateForm(formId, template) {
   // First gether necessary form details
   var data = formData[formId];
-  var isInsert = (data.submitType === "insert");
-  var isUpdate = (data.submitType === "update");
-  var isRemove = (data.submitType === "remove");
-  var method = data.submitMethod;
-  var isNormalSubmit = (!isInsert && !isUpdate && !isRemove && !method);
-  var validationType = data.validationType;
-  var skipValidate = (validationType === 'none');
+  var skipValidate = (data.validationType === 'none');
+  var ss = data.ss;
   // ss will be the schema for the `schema` attribute if present,
   // else the schema for the collection
-  var ss = data.ss;
-  var currentDoc = data.doc;
-  var docId = currentDoc ? currentDoc._id : null;
 
   // Gather all form values
   var form = getFormValues(template, formId, ss);
 
   // Perform validation
-  var result = {};
-  if (method) {
-    // For a form that calls a method, we validate the doc after running it through
-    // all before hooks for the method.
-    var beforeMethod = Hooks.getHooks(formId, 'before', method);
-    var methodDoc = doBefore(null, form.insertDoc, beforeMethod, template, 'before.method hook');
-    result.methodDoc = methodDoc;
-    result.methodDocIsValid = skipValidate || validateFormDoc(methodDoc, false, formId, ss);
-  }
+  form.insertDocIsValid = skipValidate || validateFormDoc(form.insertDoc, false, formId, ss);
 
-  if (isUpdate) {
-    // For an update form, we validate the modifier after running it through
-    // all before update hooks.
-    var beforeUpdate = Hooks.getHooks(formId, 'before', 'update');
-    var updateDoc = doBefore(docId, form.updateDoc, beforeUpdate, template, 'before.update hook');
-    result.updateDoc = updateDoc;
-    result.updateDocIsValid = skipValidate || validateFormDoc(updateDoc, true, formId, ss);
-  } else if (isInsert) {
-    // For an insert form, we validate the doc after running it through
-    // all before insert hooks.
-    var beforeInsert = Hooks.getHooks(formId, 'before', 'insert');
-    var insertDoc = doBefore(null, form.insertDoc, beforeInsert, template, 'before.insert hook');
-    result.insertDoc = insertDoc;
-    result.insertDocIsValid = skipValidate || validateFormDoc(insertDoc, false, formId, ss);
-  }
-
-  var onSubmit = Hooks.getHooks(formId, 'onSubmit');
-  if (onSubmit.length > 0 || isNormalSubmit) {
-    // onSubmit hooks receive both insert doc and update modifier, but
-    // we only need to validate the insert doc; neither go through any
-    // before hooks.
-    result.submitDoc = form.insertDoc;
-    result.submitDocIsValid = skipValidate || validateFormDoc(form.insertDoc, false, formId, ss);
-    result.submitUpdateDoc = form.updateDoc;
-  }
-
-  return result;
+  return form;
 };
 
 validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss) {
@@ -141,18 +99,32 @@ _validateField = function _validateField(key, template, skipEmpty, onlyIfAlready
 };
 
 //throttling function that calls out to _validateField
-var vok = {}, tm = {};
+var vok = {}, tm = {}, _prevent = false;
 validateField = function validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
   if (vok[key] === false) {
     Meteor.clearTimeout(tm[key]);
     tm[key] = Meteor.setTimeout(function() {
       vok[key] = true;
-      _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
+      if (!_prevent) {
+        _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
+      }
     }, 300);
     return;
   }
   vok[key] = false;
-  _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
+  if (!_prevent) {
+    _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
+  }
+};
+
+// To prevent issues with keyup validation firing right after we've
+// invalidated due to submission, we can quickly and temporarily stop
+// field validation.
+preventQueuedValidation = function preventQueuedValidation() {
+  _prevent = true;
+  Meteor.setTimeout(function() {
+    _prevent = false;
+  }, 500);
 };
 
 // Prep function to select the focus the first field with an error
@@ -168,21 +140,3 @@ selectFirstInvalidField = function selectFirstInvalidField(formId, ss, template)
   	});
   }
 };
-
-function doBefore(docId, doc, hooks, template, name) {
-  // We pass the template instance in case the hook
-  // needs the data context
-  _.each(hooks, function doBeforeHook(hook) {
-    if (hook) {
-      if (docId) {
-        doc = hook(docId, doc, template);
-      } else {
-        doc = hook(doc, template);
-      }
-      if (!_.isObject(doc)) {
-        throw new Error(name + " must return an object");
-      }
-    }
-  });
-  return doc;
-}

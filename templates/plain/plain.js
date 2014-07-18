@@ -32,7 +32,9 @@ Template['quickForm_plain'].qfNeedsButton = function plQuickFormNeedsButton() {
 Template["afCheckbox_plain"].atts = 
 Template["afRadio_plain"].atts = function () {
   var atts = _.clone(this.atts);
-  atts.checked = this.selected;
+  if (this.selected) {
+    atts.checked = "";
+  }
   return atts;
 };
 

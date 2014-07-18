@@ -58,12 +58,13 @@ AutoForm.hooks = function autoFormHooks(hooks, replace) {
  * @method AutoForm.resetForm
  * @public
  * @param {String} formId
+ * @param {TemplateInstance} [template] Looked up if not provided. Pass in for efficiency.
  * @returns {undefined}
  *
  * Resets an autoform, including resetting validation errors. The same as clicking the reset button for an autoform.
  */
-AutoForm.resetForm = function autoFormResetForm(formId) {
-  var template = templatesById[formId];
+AutoForm.resetForm = function autoFormResetForm(formId, template) {
+  template = template || templatesById[formId];
   if (template && !template._notInDOM) {
     template.$("form")[0].reset();
   }
@@ -217,12 +218,7 @@ AutoForm.validateForm = function autoFormValidateForm(formId) {
 
   var results = _validateForm(formId, template);
 
-  if (
-    results.methodDocIsValid === false ||
-    results.updateDocIsValid === false ||
-    results.insertDocIsValid === false ||
-    results.submitDocIsValid === false
-    ) {
+  if (results.insertDocIsValid === false) {
     selectFirstInvalidField(formId, ss, template);
     return false;
   } else {
