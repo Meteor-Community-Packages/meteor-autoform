@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.15.1
+
+Fix submission logic so that validation happens before insert and update "before" hooks only when there's an override schema.
+
 ### 0.15.0
 
 **BREAKING CHANGES TO FORM SUBMISSION AND HOOKS:**
