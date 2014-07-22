@@ -243,7 +243,7 @@ Template.autoForm.events({
     // Otherwise we let collection2 do the validation
     // after before hooks have run.
     var skipValidation;
-    if (ssIsOverride || isMethod || isNormalSubmit) {
+    if (data.validationType !== 'none' && (ssIsOverride || isMethod || isNormalSubmit)) {
       skipValidation = false;
       // For method forms when ssIsOverride, we will validate again, later, after before hooks
       // but before calling the method, against the collection schema
