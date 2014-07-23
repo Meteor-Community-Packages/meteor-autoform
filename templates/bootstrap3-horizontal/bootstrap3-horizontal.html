@@ -66,15 +66,15 @@
         {{/if}}
         <ul class="list-group">
           {{#if afArrayFieldIsEmpty name=this.atts.name}}
-            <li class="list-group-item autoform-array-item">
+            <li class="list-group-item">
               <button class="btn btn-primary autoform-add-item" data-autoform-field="{{this.atts.name}}" data-autoform-minCount="{{this.atts.minCount}}" data-autoform-maxCount="{{this.atts.maxCount}}"><span class="glyphicon glyphicon-plus"></span></button>
             </li>
           {{/if}}
           {{#afEachArrayItem name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
             <li class="list-group-item autoform-array-item">
               <div class="media">
-                {{> afArrayFieldAddButton_bootstrap3}}
                 {{> afArrayFieldRemoveButton_bootstrap3}}
+                {{> afArrayFieldAddButton_bootstrap3}}
                 <div class="media-body">
                   {{> afQuickField name=this.name label=false options="auto" fields=../atts.fields omitFields=../atts.omitFields}}
                 </div>

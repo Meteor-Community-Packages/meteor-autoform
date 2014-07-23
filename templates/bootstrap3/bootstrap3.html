@@ -129,16 +129,16 @@
     {{/if}}
     <ul class="list-group">
       {{#if afArrayFieldIsEmpty name=this.atts.name}}
-        <li class="list-group-item autoform-array-item">
+        <li class="list-group-item">
           <button class="btn btn-primary autoform-add-item" data-autoform-field="{{this.atts.name}}" data-autoform-minCount="{{this.atts.minCount}}" data-autoform-maxCount="{{this.atts.maxCount}}"><span class="glyphicon glyphicon-plus"></span></button>
         </li>
       {{/if}}
       {{#afEachArrayItem name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
       <li class="list-group-item autoform-array-item">
         <div class="media">
-          {{> afArrayFieldAddButton_bootstrap3}}
           {{> afArrayFieldRemoveButton_bootstrap3}}
-          <div class="media-body">
+          {{> afArrayFieldAddButton_bootstrap3}}
+          <div class="media-body" style="overflow: hidden;">
             {{> afQuickField name=this.name label=false options="auto" fields=../atts.fields omitFields=../atts.omitFields}}
           </div>
         </div>
@@ -153,16 +153,12 @@
     {{#if afArrayFieldHasLessThanMaximum name=../atts.name autoform=../autoform minCount=../atts.minCount maxCount=../atts.maxCount}}
         <button class="btn btn-primary autoform-add-item pull-left"><span class="glyphicon glyphicon-plus"></span></button>
     {{else}}
-      {{#if ../atts.removeButtons}}
-          <button class="btn btn-primary autoform-add-item invisible pull-left"><span class="glyphicon glyphicon-plus"></span></button>
-      {{else}}
+      {{#unless ../atts.removeButtons}}
         <div class="tooltip-wrapper pull-left" data-toggle="tooltip" data-title="{{afTextFromAttsOrDefault fromAtts=../atts.maxTooltipText default='Max Count Reached'}}">
           <button class="btn btn-primary autoform-add-item disabled"><span class="glyphicon glyphicon-plus"></span></button>
         </div>
-      {{/if}}
+      {{/unless}}
     {{/if}}
-  {{else}}
-      <button class="btn btn-primary autoform-add-item invisible pull-left"><span class="glyphicon glyphicon-plus"></span></button>
   {{/if}}
 </template>
 
@@ -170,12 +166,10 @@
   {{#if afArrayFieldHasMoreThanMinimum name=../atts.name autoform=../autoform minCount=../atts.minCount maxCount=../atts.maxCount}}
         <button class="btn btn-primary autoform-remove-item pull-left"><span class="glyphicon glyphicon-minus"></span></button>
   {{else}}
-    {{#if ../atts.removeButtons}}
-        <button class="btn btn-primary autoform-remove-item invisible pull-left"><span class="glyphicon glyphicon-minus"></span></button>
-    {{else}}
+    {{#unless ../atts.removeButtons}}
       <div class="tooltip-wrapper pull-left" data-toggle="tooltip" data-title="{{afTextFromAttsOrDefault fromAtts=../atts.minTooltipText default='Min Count Reached'}}">
         <button class="btn btn-primary autoform-remove-item disabled"><span class="glyphicon glyphicon-minus"></span></button>
       </div>
-    {{/if}}
+    {{/unless}}
   {{/if}}
 </template>

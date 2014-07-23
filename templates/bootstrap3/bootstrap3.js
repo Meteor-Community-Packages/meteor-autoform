@@ -79,3 +79,25 @@ Template["afSelect_bootstrap3"].optionAtts = function () {
   }
   return atts;
 };
+
+/*
+ * afTextFromAttsOrDefault
+ */
+function autoFormTextFromAttsOrDefault(options) {
+  if(!options.hash) 
+    throw new Error("afTextFromAttsOrDefault should be used passing 'fromAtts' and 'default' strings");
+  if(options.hash.fromAtts === false) 
+    return '';
+  if((typeof options.hash.fromAtts) === 'string')
+    return options.hash.fromAtts;
+  if((typeof options.hash.default) !== 'string')
+    throw new Error("afTextFromAttsOrDefault 'default' should be a string.");
+  return options.hash.default;
+};
+
+Template["afArrayFieldAddButton_bootstrap3"].helpers({
+  afTextFromAttsOrDefault: autoFormTextFromAttsOrDefault
+});
+Template["afArrayFieldRemoveButton_bootstrap3"].helpers({
+  afTextFromAttsOrDefault: autoFormTextFromAttsOrDefault
+});
