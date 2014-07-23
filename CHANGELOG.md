@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.15.3
+
+Fix to code that gathers form values so that custom object prototypes are not lost.
+
 ### 0.15.2
 
 When submitting, ensure that validation is always skipped when `validation="none"` for the form.
