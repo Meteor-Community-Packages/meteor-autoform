@@ -1,6 +1,8 @@
 if (Meteor.isClient) {
 
   Tinytest.add('AutoForm - Utility - cleanNulls', function(test) {
+    var date = new Date, oid = new Meteor.Collection.ObjectID;
+
     var cleaned = Utility.cleanNulls({
       a: void 0,
       b: undefined,
@@ -16,9 +18,13 @@ if (Meteor.isClient) {
       },
       g: {
         a: null
+      },
+      h: {
+        a: date,
+        b: oid
       }
     });
-    test.equal(cleaned, {e: "keep me", f: {e: "keep me"}});
+    test.equal(cleaned, {e: "keep me", f: {e: "keep me"}, h: { a: date, b: oid }});
   });
 
   Tinytest.add('AutoForm - Utility - reportNulls', function(test) {
