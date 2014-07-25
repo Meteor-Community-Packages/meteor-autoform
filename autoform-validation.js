@@ -1,21 +1,25 @@
-_validateForm = function _validateForm(formId, template, skipValidate) {
-  // First gether necessary form details
-  var data = formData[formId];
-  skipValidate = skipValidate == null ? (data.validationType === 'none') : skipValidate;
-  var ss = data.ss;
-  // ss will be the schema for the `schema` attribute if present,
-  // else the schema for the collection
+_validateForm = function _validateForm(formId, formDetails, formDocs, useCollectionSchema) {
+  if (formDetails.validationType === 'none')
+    return true;
 
-  // Gather all form values
-  var form = getFormValues(template, formId, ss);
-
+  // We use the schema for the `schema` attribute if present,
+  // else the schema for the collection. If there is a `schema`
+  // attribute but you want to force validation against the
+  // collection's schema instead, pass useCollectionSchema=true
+  var ss = (useCollectionSchema && formDetails.collection) ? formDetails.collection.simpleSchema() : formDetails.ss;
+  
   // Perform validation
-  form.insertDocIsValid = skipValidate || validateFormDoc(form.insertDoc, false, formId, ss);
-
-  return form;
+  if (formDetails.submitType === "update") {
+    // For a type="update" form, we validate the modifier. We don't want to throw
+    // errors about missing required fields, etc.
+    return validateFormDoc(formDocs.updateDoc, true, formId, ss);
+  } else {
+    // For any other type of form, we validate the document.
+    return validateFormDoc(formDocs.insertDoc, false, formId, ss);
+  }
 };
 
-validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss) {
+validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, key) {
   var ec = {
     userId: (Meteor.userId && Meteor.userId()) || null,
     isInsert: !isModifier,
@@ -35,10 +39,18 @@ validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss) {
   });
 
   // Validate
-  return ss.namedContext(formId).validate(docForValidation, {
-    modifier: isModifier,
-    extendedCustomContext: ec
-  });
+  // If `key` is provided, we validate that key/field only
+  if (key) {
+    return ss.namedContext(formId).validateOne(docForValidation, key, {
+      modifier: isModifier,
+      extendedCustomContext: ec
+    });
+  } else {
+    return ss.namedContext(formId).validate(docForValidation, {
+      modifier: isModifier,
+      extendedCustomContext: ec
+    });
+  }
 };
 
 _validateField = function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
@@ -48,54 +60,31 @@ _validateField = function _validateField(key, template, skipEmpty, onlyIfAlready
 
   var context = template.data;
   var formId = context.id || defaultFormId;
-  var ss = Utility.getSimpleSchemaFromContext(context, formId);
+  var formDetails = formData[formId];
+  var ss = formDetails.ss;
 
   if (onlyIfAlreadyInvalid && ss.namedContext(formId).isValid()) {
     return; //skip validation
   }
 
   // Create a document based on all the values of all the inputs on the form
-  var form = getFormValues(template, formId, ss);
+  var formDocs = getFormValues(template, formId, ss);
 
   // Clean and validate doc
-  if (context.type === "update") {
-    var docToValidate = form.updateDoc;
+  if (formDetails.submitType === "update") {
+    var docToValidate = formDocs.updateDoc;
     var isModifier = true;
   } else {
-    var docToValidate = form.insertDoc;
+    var docToValidate = formDocs.insertDoc;
     var isModifier = false;
   }
 
   // Skip validation if skipEmpty is true and the field we're validating
   // has no value.
   if (skipEmpty && !Utility.objAffectsKey(docToValidate, key))
-    return; //skip validation
+    return true; //skip validation
 
-  var userId = (Meteor.userId && Meteor.userId()) || null;
-
-  // getFormValues did some cleaning but didn't add auto values; add them now
-  ss.clean(docToValidate, {
-    isModifier: isModifier,
-    filter: false,
-    autoConvert: false,
-    extendAutoValueContext: {
-      userId: userId,
-      isInsert: !isModifier,
-      isUpdate: isModifier,
-      isUpsert: false,
-      isFromTrustedCode: false
-    }
-  });
-  return ss.namedContext(formId).validateOne(docToValidate, key, {
-    modifier: isModifier,
-    extendedCustomContext: {
-      userId: userId,
-      isInsert: !isModifier,
-      isUpdate: isModifier,
-      isUpsert: false,
-      isFromTrustedCode: false
-    }
-  });
+  return validateFormDoc(docToValidate, isModifier, formId, ss, key);
 };
 
 //throttling function that calls out to _validateField

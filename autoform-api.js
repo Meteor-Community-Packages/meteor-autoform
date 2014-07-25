@@ -216,9 +216,12 @@ AutoForm.validateForm = function autoFormValidateForm(formId) {
   // else the schema for the collection
   var ss = data.ss;
 
-  var results = _validateForm(formId, template);
+  // Gather all form values
+  var formDocs = getFormValues(template, formId, ss);
 
-  if (results.insertDocIsValid === false) {
+  var isValid = _validateForm(formId, data, formDocs);
+
+  if (isValid === false) {
     selectFirstInvalidField(formId, ss, template);
     return false;
   } else {

@@ -53,6 +53,7 @@ Template.autoForm.events({
     var currentDoc = data.doc;
     var docId = currentDoc ? currentDoc._id : null;
     var resetOnSuccess = data.resetOnSuccess;
+    var isValid;
 
     // Make sure we have a collection if we need one for the requested submit type
     if (!collection) {
@@ -83,8 +84,25 @@ Template.autoForm.events({
 
     function failedValidation() {
       selectFirstInvalidField(formId, ss, template);
+      var ec = ss.namedContext(formId);
+      var ik = ec.invalidKeys(), err;
+      if (ik) {
+        if (ik.length) {
+          // We add `message` prop to the invalidKeys.
+          // Maybe SS pkg should just add that property back in?
+          ik = _.map(ik, function (o) {
+            return _.extend({message: ec.keyErrorMessage(o.name)}, o);
+          });
+          err = new Error(ik[0].message);
+        } else {
+          err = new Error('form failed validation');
+        }
+        err.invalidKeys = ik;
+      } else {
+        err = new Error('form failed validation');
+      }
       _.each(onError, function onErrorEach(hook) {
-        hook('pre-submit validation', new Error('form failed validation'), template);
+        hook('pre-submit validation', err, template);
       });
       haltSubmission();
     }
@@ -236,30 +254,26 @@ Template.autoForm.events({
       return;
     }
 
-    // Validate, which also gets form values.
+    // Gather all form values
+    var formDocs = getFormValues(template, formId, ss);
+    var insertDoc = formDocs.insertDoc;
+    var updateDoc = formDocs.updateDoc;
+
+    // Pre-validate
     // For inserts and updates, which have their
     // own validation, we validate here only if
     // there is a `schema` attribute on the form.
     // Otherwise we let collection2 do the validation
     // after before hooks have run.
-    var skipValidation;
     if (data.validationType !== 'none' && (ssIsOverride || isMethod || isNormalSubmit)) {
-      skipValidation = false;
-      // For method forms when ssIsOverride, we will validate again, later, after before hooks
+      isValid = _validateForm(formId, data, formDocs);
+      // If we failed pre-submit validation, we stop submission.
+      if (isValid === false) {
+        return failedValidation();
+      }
+      // NOTE: For method forms when ssIsOverride, we will validate again, later, after before hooks
       // but before calling the method, against the collection schema
-    } else {
-      skipValidation = true;
     }
-
-    var results = _validateForm(formId, template, skipValidation);
-
-    // If we failed pre-submit validation, we stop submission.
-    if (results.insertDocIsValid === false) {
-      return failedValidation();
-    }
-
-    var insertDoc = results.insertDoc;
-    var updateDoc = results.updateDoc;
 
     // Run beginSubmit hooks (disable submit button or form, etc.)
     // NOTE: This needs to stay after getFormValues in case a
@@ -313,9 +327,9 @@ Template.autoForm.events({
         // When both `schema` and `collection` are supplied, we do a
         // second validation now, against the collection schema,
         // before calling the method.
-        if (ssIsOverride && data.validationType !== 'none') {
-          var isValid = validateFormDoc(doc, false, formId, ss);
-          if (!isValid) {
+        if (ssIsOverride) {
+          isValid = _validateForm(formId, data, formDocs, true);
+          if (isValid === false) {
             return failedValidation();
           }
         }
