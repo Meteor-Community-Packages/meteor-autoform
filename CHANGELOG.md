@@ -6,6 +6,11 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.15.4
+
+* Fixes to submission validation logic for forms that have both `collection` and `schema`
+* More useful `Error` instance is passed to `onError` hooks
+
 ### 0.15.3
 
 Fix to code that gathers form values so that custom object prototypes are not lost.
