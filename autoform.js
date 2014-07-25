@@ -138,6 +138,17 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
     fd.sourceDoc(formId, null);
   }
 
+  // Check autosave
+  var autosave, resetOnSuccess;
+  if (context.autosave === true && context.type === "update") {
+    // Autosave and never reset on success
+    autosave = true;
+    resetOnSuccess = false;
+  } else {
+    autosave = false;
+    resetOnSuccess = context.resetOnSuccess;
+  }
+
   // Set up the context to be used for everything within the autoform.
   var innerContext = {_af: {
     formId: formId,
@@ -149,7 +160,8 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
     validationType: (context.validation == null ? "submitThenKeyup" : context.validation),
     submitType: context.type,
     submitMethod: context.meteormethod,
-    resetOnSuccess: context.resetOnSuccess
+    resetOnSuccess: resetOnSuccess,
+    autosave: autosave
   }};
 
   // Cache context for lookup by formId

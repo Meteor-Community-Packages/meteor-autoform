@@ -363,21 +363,32 @@ Template.autoForm.events({
     }
   },
   'change form': function autoFormChangeHandler(event, template) {
+    var self = this;
+
     var key = event.target.getAttribute("data-schema-key");
     if (!key)
       return;
 
-    var formId = this.id;
+    var formId = self.id || defaultFormId;
     var data = formData[formId];
-    if (data && data.ss) {
-      var ss = data.ss;
-      formPreserve.registerForm(formId, function autoFormRegFormCallback() {
-        return getFormValues(template, formId, ss).insertDoc;
-      });
+    if (!data)
+      return;
 
-      // Get field's value for reactive show/hide of other fields by value
-      updateTrackedFieldValue(formId, key, getFieldValue(template, key));
+    // Update cached form values for hot code reload persistence
+    formPreserve.registerForm(formId, function autoFormRegFormCallback() {
+      return getFormValues(template, formId, data.ss).insertDoc;
+    });
+
+    // Update field's value for reactive show/hide of other fields by value
+    updateTrackedFieldValue(formId, key, getFieldValue(template, key));
+
+    // If the form should be auto-saved whenever updated, we do that on field
+    // changes instead of validating the field
+    if (data.autosave) {
+      $(event.currentTarget).submit();
+      return;
     }
+
     var validationType = data.validationType || 'submitThenKeyup';
     var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
     if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
