@@ -10,7 +10,7 @@ Package.on_use(function(api) {
   // Weak dependencies
   api.use(['collection2', 'reload'], ['client'], {weak: true});
   // Imply SS to make sure SimpleSchema object is available to app
-  api.imply('simple-schema', 'client');
+  api.imply('simple-schema');
   // Exports
   api.export('AutoForm', 'client');
   api.export('Utility', 'client', {testOnly: true});
