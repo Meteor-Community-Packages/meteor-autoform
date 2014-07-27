@@ -297,7 +297,15 @@ Template.autoForm.events({
         // Make callback for insert
         var insertCallback = makeCallback('insert');
         // Perform insert
-        collection.insert(doc, {validationContext: formId}, insertCallback);
+        if (typeof collection.simpleSchema === "function" && collection.simpleSchema() != null) {
+          // If the collection2 pkg is used and a schema is attached, we pass a validationContext
+          collection.insert(doc, {validationContext: formId}, insertCallback);
+        } else {
+          // If the collection2 pkg is not used or no schema is attached, we don't pass options
+          // because core Meteor's `insert` function does not accept
+          // an options argument.
+          collection.insert(doc, insertCallback);
+        }
       });
     }
 
