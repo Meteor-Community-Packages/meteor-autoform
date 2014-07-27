@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.16.1
+
+An insert form will now insert properly even if the `collection` does not have an attached schema.
+
 ### 0.16.0
 
 * Fix error when you add `autoform` to your app but not `simple-schema`.
