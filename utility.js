@@ -392,7 +392,7 @@ Utility = {
   dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString(date, offset) {
     var m = moment(date);
     m.zone(offset);
-    return m.format("YYYY-MM-DD[T]hh:mm:ss.SSS");
+    return m.format("YYYY-MM-DD[T]HH:mm:ss.SSS");
   },
   /**
    * @method  Utility.isValidNormalizedLocalDateAndTimeString
