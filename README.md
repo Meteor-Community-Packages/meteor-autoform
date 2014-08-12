@@ -54,7 +54,6 @@ have to add to your app yourself.
   - [formToDoc and docToForm](#formtodoc-and-doctoform)
 - [Complex Schemas](#complex-schemas)
 - [Complex Controls](#complex-controls)
-- [Using Block Helpers Within an AutoForm](#using-block-helpers-within-an-autoform)
 - [Dates](#dates)
   - [type=date](#type=date)
   - [type=datetime](#type=datetime)
@@ -369,7 +368,6 @@ The following attributes are recognized:
 * `name`: Required. The name of the schema key this field is for.
 * `template` (default="bootstrap3"): Specify the name of a different built-in or
 custom template to use.
-* `autoform`: Optional. Refer to "Using Block Helpers Within an AutoForm".
 * `options`: An array of objects, where each object has a `label` property
 and a `value` property. By specifying options, you cause the generated DOM
 element to be a `select` element with these options, unless you also use
@@ -443,7 +441,6 @@ The following attributes are recognized:
 * `name`: Required. The name of the schema key this field is for.
 * `template` (default="bootstrap3"): Specify the name of a different built-in or
 custom template to use.
-* `autoform`: Optional. Refer to "Using Block Helpers Within an AutoForm".
 
 ### afFieldLabel
 
@@ -456,7 +453,6 @@ The following attributes are recognized:
 * `name`: Required. The name of the schema key this label is for.
 * `template` (default="bootstrap3"): Specify the name of a different built-in or
 custom template to use.
-* `autoform`: Optional. Refer to "Using Block Helpers Within an AutoForm".
 * Any other attributes you add will be transferred to the rendered DOM element.
 
 ### afFieldMessage
@@ -1099,25 +1095,6 @@ will be an empty string, and bestTimes is required.
 NOTE: This is for illustration, but a case like this might be better accomplished
 by simply changing the schema and then adjusting the value into a string once
 the validated doc arrives on the server.
-
-## Using Block Helpers Within an AutoForm
-
-Because of the way the `{{#autoForm}}` block helper keeps track of data, if you use a block helper
-within an autoForm and that block helper changes the context (`{{#each}}` and `{{#with}}`), the `afFieldMessage` and `afFieldIsInvalid` helpers won't work correctly.
-
-To get around this issue, when you use `afFieldMessage` or `afFieldIsInvalid` within one of these "sub-blocks", you must
-provide an `autoform` attribute that supplies the autoform context, which you can get by using
-the Spacebars ".." syntax. The `autoform` attribute is *not* necessary for autoform components (anything you put a `>` before), only for the helpers.
-
-An example will be clearer:
-
-```html
-{{#autoForm collection="Books" id="myBookForm" type="insert"}}
-  {{#with objectContainingName}}
-    {{afFieldMessage name=name autoform=..}}
-  {{/with}}
-{{/autoForm}}
-```
 
 ## Dates
 

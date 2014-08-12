@@ -29,13 +29,13 @@
 <template name="afQuickField">
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afQuickField' .. ../.. ../../.. ../../../.. ../../../../..}}
-    {{#if isGroup autoform=this atts=..}}
+    {{#if isGroup atts=..}}
       {{> afObjectField ..}}
     {{else}}
-      {{#if isFieldArray autoform=this atts=..}}
+      {{#if isFieldArray atts=..}}
         {{> afArrayField ..}}
       {{else}}
-        {{#with innerContext autoform=this atts=..}}
+        {{#with innerContext atts=..}}
           {{#with getTemplate "afQuickField" ../../template ../../name ..}}
             {{#with ..}}
             {{> ..}}
@@ -51,7 +51,7 @@
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afObjectField' .. ../.. ../../.. ../../../.. ../../../../..}}
     {{#with getTemplate "afObjectField" ../template ../name this}}
-      {{#with autoform=.. atts=../..}}
+      {{#with atts=../..}}
         {{> ..}}
       {{/with}}
     {{/with}}
@@ -62,7 +62,7 @@
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afArrayField' .. ../.. ../../.. ../../../.. ../../../../..}}
     {{#with getTemplate "afArrayField" ../template ../name this}}
-      {{#with innerContext autoform=.. atts=../..}}
+      {{#with innerContext atts=../..}}
         {{> ..}}
       {{/with}}
     {{/with}}
@@ -70,28 +70,18 @@
 </template>
 
 <template name="afFieldInput">
-  {{! find autoform context up to 5 levels back}}
-  {{#with _af_findAutoForm 'afFieldInput' .. ../.. ../../.. ../../../.. ../../../../..}}
-	  {{#with innerContext autoform=this atts=..}}
-	    {{#with getTemplate getTemplateType ../../template ../../name ..}}
-        {{#with ..}}
-        {{> ..}}
-        {{/with}}
-	    {{/with}}
-	  {{/with}}
+  {{#with innerContext atts=this}}
+    {{#with afTemplateName getTemplateType}}
+      {{> UI.dynamic template=this data=..}}
+    {{/with}}
   {{/with}}
 </template>
 
 <template name="afFieldSelect">
-  {{! find autoform context up to 5 levels back}}
-  {{#with _af_findAutoForm 'afFieldSelect' .. ../.. ../../.. ../../../.. ../../../../..}}
-	  {{#with innerContext autoform=this atts=.. contentBlock=UI.contentBlock}}
-	    {{#with getTemplate "afFieldSelect" ../../template ../../name ..}}
-	      {{#with ..}}
-        {{> ..}}
-        {{/with}}
-	    {{/with}}
-	  {{/with}}
+  {{#with innerContext atts=this contentBlock=UI.contentBlock contentBlockContext=..}}
+    {{#with afTemplateName 'afFieldSelect'}}
+      {{> UI.dynamic template=this data=..}}
+    {{/with}}
   {{/with}}
 </template>
 
@@ -99,7 +89,7 @@
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afFieldLabel' .. ../.. ../../.. ../../../.. ../../../../..}}
     {{#with getTemplate "afFieldLabel" ../template ../name this}}
-      {{#with autoform=.. atts=../..}}
+      {{#with atts=../..}}
         {{> ..}}
       {{/with}}
     {{/with}}
@@ -110,7 +100,7 @@
   {{! This is a block component and doesn't render anything visible, so no customizable template is needed for this}}
   {{! find autoform context up to 5 levels back}}
   {{#with _af_findAutoForm 'afEachArrayItem' .. ../.. ../../.. ../../../.. ../../../../..}}
-    {{#with innerContext autoform=this atts=..}}
+    {{#with innerContext atts=..}}
       {{#each this}}
       {{#if this.removed}}
       <input type="hidden" name="{{this.name}}" data-schema-key="{{this.name}}" data-null-value="true" value="">

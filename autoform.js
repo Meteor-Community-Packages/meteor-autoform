@@ -52,9 +52,7 @@ deps = {
  * Shared
  */
 
-Template.afFieldInput.getTemplate =
 Template.afFieldLabel.getTemplate =
-Template.afFieldSelect.getTemplate =
 Template.afDeleteButton.getTemplate =
 Template.afQuickField.getTemplate =
 Template.afObjectField.getTemplate =
@@ -91,6 +89,41 @@ function afGenericGetTemplate(templateType, templateName, fieldName, autoform) {
   // Return the template instance that we want to use
   return result;
 };
+
+UI.registerHelper('afTemplateName', function afTemplateNameHelper(templateType) {
+  var self = this;
+  var autoform = AutoForm.find();
+  var fieldName = self.name;
+
+  // Template may be specified in schema.
+  // Skip for quickForm and afDeleteButton because they render a form
+  // and not a field.
+  if (fieldName && autoform) {
+    var defs = Utility.getDefs(autoform.ss, fieldName); //defs will not be undefined
+    templateName = templateName || (defs.autoform && defs.autoform.template);
+  }
+  
+  var defaultTemplate = AutoForm.getDefaultTemplateForType(templateType) || AutoForm.getDefaultTemplate();
+
+  // Determine template name
+  var result;
+  if (templateName) {
+    result = templateType + '_' + templateName;
+    if (!Template[result]) {
+      console.warn(templateType + ': "' + templateName + '" is not a valid template name. Falling back to default template, "' + defaultTemplate + '".');
+    }
+  }
+
+  if (!result) {
+    result = templateType + '_' + defaultTemplate;
+    if (!Template[result]) {
+      throw new Error(templateType + ': "' + defaultTemplate + '" is not a valid template name');
+    }
+  }
+
+  // Return the template instance that we want to use
+  return result;
+});
 
 /*
  * autoForm
@@ -214,10 +247,6 @@ Template.autoForm.destroyed = function autoFormDestroyed() {
  * quickForm
  */
 
-UI.registerHelper('quickForm', function quickFormHelper() {
-  throw new Error('Use the new syntax {{> quickForm}} rather than {{quickForm}}');
-});
-
 Template.quickForm.innerContext = function quickFormContext(atts) {
   // Pass along quickForm context to autoForm context, minus a few
   // properties that are specific to quickForms.
@@ -230,20 +259,8 @@ Template.quickForm.innerContext = function quickFormContext(atts) {
 };
 
 /*
- * afFieldLabel
- */
-
-UI.registerHelper('afFieldLabel', function afFieldLabelHelper() {
-  throw new Error('Use the new syntax {{> afFieldLabel name="name"}} rather than {{afFieldLabel "name"}}');
-});
-
-/*
  * afFieldInput
  */
-
-UI.registerHelper('afFieldInput', function afFieldInputHelper() {
-  throw new Error('Use the new syntax {{> afFieldInput name="name"}} rather than {{afFieldInput "name"}}');
-});
 
 Template.afFieldInput.getTemplateType = function getTemplateType() {
   return getInputTemplateType(this.type);
@@ -253,6 +270,7 @@ Template.afFieldSelect.innerContext =
 Template.afFieldInput.innerContext = function afFieldInputInnerContext(options) {
   var c = Utility.normalizeContext(options.hash, "afFieldInput and afFieldSelect");
   var contentBlock = options.hash.contentBlock; // applies only to afFieldSelect
+  var contentBlockContext = options.hash.contentBlockContext; // applies only to afFieldSelect
 
   // Set up deps, allowing us to re-render the form
   formDeps[c.af.formId] = formDeps[c.af.formId] || new Deps.Dependency;
@@ -286,24 +304,12 @@ Template.afFieldInput.innerContext = function afFieldInputInnerContext(options) 
   var iData = getInputData(defs, c.atts, value, inputType, ss.label(c.atts.name), expectsArray, c.af.submitType, c.af);
 
   // Return input data context
-  return _.extend({_af: c.af, contentBlock: contentBlock, type: inputType}, iData);
+  return _.extend({_af: c.af, contentBlock: contentBlock, contentBlockContext: contentBlockContext, type: inputType}, iData);
 };
-
-/*
- * afFieldSelect
- */
-
-UI.registerHelper('afFieldSelect', function afFieldSelectHelper() {
-  throw new Error('Use the new syntax {{> afFieldSelect name="name"}} rather than {{afFieldSelect "name"}}');
-});
 
 /*
  * afDeleteButton
  */
-
-UI.registerHelper('afDeleteButton', function afDeleteButtonHelper() {
-  throw new Error('Use the syntax {{> afDeleteButton collection=collection doc=doc}}');
-});
 
 Template.afDeleteButton.innerContext = function afDeleteButtonInnerContext(ctx, contentBlock) {
   return _.extend(ctx, {contentBlock: contentBlock});
@@ -312,10 +318,6 @@ Template.afDeleteButton.innerContext = function afDeleteButtonInnerContext(ctx, 
 /*
  * afArrayField
  */
-
-UI.registerHelper('afArrayField', function afArrayFieldHelper() {
-  throw new Error('Use the syntax {{> afArrayField name="name"}} rather than {{afArrayField "name"}}');
-});
 
 Template.afArrayField.innerContext = function (options) {
   var c = Utility.normalizeContext(options.hash, "afArrayField");
@@ -330,36 +332,22 @@ Template.afArrayField.innerContext = function (options) {
   arrayTracker.initField(formId, name, ss, docCount, fieldMinCount, fieldMaxCount);
 
   return {
-    atts: c.atts,
-    autoform: c.afc
+    atts: c.atts
   };
 };
-
-/*
- * afObjectField
- */
-
-UI.registerHelper('afObjectField', function afObjectFieldHelper() {
-  throw new Error('Use the syntax {{> afObjectField name="name"}} rather than {{afObjectField "name"}}');
-});
 
 /*
  * afQuickField
  */
 
-UI.registerHelper('afQuickField', function afQuickFieldHelper() {
-  throw new Error('Use the new syntax {{> afQuickField name="name"}} rather than {{afQuickField "name"}}');
-});
-
-function quickFieldLabelAtts(context, autoform) {
+function quickFieldLabelAtts(context) {
   // Remove unwanted props from the hash
   context = _.omit(context, 'label');
 
   // Separate label options from input options; label items begin with "label-"
   var labelContext = {
     name: context.name,
-    template: context.template,
-    autoform: autoform
+    template: context.template
   };
   _.each(context, function autoFormLabelContextEach(val, key) {
     if (key.indexOf("label-") === 0) {
@@ -370,12 +358,12 @@ function quickFieldLabelAtts(context, autoform) {
   return labelContext;
 }
 
-function quickFieldInputAtts(context, autoform) {
+function quickFieldInputAtts(context) {
   // Remove unwanted props from the hash
   context = _.omit(context, 'label');
 
   // Separate label options from input options; label items begin with "label-"
-  var inputContext = {autoform: autoform};
+  var inputContext = {};
   _.each(context, function autoFormInputContextEach(val, key) {
     if (key.indexOf("label-") !== 0) {
       inputContext[key] = val;
@@ -389,14 +377,14 @@ Template.afQuickField.innerContext = function afQuickFieldInnerContext(options) 
   var c = Utility.normalizeContext(options.hash, "afQuickField");
   var ss = c.af.ss;
 
-  var labelAtts = quickFieldLabelAtts(c.atts, c.afc);
-  var inputAtts = quickFieldInputAtts(c.atts, c.afc);
+  var labelAtts = quickFieldLabelAtts(c.atts);
+  var inputAtts = quickFieldInputAtts(c.atts);
 
   return {
     skipLabel: (c.atts.label === false || (c.defs.type === Boolean && !("select" in c.atts) && !("radio" in c.atts))),
     afFieldLabelAtts: labelAtts,
     afFieldInputAtts: inputAtts,
-    atts: {name: inputAtts.name, autoform: inputAtts.autoform}
+    atts: {name: inputAtts.name}
   };
 };
 

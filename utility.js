@@ -426,16 +426,12 @@ Utility = {
   normalizeContext: function autoFormNormalizeContext(context, name) {
     context = context || {};
     var atts = context.atts || context;
-    var afContext = atts.autoform || context.autoform;
-    if (!afContext || !afContext._af) {
-      throw new Error(name + " must be used within an autoForm block");
-    }
-
-    var defs = Utility.getDefs(afContext._af.ss, atts.name); //defs will not be undefined
+    var autoform = AutoForm.find(name);
+    var defs = Utility.getDefs(autoform.ss, atts.name); //defs will not be undefined
 
     // For array fields, `allowedValues` is on the array item definition
     if (defs.type === Array) {
-      var itemDefs = Utility.getDefs(afContext._af.ss, atts.name + ".$");
+      var itemDefs = Utility.getDefs(autoform.ss, atts.name + ".$");
       var allowedValues = itemDefs.allowedValues;
     } else {
       var allowedValues = defs.allowedValues;
@@ -467,8 +463,7 @@ Utility = {
     }
 
     return {
-      afc: afContext,
-      af: afContext._af,
+      af: autoform,
       atts: atts,
       defs: defs
     };

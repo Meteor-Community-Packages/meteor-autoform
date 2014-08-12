@@ -67,7 +67,9 @@
 
 <template name="afFieldSelect_bootstrap3">
   <select {{atts}}>
-    {{> this.contentBlock}}
+    {{#with this.contentBlockContext}}
+    {{> ../contentBlock}}
+    {{/with}}
   </select>
 </template>
 
@@ -94,12 +96,12 @@
 </template>
 
 <template name="afQuickField_bootstrap3">
-  <div class="form-group {{#if afFieldIsInvalid name=this.atts.name autoform=this.atts.autoform}}has-error{{/if}}">
+  <div class="form-group {{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
     {{#unless this.skipLabel}}
     {{> afFieldLabel this.afFieldLabelAtts}}
     {{/unless}}
     {{> afFieldInput this.afFieldInputAtts}}
-    <span class="help-block">{{{afFieldMessage name=this.atts.name autoform=this.atts.autoform}}}</span>
+    <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
   </div>
 </template>
 
@@ -109,8 +111,8 @@
       <h3 class="panel-title">{{afFieldLabelText name=this.atts.name}}</h3>
     </div>
     <div class="panel-body">
-      {{#if afFieldIsInvalid name=this.atts.name autoform=this.autoform}}
-      <span class="help-block">{{{afFieldMessage name=this.atts.name autoform=this.autoform}}}</span>
+      {{#if afFieldIsInvalid name=this.atts.name}}
+      <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
       {{/if}}
       {{#each afFieldNames name=this.atts.name fields=this.atts.fields omitFields=this.atts.omitFields}}
         {{> afQuickField name=this options="auto" fields=../atts.fields omitFields=../atts.omitFields}}
@@ -122,16 +124,16 @@
 <template name="afArrayField_bootstrap3">
   <div class="panel panel-default">
     <div class="panel-heading">{{afFieldLabelText name=this.atts.name}}</div>
-    {{#if afFieldIsInvalid name=this.atts.name autoform=this.autoform}}
+    {{#if afFieldIsInvalid name=this.atts.name}}
     <div class="panel-body has-error">
-      <span class="help-block">{{{afFieldMessage name=this.atts.name autoform=this.autoform}}}</span>
+      <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
     </div>
     {{/if}}
     <ul class="list-group">
       {{#afEachArrayItem name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
       <li class="list-group-item autoform-array-item">
         <div class="media">
-          {{#if afArrayFieldHasMoreThanMinimum name=../atts.name autoform=../autoform minCount=../atts.minCount maxCount=../atts.maxCount}}
+          {{#if afArrayFieldHasMoreThanMinimum name=../atts.name minCount=../atts.minCount maxCount=../atts.maxCount}}
           <button class="btn btn-primary autoform-remove-item pull-left"><span class="glyphicon glyphicon-minus"></span></button>
           {{/if}}
           <div class="media-body">
@@ -140,7 +142,7 @@
         </div>
       </li>
       {{/afEachArrayItem}}
-      {{#if afArrayFieldHasLessThanMaximum name=this.atts.name autoform=this.autoform minCount=this.atts.minCount maxCount=this.atts.maxCount}}
+      {{#if afArrayFieldHasLessThanMaximum name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
       <li class="list-group-item">
         <button class="btn btn-primary autoform-add-item" data-autoform-field="{{this.atts.name}}" data-autoform-minCount="{{this.atts.minCount}}" data-autoform-maxCount="{{this.atts.maxCount}}"><span class="glyphicon glyphicon-plus"></span></button>
       </li>

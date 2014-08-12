@@ -245,3 +245,14 @@ AutoForm.getValidationContext = function autoFormGetValidationContext(formId) {
   var ss = data.ss;
   return ss.namedContext(formId);
 };
+
+AutoForm.find = function autoFormFind(type) {
+  var n = 0, af;
+  do {
+    af = UI._parentData(n++);
+  } while (af && !af._af);
+  if (!af) {
+    throw new Error((type || "All autoform components") + " must be used within an autoForm block");
+  }
+  return af._af;
+};

@@ -47,7 +47,9 @@
 
 <template name="afFieldSelect_plain">
   <select {{this.atts}}>
-    {{> contentBlock}}
+    {{#with this.contentBlockContext}}
+    {{> ../contentBlock}}
+    {{/with}}
   </select>
 </template>
 
@@ -74,12 +76,12 @@
 </template>
 
 <template name="afQuickField_plain">
-  <div class="{{#if afFieldIsInvalid name=this.atts.name autoform=this.atts.autoform}}has-error{{/if}}">
+  <div class="{{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
     {{#unless this.skipLabel}}
     {{> afFieldLabel this.afFieldLabelAtts}}
     {{/unless}}
     {{> afFieldInput this.afFieldInputAtts}}
-    <span>{{{afFieldMessage name=this.atts.name autoform=this.atts.autoform}}}</span>
+    <span>{{{afFieldMessage name=this.atts.name}}}</span>
   </div>
 </template>
 
@@ -95,20 +97,20 @@
 <template name="afArrayField_plain">
   <fieldset>
     <legend>{{afFieldLabelText name=this.atts.name}}</legend>
-    {{#if afFieldIsInvalid name=this.atts.name autoform=this.autoform}}
+    {{#if afFieldIsInvalid name=this.atts.name}}
     <div class="autoform-array-field-error">
-      {{{afFieldMessage name=this.atts.name autoform=this.autoform}}}
+      {{{afFieldMessage name=this.atts.name}}}
     </div>
     {{/if}}
     {{#afEachArrayItem name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
     <div class="autoform-array-item">
       {{> afQuickField name=this.name label=false}}
-      {{#if afArrayFieldHasMoreThanMinimum name=../atts.name autoform=../autoform minCount=../atts.minCount maxCount=../atts.maxCount}}
+      {{#if afArrayFieldHasMoreThanMinimum name=../atts.name minCount=../atts.minCount maxCount=../atts.maxCount}}
       <button class="autoform-remove-item">Remove</button>
       {{/if}}
     </div>
     {{/afEachArrayItem}}
-    {{#if afArrayFieldHasLessThanMaximum name=this.atts.name autoform=this.autoform minCount=this.atts.minCount maxCount=this.atts.maxCount}}
+    {{#if afArrayFieldHasLessThanMaximum name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
     <div style="margin-top: 20px;">
       <button class="autoform-add-item" data-autoform-field="{{this.atts.name}}" data-autoform-minCount="{{this.atts.minCount}}" data-autoform-maxCount="{{this.atts.maxCount}}">Add</button>
     </div>

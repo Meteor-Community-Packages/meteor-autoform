@@ -2,12 +2,7 @@
  * afFieldMessage
  */
 UI.registerHelper('afFieldMessage', function autoFormFieldMessage(options) {
-  //help users transition from positional name arg
-  if (typeof options === "string") {
-    throw new Error('Use the new syntax {{afFieldMessage name="name"}} rather than {{afFieldMessage "name"}}');
-  }
-
-  options = parseOptions(options, this, 'afFieldMessage');
+  options = parseOptions(options, 'afFieldMessage');
 
   return options.ss.namedContext(options.formId).keyErrorMessage(options.name);
 });
@@ -16,12 +11,7 @@ UI.registerHelper('afFieldMessage', function autoFormFieldMessage(options) {
  * afFieldIsInvalid
  */
 UI.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
-  //help users transition from positional name arg
-  if (typeof options === "string") {
-    throw new Error('Use the new syntax {{#if afFieldIsInvalid name="name"}} rather than {{#if afFieldIsInvalid "name"}}');
-  }
-
-  options = parseOptions(options, this, 'afFieldIsInvalid');
+  options = parseOptions(options, 'afFieldIsInvalid');
 
   return options.ss.namedContext(options.formId).keyIsInvalid(options.name);
 });
@@ -30,7 +20,7 @@ UI.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
  * afArrayFieldHasMoreThanMinimum
  */
 UI.registerHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreThanMinimum(options) {
-  options = parseOptions(options, this, 'afArrayFieldHasMoreThanMinimum');
+  options = parseOptions(options, 'afArrayFieldHasMoreThanMinimum');
 
   var range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
   var visibleCount = arrayTracker.getVisibleCount(options.formId, options.name);
@@ -41,7 +31,7 @@ UI.registerHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldH
  * afArrayFieldHasLessThanMaximum
  */
 UI.registerHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessThanMaximum(options) {
-  options = parseOptions(options, this, 'afArrayFieldHasLessThanMaximum');
+  options = parseOptions(options, 'afArrayFieldHasLessThanMaximum');
 
   var range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
   var visibleCount = arrayTracker.getVisibleCount(options.formId, options.name);
@@ -52,7 +42,7 @@ UI.registerHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldH
  * afFieldValueIs
  */
 UI.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
-  options = parseOptions(options, this, 'afFieldValueIs');
+  options = parseOptions(options, 'afFieldValueIs');
 
   var currentValue = AutoForm.getFieldValue(options.formId, options.name);
   return currentValue === options.value;
@@ -78,7 +68,7 @@ UI.registerHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLast
  * afFieldValueContains
  */
 UI.registerHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
-  options = parseOptions(options, this, 'afFieldValueContains');
+  options = parseOptions(options, 'afFieldValueContains');
 
   var currentValue = AutoForm.getFieldValue(options.formId, options.name);
   return _.isArray(currentValue) && _.contains(currentValue, options.value);
@@ -88,7 +78,7 @@ UI.registerHelper('afFieldValueContains', function autoFormFieldValueContains(op
  * afFieldLabelText
  */
 UI.registerHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
-  options = parseOptions(options, this, 'afFieldLabelText');
+  options = parseOptions(options, 'afFieldLabelText');
 
   return options.ss.label(options.name);
 });
@@ -97,7 +87,7 @@ UI.registerHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
  * afFieldNames
  */
 UI.registerHelper("afFieldNames", function autoFormFieldNames(options) {
-  options = parseOptions(options, this, 'afFieldNames');
+  options = parseOptions(options, 'afFieldNames');
   var ss = options.ss;
   var name = options.name;
 
@@ -171,15 +161,11 @@ UI.registerHelper('_af_findAutoForm', function afFindAutoForm(name) {
   return afContext;
 });
 
-function parseOptions(options, self, helperName) {
+function parseOptions(options, helperName) {
   var hash = (options || {}).hash || {};
   // Find the autoform context
-  var afContext = hash.autoform && hash.autoform._af || self && self._af || self && self.autoform && self.autoform._af;
-  var ss = afContext.ss;
-  if (!ss) {
-    throw new Error(helperName + " helper must be used within an autoForm block");
-  }
-
-  hash.name && Utility.getDefs(ss, hash.name); //for side effect of throwing errors when name is not in schema
+  var afContext = AutoForm.find(helperName);
+  // Call getDefs for side effect of throwing errors when name is not in schema
+  hash.name && Utility.getDefs(afContext.ss, hash.name);
   return _.extend({}, afContext, hash);
 }
