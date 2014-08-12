@@ -1,16 +1,13 @@
 <template name="quickForm_bootstrap3-horizontal">
   {{#autoForm qfAutoFormContext}}
-    {{#with qfClasses ..}}
-    {{#each afFieldNames fields=../../atts.fields omitFields=../../atts.omitFields}}
-      {{> afQuickField name=this options="auto" template="bootstrap3-horizontal" input-col-class=../inputClass label-class=../labelClass fields=../../../atts.fields omitFields=../../../atts.omitFields}}
+    {{#each afFieldNames fields=../atts.fields omitFields=../atts.omitFields}}
+      {{> afQuickField name=this options="auto" template="bootstrap3-horizontal" input-col-class=inputClass label-class=labelClass fields=../../atts.fields omitFields=../../atts.omitFields}}
     {{/each}}
-    {{/with}}
     {{#if qfNeedsButton}}
-    {{#with qfClasses ..}}
     <div class="form-group">
       <div class="{{labelClass}}"></div>
       <div class="{{inputClass}}">
-        <button {{submitButtonAtts ../..}}>
+        <button {{submitButtonAtts ../atts.buttonClasses}}>
         {{#with ../atts.buttonContent}}
         {{this}}
         {{else}}
@@ -19,7 +16,6 @@
         </button>
       </div>
     </div>
-    {{/with}}
     {{/if}}
   {{/autoForm}}
 </template>
@@ -33,8 +29,8 @@
     {{> afFieldLabel afFieldLabelAtts}}
     {{/if}}
     <div class="{{rightColumnClass}}">
-        {{> afFieldInput afFieldInputAtts}}
-        <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
+      {{> afFieldInput afFieldInputAtts}}
+      <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
     </div>
   </div>
 </template>

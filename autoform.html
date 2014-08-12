@@ -9,17 +9,17 @@
 </template>
 
 <template name="quickForm">
-  {{#with getTemplate "quickForm" this.template}}
-    {{#with innerContext ..}}
-      {{> ..}}
+  {{#with innerContext this}}
+    {{#with afTemplateName 'quickForm' ../template}}
+      {{> UI.dynamic template=this data=..}}
     {{/with}}
   {{/with}}
 </template>
 
 <template name="afDeleteButton">
-  {{#with getTemplate "afDeleteButton" this.template}}
-    {{#with innerContext .. UI.contentBlock}}
-      {{> ..}}
+  {{#with innerContext this UI.contentBlock}}
+    {{#with afTemplateName 'afDeleteButton' ../template}}
+      {{> UI.dynamic template=this data=..}}
     {{/with}}
   {{/with}}
 </template>
@@ -27,51 +27,40 @@
 <!-- Templates that render fields within a form -->
 
 <template name="afQuickField">
-  {{! find autoform context up to 5 levels back}}
-  {{#with _af_findAutoForm 'afQuickField' .. ../.. ../../.. ../../../.. ../../../../..}}
-    {{#if isGroup atts=..}}
-      {{> afObjectField ..}}
+  {{#if isGroup atts=this}}
+    {{> afObjectField}}
+  {{else}}
+    {{#if isFieldArray atts=this}}
+      {{> afArrayField}}
     {{else}}
-      {{#if isFieldArray atts=..}}
-        {{> afArrayField ..}}
-      {{else}}
-        {{#with innerContext atts=..}}
-          {{#with getTemplate "afQuickField" ../../template ../../name ..}}
-            {{#with ..}}
-            {{> ..}}
-            {{/with}}
-          {{/with}}
+      {{#with innerContext atts=this}}
+        {{#with afTemplateName 'afQuickField' ../template}}
+          {{> UI.dynamic template=this data=..}}
         {{/with}}
-      {{/if}}
+      {{/with}}
     {{/if}}
-  {{/with}}
+  {{/if}}
 </template>
 
 <template name="afObjectField">
-  {{! find autoform context up to 5 levels back}}
-  {{#with _af_findAutoForm 'afObjectField' .. ../.. ../../.. ../../../.. ../../../../..}}
-    {{#with getTemplate "afObjectField" ../template ../name this}}
-      {{#with atts=../..}}
-        {{> ..}}
-      {{/with}}
+  {{#with atts=this}}
+    {{#with afTemplateName 'afObjectField' ../template}}
+      {{> UI.dynamic template=this data=..}}
     {{/with}}
   {{/with}}
 </template>
 
 <template name="afArrayField">
-  {{! find autoform context up to 5 levels back}}
-  {{#with _af_findAutoForm 'afArrayField' .. ../.. ../../.. ../../../.. ../../../../..}}
-    {{#with getTemplate "afArrayField" ../template ../name this}}
-      {{#with innerContext atts=../..}}
-        {{> ..}}
-      {{/with}}
+  {{#with innerContext atts=this}}
+    {{#with afTemplateName 'afArrayField' ../template}}
+      {{> UI.dynamic template=this data=..}}
     {{/with}}
   {{/with}}
 </template>
 
 <template name="afFieldInput">
   {{#with innerContext atts=this}}
-    {{#with afTemplateName getTemplateType}}
+    {{#with afTemplateName getTemplateType ../template}}
       {{> UI.dynamic template=this data=..}}
     {{/with}}
   {{/with}}
@@ -79,35 +68,29 @@
 
 <template name="afFieldSelect">
   {{#with innerContext atts=this contentBlock=UI.contentBlock contentBlockContext=..}}
-    {{#with afTemplateName 'afFieldSelect'}}
+    {{#with afTemplateName 'afFieldSelect' ../template}}
       {{> UI.dynamic template=this data=..}}
     {{/with}}
   {{/with}}
 </template>
 
 <template name="afFieldLabel">
-  {{! find autoform context up to 5 levels back}}
-  {{#with _af_findAutoForm 'afFieldLabel' .. ../.. ../../.. ../../../.. ../../../../..}}
-    {{#with getTemplate "afFieldLabel" ../template ../name this}}
-      {{#with atts=../..}}
-        {{> ..}}
-      {{/with}}
+  {{#with atts=this}}
+    {{#with afTemplateName 'afFieldLabel' ../template}}
+      {{> UI.dynamic template=this data=..}}
     {{/with}}
   {{/with}}
 </template>
 
 <template name="afEachArrayItem">
   {{! This is a block component and doesn't render anything visible, so no customizable template is needed for this}}
-  {{! find autoform context up to 5 levels back}}
-  {{#with _af_findAutoForm 'afEachArrayItem' .. ../.. ../../.. ../../../.. ../../../../..}}
-    {{#with innerContext atts=..}}
-      {{#each this}}
-      {{#if this.removed}}
-      <input type="hidden" name="{{this.name}}" data-schema-key="{{this.name}}" data-null-value="true" value="">
-      {{else}}
-      {{> UI.contentBlock this}}
-      {{/if}}
-      {{/each}}
-    {{/with}}
+  {{#with innerContext atts=this}}
+    {{#each this}}
+    {{#if this.removed}}
+    <input type="hidden" name="{{this.name}}" data-schema-key="{{this.name}}" data-null-value="true" value="">
+    {{else}}
+    {{> UI.contentBlock this}}
+    {{/if}}
+    {{/each}}
   {{/with}}
 </template>

@@ -52,57 +52,23 @@ deps = {
  * Shared
  */
 
-Template.afFieldLabel.getTemplate =
-Template.afDeleteButton.getTemplate =
-Template.afQuickField.getTemplate =
-Template.afObjectField.getTemplate =
-Template.afArrayField.getTemplate =
-Template.quickForm.getTemplate =
-function afGenericGetTemplate(templateType, templateName, fieldName, autoform) {
-  var result;
-
-  // Template may be specified in schema.
-  // Skip for quickForm and afDeleteButton because they render a form
-  // and not a field.
-  if (fieldName && autoform) {
-    var defs = Utility.getDefs(autoform._af.ss, fieldName); //defs will not be undefined
-    templateName = templateName || (defs.autoform && defs.autoform.template);
-  }
-  
-  var defaultTemplate = AutoForm.getDefaultTemplateForType(templateType) || AutoForm.getDefaultTemplate();
-
-  // Determine template name
-  if (templateName) {
-    var result = Template[templateType + '_' + templateName];
-    if (!result) {
-      console.warn(templateType + ': "' + templateName + '" is not a valid template name. Falling back to default template, "' + defaultTemplate + '".');
-    }
-  }
-
-  if (!result) {
-    result = Template[templateType + '_' + defaultTemplate];
-    if (!result) {
-      throw new Error(templateType + ': "' + defaultTemplate + '" is not a valid template name');
-    }
-  }
-
-  // Return the template instance that we want to use
-  return result;
-};
-
-UI.registerHelper('afTemplateName', function afTemplateNameHelper(templateType) {
+UI.registerHelper('afTemplateName', function afTemplateNameHelper(templateType, templateName) {
   var self = this;
-  var autoform = AutoForm.find();
-  var fieldName = self.name;
-
+  
   // Template may be specified in schema.
   // Skip for quickForm and afDeleteButton because they render a form
   // and not a field.
-  if (fieldName && autoform) {
-    var defs = Utility.getDefs(autoform.ss, fieldName); //defs will not be undefined
-    templateName = templateName || (defs.autoform && defs.autoform.template);
+  if (!templateName && templateType !== 'quickForm' && templateType !== 'afDeleteButton') {
+    var autoform = AutoForm.find();
+    var fieldName = self.name;
+    
+    if (fieldName && autoform) {
+      var defs = Utility.getDefs(autoform.ss, fieldName); //defs will not be undefined
+      templateName = (defs.autoform && defs.autoform.template);
+    }
   }
-  
+
+  // Determine default template
   var defaultTemplate = AutoForm.getDefaultTemplateForType(templateType) || AutoForm.getDefaultTemplate();
 
   // Determine template name
@@ -110,6 +76,7 @@ UI.registerHelper('afTemplateName', function afTemplateNameHelper(templateType) 
   if (templateName) {
     result = templateType + '_' + templateName;
     if (!Template[result]) {
+      // TODO should warn only in debug mode
       console.warn(templateType + ': "' + templateName + '" is not a valid template name. Falling back to default template, "' + defaultTemplate + '".');
     }
   }
@@ -121,7 +88,7 @@ UI.registerHelper('afTemplateName', function afTemplateNameHelper(templateType) 
     }
   }
 
-  // Return the template instance that we want to use
+  // Return the template name that we want to use
   return result;
 });
 

@@ -1,41 +1,50 @@
-Template["quickForm_bootstrap3-horizontal"].qfAutoFormContext = function () {
-  var ctx = _.clone(this.qfAutoFormContext || {});
-  if (typeof ctx["class"] === "string") {
-    ctx["class"] += " form-horizontal";
-  } else {
-    ctx["class"] = "form-horizontal";
+function findAtts() {
+  var c, n = 0;
+  do {
+    c = UI._parentData(n++);
+  } while (c && !c.atts);
+  return c && c.atts;
+}
+
+Template['quickForm_bootstrap3-horizontal'].helpers({
+  inputClass: function inputClassHelper() {
+    var atts = findAtts();
+    if (atts) {
+      return atts["input-col-class"];
+    }
+  },
+  labelClass: function inputClassHelper() {
+    var atts = findAtts();
+    if (atts) {
+      return atts["label-class"];
+    }
+  },
+  qfNeedsButton: function bsQuickFormNeedsButton() {
+    var submitType = this._af.submitType;
+    return (submitType !== "readonly" && submitType !== "disabled");
+  },
+  submitButtonAtts: function bsQuickFormSubmitButtonAtts(buttonClasses) {
+    var atts = {type: "submit"};
+    atts['class'] = 'btn btn-primary';
+    if (typeof buttonClasses === "string") {
+      atts['class'] += ' ' + buttonClasses;
+    }
+    return atts;
+  },
+  qfAutoFormContext: function () {
+    var ctx = _.clone(this.qfAutoFormContext || {});
+    if (typeof ctx["class"] === "string") {
+      ctx["class"] += " form-horizontal";
+    } else {
+      ctx["class"] = "form-horizontal";
+    }
+    if (ctx["input-col-class"])
+      delete ctx["input-col-class"];
+    if (ctx["label-class"])
+      delete ctx["label-class"];
+    return ctx;
   }
-  if (ctx["input-col-class"])
-    delete ctx["input-col-class"];
-  if (ctx["label-class"])
-    delete ctx["label-class"];
-  return ctx;
-};
-
-Template['quickForm_bootstrap3-horizontal'].submitButtonAtts = function bsQuickFormSubmitButtonAtts(qfContext) {
-  var qfAtts = qfContext.atts;
-  var atts = {type: "submit"};
-  atts['class'] = 'btn btn-primary';
-  if (typeof qfAtts.buttonClasses === "string") {
-    atts['class'] += ' ' + qfAtts.buttonClasses;
-  }
-  return atts;
-};
-
-Template['quickForm_bootstrap3-horizontal'].qfNeedsButton = function bsQuickFormNeedsButton() {
-  var submitType = this._af.submitType;
-  return (submitType !== "readonly" && submitType !== "disabled");
-};
-
-Template['quickForm_bootstrap3-horizontal'].qfClasses = function bsQuickFormClasses(qfContext) {
-  // This helper is a workaround for the fact that it does not
-  // seem to work currently to do input-col-class=../atts.input-col-class
-  // in the template because dashes in the attribute value cause problems.
-  return {
-    inputClass: qfContext.atts["input-col-class"],
-    labelClass: qfContext.atts["label-class"]
-  };
-};
+});
 
 Template["afQuickField_bootstrap3-horizontal"].afFieldInputAtts = function () {
   var atts = _.clone(this.afFieldInputAtts || {});
