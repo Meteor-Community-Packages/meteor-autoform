@@ -59,7 +59,7 @@ UI.registerHelper('afTemplateName', function afTemplateNameHelper(templateType, 
   // Skip for quickForm and afDeleteButton because they render a form
   // and not a field.
   if (!templateName && templateType !== 'quickForm' && templateType !== 'afDeleteButton') {
-    var autoform = AutoForm.find();
+    var autoform = AutoForm.find(templateType);
     var fieldName = self.name;
     
     if (fieldName && autoform) {

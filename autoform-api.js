@@ -246,13 +246,20 @@ AutoForm.getValidationContext = function autoFormGetValidationContext(formId) {
   return ss.namedContext(formId);
 };
 
+/**
+ * @method AutoForm.find
+ * @public
+ * @return {Object} The data context for the closest autoform.
+ *
+ * Call this method from a UI helper to get the data context for the closest autoform.
+ */
 AutoForm.find = function autoFormFind(type) {
   var n = 0, af;
   do {
     af = UI._parentData(n++);
   } while (af && !af._af);
   if (!af) {
-    throw new Error((type || "All autoform components") + " must be used within an autoForm block");
+    throw new Error((type || "AutoForm.find") + " must be used within an autoForm block");
   }
   return af._af;
 };
