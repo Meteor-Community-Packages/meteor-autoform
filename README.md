@@ -312,7 +312,7 @@ that is used to determine which type of input to use:
 
 * If you include your own `type` attribute, that input type is used.
 * If type is `String`, `<input type="text">`.
-* If you include the `rows` attribute for a `String` type property, a `<textarea>` is used instead of an `<input type="text">`.
+* If you include the `rows` attribute for a `String` type property, a `<textarea>` is used instead of an `<input type="text">`. You can also set the `rows` attribute in the schema eg. `autoform: {rows:3}`.
 * If type is `Number`, `<input type="number">`. You may specify the step, min, and max attributes to further restrict entry. The min and max values defined in your schema are automatically transferred to the DOM element, too.
 * If type is `Date`, `<input type="date">`. If you want `datetime` or `datetime-local` instead, specify your own `type`
 attribute.
