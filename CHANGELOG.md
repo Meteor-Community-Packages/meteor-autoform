@@ -6,6 +6,20 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.17.0
+
+* Requires Meteor 0.8.2+
+* Fix issue with datetime-local field being 12 hours off
+* The `autoform` attribute is no longer ever necessary. AutoForm can locate the closest form no matter how many times you use blocks that change the context within a form.
+* If you set `buttonContent=false` on a `quickForm`, it won't generate a button.
+* BREAKING! If you provide `buttonClasses` attribute on a `quickForm`, the bootstrap templates no longer add "btn btn-primary" to your classes.
+* `type="remove"` forms and the `afDeleteButton` are now deprecated but still work for now. Use the [delete-button package](https://github.com/aldeed/meteor-delete-button).
+* Most hooks now have `this.event`, `this.template`, `this.formId`, and `this.resetForm()`. You can use `this.formId` in conjunction with a global hook to implement hook logic for multiple forms.
+* You can set `filter`, `autoConvert`, and/or `removeEmptyStrings` attributes to `false` on an autoForm or quickForm to change the default behavior for document cleaning for that form.
+* You can now call `AutoForm.debug()` to enable additional logging during development.
+* Add `afQuickFields` component. See readme.
+* When all fields that comprise a sub-object are empty, we now unset the whole sub-object. This prevents issues when some of the properties are required, but the sub-object itself is optional.
+
 ### 0.16.1
 
 An insert form will now insert properly even if the `collection` does not have an attached schema.
