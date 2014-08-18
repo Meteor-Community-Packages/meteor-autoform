@@ -455,26 +455,6 @@ getFieldValue = function getFieldValue(template, key) {
 };
 
 getFormValues = function getFormValues(template, formId, ss) {
-  var doc = getFieldsValues(template.$("[data-schema-key]").not("[disabled]"));
-
-  // Expand the object
-  doc = Utility.expandObj(doc);
-
-  // As array items are removed, gaps can appear in the numbering,
-  // which results in arrays that have undefined items. Here we
-  // remove any array items that are undefined.
-  Utility.compactArrays(doc);
-
-  // Pass expanded doc through formToDoc hooks
-  var hookCtx = {
-    template: template,
-    formId: formId
-  };
-  var transforms = Hooks.getHooks(formId, 'formToDoc');
-  _.each(transforms, function formValuesTransform(transform) {
-    doc = transform.call(hookCtx, doc, ss, formId);
-  });
-
   var formInfo = formData[formId];
   // By default, we do not keep empty strings
   var keepEmptyStrings = false;
@@ -491,6 +471,34 @@ getFormValues = function getFormValues(template, formId, ss) {
   if (formInfo.autoConvert === false) {
     autoConvert = false;
   }
+
+  // Build doc from field values
+  var doc = getFieldsValues(template.$("[data-schema-key]").not("[disabled]"));
+
+  // Expand the object
+  doc = Utility.expandObj(doc);
+
+  // As array items are removed, gaps can appear in the numbering,
+  // which results in arrays that have undefined items. Here we
+  // remove any array items that are undefined.
+  Utility.compactArrays(doc);
+
+  // When all fields that comprise a sub-object are empty, we should unset
+  // the whole subobject and not complain about required fields in it. For example,
+  // if `profile.address` has several properties but they are all null or undefined,
+  // we will set `profile.address=null`. This ensures that we don't get incorrect validation
+  // errors about required fields that are children of optional objects.
+  Utility.bubbleEmpty(doc, keepEmptyStrings);
+
+  // Pass expanded doc through formToDoc hooks
+  var hookCtx = {
+    template: template,
+    formId: formId
+  };
+  var transforms = Hooks.getHooks(formId, 'formToDoc');
+  _.each(transforms, function formValuesTransform(transform) {
+    doc = transform.call(hookCtx, doc, ss, formId);
+  });
 
   // We return doc, insertDoc, and updateDoc.
   // For insertDoc, delete any properties that are null, undefined, or empty strings.

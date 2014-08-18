@@ -240,6 +240,35 @@ Utility = {
     }
   },
   /**
+   * @method Utility.bubbleEmpty
+   * @private
+   * @param  {Object} obj
+   * @return {undefined}
+   *
+   * Edits the object by reference.
+   */
+  bubbleEmpty: function bubbleEmpty(obj, keepEmptyStrings) {
+    if (_.isObject(obj)) {
+      _.each(obj, function (val, key) {
+        if (_.isArray(val)) {
+          _.each(val, function (arrayItem) {
+            bubbleEmpty(arrayItem);
+          });
+        } else if (_.isObject(val)) {
+          var allEmpty = _.all(val, function (prop) {
+            return (prop === void 0 || prop === null || (!keepEmptyStrings && typeof prop === "string" && prop.length === 0));
+          });
+          if (_.isEmpty(val) || allEmpty) {
+            obj[key] = null;
+          } else {
+            //recurse into objects
+            bubbleEmpty(val);
+          }
+        }
+      });
+    }
+  },
+  /**
    * @method Utility.getSimpleSchemaFromContext
    * @private
    * @param  {Object} context
