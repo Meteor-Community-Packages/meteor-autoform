@@ -106,34 +106,33 @@ provided by the collection2 package. (Adding `autoform` to your app does not add
 to work.)
 
 ```js
-Books = new Meteor.Collection("books", {
-    schema: {
-        title: {
-            type: String,
-            label: "Title",
-            max: 200
-        },
-        author: {
-            type: String,
-            label: "Author"
-        },
-        copies: {
-            type: Number,
-            label: "Number of copies",
-            min: 0
-        },
-        lastCheckedOut: {
-            type: Date,
-            label: "Last date this book was checked out",
-            optional: true
-        },
-        summary: {
-            type: String,
-            label: "Brief summary",
-            optional: true,
-            max: 1000
-        }
-    }
+Books = new Meteor.Collection("books");
+Books.attachSchema({
+  title: {
+    type: String,
+    label: "Title",
+    max: 200
+  },
+  author: {
+    type: String,
+    label: "Author"
+  },
+  copies: {
+    type: Number,
+    label: "Number of copies",
+    min: 0
+  },
+  lastCheckedOut: {
+    type: Date,
+    label: "Last date this book was checked out",
+    optional: true
+  },
+  summary: {
+    type: String,
+    label: "Brief summary",
+    optional: true,
+    max: 1000
+  }
 });
 ```
 
@@ -171,33 +170,12 @@ document with the original values to be updated:
 And the helper:
 
 ```js
-Template.updateBookForm.editingDoc = function () {
-  return Books.findOne({_id: Session.get("selectedDocId")});
-};
+Template.updateBookForm.helpers({
+  editingDoc: function editingDocHelper() {
+    return Books.findOne({_id: Session.get("selectedDocId")});
+  }
+});
 ```
-
-### A Basic Remove Form
-
-It's possible to use a "remove" type, too, but usually you just want a single button
-for removing, so there is a special template you can use to get that:
-
-```html
-{{> afDeleteButton collection="Books" doc=editingDoc}}
-```
-
-Where the `editingDoc` helper is the same as in the update form example.
-
-When used this way, the content of the delete button will be the word "Delete". If you want to
-get fancy, you can instead use `afDeleteButton` as a block helper and provide your own button
-content:
-
-```html
-{{#afDeleteButton collection="Books" doc=editingDoc}}
-<span style="color: yellow">DELETE ME!!</span>
-{{/afDeleteButton}}
-```
-
-To show a confirmation dialog before deleting, add an `id` attribute to the `afDeleteButton` and define a "before remove" hook for that form ID.
 
 ### A Custom Insert Form
 
@@ -211,17 +189,17 @@ Here's an example:
 
 ```html
 <template name="insertBookForm">
-    {{#autoForm collection="Books" id="insertBookForm" type="insert"}}
+  {{#autoForm collection="Books" id="insertBookForm" type="insert"}}
     <fieldset>
-        <legend>Add a Book</legend>
-        {{> afQuickField name='title'}}
-        {{> afQuickField name='author'}}
-        {{> afQuickField name='summary' rows=6}}
-        {{> afQuickField name='copies'}}
-        {{> afQuickField name='lastCheckedOut'}}
+      <legend>Add a Book</legend>
+      {{> afQuickField name='title'}}
+      {{> afQuickField name='author'}}
+      {{> afQuickField name='summary' rows=6}}
+      {{> afQuickField name='copies'}}
+      {{> afQuickField name='lastCheckedOut'}}
     </fieldset>
     <button type="submit" class="btn btn-primary">Insert</button>
-    {{/autoForm}}
+  {{/autoForm}}
 </template>
 ```
 
@@ -295,23 +273,23 @@ validation when `insert` or `update` is called on the collection. Set to one of 
 instance of `SimpleSchema`.
     * The name (in quotation marks) of a `SimpleSchema` instance that is in
 the `window` namespace.
-* `doc`: Required for update and remove actions. Pass the current document
+* `id`: Required. This is used as the `id` attribute on the rendered `form`
+element, so it must be unique within your entire application. It's required
+because we use it to set up a form-specific validation context and to preserve
+input values when a "hot code push" happens.
+* `doc`: Required for an update form, and must have at least an `_id` property. Pass the current document
 object, retrieved with a call to `findOne()` for example. For an insert form,
 you can also use this attribute to pass an object that has default form values
-set.
+set (the same effect as setting a `value` attribute on each field within the form).
 * `validation`: Optional. See the "Fine Tuning Validation" section.
 * `template`: Optional. See the "Templates" section.
-* `type`: Optional. One of "insert", "update", "remove", or "method". Anything
-else will result in normal browser form submission after validation.
+* `type`: Optional. One of "insert", "update", or "method". Setting the `type` to anything else or omitting it will call any `onSubmit` hooks, where you can do custom submission logic. If `onSubmit` does not return false or call `this.event.preventDefault()`, the browser will also submit the form. This means that you can use AutoForm to generate and validate a form but still have it POST normally to some non-Meteor HTTP endpoint.
 * `meteormethod`: Optional. When `type` is "method", indicate the name of the
 Meteor method in this attribute.
 * `resetOnSuccess`: Optional. The form is automatically reset
 for you after a successful submission action. You can skip this by setting this
 attribute to `false`.
-* `id`: Required. This is used as the `id` attribute on the rendered `form`
-element, so it must be unique within your entire application. It's required
-because we use it to set up a form-specific validation context and to preserve
-input values when a "hot code push" happens.
+* `autosave`: Optional. Set to `true` to enable automatic form submission for a `type="update"` form. Whenever any field value changes within the form, the change will be automatically saved to the database.
 * Any additional attributes are passed along to the `<form>` element, meaning
 that you can add classes, etc.
 
@@ -322,8 +300,8 @@ all the same attributes as `autoForm`. In addition, it recognizes the following
 attributes:
 
 * `type`: Two additional type values are supported: "readonly" and "disabled".
-* `buttonClasses`: Added to the class attribute for the rendered submit button.
-* `buttonContent`: The submit button content. If you don't set this, "Submit" is used.
+* `buttonClasses`: Set the class attribute for the rendered submit button. Some templates may provide a default class if you don't set this.
+* `buttonContent`: The submit button content. If you don't set this, "Submit" is used. If you set this to `false`, no submit button is rendered.
 * `fields`: Optional. Bind an array or specify a comma-delimited string of field
 names to include. Only the listed fields (and their subfields, if any) will be
 included, and they'll appear in the order you specify.
