@@ -1466,7 +1466,8 @@ on the site, too. If the code is publicly available, link to that, too.
 
 ## Troubleshooting
 
-If nothing happens when you click the submit button for your form and there are
+* While developing, be sure to call `AutoForm.debug()` in your client code to enable extra logging.
+* If nothing happens when you click the submit button for your form and there are
 no errors, make sure the button's type is `submit`.
 
 ## Contributing

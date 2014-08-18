@@ -263,3 +263,18 @@ AutoForm.find = function autoFormFind(type) {
   }
   return af._af;
 };
+
+/**
+ * @method AutoForm.debug
+ * @public
+ *
+ * Call this method in client code while developing to turn on extra logging.
+ */
+AutoForm.debug = function autoFormDebug() {
+  SimpleSchema.debug = true;
+  AutoForm.addHooks(null, {
+    onError: function (operation, error, template) {
+      console.log("Error in " + this.formId, operation, error);
+    }
+  });
+};
