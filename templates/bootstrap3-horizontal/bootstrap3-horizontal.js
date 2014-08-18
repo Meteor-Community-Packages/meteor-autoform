@@ -19,14 +19,11 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
       return atts["label-class"];
     }
   },
-  qfNeedsButton: function bsQuickFormNeedsButton() {
-    var submitType = this._af.submitType;
-    return (submitType !== "readonly" && submitType !== "disabled");
-  },
-  submitButtonAtts: function bsQuickFormSubmitButtonAtts(buttonClasses) {
+  submitButtonAtts: function bsQuickFormSubmitButtonAtts() {
+    var qfAtts = this.atts;
     var atts = {type: "submit"};
-    if (typeof buttonClasses === "string") {
-      atts['class'] = buttonClasses;
+    if (typeof qfAtts.buttonClasses === "string") {
+      atts['class'] = qfAtts.buttonClasses;
     } else {
       atts['class'] = 'btn btn-primary';
     }

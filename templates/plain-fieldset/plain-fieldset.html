@@ -8,7 +8,7 @@
         {{> afQuickField name=this options="auto" fields=../../atts.fields omitFields=../../atts.omitFields}}
       {{/each}}
     </fieldset>
-    {{#if qfNeedsButton}}
+    {{#if qfShouldRenderButton}}
     <div>
       <button {{submitButtonAtts}}>
         {{#with ../atts.buttonContent}}

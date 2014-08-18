@@ -3,11 +3,11 @@
     {{#each afFieldNames fields=../atts.fields omitFields=../atts.omitFields}}
       {{> afQuickField name=this options="auto" template="bootstrap3-horizontal" input-col-class=inputClass label-class=labelClass fields=../../atts.fields omitFields=../../atts.omitFields}}
     {{/each}}
-    {{#if qfNeedsButton}}
+    {{#if qfShouldRenderButton}}
     <div class="form-group">
       <div class="{{labelClass}}"></div>
       <div class="{{inputClass}}">
-        <button {{submitButtonAtts ../atts.buttonClasses}}>
+        <button {{submitButtonAtts}}>
         {{#with ../atts.buttonContent}}
         {{this}}
         {{else}}

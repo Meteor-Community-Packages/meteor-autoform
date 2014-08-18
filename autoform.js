@@ -221,7 +221,14 @@ Template.quickForm.innerContext = function quickFormContext(atts) {
 
   return {
     qfAutoFormContext: qfAutoFormContext,
-    atts: atts
+    atts: atts,
+    // qfShouldRenderButton helper
+    qfShouldRenderButton: function qfShouldRenderButton() {
+      var self = this;
+      var qfAtts = self.atts;
+      var submitType = self._af.submitType;
+      return (qfAtts.buttonContent !== false && submitType !== "readonly" && submitType !== "disabled");
+    }
   };
 };
 

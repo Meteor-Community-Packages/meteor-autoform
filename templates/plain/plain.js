@@ -24,11 +24,6 @@ Template['quickForm_plain'].submitButtonAtts = function plQuickFormSubmitButtonA
   return atts;
 };
 
-Template['quickForm_plain'].qfNeedsButton = function plQuickFormNeedsButton() {
-  var submitType = this._af.submitType;
-  return (submitType !== "readonly" && submitType !== "disabled");
-};
-
 Template["afCheckbox_plain"].atts = 
 Template["afRadio_plain"].atts = function () {
   var atts = _.clone(this.atts);

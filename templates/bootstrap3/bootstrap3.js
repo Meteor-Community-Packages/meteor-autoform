@@ -39,11 +39,6 @@ Template['quickForm_bootstrap3'].submitButtonAtts = function bsQuickFormSubmitBu
   return atts;
 };
 
-Template['quickForm_bootstrap3'].qfNeedsButton = function bsQuickFormNeedsButton() {
-  var submitType = this._af.submitType;
-  return (submitType !== "readonly" && submitType !== "disabled");
-};
-
 function addFormControlAtts() {
   var atts = _.clone(this.atts);
   if (typeof atts["class"] === "string") {

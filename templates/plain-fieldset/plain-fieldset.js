@@ -6,8 +6,3 @@ Template['quickForm_plain-fieldset'].submitButtonAtts = function plfsQuickFormSu
   }
   return atts;
 };
-
-Template['quickForm_plain-fieldset'].qfNeedsButton = function plfsQuickFormNeedsButton() {
-  var submitType = this._af.submitType;
-  return (submitType !== "readonly" && submitType !== "disabled");
-};
