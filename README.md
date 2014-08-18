@@ -851,6 +851,7 @@ Meteor.call method. Notice, though, that they are passed one additional final
 argument, which is the template object. One use for the template object
 might be so that you can clean up certain form fields if the result was successful
 or show additional error-related elements if not. This should be rarely needed unless you have complex custom controls in your form.
+* Within most hooks, you can do `this.event`, `this.template`, `this.formId` (useful in a global hook), and `this.resetForm()`.
 * Refer to the next sections for details about the `onSubmit`, `formToDoc`,
 and `docToForm` hooks.
 

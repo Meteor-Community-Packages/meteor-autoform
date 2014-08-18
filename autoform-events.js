@@ -109,13 +109,21 @@ Template.autoForm.events({
 
     // Prep callback creator function
     function makeCallback(name) {
+      var cbCtx = {
+        event: event,
+        template: template,
+        formId: formId,
+        resetForm: function () {
+          AutoForm.resetForm(formId, template);
+        }
+      };
       var afterHooks = Hooks.getHooks(formId, 'after', name);
       return function autoFormActionCallback(error, result) {
         if (error) {
           preventQueuedValidation();
           selectFirstInvalidField(formId, ss, template);
           _.each(onError, function onErrorEach(hook) {
-            hook(name, error, template);
+            hook.call(cbCtx, name, error, template);
           });
         } else {
           // By default, we reset form after successful submit, but
@@ -124,11 +132,11 @@ Template.autoForm.events({
             AutoForm.resetForm(formId, template);
           }
           _.each(onSuccess, function onSuccessEach(hook) {
-            hook(name, result, template);
+            hook.call(cbCtx, name, result, template);
           });
         }
         _.each(afterHooks, function afterHooksEach(hook) {
-          hook(error, result, template);
+          hook.call(cbCtx, error, result, template);
         });
         // Run endSubmit hooks (re-enabled submit button or form, etc.)
         endSubmit(formId, template);
@@ -165,6 +173,12 @@ Template.autoForm.events({
           }
         };
         var ctx = {
+          event: event,
+          template: template,
+          formId: formId,
+          resetForm: function () {
+            AutoForm.resetForm(formId, template);
+          },
           result: _.once(cb)
         };
 
@@ -202,10 +216,11 @@ Template.autoForm.events({
         return;
       }
 
-      // Set up before hook context
+      // Set up onSubmit hook context
       var ctx = {
         event: event,
         template: template,
+        formId: formId,
         resetForm: function () {
           AutoForm.resetForm(formId, template);
         },
