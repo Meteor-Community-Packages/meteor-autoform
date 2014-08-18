@@ -533,6 +533,30 @@ FieldValueContains.attachSchema(new SimpleSchema({
 }));
 ```
 
+### afFieldNames
+
+Use with `#each` to loop through all the field names for the form's schema or for an object field.
+
+The following is roughly equivalent to a `quickForm`:
+
+```html
+{{#autoForm}}
+  {{#each afFieldNames}}
+    {{> afQuickField name=this options="auto"}}
+  {{/each}}
+{{/autoForm}}
+```
+
+Or you can provide a `name` attribute for an object field:
+
+```html
+{{#autoForm}}
+  {{#each afFieldNames name="profile"}}
+    {{> afQuickField name=this options="auto"}}
+  {{/each}}
+{{/autoForm}}
+```
+
 ## Objects and Arrays
 
 Fields with type `Object` or `Array` are treated specially.
