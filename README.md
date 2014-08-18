@@ -968,6 +968,21 @@ AutoForm.hooks({
 });
 ```
 
+## Putting Field Attribute Defaults in the Schema
+
+If you are using the `quickForm`, `afQuickField`, `afObjectField`, or `afArrayField` components, you may find that you want to set an attribute on something generated within those templates. In most cases, you can do this by setting attribute defaults in the corresponding schema definition. Add an `autoform` property to the schema defininition, and set it to an object specifying attribute defaults. For example, to ensure a field is always rendered as a textarea, you could do this:
+
+```js
+summary: {
+  type: String,
+  optional: true,
+  max: 2000,
+  autoform: {
+    rows: 10
+  }
+}
+```
+
 ## Complex Schemas
 
 You can use mongo dot notation to map an input to a subdocument. For example:
