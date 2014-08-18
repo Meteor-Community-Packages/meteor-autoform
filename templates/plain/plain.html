@@ -1,8 +1,6 @@
 <template name="quickForm_plain">
   {{#autoForm this.qfAutoFormContext}}
-    {{#each afFieldNames fields=../atts.fields omitFields=../atts.omitFields}}
-      {{> afQuickField name=this options="auto" fields=../../atts.fields omitFields=../../atts.omitFields}}
-    {{/each}}
+    {{> afQuickFields fields=../atts.fields omitFields=../atts.omitFields}}
     {{#if qfShouldRenderButton}}
     <div>
       <button {{submitButtonAtts}}>
@@ -88,9 +86,7 @@
 <template name="afObjectField_plain">
   <fieldset>
     <legend>{{afFieldLabelText name=this.atts.name}}</legend>
-    {{#each afFieldNames name=this.atts.name fields=this.atts.fields omitFields=this.atts.omitFields}}
-      {{> afQuickField name=this options="auto" fields=../atts.fields omitFields=../atts.omitFields}}
-    {{/each}}
+    {{> afQuickFields name=this.atts.name fields=this.atts.fields omitFields=this.atts.omitFields}}
   </fieldset>
 </template>
 

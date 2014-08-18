@@ -42,6 +42,14 @@
   {{/if}}
 </template>
 
+<template name="afQuickFields">
+  {{#each afFieldNames name=this.name fields=this.fields omitFields=this.omitFields}}
+    {{#with name=this}}
+    {{> afQuickField quickFieldAtts}}
+    {{/with}}
+  {{/each}}
+</template>
+
 <template name="afObjectField">
   {{#with atts=this}}
     {{#with afTemplateName 'afObjectField' ../template}}

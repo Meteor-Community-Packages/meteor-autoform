@@ -1,8 +1,6 @@
 <template name="quickForm_bootstrap3">
   {{#autoForm this.qfAutoFormContext}}
-    {{#each afFieldNames fields=../atts.fields omitFields=../atts.omitFields}}
-      {{> afQuickField name=this options="auto" fields=../../atts.fields omitFields=../../atts.omitFields}}
-    {{/each}}
+    {{> afQuickFields fields=../atts.fields omitFields=../atts.omitFields}}
     {{#if qfShouldRenderButton}}
     <div>
       <button {{submitButtonAtts}}>
@@ -114,9 +112,7 @@
       {{#if afFieldIsInvalid name=this.atts.name}}
       <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
       {{/if}}
-      {{#each afFieldNames name=this.atts.name fields=this.atts.fields omitFields=this.atts.omitFields}}
-        {{> afQuickField name=this options="auto" fields=../atts.fields omitFields=../atts.omitFields}}
-      {{/each}}
+      {{> afQuickFields name=this.atts.name fields=this.atts.fields omitFields=this.atts.omitFields}}
     </div>
   </div>
 </template>

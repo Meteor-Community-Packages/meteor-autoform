@@ -382,6 +382,16 @@ Template.afQuickField.isFieldArray = function afQuickFieldIsFieldArray(options) 
 };
 
 /*
+ * afQuickFields
+ */
+
+Template.afQuickFields.helpers({
+  quickFieldAtts: function quickFieldAtts() {
+    return _.extend({options: "auto"}, UI._parentData(2), this);
+  }
+});
+
+/*
  * afEachArrayItem
  */
 

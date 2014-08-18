@@ -557,6 +557,24 @@ Or you can provide a `name` attribute for an object field:
 {{/autoForm}}
 ```
 
+You can optionally pass `fields` or `omitFields` attributes.
+
+### afQuickFields
+
+Render an `afQuickField` for each field in the form schema or an object field.
+
+```html
+{{#autoForm}}
+  {{! These do the same thing}}
+  {{#each afFieldNames name="profile"}}
+    {{> afQuickField name=this options="auto"}}
+  {{/each}}
+  {{> afQuickFields name="profile"}}
+{{/autoForm}}
+```
+
+You can optionally pass `fields` or `omitFields` attributes.
+
 ## Objects and Arrays
 
 Fields with type `Object` or `Array` are treated specially.
