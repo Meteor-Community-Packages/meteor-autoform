@@ -107,7 +107,8 @@ Template.autoForm.atts = function autoFormTplAtts() {
   // After removing all of the props we know about, everything else should
   // become a form attribute.
   // XXX Would be better to use a whitelist of HTML attributes allowed on form elements
-  return _.omit(context, "schema", "collection", "validation", "doc", "resetOnSuccess", "type", "template");
+  return _.omit(context, "schema", "collection", "validation", "doc", "resetOnSuccess",
+      "type", "template", "autosave", "meteormethod", "filter", "autoConvert", "removeEmptyStrings");
 };
 
 Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) {
@@ -162,7 +163,10 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
     submitType: context.type,
     submitMethod: context.meteormethod,
     resetOnSuccess: resetOnSuccess,
-    autosave: autosave
+    autosave: autosave,
+    filter: context.filter,
+    autoConvert: context.autoConvert,
+    removeEmptyStrings: context.removeEmptyStrings
   }};
 
   // Cache context for lookup by formId
@@ -461,18 +465,39 @@ getFormValues = function getFormValues(template, formId, ss) {
     doc = transform.call(hookCtx, doc, ss, formId);
   });
 
+  var formInfo = formData[formId];
+  // By default, we do not keep empty strings
+  var keepEmptyStrings = false;
+  if (formInfo.removeEmptyStrings === false) {
+    keepEmptyStrings = true;
+  }
+  // By default, we do filter
+  var filter = true;
+  if (formInfo.filter === false) {
+    filter = false;
+  }
+  // By default, we do autoConvert
+  var autoConvert = true;
+  if (formInfo.autoConvert === false) {
+    autoConvert = false;
+  }
+
   // We return doc, insertDoc, and updateDoc.
   // For insertDoc, delete any properties that are null, undefined, or empty strings.
   // For updateDoc, convert to modifier object with $set and $unset.
   // Do not add auto values to either.
   var result = {
-    insertDoc: ss.clean(Utility.cleanNulls(doc), {
+    insertDoc: ss.clean(Utility.cleanNulls(doc, false, keepEmptyStrings), {
       isModifier: false,
-      getAutoValues: false
+      getAutoValues: false,
+      filter: filter,
+      autoConvert: autoConvert
     }),
-    updateDoc: ss.clean(Utility.docToModifier(doc), {
+    updateDoc: ss.clean(Utility.docToModifier(doc, keepEmptyStrings), {
       isModifier: true,
-      getAutoValues: false
+      getAutoValues: false,
+      filter: filter,
+      autoConvert: autoConvert
     })
   };
   return result;

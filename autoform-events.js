@@ -52,7 +52,6 @@ Template.autoForm.events({
     var collection = data.collection;
     var currentDoc = data.doc;
     var docId = currentDoc ? currentDoc._id : null;
-    var resetOnSuccess = data.resetOnSuccess;
     var isValid;
 
     // Make sure we have a collection if we need one for the requested submit type
@@ -128,7 +127,7 @@ Template.autoForm.events({
         } else {
           // By default, we reset form after successful submit, but
           // you can opt out.
-          if (resetOnSuccess !== false) {
+          if (data.resetOnSuccess !== false) {
             AutoForm.resetForm(formId, template);
           }
           _.each(onSuccess, function onSuccessEach(hook) {
@@ -302,6 +301,12 @@ Template.autoForm.events({
     // we do it again upon insert or update
     // because collection2 validation catches additional stuff like unique and
     // because our form schema need not be the same as our collection schema.
+    var validationOptions = {
+      validationContext: formId,
+      filter: data.filter,
+      autoConvert: data.autoConvert,
+      removeEmptyStrings: data.removeEmptyStrings
+    };
 
     // INSERT FORM SUBMIT
     if (isInsert) {
@@ -314,7 +319,7 @@ Template.autoForm.events({
         // Perform insert
         if (typeof collection.simpleSchema === "function" && collection.simpleSchema() != null) {
           // If the collection2 pkg is used and a schema is attached, we pass a validationContext
-          collection.insert(doc, {validationContext: formId}, insertCallback);
+          collection.insert(doc, validationOptions, insertCallback);
         } else {
           // If the collection2 pkg is not used or no schema is attached, we don't pass options
           // because core Meteor's `insert` function does not accept
@@ -337,7 +342,7 @@ Template.autoForm.events({
           updateCallback(null, 0);
         }
         // Perform update
-        collection.update(docId, modifier, {validationContext: formId}, updateCallback);
+        collection.update(docId, modifier, validationOptions, updateCallback);
       });
     }
 
