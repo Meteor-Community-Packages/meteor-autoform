@@ -25,9 +25,10 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   },
   submitButtonAtts: function bsQuickFormSubmitButtonAtts(buttonClasses) {
     var atts = {type: "submit"};
-    atts['class'] = 'btn btn-primary';
     if (typeof buttonClasses === "string") {
-      atts['class'] += ' ' + buttonClasses;
+      atts['class'] = buttonClasses;
+    } else {
+      atts['class'] = 'btn btn-primary';
     }
     return atts;
   },
