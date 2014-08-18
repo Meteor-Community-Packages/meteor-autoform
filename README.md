@@ -16,12 +16,10 @@ have to add to your app yourself.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
-- [Blaze Transition](#blaze-transition)
 - [Installation](#installation)
 - [Example](#example)
   - [A Basic Insert Form](#a-basic-insert-form)
   - [A Basic Update Form](#a-basic-update-form)
-  - [A Basic Remove Form](#a-basic-remove-form)
   - [A Custom Insert Form](#a-custom-insert-form)
   - [Another Custom Insert Form](#another-custom-insert-form)
 - [Component and Helper Reference](#component-and-helper-reference)
@@ -73,23 +71,6 @@ have to add to your app yourself.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Blaze Transition
-
-If you've been using AutoForm and are now switching to the Blaze rendering engine, here's what you need to know to transition your app:
-
-* Add "> " before every afQuickField, afFieldInput, afFieldLabel, and quickForm.
-* Use `..` whereever you formerly used `../this`.
-* When specifying the field name for any component or helper, add `name=`. For example, `{{afFieldMessage name="name"}}` rather than `{{afFieldMessage "name"}}`.
-* Instead of using a submit button class to determine form behavior, use a `type` attribute on the `autoForm` component.
-* Instead of using a submit button `data-meteor-method` attribute to identify the method name, use a `meteormethod` attribute on the `autoForm` or `quickForm` component.
-* The components (any that you use `>` before) no longer require an `autoform` attribute when used within an `#each` or `#with` block. The helpers *do* still require the `autoform` attribute that references the `autoForm` context.
-* There is no `AutoForm` instance. [How to add hooks.](#callbackshooks) There is also now support for global hooks and multiple hooks of the same type per form. (Adding hooks multiple times will extend the list of hooks rather than overwriting the previous hook.)
-* Again, there is no `AutoForm` instance. The `autoForm` component can take a `schema` attribute that supplies a `SimpleSchema` instance or a `collection` attribute that supplies a `Meteor.Collection` instance with an attached schema. You can also specify both attributes, in which case form generation and validation will be based on the schema, but insert/update (and final validation) will happen on the collection. In this way, you can use slightly different validation logic or add additional constraints to a form that are not actual constraints on the collection's schema.
-* New `afFieldSelect` block component that supports optgroups. [Read about it.](#affieldselect)
-* Read about [choosing and customizing templates](#templates).
-* Experimental support for array fields, including arrays of objects with add/remove buttons. Documentation coming soon.
-* You may find the new [Common Questions](#common-questions) section helpful. 
-
 ## Installation
 
 Install using Meteorite. When in a Meteorite-managed app directory, enter:
@@ -107,7 +88,7 @@ to work.)
 
 ```js
 Books = new Meteor.Collection("books");
-Books.attachSchema({
+Books.attachSchema(new SimpleSchema({
   title: {
     type: String,
     label: "Title",
@@ -133,7 +114,7 @@ Books.attachSchema({
     optional: true,
     max: 1000
   }
-});
+}));
 ```
 
 ### A Basic Insert Form
@@ -537,17 +518,16 @@ Use this helper with `#if` to dynamically show and hide sections of a form based
 With the collection:
 
 ```js
-FieldValueContains = new Meteor.Collection("FieldValueContains", {
-  schema: new SimpleSchema({
-    a: {
-      type: [String],
-      allowedValues: ["foo", "bar"]
-    },
-    b: {
-      type: String
-    }
-  })
-});
+FieldValueContains = new Meteor.Collection("FieldValueContains");
+FieldValueContains.attachSchema(new SimpleSchema({
+  a: {
+    type: [String],
+    allowedValues: ["foo", "bar"]
+  },
+  b: {
+    type: String
+  }
+}));
 ```
 
 ## Objects and Arrays
@@ -780,23 +760,21 @@ AutoForm.hooks({
     before: {
       insert: function(doc, template) {},
       update: function(docId, modifier, template) {},
-      remove: function(docId, template) {},
       "methodName": function(doc, template) {}
     },
     after: {
       insert: function(error, result, template) {},
       update: function(error, result, template) {},
-      remove: function(error, result, template) {},
       "methodName": function(error, result, template) {}
     },
     onSubmit: function(insertDoc, updateDoc, currentDoc) {},
 
     // Called when any operation succeeds, where operation will be
-    // "insert", "update", "remove", or the method name.
+    // "insert", "update", or the method name.
     onSuccess: function(operation, result, template) {}, 
 
     // Called when any operation fails, where operation will be
-    // "validation", "insert", "update", "remove", or the method name.
+    // "validation", "insert", "update", or the method name.
     onError: function(operation, error, template) {},
     formToDoc: function(doc, ss, formId) {},
     docToForm: function(doc, ss, formId) {},
@@ -831,9 +809,6 @@ If you want to add the same hook for multiple forms or for all forms, use the
         } else {
           console.log("Updated!");
         }
-      },
-      remove: function(error) {
-        console.log("Remove Error:", error);
       }
     }
   });
@@ -865,15 +840,13 @@ before all global hooks.
 * Passing `null` as the first argument of `AutoForm.addHooks` adds global hooks, that is,
 hooks that run for every form that has been created and every form that ever will be created
 in the app.
-* The before hooks are called just before the insert, update, remove, or method
-call. The `insert`, `update`, and `"methodName"` functions are passed the document or
+* The before hooks are called just before the insert, update, or method
+call. These hooks are passed the document or
 modifier as gathered from the form fields. If necessary they can modify the document or modifier. These functions can perform asynchronous tasks if necessary. If asynchronicity is not needed, simply return the document or modifier, or return `false` to cancel submission. If you don't return anything, then you must call `this.result()` eventually and pass it either the document or modifier, or `false` to cancel submission. *This is run only on the client.
 Therefore, you should not assume that this will always run since a devious user
 could skip it.*
-* The `remove` before function is passed the ID of the document to be removed, and
-you can return `false` to cancel the removal.
 * The after hooks are the same as those you would normally specify as the last
-argument of the insert, update, or remove methods on a Meteor.Collection or the
+argument of the `insert` or `update` methods on a Meteor.Collection or the
 Meteor.call method. Notice, though, that they are passed one additional final
 argument, which is the template object. One use for the template object
 might be so that you can clean up certain form fields if the result was successful
@@ -1194,7 +1167,6 @@ Here's the list of possible types you can use for the first argument of
 `setDefaultTemplateForType`:
 
 * quickForm
-* afDeleteButton
 * afQuickField
 * afFieldLabel
 * afFieldSelect
@@ -1360,9 +1332,6 @@ to `null` (or a document containing default values) for an insert, probably by
 updating a reactive variable.
 3. Call `AutoForm.resetForm(formId)`. This will clear any existing validation
 errors for the form.
-
-You will probably also have to remove the `preserve-inputs` package to avoid
-issues with values from the previous form state refusing to disappear.
 
 ### What are the various ways I can specify options for a select, radio group, or checkbox group?
 
