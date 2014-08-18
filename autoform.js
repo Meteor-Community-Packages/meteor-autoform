@@ -126,9 +126,10 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
   if (context.doc && !_.isEmpty(context.doc)) {
     // Clone doc
     var copy = _.clone(context.doc);
+    var hookCtx = {formId: formId};
     // Pass doc through docToForm hooks
-    _.each(Hooks.getHooks(formId, 'docToForm'), function autoFormEachDocToForm(func) {
-      copy = func(copy, ss, formId);
+    _.each(Hooks.getHooks(formId, 'docToForm'), function autoFormEachDocToForm(hook) {
+      copy = hook.call(hookCtx, copy, ss, formId);
     });
     // Create a "flat doc" that can be used to easily get values for corresponding
     // form fields.
@@ -451,9 +452,13 @@ getFormValues = function getFormValues(template, formId, ss) {
   Utility.compactArrays(doc);
 
   // Pass expanded doc through formToDoc hooks
+  var hookCtx = {
+    template: template,
+    formId: formId
+  };
   var transforms = Hooks.getHooks(formId, 'formToDoc');
   _.each(transforms, function formValuesTransform(transform) {
-    doc = transform(doc, ss, formId);
+    doc = transform.call(hookCtx, doc, ss, formId);
   });
 
   // We return doc, insertDoc, and updateDoc.
