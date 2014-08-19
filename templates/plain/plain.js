@@ -24,6 +24,7 @@ Template['quickForm_plain'].submitButtonAtts = function plQuickFormSubmitButtonA
   return atts;
 };
 
+Template["afCheckboxGroup_plain"].atts = 
 Template["afCheckbox_plain"].atts = 
 Template["afRadio_plain"].atts = function () {
   var atts = _.clone(this.atts);
