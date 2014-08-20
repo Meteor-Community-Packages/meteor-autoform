@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 0.17.1
+
+Fix for Dates being stripped out on submission
+
 ### 0.17.0
 
 * Requires Meteor 0.8.2+
