@@ -254,7 +254,7 @@ Utility = {
           _.each(val, function (arrayItem) {
             bubbleEmpty(arrayItem);
           });
-        } else if (_.isObject(val)) {
+        } else if (_.isObject(val) && !(val instanceof Date)) {
           var allEmpty = _.all(val, function (prop) {
             return (prop === void 0 || prop === null || (!keepEmptyStrings && typeof prop === "string" && prop.length === 0));
           });
