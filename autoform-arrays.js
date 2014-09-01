@@ -53,7 +53,7 @@ ArrayTracker.prototype.initField = function atInitField(formId, field, ss, docCo
 	// If we have a doc: The count should be the maximum of docCount or schema minCount or field minCount or 1.
 	// If we don't have a doc: The count should be the maximum of schema minCount or field minCount or 1.
 	var range = self.getMinMax(ss, field, overrideMinCount, overrideMaxCount);
-	var arrayCount = Math.max(range.minCount, docCount || 1);
+	var arrayCount = Math.max(range.minCount, (docCount == undefined) ? 1 : docCount);
 
 	// If this is an array of objects, collect names of object props
 	var childKeys = [];
@@ -223,9 +223,9 @@ autoFormChildKeys = function autoFormChildKeys(ss, name) {
 var createLoopCtx = function(formId, field, index, childKeys, overrideMinCount, overrideMaxCount) {
   var loopCtx = {
   	formId:         formId,
-  	arrayFieldName: field, 
+  	arrayFieldName: field,
   	name:           field + '.' + index,
-  	index:          index, 
+  	index:          index,
   	minCount:       overrideMinCount,
   	maxCount:       overrideMaxCount
   };

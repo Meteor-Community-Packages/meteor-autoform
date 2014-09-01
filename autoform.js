@@ -54,14 +54,14 @@ deps = {
 
 UI.registerHelper('afTemplateName', function afTemplateNameHelper(templateType, templateName) {
   var self = this;
-  
+
   // Template may be specified in schema.
   // Skip for quickForm and afDeleteButton because they render a form
   // and not a field.
   if (!templateName && templateType !== 'quickForm' && templateType !== 'afDeleteButton') {
     var autoform = AutoForm.find(templateType);
     var fieldName = self.name;
-    
+
     if (fieldName && autoform) {
       var defs = Utility.getDefs(autoform.ss, fieldName); //defs will not be undefined
       templateName = (defs.autoform && defs.autoform.template);
@@ -278,7 +278,7 @@ Template.afFieldInput.innerContext = function afFieldInputInnerContext(options) 
 
   // Track field's value for reactive show/hide of other fields by value
   updateTrackedFieldValue(c.af.formId, c.atts.name, value);
-  
+
   // Get input data context
   var iData = getInputData(defs, c.atts, value, inputType, ss.label(c.atts.name), expectsArray, c.af.submitType, c.af);
 
@@ -307,7 +307,7 @@ Template.afArrayField.innerContext = function (options) {
   var formId = c.af.formId;
 
   // Init the array tracking for this field
-  var docCount = fd.getDocCountForField(formId, name);
+  var docCount = fd.getDocCountForField(formId, name) || c.atts.initialValueCount;
   arrayTracker.initField(formId, name, ss, docCount, fieldMinCount, fieldMaxCount);
 
   return {
@@ -402,7 +402,7 @@ Template.afEachArrayItem.innerContext = function afEachArrayItemInnerContext(opt
   var docCount = fd.getDocCountForField(formId, name);
 
   arrayTracker.initField(formId, name, c.af.ss, docCount, c.atts.minCount, c.atts.maxCount);
-  
+
   return arrayTracker.getField(formId, name);
 };
 
@@ -785,7 +785,7 @@ function getInputData(defs, hash, value, inputType, label, expectsArray, submitT
         }
       ];
     }
-    
+
     if (inputType === "boolean-radios" || inputType === "boolean-select") {
       data.items = getItems();
     } else {
@@ -910,7 +910,7 @@ function getInputTemplateType(type) {
 
   // All other input types
   var defaultTemplateType = "afInput";
-  
+
   return typeMap[type] || defaultTemplateType;
 }
 
