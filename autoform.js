@@ -297,6 +297,9 @@ Template.afArrayField.innerContext = function (options) {
 
   // Init the array tracking for this field
   var docCount = fd.getDocCountForField(formId, name);
+  if (docCount == null) {
+    docCount = c.atts.initialCount;
+  }
   arrayTracker.initField(formId, name, ss, docCount, fieldMinCount, fieldMaxCount);
 
   return {
@@ -388,8 +391,11 @@ Template.afEachArrayItem.innerContext = function afEachArrayItemInnerContext(opt
   var c = Utility.normalizeContext(options.hash, "afEachArrayItem");
   var formId = c.af.formId;
   var name = c.atts.name;
-  var docCount = fd.getDocCountForField(formId, name);
 
+  var docCount = fd.getDocCountForField(formId, name);
+  if (docCount == null) {
+    docCount = c.atts.initialCount;
+  }
   arrayTracker.initField(formId, name, c.af.ss, docCount, c.atts.minCount, c.atts.maxCount);
   
   return arrayTracker.getField(formId, name);

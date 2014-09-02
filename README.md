@@ -603,11 +603,15 @@ Additionally, buttons for adding and removing array items are automatically adde
 
 An `afArrayField` (or an `afQuickField` for an array) supports the additional attributes `minCount` and `maxCount`. Normally, by default, you cannot remove items below the schema-defined `minCount` and you cannot add items above the schema-defined `maxCount`. However, sometimes you don't want a minimum or maximum count defined in the schema, but you *do* want to limit the number of items on a certain form. To do this, use the `minCount` and `maxCount` attributes. Note, however, that you may *not* override the `minCount` to be less than the schema-defined `minCount`, and you may not override the `maxCount` to be more than the schema-defined `maxCount`.
 
+An `afArrayField` also supports the `initialCount` attribute. Use it to override the default initial count to be something other than 1, including 0. Note that `minCount` will still always take precedence. That is, if the `minCount` is 1 and you specify `initialCount=0`, the initial count will be 1.
+
 At the moment, the add and remove buttons disappear when you can't use them. This could be changed to make them disabled. You can do this yourself with a custom template, but if you have thoughts about how it should work out of the box, submit an issue to discuss.
 
 ### afEachArrayItem
 
 This is a block helper that can be used to render specific content for each item in an array. It tracks the addition and removal of array item fields (or groups of fields) reactively for you. This allows you to customize the repeated array fields, remove buttons, etc. It's generally most useful within a custom `afArrayField` template. See the built-in `afArrayField` templates for example usage.
+
+`afEachArrayItem` supports the same attributes as `afArrayField`.
 
 ### afArrayFieldIsFirstVisible and afArrayFieldIsLastVisible
 

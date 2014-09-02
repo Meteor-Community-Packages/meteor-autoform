@@ -12,6 +12,7 @@ forms with automatic insert and update events, and automatic reactive validation
 * Removed support for `type="remove"` forms
 * Updates for >=1.0.0 dependencies on aldeed:simple-schema and aldeed:collection2
 * Made the array tracker object public as `AutoForm.arrayTracker`. This allows you to, for example, add and remove array item fields from code.
+* Add support for `initialCount` attribute on `afArrayField` and `afEachArrayItem` components. By default, if there is no `doc` attached to the form, there is initially 1 item field shown, or minCount fields if minCount is greater than 1. This logic is unchanged, but now you can override that default initial count to be something other than 1, including 0. Note that minCount will still always take precedence.
 
 ### 0.17.1
 
