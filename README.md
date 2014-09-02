@@ -1540,4 +1540,6 @@ no errors, make sure the button's type is `submit`.
 
 Anyone is welcome to contribute. Fork, make your changes, and then submit a pull request.
 
+Thanks to [all those who have contributed code changes](https://github.com/aldeed/meteor-autoform/graphs/contributors) and all who have helped by submitting bug reports and feature ideas.
+
 [![Support via Gittip](https://rawgithub.com/twolfson/gittip-badge/0.2.0/dist/gittip.png)](https://www.gittip.com/aldeed/)
