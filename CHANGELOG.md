@@ -9,6 +9,7 @@ forms with automatic insert and update events, and automatic reactive validation
 ### 1.0.0
 
 * Removed `afDeleteButton`
+* Removed support for `type="remove"` forms
 
 
 ### 0.17.1

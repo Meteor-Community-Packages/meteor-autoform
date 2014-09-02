@@ -41,10 +41,9 @@ Template.autoForm.events({
     var data = formData[formId];
     var isInsert = (data.submitType === "insert");
     var isUpdate = (data.submitType === "update");
-    var isRemove = (data.submitType === "remove");
     var isMethod = (data.submitType === "method");
     var method = data.submitMethod;
-    var isNormalSubmit = (!isInsert && !isUpdate && !isRemove && !isMethod);
+    var isNormalSubmit = (!isInsert && !isUpdate && !isMethod);
     // ss will be the schema for the `schema` attribute if present,
     // else the schema for the collection
     var ss = data.ss;
@@ -60,8 +59,6 @@ Template.autoForm.events({
         throw new Error("AutoForm: You must specify a collection when form type is insert.");
       else if (isUpdate)
         throw new Error("AutoForm: You must specify a collection when form type is update.");
-      else if (isRemove)
-        throw new Error("AutoForm: You must specify a collection when form type is remove.");
     }
 
     // Prevent browser form submission if we're planning to do our own thing
@@ -249,25 +246,6 @@ Template.autoForm.events({
       }
     }
 
-    // If type is "remove", do that right away since we don't need to gather
-    // form values or validate.
-    if (isRemove) {
-      // Run beginSubmit hooks (disable submit button or form, etc.)
-      beginSubmit(formId, template);
-
-      // Call beforeRemove hooks if present, and stop if any return false
-      var beforeRemove = Hooks.getHooks(formId, 'before', 'remove');
-      var shouldStop = _.any(beforeRemove, function eachBeforeRemove(hook) {
-        return (hook(docId, template) === false);
-      });
-      if (shouldStop) {
-        return haltSubmission();
-      }
-      var removeCallback = makeCallback('remove');
-      collection.remove(docId, removeCallback);
-      return;
-    }
-
     // Gather all form values
     var formDocs = getFormValues(template, formId, ss);
     var insertDoc = formDocs.insertDoc;
@@ -296,7 +274,7 @@ Template.autoForm.events({
     // then we actually do want the values.
     beginSubmit(formId, template);
 
-    // Now we will do the requested insert, update, remove, method, or normal
+    // Now we will do the requested insert, update, method, or normal
     // browser form submission. Even though we may have already validated above,
     // we do it again upon insert or update
     // because collection2 validation catches additional stuff like unique and
