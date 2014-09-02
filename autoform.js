@@ -21,7 +21,6 @@ defaultTypeTemplates = {
   afCheckbox: null,
   afRadio: null,
   afInput: null,
-  afDeleteButton: null,
   afQuickField: null,
   afObjectField: null,
   afArrayField: null
@@ -41,7 +40,6 @@ deps = {
     afCheckbox: new Deps.Dependency,
     afRadio: new Deps.Dependency,
     afInput: new Deps.Dependency,
-    afDeleteButton: new Deps.Dependency,
     afQuickField: new Deps.Dependency,
     afObjectField: new Deps.Dependency,
     afArrayField: new Deps.Dependency
@@ -56,9 +54,8 @@ UI.registerHelper('afTemplateName', function afTemplateNameHelper(templateType, 
   var self = this;
   
   // Template may be specified in schema.
-  // Skip for quickForm and afDeleteButton because they render a form
-  // and not a field.
-  if (!templateName && templateType !== 'quickForm' && templateType !== 'afDeleteButton') {
+  // Skip for quickForm because it renders a form and not a field.
+  if (!templateName && templateType !== 'quickForm') {
     var autoform = AutoForm.find(templateType);
     var fieldName = self.name;
     
@@ -284,14 +281,6 @@ Template.afFieldInput.innerContext = function afFieldInputInnerContext(options) 
 
   // Return input data context
   return _.extend({_af: c.af, contentBlock: contentBlock, contentBlockContext: contentBlockContext, type: inputType}, iData);
-};
-
-/*
- * afDeleteButton
- */
-
-Template.afDeleteButton.innerContext = function afDeleteButtonInnerContext(ctx, contentBlock) {
-  return _.extend(ctx, {contentBlock: contentBlock});
 };
 
 /*

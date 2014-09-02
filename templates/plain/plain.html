@@ -67,12 +67,6 @@
   <input type="{{this.type}}" value="{{this.value}}" {{this.atts}}/>
 </template>
 
-<template name="afDeleteButton_plain">
-  {{#autoForm collection=this.collection type="remove" doc=this.doc id=this.id}}
-  <button type="submit" {{atts}}>{{#if ../contentBlock}}{{> ../contentBlock}}{{else}}Delete{{/if}}</button>
-  {{/autoForm}}
-</template>
-
 <template name="afQuickField_plain">
   <div class="{{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
     {{#unless this.skipLabel}}

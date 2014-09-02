@@ -16,14 +16,6 @@
   {{/with}}
 </template>
 
-<template name="afDeleteButton">
-  {{#with innerContext this UI.contentBlock}}
-    {{#with afTemplateName 'afDeleteButton' ../template}}
-      {{> UI.dynamic template=this data=..}}
-    {{/with}}
-  {{/with}}
-</template>
-
 <!-- Templates that render fields within a form -->
 
 <template name="afQuickField">

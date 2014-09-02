@@ -6,6 +6,11 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 1.0.0
+
+* Removed `afDeleteButton`
+
+
 ### 0.17.1
 
 Fix for Dates being stripped out on submission
