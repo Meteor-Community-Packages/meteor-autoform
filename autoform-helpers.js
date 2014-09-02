@@ -108,7 +108,7 @@ UI.registerHelper("afFieldNames", function autoFormFieldNames(options) {
     });
   } else {
     // If we weren't given a fieldList or a field name, use all first level schema keys by default
-    fieldList = ss.firstLevelSchemaKeys() || [];
+    fieldList = ss.objectKeys() || [];
   }
 
   // If user wants to omit some fields, remove those from the array
