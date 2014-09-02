@@ -10,7 +10,8 @@ forms with automatic insert and update events, and automatic reactive validation
 
 * Removed `afDeleteButton`
 * Removed support for `type="remove"` forms
-
+* Updates for >=1.0.0 dependencies on aldeed:simple-schema and aldeed:collection2
+* Made the array tracker object public as `AutoForm.arrayTracker`. This allows you to, for example, add and remove array item fields from code.
 
 ### 0.17.1
 

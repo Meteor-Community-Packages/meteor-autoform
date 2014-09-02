@@ -278,3 +278,11 @@ AutoForm.debug = function autoFormDebug() {
     }
   });
 };
+
+/**
+ * @property AutoForm.arrayTracker
+ * @public
+ *
+ * @return {ArrayTracker}
+ */
+AutoForm.arrayTracker = arrayTracker;
