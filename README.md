@@ -1051,6 +1051,8 @@ summary: {
 }
 ```
 
+You can also set `autoform.omit` to `true` in the schema definition for a field to prevent it from ever being included in quickForms, afObjectFields, afArrayFields, etc. This is useful for autoValue properties such as `createdAt` that you know you will not want on a form.
+
 ## Complex Schemas
 
 You can use mongo dot notation to map an input to a subdocument. For example:
