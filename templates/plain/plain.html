@@ -67,7 +67,7 @@
   <input type="{{this.type}}" value="{{this.value}}" {{this.atts}}/>
 </template>
 
-<template name="afQuickField_plain">
+<template name="afFormGroup_plain">
   <div class="{{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
     {{#unless this.skipLabel}}
     {{> afFieldLabel this.afFieldLabelAtts}}

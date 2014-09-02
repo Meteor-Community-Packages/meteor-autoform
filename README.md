@@ -30,6 +30,7 @@ have to add to your app yourself.
   - [afFieldLabel](#affieldlabel)
   - [afFieldMessage](#affieldmessage)
   - [afFieldIsInvalid](#affieldisinvalid)
+  - [afFormGroup](#afformgroup)
   - [afQuickField](#afquickfield)
     - [afQuickField Examples](#afquickfield-examples)
   - [afFieldValueIs](#affieldvalueis)
@@ -442,9 +443,9 @@ Accepts and requires just one attribute, `name`, which is the name of the schema
 Returns `true` if the specified key is currently invalid. This value updates 
 reactively whenever validation is performed.
 
-### afQuickField
+### afFormGroup
 
-Just as `quickForm` renders a form in one line, `afQuickField` renders a form
+Just as `quickForm` renders a form in one line, `afFormGroup` renders a form
 group, that is, everything related to a single field -- the label, the input,
 and the error message -- in one line.
 
@@ -452,7 +453,15 @@ This component accepts the same attributes as `afFieldInput` and `afFieldLabel`.
 Attributes that are prefixed with `label-` are forwarded to `afFieldLabel` while
 any remaining attributes are forwarded to `afFieldInput`.
 
-When you use the `afQuickField` component for a field that is an `Object`, it is rendered using the `afObjectField` component unless you override the type or specify options. When you use the `afQuickField` component for a field that is an `Array`, it is rendered using the `afArrayField` component unless you override the type or specify options. Refer to the "Objects and Arrays" section for additional information.
+### afQuickField
+
+The `afQuickField` component is a helper component that decides whether a particular key should be rendered using `afArrayField`, `afObjectField`, or `afFormGroup`, and then forwards all your attributes to the chosen component.
+
+* When you use the `afQuickField` component for a field that is an `Object`, it is rendered using the `afObjectField` component unless you override the `type` or supply `options`.
+* When you use the `afQuickField` component for a field that is an `Array`, it is rendered using the `afArrayField` component unless you override the `type` or supply `options`.
+* All other keys are rendered using the `afFormGroup` component.
+
+Refer to the "Objects and Arrays" section for additional information.
 
 #### afQuickField Examples
 
@@ -603,7 +612,7 @@ Additionally, buttons for adding and removing array items are automatically adde
 
 An `afArrayField` (or an `afQuickField` for an array) supports the additional attributes `minCount` and `maxCount`. Normally, by default, you cannot remove items below the schema-defined `minCount` and you cannot add items above the schema-defined `maxCount`. However, sometimes you don't want a minimum or maximum count defined in the schema, but you *do* want to limit the number of items on a certain form. To do this, use the `minCount` and `maxCount` attributes. Note, however, that you may *not* override the `minCount` to be less than the schema-defined `minCount`, and you may not override the `maxCount` to be more than the schema-defined `maxCount`.
 
-An `afArrayField` also supports the `initialCount` attribute. Use it to override the default initial count to be something other than 1, including 0. Note that `minCount` will still always take precedence. That is, if the `minCount` is 1 and you specify `initialCount=0`, the initial count will be 1.
+An `afArrayField` (or an `afQuickField` for an array) also supports the `initialCount` attribute. Use it to override the default initial count to be something other than 1, including 0. Note that `minCount` will still always take precedence. That is, if the `minCount` is 1 and you specify `initialCount=0`, the initial count will be 1.
 
 At the moment, the add and remove buttons disappear when you can't use them. This could be changed to make them disabled. You can do this yourself with a custom template, but if you have thoughts about how it should work out of the box, submit an issue to discuss.
 
@@ -1028,7 +1037,7 @@ AutoForm.hooks({
 
 ## Putting Field Attribute Defaults in the Schema
 
-If you are using the `quickForm`, `afQuickField`, `afObjectField`, or `afArrayField` components, you may find that you want to set an attribute on something generated within those templates. In most cases, you can do this by setting attribute defaults in the corresponding schema definition. Add an `autoform` property to the schema defininition, and set it to an object specifying attribute defaults. For example, to ensure a field is always rendered as a textarea, you could do this:
+If you are using the `quickForm`, `afQuickField`, `afFormGroup`, `afObjectField`, or `afArrayField` components, you may find that you want to set an attribute on something generated within those templates. In most cases, you can do this by setting attribute defaults in the corresponding schema definition. Add an `autoform` property to the schema defininition, and set it to an object specifying attribute defaults. For example, to ensure a field is always rendered as a textarea, you could do this:
 
 ```js
 summary: {
@@ -1173,7 +1182,7 @@ in the UTC time zone.
 ### type=datetime-local
 
 * **Saving:** If you use an input with `type="datetime-local"`, you should also
-specify an `offset` attribute on the `afFieldInput` or `afQuickField` helper.
+specify an `offset` attribute on the `afFieldInput` or `afFormGroup` helper.
 Set this attribute to a UTC offset string such as "+05:00" or "-0300" or "Z". This
 offset string will be appended to the user-entered date string to create the `Date`
 object that will be saved. For example, if you use an input with `type="datetime-local"` in a form
@@ -1204,7 +1213,7 @@ AutoForm has a robust and extendable template system. The following templates ar
 
 * `bootstrap3`: Default. UI elements will be generated using Bootstrap 3 structure
 and classes.
-* `bootstrap3-horizontal`: Can be used with `afQuickField` or `quickForm` only. Generates markup and
+* `bootstrap3-horizontal`: Can be used with `afFormGroup` or `afQuickField` or `quickForm` only. Generates markup and
 classes necessary to make the form appear with labels aligned horizontally with the fields.
 In additional to setting `template="bootstrap3-horizontal"` on your `afQuickField`, you must
 also define the column classes to use, for example, `{{> afQuickField name="name" template="bootstrap3-horizontal" label-class="col-sm-3" input-col-class="col-sm-9"}}` or `{{> quickForm schema=Schemas.ContactForm id="contactForm" type="method" meteormethod="sendEmail" template="bootstrap3-horizontal" label-class="col-sm-3" input-col-class="col-sm-9"}}`.
@@ -1240,7 +1249,7 @@ Here's the list of possible types you can use for the first argument of
 `setDefaultTemplateForType`:
 
 * quickForm
-* afQuickField
+* afFormGroup
 * afFieldLabel
 * afFieldSelect
 * afCheckbox

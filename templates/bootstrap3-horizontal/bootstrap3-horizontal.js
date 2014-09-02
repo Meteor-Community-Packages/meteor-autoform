@@ -44,7 +44,7 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   }
 });
 
-Template["afQuickField_bootstrap3-horizontal"].afFieldInputAtts = function () {
+Template["afFormGroup_bootstrap3-horizontal"].afFieldInputAtts = function () {
   var atts = _.clone(this.afFieldInputAtts || {});
   if ('input-col-class' in atts) {
     delete atts['input-col-class'];
@@ -53,13 +53,13 @@ Template["afQuickField_bootstrap3-horizontal"].afFieldInputAtts = function () {
   return atts;
 };
 
-Template["afQuickField_bootstrap3-horizontal"].afFieldLabelAtts = function () {
+Template["afFormGroup_bootstrap3-horizontal"].afFieldLabelAtts = function () {
   var atts = _.clone(this.afFieldLabelAtts || {});
   atts.template = "bootstrap3";
   return atts;
 };
 
-Template["afQuickField_bootstrap3-horizontal"].afEmptyFieldLabelAtts = function () {
+Template["afFormGroup_bootstrap3-horizontal"].afEmptyFieldLabelAtts = function () {
   var atts = _.clone(this.afFieldLabelAtts || {});
   var labelAtts = _.omit(atts, 'name', 'autoform', 'template');
   // Add bootstrap class if necessary
@@ -71,7 +71,7 @@ Template["afQuickField_bootstrap3-horizontal"].afEmptyFieldLabelAtts = function 
   return labelAtts;
 };
 
-Template["afQuickField_bootstrap3-horizontal"].rightColumnClass = function () {
+Template["afFormGroup_bootstrap3-horizontal"].rightColumnClass = function () {
   var atts = this.afFieldInputAtts || {};
   return atts['input-col-class'] || "";
 };

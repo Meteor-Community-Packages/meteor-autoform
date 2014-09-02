@@ -21,7 +21,7 @@ defaultTypeTemplates = {
   afCheckbox: null,
   afRadio: null,
   afInput: null,
-  afQuickField: null,
+  afFormGroup: null,
   afObjectField: null,
   afArrayField: null
 };
@@ -40,7 +40,7 @@ deps = {
     afCheckbox: new Deps.Dependency,
     afRadio: new Deps.Dependency,
     afInput: new Deps.Dependency,
-    afQuickField: new Deps.Dependency,
+    afFormGroup: new Deps.Dependency,
     afObjectField: new Deps.Dependency,
     afArrayField: new Deps.Dependency
   }
@@ -308,10 +308,10 @@ Template.afArrayField.innerContext = function (options) {
 };
 
 /*
- * afQuickField
+ * afFormGroup
  */
 
-function quickFieldLabelAtts(context) {
+function formGroupLabelAtts(context) {
   // Remove unwanted props from the hash
   context = _.omit(context, 'label');
 
@@ -329,7 +329,7 @@ function quickFieldLabelAtts(context) {
   return labelContext;
 }
 
-function quickFieldInputAtts(context) {
+function formGroupInputAtts(context) {
   // Remove unwanted props from the hash
   context = _.omit(context, 'label');
 
@@ -344,12 +344,12 @@ function quickFieldInputAtts(context) {
   return inputContext;
 }
 
-Template.afQuickField.innerContext = function afQuickFieldInnerContext(options) {
-  var c = Utility.normalizeContext(options.hash, "afQuickField");
+Template.afFormGroup.innerContext = function afFormGroupInnerContext(options) {
+  var c = Utility.normalizeContext(options.hash, "afFormGroup");
   var ss = c.af.ss;
 
-  var labelAtts = quickFieldLabelAtts(c.atts);
-  var inputAtts = quickFieldInputAtts(c.atts);
+  var labelAtts = formGroupLabelAtts(c.atts);
+  var inputAtts = formGroupInputAtts(c.atts);
 
   return {
     skipLabel: (c.atts.label === false || (c.defs.type === Boolean && !("select" in c.atts) && !("radio" in c.atts))),
@@ -358,6 +358,10 @@ Template.afQuickField.innerContext = function afQuickFieldInnerContext(options) 
     atts: {name: inputAtts.name}
   };
 };
+
+/*
+ * afQuickField
+ */
 
 Template.afQuickField.isGroup = function afQuickFieldIsGroup(options) {
   var c = Utility.normalizeContext(options.hash, "afQuickField");

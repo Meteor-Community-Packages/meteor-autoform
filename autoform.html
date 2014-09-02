@@ -25,11 +25,7 @@
     {{#if isFieldArray atts=this}}
       {{> afArrayField}}
     {{else}}
-      {{#with innerContext atts=this}}
-        {{#with afTemplateName 'afQuickField' ../template}}
-          {{> UI.dynamic template=this data=..}}
-        {{/with}}
-      {{/with}}
+      {{> afFormGroup}}
     {{/if}}
   {{/if}}
 </template>
@@ -40,6 +36,14 @@
     {{> afQuickField quickFieldAtts}}
     {{/with}}
   {{/each}}
+</template>
+
+<template name="afFormGroup">
+  {{#with innerContext atts=this}}
+    {{#with afTemplateName 'afFormGroup' ../template}}
+      {{> UI.dynamic template=this data=..}}
+    {{/with}}
+  {{/with}}
 </template>
 
 <template name="afObjectField">
