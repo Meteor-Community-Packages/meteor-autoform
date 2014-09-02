@@ -105,7 +105,7 @@ Template.autoForm.atts = function autoFormTplAtts() {
   // become a form attribute.
   // XXX Would be better to use a whitelist of HTML attributes allowed on form elements
   return _.omit(context, "schema", "collection", "validation", "doc", "resetOnSuccess",
-      "type", "template", "autosave", "meteormethod", "filter", "autoConvert", "removeEmptyStrings");
+      "type", "template", "autosave", "meteormethod", "filter", "autoConvert", "removeEmptyStrings", "trimStrings");
 };
 
 Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) {
@@ -163,7 +163,8 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
     autosave: autosave,
     filter: context.filter,
     autoConvert: context.autoConvert,
-    removeEmptyStrings: context.removeEmptyStrings
+    removeEmptyStrings: context.removeEmptyStrings,
+    trimStrings: context.trimStrings
   }};
 
   // Cache context for lookup by formId
@@ -470,6 +471,11 @@ getFormValues = function getFormValues(template, formId, ss) {
   if (formInfo.autoConvert === false) {
     autoConvert = false;
   }
+  // By default, we do trimStrings
+  var trimStrings = true;
+  if (formInfo.trimStrings === false) {
+    trimStrings = false;
+  }
 
   // Build doc from field values
   var doc = getFieldsValues(template.$("[data-schema-key]").not("[disabled]"));
@@ -508,13 +514,15 @@ getFormValues = function getFormValues(template, formId, ss) {
       isModifier: false,
       getAutoValues: false,
       filter: filter,
-      autoConvert: autoConvert
+      autoConvert: autoConvert,
+      trimStrings: trimStrings
     }),
     updateDoc: ss.clean(Utility.docToModifier(doc, keepEmptyStrings), {
       isModifier: true,
       getAutoValues: false,
       filter: filter,
-      autoConvert: autoConvert
+      autoConvert: autoConvert,
+      trimStrings: trimStrings
     })
   };
   return result;

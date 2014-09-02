@@ -14,6 +14,7 @@ forms with automatic insert and update events, and automatic reactive validation
 * Made the array tracker object public as `AutoForm.arrayTracker`. This allows you to, for example, add and remove array item fields from code.
 * Add support for `initialCount` attribute on `afArrayField` and `afEachArrayItem` components. By default, if there is no `doc` attached to the form, there is initially 1 item field shown, or minCount fields if minCount is greater than 1. This logic is unchanged, but now you can override that default initial count to be something other than 1, including 0. Note that minCount will still always take precedence.
 * Previously, the component template that generates a form group was prefixed with `afQuickField_`. Now it is prefixed with `afFormGroup_`, and this template is rendered also when you use a new `afFormGroup` component. This separation allows `afQuickField` to act solely as a logic component; it decides whether a particular key should be rendered using `afArrayField`, `afObjectField`, or `afFormGroup`, and then forwards all your attributes to the chosen component. So `afQuickField` no longer has a template associated with it. To update your code, change "afQuickField_" to "afFormGroup_" for any custom templates you have, and if you are calling `AutoForm.setDefaultTemplateForType` for "afQuickField", change it to "afFormGroup".
+* You can set `trimStrings` attributes to `false` on an autoForm or quickForm to change the default behavior for document cleaning for that form.
 
 ### 0.17.1
 

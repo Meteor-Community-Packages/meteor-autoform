@@ -283,6 +283,7 @@ attribute to `false`.
 * `filter`: Optional. Set to `false` for an insert or update form to skip filtering out unknown properties when cleaning the form document.
 * `autoConvert`: Optional. Set to `false` for an insert or update form to skip autoconverting property values when cleaning the form document.
 * `removeEmptyStrings`: Optional. Set to `false` for an insert or update form to keep empty string values when cleaning the form document.
+* `trimStrings`: Optional. Set to `false` for an insert or update form to keep leading and trailing spaces for string values when cleaning the form document.
 * Any additional attributes are passed along to the `<form>` element, meaning
 that you can add classes, etc.
 

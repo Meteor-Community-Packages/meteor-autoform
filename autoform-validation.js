@@ -35,6 +35,7 @@ validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, key) {
     isModifier: isModifier,
     filter: false,
     autoConvert: false,
+    trimStrings: false,
     extendAutoValueContext: ec
   });
 

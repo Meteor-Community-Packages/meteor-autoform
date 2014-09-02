@@ -283,7 +283,8 @@ Template.autoForm.events({
       validationContext: formId,
       filter: data.filter,
       autoConvert: data.autoConvert,
-      removeEmptyStrings: data.removeEmptyStrings
+      removeEmptyStrings: data.removeEmptyStrings,
+      trimStrings: data.trimStrings
     };
 
     // INSERT FORM SUBMIT
