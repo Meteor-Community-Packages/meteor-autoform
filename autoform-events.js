@@ -258,7 +258,15 @@ Template.autoForm.events({
     // Otherwise we let collection2 do the validation
     // after before hooks have run.
     if (data.validationType !== 'none' && (ssIsOverride || isMethod || isNormalSubmit)) {
-      isValid = _validateForm(formId, data, formDocs);
+      // Catch exceptions in validation functions which will bubble up here, cause a form with
+      // onSubmit() to submit prematurely and prevent the error from being reported
+      // (due to a page refresh).
+      try {
+        isValid = _validateForm(formId, data, formDocs);
+      } catch (e) {
+        console.error('Validation error', e);
+        isValid = false;
+      }
       // If we failed pre-submit validation, we stop submission.
       if (isValid === false) {
         return failedValidation();

@@ -5,3 +5,4 @@
 smart.lock
 nbproject*
 /packages/
+.idea/
