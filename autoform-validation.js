@@ -121,12 +121,14 @@ preventQueuedValidation = function preventQueuedValidation() {
 selectFirstInvalidField = function selectFirstInvalidField(formId, ss, template) {
   var ctx = ss.namedContext(formId);
   if (!ctx.isValid()) {
-  	template.$('[data-schema-key]').each(function () {
-  	  var f = $(this);
-  	  if (ctx.keyIsInvalid(f.attr('data-schema-key'))) {
+    // Exclude fields in sub-forms, since they will belong to a different AutoForm and schema.
+    var fields = template.$('[data-schema-key]').not(template.$('form form [data-schema-key]'));
+    fields.each(function () {
+      var f = $(this);
+      if (ctx.keyIsInvalid(f.attr('data-schema-key'))) {
         f.focus();
         return false;
       }
-  	});
+    });
   }
 };
