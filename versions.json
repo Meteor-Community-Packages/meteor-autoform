@@ -2,11 +2,11 @@
   "dependencies": [
     [
       "aldeed:simple-schema",
-      "1.0.1"
+      "1.0.0"
     ],
     [
       "blaze",
-      "1.0.3"
+      "2.0.0"
     ],
     [
       "callback-hook",
@@ -17,19 +17,19 @@
       "1.0.0"
     ],
     [
+      "ddp",
+      "1.0.8"
+    ],
+    [
       "deps",
-      "1.0.1"
+      "1.0.2"
     ],
     [
       "ejson",
-      "1.0.0"
+      "1.0.1"
     ],
     [
       "geojson-utils",
-      "1.0.0"
-    ],
-    [
-      "handlebars",
       "1.0.0"
     ],
     [
@@ -50,7 +50,7 @@
     ],
     [
       "livedata",
-      "1.0.7"
+      "1.0.8"
     ],
     [
       "logging",
@@ -58,11 +58,11 @@
     ],
     [
       "meteor",
-      "1.0.2"
+      "1.0.3"
     ],
     [
       "minimongo",
-      "1.0.1"
+      "1.0.2"
     ],
     [
       "mrt:moment",
@@ -70,7 +70,7 @@
     ],
     [
       "observe-sequence",
-      "1.0.1"
+      "1.0.2"
     ],
     [
       "ordered-dict",
@@ -81,16 +81,24 @@
       "1.0.0"
     ],
     [
+      "reactive-var",
+      "1.0.1"
+    ],
+    [
       "retry",
       "1.0.0"
     ],
     [
       "templating",
-      "1.0.4"
+      "1.0.5"
+    ],
+    [
+      "tracker",
+      "1.0.2"
     ],
     [
       "ui",
-      "1.0.0"
+      "1.0.1"
     ],
     [
       "underscore",
@@ -98,6 +106,6 @@
     ]
   ],
   "pluginDependencies": [],
-  "toolVersion": "meteor-tool@1.0.26",
+  "toolVersion": "meteor-tool@1.0.27",
   "format": "1.0"
 }

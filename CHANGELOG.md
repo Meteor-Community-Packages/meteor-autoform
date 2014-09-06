@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 2.0.0
+
+Minor fixes (thanks @aramk) and use 0.9.1 core packages, which means you can't use this one on 0.9.0. Not my fault; blame Meteor.
+
 ### 1.0.0
 
 * Removed `afDeleteButton`

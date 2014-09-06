@@ -2,7 +2,7 @@ Package.describe({
   name: "aldeed:autoform",
   summary: "Easily create forms with automatic insert and update, and automatic reactive validation.",
   git: "https://github.com/aldeed/meteor-autoform.git",
-  version: "1.0.0"
+  version: "2.0.0"
 });
 
 Package.on_use(function(api) {
@@ -10,17 +10,14 @@ Package.on_use(function(api) {
 
   // 0.9.0+
   if (api.versionsFrom) {
+    api.versionsFrom('METEOR@0.9.1');
     // common
     api.use('aldeed:simple-schema@1.0.0');
-    api.use('check@1.0.0');
+    api.use('check');
+    // client
+    api.use(['livedata', 'underscore', 'deps', 'templating', 'ui', 'blaze'], 'client');
     api.use('mrt:moment@2.6.0', 'client');
-    api.use('livedata@1.0.0', 'client');
-    api.use('underscore@1.0.0', 'client');
-    api.use('deps@1.0.0', 'client');
-    api.use('templating@1.0.0', 'client');
-    api.use('handlebars@1.0.0', 'client');
-    api.use('ui@1.0.0', 'client');
-    api.use('aldeed:collection2@1.0.0', ['client'], {weak: true});
+    api.use(['aldeed:collection2@1.0.0', 'reload'], 'client', {weak: true});
     // Imply SS to make sure SimpleSchema object is available to app
     api.imply('aldeed:simple-schema');
   }
@@ -77,9 +74,7 @@ Package.on_use(function(api) {
 
 Package.on_test(function (api) {
   if (api.versionsFrom) {
-    api.use('aldeed:autoform');
-    api.use('tinytest@1.0.0');
-    api.use('underscore@1.0.0');
+    api.use(['aldeed:autoform', 'tinytest', 'underscore']);
   } else {
     api.use(['autoform', 'tinytest', 'underscore']);
   }
