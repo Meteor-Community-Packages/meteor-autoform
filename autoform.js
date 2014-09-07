@@ -117,6 +117,10 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
   // Retain doc values after a "hot code push", if possible
   var retrievedDoc = formPreserve.getDocument(formId);
   if (retrievedDoc !== false) {
+    if (context.doc) {
+      // Prevent removing the ID when replacing values.
+      retrievedDoc._id = context.doc._id;
+    }
     context.doc = retrievedDoc;
   }
 
