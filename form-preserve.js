@@ -29,16 +29,13 @@ FormPreserve.prototype.getDocument = function (formId) {
     return self.retrievedDocuments[formId];
 };
 
-FormPreserve.prototype.saveDocument = function (formId) {
-  this.retrievedDocuments[formId] = this.registeredForms[formId]();
-}
-
 FormPreserve.prototype.registerForm = function (formId, retrieveFunc) {
   this.registeredForms[formId] = retrieveFunc;
 };
 
 FormPreserve.prototype.unregisterForm = function (formId) {
   delete this.registeredForms[formId];
+  delete this.retrievedDocuments[formId];
 };
 
 FormPreserve.prototype._retrieveRegisteredDocuments = function () {
