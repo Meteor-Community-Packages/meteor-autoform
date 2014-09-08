@@ -275,8 +275,6 @@ Template.autoForm.events({
       // but before calling the method, against the collection schema
     }
 
-    formPreserve.unregisterForm(formId);
-
     // Run beginSubmit hooks (disable submit button or form, etc.)
     // NOTE: This needs to stay after getFormValues in case a
     // beginSubmit hook disables inputs. We don't get values for
