@@ -54,8 +54,8 @@ Hooks.getHooks = function getHooks(formId, type, subtype) {
     f = Hooks.form[formId] && Hooks.form[formId][type] && Hooks.form[formId][type][subtype] || [];
     g = Hooks.global[type] && Hooks.global[type][subtype] || [];
   } else {
-    f = Hooks.form[formId] && Hooks.form[formId][type] || [];
-    g = Hooks.global[type] || [];
+    f = Hooks.form[formId] && _.isArray(Hooks.form[formId][type]) && Hooks.form[formId][type] || [];
+    g = _.isArray(Hooks.global[type]) && Hooks.global[type] || [];
   }
   return f.concat(g);
 };
