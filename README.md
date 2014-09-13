@@ -82,7 +82,7 @@ have to add to your app yourself.
 
 ## Installation
 
-Install using Meteorite. When in a Meteorite-managed app directory, enter:
+In a Meteor app directory, enter:
 
 ```
 $ meteor add aldeed:autoform
