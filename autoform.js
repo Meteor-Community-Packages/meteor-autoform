@@ -118,7 +118,7 @@ Template.autoForm.innerContext = function autoFormTplInnerContext(outerContext) 
   var retrievedDoc = formPreserve.getDocument(formId);
   if (retrievedDoc !== false) {
     // Ensure we keep the _id property which may not be present in retrievedDoc.
-    context.doc = _.extend(context.doc || {}, retrievedDoc);
+    context.doc = _.extend({}, context.doc || {}, retrievedDoc);
   }
 
   var mDoc;
