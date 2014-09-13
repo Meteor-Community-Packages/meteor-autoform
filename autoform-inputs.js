@@ -75,9 +75,8 @@ defaultInputValueHandlers = {
 	'input[type=datetime-local]': function () {
 		var val = this.val();
 		val = (typeof val === "string") ? val.replace(/ /g, "T") : val;
-		var offset = this.attr("data-offset") || "Z";
 		if (Utility.isValidNormalizedLocalDateAndTimeString(val)) {
-			return new Date(val + offset);
+			return moment(val).toDate();
 		} else {
 			return null;
 		}
