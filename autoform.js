@@ -73,6 +73,7 @@ UI.registerHelper('afTemplateName', function afTemplateNameHelper(templateType, 
   if (templateName) {
     result = templateType + '_' + templateName;
     if (!Template[result]) {
+      result = null;
       // TODO should warn only in debug mode
       console.warn(templateType + ': "' + templateName + '" is not a valid template name. Falling back to default template, "' + defaultTemplate + '".');
     }
