@@ -118,9 +118,14 @@ Template.autoForm.events({
         if (error) {
           preventQueuedValidation();
           selectFirstInvalidField(formId, ss, template);
-          _.each(onError, function onErrorEach(hook) {
-            hook.call(cbCtx, name, error, template);
-          });
+          if (onError && onError.length) {
+            _.each(onError, function onErrorEach(hook) {
+              hook.call(cbCtx, name, error, template);
+            });
+          } else if (!afterHooks || !afterHooks.length) {
+            // if there are no onError or "after" hooks, throw the error
+            throw error;
+          }
         } else {
           // By default, we reset form after successful submit, but
           // you can opt out.
