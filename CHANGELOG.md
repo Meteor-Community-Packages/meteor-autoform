@@ -11,6 +11,7 @@ forms with automatic insert and update events, and automatic reactive validation
 * Fixes to form preservation during hot code push.
 * You can now disable form preservation for a specific form by setting `preserveForm=false` attribute on the `autoForm` or `quickForm`.
 * Expose `formPreserve` object as `AutoForm.formPreserve`. Add `unregisterAllForms` method. You can now do `AutoForm.formPreserve.unregisterForm(formId)` or `AutoForm.formPreserve.unregisterAllForms()` to resolve strange issues due to faulty form preservation logic.
+* Support for `offset` attribute on `datetime-local` inputs is removed and replaced by a `timezoneId` attribute, which should be set to a timezone ID that `moment-timezone` understands. You'll also need to add the `moment-timezone` library to your app, for example, by adding the `mrt:moment-timezone` Meteor package.
 
 ### 2.0.2
 

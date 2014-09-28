@@ -1184,31 +1184,27 @@ in the UTC time zone.
 
 ### type=datetime-local
 
-* **Saving:** If you use an input with `type="datetime-local"`, you should also
-specify an `offset` attribute on the `afFieldInput` or `afFormGroup` helper.
-Set this attribute to a UTC offset string such as "+05:00" or "-0300" or "Z". This
-offset string will be appended to the user-entered date string to create the `Date`
-object that will be saved. For example, if you use an input with `type="datetime-local"` in a form
+* **Saving:** If you use an input with `type="datetime-local"`, the datetime string that is entered will be assumed to be in the client's local timezone. To use a different specific timezone, add a `moment-timezone` package to your app and specify a `timezoneId` attribute on the `afFieldInput` or `afFormGroup` helper.
+Set this attribute to a timezone ID that moment-timezone understands, such as "America/Los_Angeles". For example, if you use an input with `type="datetime-local"` in a form
 in which a user is setting up a meeting, you would need to previously determine
 the time zone in which the meeting will take place. When generating the autoform
-field, set the `offset` attribute to the UTC offset for this time zone.
+field, set the `timezoneId` attribute to the ID for this time zone.
 (Chrome and some mobile browsers provide
 datetime pickers that set the input value to a string in the expected format automatically,
 but users of other browsers will have to manually enter the datetime in the correct
 format, which is `date string + "T" + time string`.)
 * **Loading:** If you are binding an object containing `Date` objects to an update autoform
 and using them in an input with `type="datetime-local"`, be sure to set the
-`offset` attribute on the helper to the time zone offset that applies. This will
+`timezoneId` attribute on the component to the time zone ID that applies. This will
 ensure that the date and time you expect are shown in the input element.
 * **Displaying:** Before displaying the saved date, determine the equivalent
 date and time in the corresponding time zone. The easiest way to do this is
-using `var m = moment(myDate).zone(myDesiredTimeZoneOffset); var displayString = m.format();`
-from the `moment` package/library. (`zone` setting is available starting with
-version 2.1.0 of Moment.)
+using `moment(myDate).tz(timezoneId).format()`
+from the `moment` and `moment-timezone` packages/libraries.
 * **Min/Max:** When specifying min or max values in your schema, use a `Date`
 object that represents the exact minimum or maximum date and time
 in the corresponding time zone. This may mean returning the min or max value
-from a function based on a time zone name or offset you are storing elsewhere.
+from a function based on a time zone ID you are storing elsewhere.
 
 ## Templates
 

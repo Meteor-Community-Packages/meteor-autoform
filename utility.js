@@ -418,15 +418,22 @@ Utility = {
   /**
    * @method Utility.dateToNormalizedLocalDateAndTimeString
    * @private
-   * @param {Date} date
-   * @param {String} offset A valid offset string (to pass to moment.zone)
+   * @param {Date} date The Date object
+   * @param {String} [timezoneId] A valid timezoneId that moment-timezone understands, e.g., "America/Los_Angeles"
    * @return {String}
    *
    * Returns a "valid normalized local date and time string".
    */
-  dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString(date, offset) {
+  dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString(date, timezoneId) {
     var m = moment(date);
-    m.zone(offset);
+    // by default, we assume local timezone; add moment-timezone to app and pass timezoneId
+    // to use a different timezone
+    if (typeof timezoneId === "string") {
+      if (typeof m.tz !== "function") {
+        throw new Error("If you specify a timezoneId, make sure that you've added a moment-timezone package to your app");
+      }
+      m.tz(timezoneId);
+    }
     return m.format("YYYY-MM-DD[T]HH:mm:ss.SSS");
   },
   /**

@@ -564,9 +564,7 @@ function getInputValue(name, atts, expectsArray, inputType, value, mDoc, default
         if (inputType === "datetime") {
           return Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(val);
         } else if (inputType === "datetime-local") {
-          var offset = atts.offset || "Z";
-          // TODO switch to use timezoneId attribute instead of offset
-          return Utility.dateToNormalizedLocalDateAndTimeString(val, offset);
+          return Utility.dateToNormalizedLocalDateAndTimeString(val, atts.timezoneId);
         } else {
           // This fallback will be used for type="date" as well
           // as for select arrays, since it would not make much
@@ -625,7 +623,7 @@ function getInputData(defs, hash, value, inputType, label, expectsArray, submitT
           "trueLabel",
           "falseLabel",
           "options",
-          "offset",
+          "offset", //deprecated attr, but we'll remove it for now
           "timezoneId",
           "template");
 
@@ -645,9 +643,9 @@ function getInputData(defs, hash, value, inputType, label, expectsArray, submitT
   var max = (typeof defs.max === "function") ? defs.max() : defs.max;
 
   if (inputType === "datetime-local") {
-    // `offset` is deprecated and replaced by `timezoneId`
-    inputAtts["data-offset"] = hash.offset || "Z";
-    inputAtts["data-timezoneId"] = hash.timezoneId || "UTC";
+    if (typeof hash.timezoneId === "string") {
+      inputAtts["data-timezone-id"] = hash.timezoneId;
+    }
   }
 
   // Extract settings from hash
@@ -835,10 +833,10 @@ function getInputData(defs, hash, value, inputType, label, expectsArray, submitT
         break;
       case "datetime-local":
         if (typeof inputAtts.max === "undefined" && max instanceof Date) {
-          inputAtts.max = Utility.dateToNormalizedLocalDateAndTimeString(max, inputAtts["data-offset"]);
+          inputAtts.max = Utility.dateToNormalizedLocalDateAndTimeString(max, inputAtts["data-timezone-id"]);
         }
         if (typeof inputAtts.min === "undefined" && min instanceof Date) {
-          inputAtts.min = Utility.dateToNormalizedLocalDateAndTimeString(min, inputAtts["data-offset"]);
+          inputAtts.min = Utility.dateToNormalizedLocalDateAndTimeString(min, inputAtts["data-timezone-id"]);
         }
         break;
       case "hidden":
