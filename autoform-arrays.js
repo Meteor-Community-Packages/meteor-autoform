@@ -58,7 +58,7 @@ ArrayTracker.prototype.initField = function atInitField(formId, field, ss, docCo
 	// If this is an array of objects, collect names of object props
 	var childKeys = [];
 	if (ss.schema(field + '.$').type === Object) {
-		childKeys = autoFormChildKeys(ss, field + '.$');
+    childKeys = ss.objectKeys(field + '.$');
 	}
 
 	var loopArray = [];
@@ -167,7 +167,7 @@ ArrayTracker.prototype.addOneToField = function atAddOneToField(formId, field, s
 	  // If this is an array of objects, collect names of object props
 	  var childKeys = [];
 	  if (ss.schema(field + '.$').type === Object) {
-	    childKeys = autoFormChildKeys(ss, field + '.$');
+      childKeys = ss.objectKeys(field + '.$');
 	  }
 
 	  var loopCtx = createLoopCtx(formId, field, i, childKeys, overrideMinCount, overrideMaxCount);
@@ -197,25 +197,6 @@ ArrayTracker.prototype.removeFromFieldAtIndex = function atRemoveFromFieldAtInde
     self.info[formId][field].deps.changed();
   }
 }
-
-// Returns schema keys that are direct children of the given schema key
-// XXX this could be a method on ss
-autoFormChildKeys = function autoFormChildKeys(ss, name) {
-  name = SimpleSchema._makeGeneric(name);
-  var prefix = name + ".";
-
-  var childKeys = [];
-  _.each(ss._schemaKeys, function (key) {
-    // If it's a direct child, add it to the list
-    if (key.indexOf(prefix) === 0) {
-      var ending = key.slice(prefix.length);
-      if (ending.indexOf('.') === -1) {
-        childKeys.push(ending);
-      }
-    }
-  });
-  return childKeys;
-};
 
 /*
  * PRIVATE
