@@ -1,7 +1,7 @@
 if (Meteor.isClient) {
 
   Tinytest.add('AutoForm - Utility - cleanNulls', function(test) {
-    var date = new Date, oid = new Meteor.Collection.ObjectID;
+    var date = new Date, oid = new Mongo.Collection.ObjectID;
 
     var cleaned = Utility.cleanNulls({
       a: void 0,

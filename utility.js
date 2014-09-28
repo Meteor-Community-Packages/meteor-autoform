@@ -290,14 +290,10 @@ Utility = {
     // If no schema attribute, use the schema attached to the collection
     var collection = Utility.lookup(context.collection);
     if (collection) {
-      if (collection instanceof Meteor.Collection) {
-        if (typeof collection.simpleSchema === 'function') {
-          return collection.simpleSchema();
-        } else {
-          throw new Error('AutoForm: collection attribute for form with id "' + formId + '" refers to a collection that does not have a schema. You might have forgotten to attach a schema to the collection or you might need to add the collection2 package to your app.');
-        }
+      if (typeof collection.simpleSchema === 'function') {
+        return collection.simpleSchema();
       } else {
-        throw new Error('AutoForm: collection attribute for form with id "' + formId + '" is not a Meteor.Collection instance');
+        throw new Error('AutoForm: collection attribute for form with id "' + formId + '" refers to a collection that does not have a schema, or is not a collection. You might have forgotten to attach a schema to the collection or you might need to add the collection2 package to your app.');
       }
     }
     // If we got this far, we have no schema so throw an error
