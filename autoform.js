@@ -564,9 +564,7 @@ function getInputValue(name, atts, expectsArray, inputType, value, mDoc, default
         if (inputType === "datetime") {
           return Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(val);
         } else if (inputType === "datetime-local") {
-          var offset = atts.offset || "Z";
-          // TODO switch to use timezoneId attribute instead of offset
-          return Utility.dateToNormalizedLocalDateAndTimeString(val, offset);
+          return Utility.dateToNormalizedLocalDateAndTimeString(val);
         } else {
           // This fallback will be used for type="date" as well
           // as for select arrays, since it would not make much

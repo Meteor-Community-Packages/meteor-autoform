@@ -424,10 +424,8 @@ Utility = {
    *
    * Returns a "valid normalized local date and time string".
    */
-  dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString(date, offset) {
-    var m = moment(date);
-    m.zone(offset);
-    return m.format("YYYY-MM-DD[T]HH:mm:ss.SSS");
+  dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString(date) {
+    return moment(date).format("YYYY-MM-DD[T]HH:mm:ss.SSS");
   },
   /**
    * @method  Utility.isValidNormalizedLocalDateAndTimeString
