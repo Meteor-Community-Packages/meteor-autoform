@@ -6,6 +6,12 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### vNext
+
+* Fixes to form preservation during hot code push.
+* You can now disable form preservation for a specific form by setting `preserveForm=false` attribute on the `autoForm` or `quickForm`.
+
+
 ### 2.0.2
 
 Minor fix to template selection logic. Make sure default template is always used if specific template is not found.

@@ -390,9 +390,11 @@ Template.autoForm.events({
       return;
 
     // Update cached form values for hot code reload persistence
-    formPreserve.registerForm(formId, function autoFormRegFormCallback() {
-      return getFormValues(template, formId, data.ss).insertDoc;
-    });
+    if (self.preserveForm !== false) {
+      formPreserve.registerForm(formId, function autoFormRegFormCallback() {
+        return getFormValues(template, formId, data.ss).insertDoc;
+      });
+    }
 
     // Update field's value for reactive show/hide of other fields by value
     updateTrackedFieldValue(formId, key, getFieldValue(template, key));
