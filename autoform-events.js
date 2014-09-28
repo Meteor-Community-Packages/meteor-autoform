@@ -336,6 +336,9 @@ Template.autoForm.events({
     // METHOD FORM SUBMIT
     else if (isMethod) {
       // Get "before.methodName" hooks
+      if (!method) {
+        throw new Error('When form type is "method", you must also provide a "meteormethod" attribute');
+      }
       var beforeMethodHooks = Hooks.getHooks(formId, 'before', method);
       // Run "before.methodName" hooks
       doBefore(null, insertDoc, beforeMethodHooks, 'before.method hook', function (doc) {
