@@ -38,9 +38,16 @@ FormPreserve.prototype.unregisterForm = function (formId) {
   delete this.retrievedDocuments[formId];
 };
 
+FormPreserve.prototype.unregisterAllForms = function () {
+  var self = this;
+  self.registeredForms = {};
+  self.retrievedDocuments = {};
+};
+
 FormPreserve.prototype._retrieveRegisteredDocuments = function () {
+  var self = this;
   res = {};
-  _.each(this.registeredForms, function (retrieveFunc, formId) {
+  _.each(self.registeredForms, function (retrieveFunc, formId) {
     res[formId] = retrieveFunc();
   });
   return res;

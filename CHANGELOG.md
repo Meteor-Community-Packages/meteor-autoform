@@ -10,7 +10,7 @@ forms with automatic insert and update events, and automatic reactive validation
 
 * Fixes to form preservation during hot code push.
 * You can now disable form preservation for a specific form by setting `preserveForm=false` attribute on the `autoForm` or `quickForm`.
-
+* Expose `formPreserve` object as `AutoForm.formPreserve`. Add `unregisterAllForms` method. You can now do `AutoForm.formPreserve.unregisterForm(formId)` or `AutoForm.formPreserve.unregisterAllForms()` to resolve strange issues due to faulty form preservation logic.
 
 ### 2.0.2
 

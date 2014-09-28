@@ -1,5 +1,7 @@
 AutoForm = AutoForm || {}; //exported
 
+AutoForm.formPreserve = formPreserve;
+
 /**
  * @method AutoForm.addHooks
  * @public
