@@ -90,13 +90,13 @@ $ meteor add aldeed:autoform
 
 ## Example
 
-Let's say you have the following Meteor.Collection instance, with schema support
+Let's say you have the following Mongo.Collection instance, with schema support
 provided by the collection2 package. (Adding `autoform` to your app does not add
 `collection2` by default so you need to run `meteor add aldeed:collection2` for this example
 to work.)
 
 ```js
-Books = new Meteor.Collection("books");
+Books = new Mongo.Collection("books");
 Books.attachSchema(new SimpleSchema({
   title: {
     type: String,
@@ -251,8 +251,8 @@ The following attributes are recognized:
 
 * `collection`: Required if `schema` is not set. Set to one of the following:
     * The name of a helper function (no quotation marks) that returns an
-instance of `Meteor.Collection` that has a schema defined.
-    * The name (in quotation marks) of a `Meteor.Collection` instance that has
+instance of `Mongo.Collection` that has a schema defined.
+    * The name (in quotation marks) of a `Mongo.Collection` instance that has
 a schema defined and is in the `window` namespace.
 * `schema`: Required if `collection` is not set. This schema will be used to generate
 and validate the form prior to submission, so you can specify this along with a
@@ -539,7 +539,7 @@ Use this helper with `#if` to dynamically show and hide sections of a form based
 With the collection:
 
 ```js
-FieldValueContains = new Meteor.Collection("FieldValueContains");
+FieldValueContains = new Mongo.Collection("FieldValueContains");
 FieldValueContains.attachSchema(new SimpleSchema({
   a: {
     type: [String],
@@ -913,7 +913,7 @@ modifier as gathered from the form fields. If necessary they can modify the docu
 Therefore, you should not assume that this will always run since a devious user
 could skip it.*
 * The after hooks are the same as those you would normally specify as the last
-argument of the `insert` or `update` methods on a Meteor.Collection or the
+argument of the `insert` or `update` methods on a Mongo.Collection or the
 Meteor.call method. Notice, though, that they are passed one additional final
 argument, which is the template object. One use for the template object
 might be so that you can clean up certain form fields if the result was successful
@@ -966,7 +966,7 @@ to calling `this.event.preventDefault()` and `this.event.stopPropagation()`. If 
 
 If you use `autoValue` or `defaultValue` options, be aware that `insertDoc` and
 `updateDoc` will not yet have auto or default values added to them. If you're
-passing them to `insert` or `update` on a Meteor.Collection with a schema, then
+passing them to `insert` or `update` on a Mongo.Collection with a schema, then
 there's nothing to worry about. But if you're doing something else with the
 object on the client, then you might want to call `clean` to add the auto and
 default values:
@@ -1332,7 +1332,7 @@ your collections at the top level of your client files and without the `var`
 keyword, then you can use this trick to avoid writing helpers.
 
 If you don't use quotation marks, then you must define a helper function with
-that name and have it return the SimpleSchema or Meteor.Collection instance.
+that name and have it return the SimpleSchema or Mongo.Collection instance.
 
 Probably the best technique for organizing your form schemas and making them
 available as helpers is to add all SimpleSchema instances to a `Schemas` object
