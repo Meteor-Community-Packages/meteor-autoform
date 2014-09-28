@@ -13,7 +13,7 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
       return atts["input-col-class"];
     }
   },
-  labelClass: function inputClassHelper() {
+  labelClass: function labelClassHelper() {
     var atts = findAtts();
     if (atts) {
       return atts["label-class"];
