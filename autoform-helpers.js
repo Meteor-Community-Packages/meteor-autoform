@@ -99,7 +99,7 @@ UI.registerHelper("afFieldNames", function autoFormFieldNames(options) {
     // If we weren't given a fieldList but were given a field name, use subfields by default
     
     // Get list of field names that are descendants of this field's name
-    fieldList = ss.objectKeys(name);
+    fieldList = ss.objectKeys(SimpleSchema._makeGeneric(name));
 
     // Tack child field name on to end of parent field name. This
     // ensures that we keep the desired array index for array items.

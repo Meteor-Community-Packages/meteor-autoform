@@ -58,7 +58,7 @@ ArrayTracker.prototype.initField = function atInitField(formId, field, ss, docCo
 	// If this is an array of objects, collect names of object props
 	var childKeys = [];
 	if (ss.schema(field + '.$').type === Object) {
-    childKeys = ss.objectKeys(field + '.$');
+    childKeys = ss.objectKeys(SimpleSchema._makeGeneric(field) + '.$');
 	}
 
 	var loopArray = [];
@@ -167,7 +167,7 @@ ArrayTracker.prototype.addOneToField = function atAddOneToField(formId, field, s
 	  // If this is an array of objects, collect names of object props
 	  var childKeys = [];
 	  if (ss.schema(field + '.$').type === Object) {
-      childKeys = ss.objectKeys(field + '.$');
+      childKeys = ss.objectKeys(SimpleSchema._makeGeneric(field) + '.$');
 	  }
 
 	  var loopCtx = createLoopCtx(formId, field, i, childKeys, overrideMinCount, overrideMaxCount);
