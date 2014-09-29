@@ -227,8 +227,8 @@ Here's an example:
         {{> afFieldInput name='cost'}}
         <span class="input-group-addon">/each</span>
       </div>
-      {{#if afFieldIsInvalid 'cost'}}
-      <span class="help-block">{{afFieldMessage 'cost'}}</span>
+      {{#if afFieldIsInvalid name='cost'}}
+      <span class="help-block">{{afFieldMessage name='cost'}}</span>
       {{/if}}
     </div>
   </fieldset>
