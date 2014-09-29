@@ -84,7 +84,7 @@ defaultInputValueHandlers = {
 	      }
 	      return moment.tz(val, timezoneId).toDate();
 			} else {
-				return new Date(val);
+				return moment(val).toDate();
 			}
 		} else {
 			return null;
