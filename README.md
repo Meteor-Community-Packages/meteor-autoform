@@ -834,6 +834,7 @@ AutoForm.hooks({
       update: function(error, result, template) {},
       "methodName": function(error, result, template) {}
     },
+    // Called when form does not have a `type` attribute
     onSubmit: function(insertDoc, updateDoc, currentDoc) {},
 
     // Called when any operation succeeds, where operation will be
@@ -881,8 +882,8 @@ If you want to add the same hook for multiple forms or for all forms, use the
   });
 
   AutoForm.addHooks(null, {
-    onSubmit: function () {
-      console.log("onSubmit ALL FORMS!");
+    onSuccess: function () {
+      console.log("onSuccess on all input/update/method forms!");
     }
   });
 ```
