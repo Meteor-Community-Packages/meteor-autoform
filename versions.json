@@ -2,11 +2,15 @@
   "dependencies": [
     [
       "aldeed:simple-schema",
-      "1.0.1"
+      "1.0.3"
+    ],
+    [
+      "base64",
+      "1.0.0"
     ],
     [
       "blaze",
-      "2.0.0"
+      "2.0.1"
     ],
     [
       "callback-hook",
@@ -14,19 +18,19 @@
     ],
     [
       "check",
-      "1.0.0"
+      "1.0.1"
     ],
     [
       "ddp",
-      "1.0.8"
+      "1.0.9"
     ],
     [
       "deps",
-      "1.0.3"
+      "1.0.4"
     ],
     [
       "ejson",
-      "1.0.1"
+      "1.0.3"
     ],
     [
       "geojson-utils",
@@ -34,7 +38,7 @@
     ],
     [
       "htmljs",
-      "1.0.0-cordova1"
+      "1.0.1"
     ],
     [
       "id-map",
@@ -50,19 +54,19 @@
     ],
     [
       "livedata",
-      "1.0.9"
+      "1.0.10"
     ],
     [
       "logging",
-      "1.0.2-cordova2"
+      "1.0.3"
     ],
     [
       "meteor",
-      "1.0.4-cordova6"
+      "1.1.1"
     ],
     [
       "minimongo",
-      "1.0.2"
+      "1.0.3"
     ],
     [
       "mrt:moment",
@@ -82,7 +86,7 @@
     ],
     [
       "reactive-var",
-      "1.0.1"
+      "1.0.2"
     ],
     [
       "retry",
@@ -90,7 +94,7 @@
     ],
     [
       "templating",
-      "1.0.5"
+      "1.0.7"
     ],
     [
       "tracker",
@@ -98,7 +102,7 @@
     ],
     [
       "ui",
-      "1.0.2"
+      "1.0.3"
     ],
     [
       "underscore",
@@ -106,6 +110,6 @@
     ]
   ],
   "pluginDependencies": [],
-  "toolVersion": "meteor-tool@CHECKOUT",
+  "toolVersion": "meteor-tool@1.0.33",
   "format": "1.0"
 }

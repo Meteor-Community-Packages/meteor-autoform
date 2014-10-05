@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 3.1.0
+
+When AutoForm pre-validates, it now passes `docId` to autoValue and custom context, just as collection2 would do.
+
 ### 3.0.0
 
 * Fixes to form preservation during hot code push.
