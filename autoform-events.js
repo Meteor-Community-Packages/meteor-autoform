@@ -1,4 +1,5 @@
 // all form events handled here
+var lastAutoSaveElement = null;
 
 function beginSubmit(formId, template) {
   if (!template || template._notInDOM)
@@ -21,6 +22,8 @@ function beginSubmit(formId, template) {
 function endSubmit(formId, template) {
   if (!template || template._notInDOM)
     return;
+  // Try to avoid incorrect reporting of which input caused autosave
+  lastAutoSaveElement = null;
   // Get user-defined hooks
   var hooks = Hooks.getHooks(formId, 'endSubmit');
   if (hooks.length) {
@@ -33,7 +36,7 @@ function endSubmit(formId, template) {
     if (submitButton) {
       submitButton.disabled = false;
     }
-  } 
+  }
 }
 
 Template.autoForm.events({
@@ -112,6 +115,7 @@ Template.autoForm.events({
         template: template,
         formId: formId,
         docId: docId,
+        autoSaveChangedElement: lastAutoSaveElement,
         resetForm: function () {
           AutoForm.resetForm(formId, template);
         }
@@ -183,6 +187,7 @@ Template.autoForm.events({
           template: template,
           formId: formId,
           docId: docId,
+          autoSaveChangedElement: lastAutoSaveElement,
           resetForm: function () {
             AutoForm.resetForm(formId, template);
           },
@@ -229,6 +234,7 @@ Template.autoForm.events({
         template: template,
         formId: formId,
         docId: docId,
+        autoSaveChangedElement: lastAutoSaveElement,
         resetForm: function () {
           AutoForm.resetForm(formId, template);
         },
@@ -417,6 +423,7 @@ Template.autoForm.events({
     // If the form should be auto-saved whenever updated, we do that on field
     // changes instead of validating the field
     if (data.autosave) {
+      lastAutoSaveElement = event.currentTarget;
       $(event.currentTarget).submit();
       return;
     }
