@@ -7,7 +7,7 @@ formDeps = {}; //for invalidating the form inner context and causing rerender
 fd = new FormData();
 arrayTracker = new ArrayTracker();
 customInputValueHandlers = {};
-defaultTemplate = "bootstrap3";
+globalDefaultTemplate = "bootstrap3"
 // All use global template by default
 defaultTypeTemplates = {
   quickForm: null,

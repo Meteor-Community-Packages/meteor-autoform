@@ -156,44 +156,74 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
 
 /*
  * afTemplateName
+ *
+ * Returns the full template name. In the simplest scenario, this is templateType_templateName
+ * as passed in. However, if templateName is not provided, it is looked up in the following
+ * manner:
+ * 
+ * 1. autoform.<componentType>.template from the schema (field+type override for all forms)
+ * 2. autoform.template from the schema (field override for all forms)
+ * 3. template-<componentType> attribute on an ancestor component within the same form (form+type for all fields)
+ * 4. template attribute on an ancestor component within the same form (form specificity for all types and fields)
+ * 5. Default template for component type, as set by AutoForm.setDefaultTemplateForType
+ * 6. Default template, as set by AutoForm.setDefaultTemplate.
+ * 7. Built-in default template, currently bootstrap-3.
  */
 regHelper('afTemplateName', function afTemplateNameHelper(templateType, templateName) {
-  var self = this;
-  
-  // Template may be specified in schema.
+  var self = this, result, schemaAutoFormDefs, templateFromAncestor, defaultTemplate;
+
+  var result = templateType + '_' + templateName; // templateName might be undefined, but the result will be the same
+  if (Template[result]) {
+    return result;
+  }
+
+  // If the attributes provided a templateName but that template didn't exist, show a warning
+  if (templateName && AutoForm._debug) {
+    console.warn(templateType + ': "' + templateName + '" is not a valid template name. Falling back to a different template.');
+  }
+
+  // Get `autoform` object from the schema, if present.
   // Skip for quickForm because it renders a form and not a field.
-  if (!templateName && templateType !== 'quickForm') {
-    var autoform = AutoForm.find(templateType);
-    var fieldName = self.name;
-    
-    if (fieldName && autoform) {
-      var defs = Utility.getDefs(autoform.ss, fieldName); //defs will not be undefined
-      templateName = (defs.autoform && defs.autoform.template);
-    }
+  if (templateType !== 'quickForm' && self.atts && self.atts.name) {
+    schemaAutoFormDefs = AutoForm.getSchemaForField(self.atts.name).autoform;
   }
 
-  // Determine default template
-  var defaultTemplate = AutoForm.getDefaultTemplateForType(templateType) || AutoForm.getDefaultTemplate();
-
-  // Determine template name
-  var result;
-  if (templateName) {
-    result = templateType + '_' + templateName;
-    if (!Template[result]) {
-      result = null;
-      AutoForm._debug && console.warn(templateType + ': "' + templateName + '" is not a valid template name. Falling back to default template, "' + defaultTemplate + '".');
-    }
+  // Fallback #1: autoform.<componentType>.template from the schema
+  if (schemaAutoFormDefs && schemaAutoFormDefs[templateType] && schemaAutoFormDefs[templateType].template && Template[templateType + '_' + schemaAutoFormDefs[templateType].template]) {
+    return templateType + '_' + schemaAutoFormDefs[templateType].template;
   }
 
-  if (!result) {
-    result = templateType + '_' + defaultTemplate;
-    if (!Template[result]) {
-      throw new Error(templateType + ': "' + defaultTemplate + '" is not a valid template name');
-    }
+  // Fallback #2: autoform.template from the schema
+  if (schemaAutoFormDefs && schemaAutoFormDefs.template && Template[templateType + '_' + schemaAutoFormDefs.template]) {
+    return templateType + '_' + schemaAutoFormDefs.template;
   }
 
-  // Return the template name that we want to use
-  return result;
+  // Fallback #3: template-<componentType> attribute on an ancestor component within the same form
+  templateFromAncestor = AutoForm.findAttribute("template-" + templateType);
+  if (templateFromAncestor && Template[templateType + '_' + templateFromAncestor]) {
+    return templateType + '_' + templateFromAncestor;
+  }
+
+  // Fallback #4: template attribute on an ancestor component within the same form
+  templateFromAncestor = AutoForm.findAttribute("template");
+  if (templateFromAncestor && Template[templateType + '_' + templateFromAncestor]) {
+    return templateType + '_' + templateFromAncestor;
+  }
+
+  // Fallback #5: Default template for component type, as set by AutoForm.setDefaultTemplateForType
+  defaultTemplate = AutoForm.getDefaultTemplateForType(templateType);
+  if (defaultTemplate && Template[templateType + '_' + defaultTemplate]) {
+    return templateType + '_' + defaultTemplate;
+  }
+
+  // Fallback #6: Default template, as set by AutoForm.setDefaultTemplate
+  defaultTemplate = AutoForm.getDefaultTemplate();
+  if (defaultTemplate && Template[templateType + '_' + defaultTemplate]) {
+    return templateType + '_' + defaultTemplate;
+  }
+
+  // Fallback #7: hard-coded default
+  return "bootstrap3";
 });
 
 /*

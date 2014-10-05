@@ -80,7 +80,7 @@ AutoForm.resetForm = function autoFormResetForm(formId, template) {
  * @param {String} template
  */
 AutoForm.setDefaultTemplate = function autoFormSetDefaultTemplate(template) {
-  defaultTemplate = template;
+  globalDefaultTemplate = template;
   deps.defaultTemplate.changed();
 };
 
@@ -92,7 +92,7 @@ AutoForm.setDefaultTemplate = function autoFormSetDefaultTemplate(template) {
  */
 AutoForm.getDefaultTemplate = function autoFormGetDefaultTemplate() {
   deps.defaultTemplate.depend();
-  return defaultTemplate;
+  return globalDefaultTemplate;
 };
 
 /**
@@ -266,6 +266,31 @@ AutoForm.find = function autoFormFind(type) {
     throw new Error((type || "AutoForm.find") + " must be used within an autoForm block");
   }
   return af._af;
+};
+
+/**
+ * @method AutoForm.findAttribute
+ * @param {String} attrName Attribute name
+ * @public
+ * @return {Any|undefined} Searches for the given attribute, looking up the parent context tree until the closest autoform is reached.
+ *
+ * Call this method from a UI helper. Might return undefined.
+ */
+AutoForm.findAttribute = function autoFormFindAttribute(attrName) {
+  var n = 0, af, val, stopAt = -1;
+  // we go one level past _af so that we get the original autoForm or quickForm attributes, too
+  do {
+    af = UI._parentData(n++);
+    if (af && af.atts && af.atts[attrName] !== void 0) {
+      val = af.atts[attrName];
+    } else if (af && af[attrName] !== void 0) {
+      val = af[attrName];
+    }
+    if (af && af._af) {
+      stopAt = n + 1;
+    }
+  } while (af && stopAt < n && val === void 0);
+  return val;
 };
 
 /**
