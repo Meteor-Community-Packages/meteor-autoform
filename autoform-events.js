@@ -111,6 +111,7 @@ Template.autoForm.events({
         event: event,
         template: template,
         formId: formId,
+        docId: docId,
         resetForm: function () {
           AutoForm.resetForm(formId, template);
         }
@@ -181,6 +182,7 @@ Template.autoForm.events({
           event: event,
           template: template,
           formId: formId,
+          docId: docId,
           resetForm: function () {
             AutoForm.resetForm(formId, template);
           },
@@ -226,6 +228,7 @@ Template.autoForm.events({
         event: event,
         template: template,
         formId: formId,
+        docId: docId,
         resetForm: function () {
           AutoForm.resetForm(formId, template);
         },
