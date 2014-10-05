@@ -124,8 +124,9 @@ Template.autoForm.events({
             _.each(onError, function onErrorEach(hook) {
               hook.call(cbCtx, name, error, template);
             });
-          } else if (!afterHooks || !afterHooks.length) {
-            // if there are no onError or "after" hooks, throw the error
+          } else if ((!afterHooks || !afterHooks.length) && ss.namedContext(formId).isValid()) {
+            // if there are no onError or "after" hooks or validation errors, throw the error
+            // because it must be some other error from the server
             endSubmit(formId, template);
             throw error;
           }
