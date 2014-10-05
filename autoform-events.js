@@ -124,6 +124,7 @@ Template.autoForm.events({
             });
           } else if (!afterHooks || !afterHooks.length) {
             // if there are no onError or "after" hooks, throw the error
+            endSubmit(formId, template);
             throw error;
           }
         } else {
