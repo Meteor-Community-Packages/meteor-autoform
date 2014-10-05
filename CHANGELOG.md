@@ -6,6 +6,15 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 3.2.0
+
+* Documentation corrections. (Thanks @paulellery and @jakozaur)
+* Fixes to logic for throwing errors: don't do it if there are validation errors, and call endSubmit (e.g., to re-enable buttons) before doing it. (Thanks @jakozaur)
+* Internal code revisions for better backwards and forewards compatibility (Thanks @SachaG)
+* The bootstrap3-horizontal template now recognizes a `leftLabel` attribute that you can set to `true` on your boolean check box fields to put the check box label in the left column instead of to the right of the check box.
+* In hooks for update forms, you can now use `this.docId` to figure out which document is being updated.
+* In hooks for autosave forms, you can now use `this.autoSaveChangedElement` to get the element that caused the automatic form submission. You can use this, for example, to display some kind of indicator that the changed field was saved.
+
 ### 3.1.0
 
 When AutoForm pre-validates, it now passes `docId` to autoValue and custom context, just as collection2 would do.
