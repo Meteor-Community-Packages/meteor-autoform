@@ -138,7 +138,6 @@ Template["afCheckbox_bootstrap3-horizontal"].helpers({
     return atts;
   },
   useLeftLabel: function () {
-    console.log(this.atts);
     return this.atts.leftLabel;
   }
 });
