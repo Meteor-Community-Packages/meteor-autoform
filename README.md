@@ -377,7 +377,7 @@ Here's an example of passing `options` to generate a `select` field:
 *client.js:*
 
 ```js
-UI.registerHelper("yearOptions", function() {
+Template.registerHelper("yearOptions", function() {
     return [
         {label: "2013", value: 2013},
         {label: "2014", value: 2014},
@@ -1369,7 +1369,7 @@ Schemas.ContactForm = new SimpleSchema({
 *client.js:*
 
 ```js
-UI.registerHelper("Schemas", Schemas);
+Template.registerHelper("Schemas", Schemas);
 ```
 
 *html:*

@@ -1,3 +1,5 @@
+// all form events handled here
+
 function beginSubmit(formId, template) {
   if (!template || template._notInDOM)
     return;

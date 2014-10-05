@@ -1,0 +1,7 @@
+<template name="autoForm">
+  <form {{atts}}>
+    {{#with innerContext ..}}
+    {{> UI.contentBlock this}}
+    {{/with}}
+  </form>
+</template>

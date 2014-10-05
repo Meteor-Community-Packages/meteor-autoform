@@ -1,3 +1,5 @@
+// Tracks form data; particularly needed to track the number of items in arrays in the doc
+
 FormData = function afFormData() {
 	var self = this;
 	self.forms = {};

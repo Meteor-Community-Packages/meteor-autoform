@@ -57,8 +57,7 @@ Package.on_use(function(api) {
     // plain-span Template
     'templates/plain-span/plain-span.html',
     'templates/plain-span/plain-span.js',
-    // Core Files
-    'autoform.html',
+    // functions and utilities
     'utility.js',
     'form-preserve.js',
     'autoform-hooks.js',
@@ -66,9 +65,35 @@ Package.on_use(function(api) {
     'autoform-formdata.js',
     'autoform-arrays.js',
     'autoform.js',
+    // components that render a form
+    'components/autoForm/autoForm.html',
+    'components/autoForm/autoForm.js',
+    'components/quickForm/quickForm.html',
+    'components/quickForm/quickForm.js',
+    // components that render controls within a form
+    'components/afArrayField/afArrayField.html',
+    'components/afArrayField/afArrayField.js',
+    'components/afEachArrayItem/afEachArrayItem.html',
+    'components/afEachArrayItem/afEachArrayItem.js',
+    'components/afFieldInput/afFieldInput.html',
+    'components/afFieldInput/afFieldInput.js',
+    'components/afFieldLabel/afFieldLabel.html',
+    'components/afFieldSelect/afFieldSelect.html',
+    'components/afFieldSelect/afFieldSelect.js',
+    'components/afFormGroup/afFormGroup.html',
+    'components/afFormGroup/afFormGroup.js',
+    'components/afObjectField/afObjectField.html',
+    'components/afQuickField/afQuickField.html',
+    'components/afQuickField/afQuickField.js',
+    'components/afQuickFields/afQuickFields.html',
+    'components/afQuickFields/afQuickFields.js',
+    // global helpers
     'autoform-helpers.js',
+    // validation
     'autoform-validation.js',
+    // event handling
     'autoform-events.js',
+    // public API
     'autoform-api.js'
   ], 'client');
 });

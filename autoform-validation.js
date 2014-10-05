@@ -1,3 +1,5 @@
+// all form validation logic is here
+
 _validateForm = function _validateForm(formId, formDetails, formDocs, useCollectionSchema) {
   if (formDetails.validationType === 'none')
     return true;

@@ -1,0 +1,7 @@
+<template name="afFieldSelect">
+  {{#with innerContext atts=this contentBlock=UI.contentBlock contentBlockContext=..}}
+    {{#with afTemplateName 'afFieldSelect' ../template}}
+      {{> UI.dynamic template=this data=..}}
+    {{/with}}
+  {{/with}}
+</template>

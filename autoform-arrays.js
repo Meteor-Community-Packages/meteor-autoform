@@ -1,3 +1,7 @@
+// Track arrays; this allows us to add/remove fields or groups of fields for an array
+// but still easily respect minCount and maxCount, and properly add/remove the same
+// items from the database once the form is submitted.
+
 ArrayTracker = function afArrayTracker() {
   var self = this;
   self.info = {};

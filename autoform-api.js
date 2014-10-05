@@ -1,3 +1,5 @@
+// This file defines the public, exported API
+
 AutoForm = AutoForm || {}; //exported
 
 AutoForm.formPreserve = formPreserve;
@@ -274,6 +276,7 @@ AutoForm.find = function autoFormFind(type) {
  */
 AutoForm.debug = function autoFormDebug() {
   SimpleSchema.debug = true;
+  AutoForm._debug = true;
   AutoForm.addHooks(null, {
     onError: function (operation, error, template) {
       console.log("Error in " + this.formId, operation, error);
@@ -294,10 +297,11 @@ AutoForm.arrayTracker = arrayTracker;
 
 /**
  * @method AutoForm.getInputType
+ * @param {Object} atts The attributes provided to afFieldInput.
  * @public
  * @return {String} The input type. Most are the same as the `type` attributes for HTML input elements, but some are special strings that autoform interprets.
  *
- * Call this method from a UI helper to get the data context for the closest autoform.
+ * Call this method from a UI helper to get the type string for the input control.
  */
 AutoForm.getInputType = getInputType;
 
@@ -322,4 +326,12 @@ AutoForm.getSchemaForField = function autoFormGetSchemaForField(name, autoform) 
   return Utility.getDefs(ss, name);
 };
 
+/**
+ * @method AutoForm.expectsArray
+ * @public
+ * @param {Object} atts The attributes provided to afFieldInput.
+ * @return {Boolean} 
+ *
+ * Call this method from a UI helper to determine whether the user is expecting the input control to produce an array value.
+ */
 AutoForm.expectsArray = expectsArray;

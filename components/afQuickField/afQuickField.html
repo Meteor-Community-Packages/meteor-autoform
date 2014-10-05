@@ -1,0 +1,11 @@
+<template name="afQuickField">
+  {{#if isGroup atts=this}}
+    {{> afObjectField}}
+  {{else}}
+    {{#if isFieldArray atts=this}}
+      {{> afArrayField}}
+    {{else}}
+      {{> afFormGroup}}
+    {{/if}}
+  {{/if}}
+</template>

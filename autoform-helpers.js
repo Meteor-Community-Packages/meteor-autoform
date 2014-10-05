@@ -1,7 +1,14 @@
+// Global template helpers (exported)
+
+var regHelper = Template.registerHelper;
+if (typeof regHelper !== "function") {
+  regHelper = UI.registerHelper;
+}
+
 /*
  * afFieldMessage
  */
-UI.registerHelper('afFieldMessage', function autoFormFieldMessage(options) {
+regHelper('afFieldMessage', function autoFormFieldMessage(options) {
   options = parseOptions(options, 'afFieldMessage');
 
   return options.ss.namedContext(options.formId).keyErrorMessage(options.name);
@@ -10,7 +17,7 @@ UI.registerHelper('afFieldMessage', function autoFormFieldMessage(options) {
 /*
  * afFieldIsInvalid
  */
-UI.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
+regHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
   options = parseOptions(options, 'afFieldIsInvalid');
 
   return options.ss.namedContext(options.formId).keyIsInvalid(options.name);
@@ -19,7 +26,7 @@ UI.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
 /*
  * afArrayFieldHasMoreThanMinimum
  */
-UI.registerHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreThanMinimum(options) {
+regHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreThanMinimum(options) {
   options = parseOptions(options, 'afArrayFieldHasMoreThanMinimum');
 
   var range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
@@ -30,7 +37,7 @@ UI.registerHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldH
 /*
  * afArrayFieldHasLessThanMaximum
  */
-UI.registerHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessThanMaximum(options) {
+regHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessThanMaximum(options) {
   options = parseOptions(options, 'afArrayFieldHasLessThanMaximum');
 
   var range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
@@ -41,7 +48,7 @@ UI.registerHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldH
 /*
  * afFieldValueIs
  */
-UI.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
+regHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
   options = parseOptions(options, 'afFieldValueIs');
 
   var currentValue = AutoForm.getFieldValue(options.formId, options.name);
@@ -51,7 +58,7 @@ UI.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
 /*
  * afArrayFieldIsFirstVisible
  */
-UI.registerHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFirstVisible() {
+regHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFirstVisible() {
   var context = this;
   return arrayTracker.isFirstFieldlVisible(context.formId, context.arrayFieldName, context.index);
 });
@@ -59,7 +66,7 @@ UI.registerHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFir
 /*
  * afArrayFieldIsLastVisible
  */
-UI.registerHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLastVisible() {
+regHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLastVisible() {
   var context = this;
   return arrayTracker.isLastFieldlVisible(context.formId, context.arrayFieldName, context.index);
 });
@@ -67,7 +74,7 @@ UI.registerHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLast
 /*
  * afFieldValueContains
  */
-UI.registerHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
+regHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
   options = parseOptions(options, 'afFieldValueContains');
 
   var currentValue = AutoForm.getFieldValue(options.formId, options.name);
@@ -77,7 +84,7 @@ UI.registerHelper('afFieldValueContains', function autoFormFieldValueContains(op
 /*
  * afFieldLabelText
  */
-UI.registerHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
+regHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
   options = parseOptions(options, 'afFieldLabelText');
 
   return options.ss.label(options.name);
@@ -86,7 +93,7 @@ UI.registerHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
 /*
  * afFieldNames
  */
-UI.registerHelper("afFieldNames", function autoFormFieldNames(options) {
+regHelper("afFieldNames", function autoFormFieldNames(options) {
   options = parseOptions(options, 'afFieldNames');
   var ss = options.ss;
   var name = options.name;
@@ -145,6 +152,48 @@ UI.registerHelper("afFieldNames", function autoFormFieldNames(options) {
   fieldList = _.unique(fieldList);
 
   return fieldList;
+});
+
+/*
+ * afTemplateName
+ */
+regHelper('afTemplateName', function afTemplateNameHelper(templateType, templateName) {
+  var self = this;
+  
+  // Template may be specified in schema.
+  // Skip for quickForm because it renders a form and not a field.
+  if (!templateName && templateType !== 'quickForm') {
+    var autoform = AutoForm.find(templateType);
+    var fieldName = self.name;
+    
+    if (fieldName && autoform) {
+      var defs = Utility.getDefs(autoform.ss, fieldName); //defs will not be undefined
+      templateName = (defs.autoform && defs.autoform.template);
+    }
+  }
+
+  // Determine default template
+  var defaultTemplate = AutoForm.getDefaultTemplateForType(templateType) || AutoForm.getDefaultTemplate();
+
+  // Determine template name
+  var result;
+  if (templateName) {
+    result = templateType + '_' + templateName;
+    if (!Template[result]) {
+      result = null;
+      AutoForm._debug && console.warn(templateType + ': "' + templateName + '" is not a valid template name. Falling back to default template, "' + defaultTemplate + '".');
+    }
+  }
+
+  if (!result) {
+    result = templateType + '_' + defaultTemplate;
+    if (!Template[result]) {
+      throw new Error(templateType + ': "' + defaultTemplate + '" is not a valid template name');
+    }
+  }
+
+  // Return the template name that we want to use
+  return result;
 });
 
 /*

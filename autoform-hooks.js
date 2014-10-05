@@ -1,3 +1,5 @@
+// Manages all hooks, supporting append/replace, get
+
 Hooks = {
   form: {},
   global: {
