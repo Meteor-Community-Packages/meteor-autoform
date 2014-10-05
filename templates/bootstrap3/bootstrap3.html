@@ -89,7 +89,7 @@
 
 <template name="afFormGroup_bootstrap3">
   <div class="form-group {{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
-    {{#unless this.skipLabel}}
+    {{#unless skipLabel}}
     {{> afFieldLabel this.afFieldLabelAtts}}
     {{/unless}}
     {{> afFieldInput this.afFieldInputAtts}}

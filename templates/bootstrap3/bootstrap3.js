@@ -27,6 +27,13 @@ Template['quickForm_bootstrap3'].submitButtonAtts = function bsQuickFormSubmitBu
   return atts;
 };
 
+Template['afFormGroup_bootstrap3'].skipLabel = function bsFormGroupSkipLabel() {
+  var self = this;
+
+  var type = AutoForm.getInputType(self.afFieldInputAtts);
+  return (self.skipLabel || type === "boolean-checkbox");
+};
+
 function addFormControlAtts() {
   var atts = _.clone(this.atts);
   if (typeof atts["class"] === "string") {

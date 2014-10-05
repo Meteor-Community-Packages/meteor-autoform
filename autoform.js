@@ -258,29 +258,25 @@ Template.afFieldInput.innerContext = function afFieldInputInnerContext(options) 
   var ss = c.af.ss;
   var defs = c.defs;
 
+  var fieldExpectsArray = AutoForm.expectsArray(c.atts);
+
   // Adjust for array fields if necessary
-  var expectsArray = false;
   var defaultValue = defs.defaultValue; //make sure to use pre-adjustment defaultValue for arrays
   if (defs.type === Array) {
     defs = ss.schema(c.atts.name + ".$");
-
-    //if the user overrides the type to anything,
-    //then we won't be using a select box and
-    //we won't be expecting an array for the current value
-    expectsArray = !c.atts.type;
   }
 
   // Get inputType
-  var inputType = getInputType(c.atts, defs, expectsArray);
+  var inputType = AutoForm.getInputType(c.atts);
 
   // Get input value
-  var value = getInputValue(c.atts.name, c.atts, expectsArray, inputType, c.atts.value, c.af.mDoc, defaultValue);
+  var value = getInputValue(c.atts.name, c.atts, fieldExpectsArray, inputType, c.atts.value, c.af.mDoc, defaultValue);
 
   // Track field's value for reactive show/hide of other fields by value
   updateTrackedFieldValue(c.af.formId, c.atts.name, value);
   
   // Get input data context
-  var iData = getInputData(defs, c.atts, value, inputType, ss.label(c.atts.name), expectsArray, c.af.submitType, c.af);
+  var iData = getInputData(defs, c.atts, value, inputType, ss.label(c.atts.name), fieldExpectsArray, c.af.submitType, c.af);
 
   // Return input data context
   return _.extend({_af: c.af, contentBlock: contentBlock, contentBlockContext: contentBlockContext, type: inputType}, iData);
@@ -314,51 +310,36 @@ Template.afArrayField.innerContext = function (options) {
  * afFormGroup
  */
 
-function formGroupLabelAtts(context) {
-  // Remove unwanted props from the hash
-  context = _.omit(context, 'label');
-
+function formGroupLabelAtts(atts) {
   // Separate label options from input options; label items begin with "label-"
-  var labelContext = {
-    name: context.name,
-    template: context.template
+  var labelAtts = {
+    name: atts.name,
+    template: atts.template
   };
-  _.each(context, function autoFormLabelContextEach(val, key) {
+  _.each(atts, function autoFormLabelAttsEach(val, key) {
     if (key.indexOf("label-") === 0) {
-      labelContext[key.substring(6)] = val;
+      labelAtts[key.substring(6)] = val;
     }
   });
 
-  return labelContext;
+  return labelAtts;
 }
 
-function formGroupInputAtts(context) {
-  // Remove unwanted props from the hash
-  context = _.omit(context, 'label');
-
+function formGroupInputAtts(atts) {
   // Separate label options from input options; label items begin with "label-"
-  var inputContext = {};
-  _.each(context, function autoFormInputContextEach(val, key) {
-    if (key.indexOf("label-") !== 0) {
-      inputContext[key] = val;
-    }
+  // We also don't want the "label" option
+  return _.omit(atts, function (val, key) {
+    return (key === "label" || key.indexOf("label-") === 0);
   });
-
-  return inputContext;
 }
 
 Template.afFormGroup.innerContext = function afFormGroupInnerContext(options) {
   var c = Utility.normalizeContext(options.hash, "afFormGroup");
-  var ss = c.af.ss;
-
-  var labelAtts = formGroupLabelAtts(c.atts);
-  var inputAtts = formGroupInputAtts(c.atts);
-
   return {
-    skipLabel: (c.atts.label === false || (c.defs.type === Boolean && !("select" in c.atts) && !("radio" in c.atts))),
-    afFieldLabelAtts: labelAtts,
-    afFieldInputAtts: inputAtts,
-    atts: {name: inputAtts.name}
+    skipLabel: (c.atts.label === false),
+    afFieldLabelAtts: formGroupLabelAtts(c.atts),
+    afFieldInputAtts: formGroupInputAtts(c.atts),
+    atts: {name: c.atts.name}
   };
 };
 
@@ -862,44 +843,6 @@ function getInputData(defs, hash, value, inputType, label, expectsArray, submitT
   data.atts = inputAtts;
 
   return data;
-}
-
-function getInputType(atts, defs, expectsArray) {
-  var schemaType = defs.type;
-
-  var type = "text";
-  if (atts.type) {
-    type = atts.type;
-  } else if (atts.options) {
-    if (atts.noselect) {
-      if (expectsArray) {
-        type = "select-checkbox";
-      } else {
-        type = "select-radio";
-      }
-    } else {
-      type = "select";
-    }
-  } else if (schemaType === String && defs.regEx === SimpleSchema.RegEx.Email) {
-    type = "email";
-  } else if (schemaType === String && defs.regEx === SimpleSchema.RegEx.Url) {
-    type = "url";
-  } else if (schemaType === String && atts.rows) {
-    type = "textarea";
-  } else if (schemaType === Number) {
-    type = "number";
-  } else if (schemaType === Date) {
-    type = "date";
-  } else if (schemaType === Boolean) {
-    if (atts.radio) {
-      type = "boolean-radios";
-    } else if (atts.select) {
-      type = "boolean-select";
-    } else {
-      type = "boolean-checkbox";
-    }
-  }
-  return type;
 }
 
 function getInputTemplateType(type) {

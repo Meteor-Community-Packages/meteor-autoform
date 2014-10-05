@@ -20,7 +20,7 @@
 
 <template name="afFormGroup_bootstrap3-horizontal">
   <div class="form-group {{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
-    {{#if this.skipLabel}}
+    {{#if skipLabel}}
     {{! We include the empty label as the easiest way to keep proper field alignment}}
     <label {{afEmptyFieldLabelAtts}}></label>
     {{else}}
@@ -78,4 +78,20 @@
       </div>
     </div>
   </div>
+</template>
+
+<template name="afCheckbox_bootstrap3-horizontal">
+  {{#if useLeftLabel}}
+  {{! same as bootstrap, but we don't include the label because it appears in the left column}}
+  <div class="checkbox">
+    <input type="checkbox" value="{{this.value}}" {{attsPlusSpecialClass}} />
+  </div>
+  {{else}}
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" value="{{this.value}}" {{atts}} />
+      {{afFieldLabelText name=this.name}}
+    </label>
+  </div>
+  {{/if}}
 </template>

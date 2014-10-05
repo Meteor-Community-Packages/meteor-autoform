@@ -101,3 +101,66 @@ defaultInputValueHandlers = {
 		return this.val();
 	}
 };
+
+// must be used in a template helper
+expectsArray = function expectsArray(inputAtts) {
+	// If the user overrides the type to anything,
+  // then we won't be using a select box and
+  // we won't be expecting an array for the current value.
+  // This logic should probably be more robust. The idea is that
+  // the user should be able to specify any type of control to use
+  // to override the default logic, and then she can use either a custom input
+  // handler or formToDoc hook to change the value into the expected array.
+	return (AutoForm.getSchemaForField(inputAtts.name).type === Array && !inputAtts.type);
+};
+
+// Determines based on different options what type of input/control should be used
+getInputType = function getInputType(atts) {
+	// Does the schema/form expect the value of the field to be an array?
+	var expectsArray = AutoForm.expectsArray(atts);
+
+	// What is the `type` in the schema definition?
+	var defs = AutoForm.getSchemaForField(atts.name);
+  var schemaType = defs.type;
+  if (schemaType === Array) {
+    schemaType = AutoForm.find().ss.schema(atts.name + ".$");
+  }
+
+  // Based on the `type` attribute, the `type` from the schema, and/or
+  // other characteristics such as regEx and whether an array is expected,
+  // choose which type string to return.
+  // TODO allow outside packages to extend/override this logic.
+  var type = "text";
+  if (atts.type) {
+    type = atts.type;
+  } else if (atts.options) {
+    if (atts.noselect) {
+      if (expectsArray) {
+        type = "select-checkbox";
+      } else {
+        type = "select-radio";
+      }
+    } else {
+      type = "select";
+    }
+  } else if (schemaType === String && defs.regEx === SimpleSchema.RegEx.Email) {
+    type = "email";
+  } else if (schemaType === String && defs.regEx === SimpleSchema.RegEx.Url) {
+    type = "url";
+  } else if (schemaType === String && atts.rows) {
+    type = "textarea";
+  } else if (schemaType === Number) {
+    type = "number";
+  } else if (schemaType === Date) {
+    type = "date";
+  } else if (schemaType === Boolean) {
+    if (atts.radio) {
+      type = "boolean-radios";
+    } else if (atts.select) {
+      type = "boolean-select";
+    } else {
+      type = "boolean-checkbox";
+    }
+  }
+  return type;
+};

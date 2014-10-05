@@ -50,7 +50,13 @@ Template["afFormGroup_bootstrap3-horizontal"].helpers({
     if ('input-col-class' in atts) {
       delete atts['input-col-class'];
     }
-    atts.template = "bootstrap3";
+    // We have a special template for check boxes, but otherwise we
+    // want to use the same as those defined for bootstrap3 template.
+    if (AutoForm.getInputType(this.afFieldInputAtts) === "boolean-checkbox") {
+      atts.template = "bootstrap3-horizontal";
+    } else {
+      atts.template = "bootstrap3";
+    }
     return atts;
   },
   afFieldLabelAtts: function () {
@@ -72,6 +78,12 @@ Template["afFormGroup_bootstrap3-horizontal"].helpers({
   rightColumnClass: function () {
     var atts = this.afFieldInputAtts || {};
     return atts['input-col-class'] || "";
+  },
+  skipLabel: function bshFormGroupSkipLabel() {
+    var self = this;
+
+    var type = AutoForm.getInputType(self.afFieldInputAtts);
+    return (self.skipLabel || (type === "boolean-checkbox" && !self.afFieldInputAtts.leftLabel));
   }
 });
 
@@ -102,5 +114,31 @@ Template["afArrayField_bootstrap3-horizontal"].helpers({
       "class": atts["label-class"],
       "name": atts.name
     };
+  }
+});
+
+Template["afCheckbox_bootstrap3-horizontal"].helpers({
+  atts: function () {
+    var atts = _.clone(this.atts);
+    if (this.selected) {
+      atts.checked = "";
+    }
+    return atts;
+  },
+  attsPlusSpecialClass: function () {
+    var atts = _.clone(this.atts);
+    if (this.selected) {
+      atts.checked = "";
+    }
+    if (atts["class"]) {
+      atts["class"] += " autoform-checkbox-margin-fix";
+    } else {
+      atts["class"] = "autoform-checkbox-margin-fix"
+    }
+    return atts;
+  },
+  useLeftLabel: function () {
+    console.log(this.atts);
+    return this.atts.leftLabel;
   }
 });
