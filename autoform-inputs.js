@@ -102,6 +102,363 @@ defaultInputValueHandlers = {
 	}
 };
 
+// Maps a `type=<typeString>` to the component type that should be used to render it
+inputTypeDefinitions = {
+  "select": {
+    componentName:"afSelect",
+    contextAdjust: function (context) {
+      //can fix issues with some browsers selecting the firstOption instead of the selected option
+      context.atts.autocomplete = "off";
+
+      // build items list
+      context.items = [];
+
+      // If a firstOption was provided, add that to the items list first
+      if (context.firstOption) {
+        context.items.push({
+          name: context.name,
+          label: context.firstOption,
+          value: "",
+          // _id must be included because it is a special property that
+          // #each uses to track unique list items when adding and removing them
+          // See https://github.com/meteor/meteor/issues/2174
+          _id: "",
+          selected: false,
+          atts: context.atts
+        });
+      }
+
+      // Add all defined options
+      _.each(context.selectOptions, function(opt) {
+        context.items.push({
+          name: context.name,
+          label: opt.label,
+          value: opt.value,
+          // _id must be included because it is a special property that
+          // #each uses to track unique list items when adding and removing them
+          // See https://github.com/meteor/meteor/issues/2174
+          _id: opt.value,
+          selected: (opt.value.toString() === context.value.toString()),
+          atts: context.atts
+        });
+      });
+
+      return context;
+    }
+  },
+  "select-multiple": {
+    componentName:"afSelectMultiple",
+    valueIsArray: true,
+    contextAdjust: function (context) {
+      // build items list
+      context.items = _.map(context.selectOptions, function(opt) {
+        return {
+          name: context.name,
+          label: opt.label,
+          value: opt.value,
+          // _id must be included because it is a special property that
+          // #each uses to track unique list items when adding and removing them
+          // See https://github.com/meteor/meteor/issues/2174
+          _id: opt.value,
+          selected: _.contains(context.value, opt.value.toString()),
+          atts: context.atts
+        };
+      });
+
+      return context;
+    }
+  },
+  "select-checkbox": {
+    componentName:"afCheckboxGroup",
+    valueIsArray: true,
+    contextAdjust: function (context) {
+      // add the "autoform-array-item" class
+      context.atts["class"] = (context.atts["class"] || "") + " autoform-array-item";
+      return context;
+    }
+  },
+  "select-radio": {
+    componentName:"afRadioGroup"
+  },
+  "textarea": {
+    componentName:"afTextarea",
+    contextAdjust: function (context) {
+      if (typeof context.atts.maxlength === "undefined" && typeof context.max === "number") {
+        context.atts.maxlength = context.max;
+      }
+      return context;
+    }
+  },
+  "contenteditable": {
+    componentName:"afContenteditable",
+    contextAdjust: function (context) {
+      if (typeof context.atts['data-maxlength'] === "undefined" && typeof context.max === "number") {
+        context.atts['data-maxlength'] = context.max;
+      }
+      return context;
+    }
+  },
+  "boolean-radios": {
+    componentName:"afRadioGroup",
+    valueIn: function (val) {
+      // switch to a boolean
+      return (val === "true") ? true : false;
+    },
+    contextAdjust: function (context) {
+      // add autoform-boolean class, which we use when building object
+      // from form values later
+      context.atts["class"] = (context.atts["class"] || "") + " autoform-boolean";
+
+      // build items list
+      context.items = [
+        {
+          name: context.name,
+          value: "false",
+          // _id must be included because it is a special property that
+          // #each uses to track unique list items when adding and removing them
+          // See https://github.com/meteor/meteor/issues/2174
+          _id: "false",
+          selected: !context.value,
+          label: context.falseLabel,
+          atts: context.atts
+        },
+        {
+          name: context.name,
+          value: "true",
+          // _id must be included because it is a special property that
+          // #each uses to track unique list items when adding and removing them
+          // See https://github.com/meteor/meteor/issues/2174
+          _id: "true",
+          selected: context.value,
+          label: context.trueLabel,
+          atts: context.atts
+        }
+      ];
+
+      return context;
+    }
+  },
+  "boolean-select": {
+    componentName:"afSelect",
+    valueIn: function (val) {
+      // switch to a boolean
+      return (val === "true") ? true : false;
+    },
+    contextAdjust: function (context) {
+      // add autoform-boolean class, which we use when building object
+      // from form values later
+      context.atts["class"] = (context.atts["class"] || "") + " autoform-boolean";
+
+      // build items list
+      context.items = [
+        {
+          name: context.name,
+          value: "false",
+          // _id must be included because it is a special property that
+          // #each uses to track unique list items when adding and removing them
+          // See https://github.com/meteor/meteor/issues/2174
+          _id: "false",
+          selected: !context.value,
+          label: context.falseLabel,
+          atts: context.atts
+        },
+        {
+          name: context.name,
+          value: "true",
+          // _id must be included because it is a special property that
+          // #each uses to track unique list items when adding and removing them
+          // See https://github.com/meteor/meteor/issues/2174
+          _id: "true",
+          selected: context.value,
+          label: context.trueLabel,
+          atts: context.atts
+        }
+      ];
+
+      return context;
+    }
+  },
+  "boolean-checkbox": {
+    componentName:"afCheckbox",
+    valueIn: function (val) {
+      // switch to a boolean
+      return (val === "true") ? true : false;
+    },
+    contextAdjust: function (context) {
+      // add autoform-boolean class, which we use when building object
+      // from form values later
+      context.atts["class"] = (context.atts["class"] || "") + " autoform-boolean";
+
+      //don't add required attribute to checkboxes because some browsers assume that to mean that it must be checked, which is not what we mean by "required"
+      delete context.atts.required;
+      
+      context.selected = context.value;
+      context.value = "true";
+
+      return context;
+    }
+  },
+  "text": {
+    componentName: "afInputText",
+    contextAdjust: function (context) {
+      if (typeof context.atts.maxlength === "undefined" && typeof context.max === "number") {
+        context.atts.maxlength = context.max;
+      }
+      return context;
+    }
+  },
+  "password": {
+    componentName: "afInputPassword",
+    contextAdjust: function (context) {
+      if (typeof context.atts.maxlength === "undefined" && typeof context.max === "number") {
+        context.atts.maxlength = context.max;
+      }
+      return context;
+    }
+  },
+  "button": {
+    componentName: "afInputButton"
+  },
+  "submit": {
+    componentName: "afInputSubmit"
+  },
+  "reset": {
+    componentName: "afInputReset"
+  },
+  "file": {
+    componentName: "afInputFile"
+  },
+  "hidden": {
+    componentName: "afInputHidden",
+    contextAdjust: function (context) {
+      if (context.schemaType === Boolean) {
+        // add autoform-boolean class, which we use when building object
+        // from form values later
+        context.atts["class"] = (context.atts["class"] || "") + " autoform-boolean";
+      }
+      return context;
+    }
+  },
+  "image": {
+    componentName: "afInputImage"
+  },
+  "month": {
+    componentName: "afInputMonth"
+  },
+  "time": {
+    componentName: "afInputTime"
+  },
+  "week": {
+    componentName: "afInputWeek"
+  },
+  "number": {
+    componentName: "afInputNumber",
+    contextAdjust: function (context) {
+      if (typeof context.atts.max === "undefined" && typeof context.max === "number") {
+        context.atts.max = context.max;
+      }
+      if (typeof context.atts.min === "undefined" && typeof context.min === "number") {
+        context.atts.min = context.min;
+      }
+      if (typeof context.atts.step === "undefined" && context.decimal) {
+        context.atts.step = '0.01';
+      }
+      return context;
+    }
+  },
+  "email": {
+    componentName: "afInputEmail",
+    contextAdjust: function (context) {
+      if (typeof context.atts.maxlength === "undefined" && typeof context.max === "number") {
+        context.atts.maxlength = context.max;
+      }
+      return context;
+    }
+  },
+  "url": {
+    componentName: "afInputUrl",
+    contextAdjust: function (context) {
+      if (typeof context.atts.maxlength === "undefined" && typeof context.max === "number") {
+        context.atts.maxlength = context.max;
+      }
+      return context;
+    }
+  },
+  "search": {
+    componentName: "afInputSearch",
+    contextAdjust: function (context) {
+      if (typeof context.atts.maxlength === "undefined" && typeof context.max === "number") {
+        context.atts.maxlength = context.max;
+      }
+      return context;
+    }
+  },
+  "tel": {
+    componentName: "afInputTel",
+    contextAdjust: function (context) {
+      if (typeof context.atts.maxlength === "undefined" && typeof context.max === "number") {
+        context.atts.maxlength = context.max;
+      }
+      return context;
+    }
+  },
+  "color": {
+    componentName: "afInputColor"
+  },
+  "date": {
+    componentName: "afInputDate",
+    valueIn: function (val) {
+      //convert Date to string value
+      return (val instanceof Date) ? Utility.dateToDateStringUTC(val) : val;
+    },
+    contextAdjust: function (context) {
+      if (typeof context.atts.max === "undefined" && context.max instanceof Date) {
+        context.atts.max = Utility.dateToDateStringUTC(context.max);
+      }
+      if (typeof context.atts.min === "undefined" && context.min instanceof Date) {
+        context.atts.min = Utility.dateToDateStringUTC(context.min);
+      }
+      return context;
+    }
+  },
+  "datetime": {
+    componentName: "afInputDateTime",
+    valueIn: function (val) {
+      //convert Date to string value
+      return (val instanceof Date) ? Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(val): val;
+    },
+    contextAdjust: function (context) {
+      if (typeof context.atts.max === "undefined" && context.max instanceof Date) {
+        context.atts.max = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(context.max);
+      }
+      if (typeof context.atts.min === "undefined" && context.min instanceof Date) {
+        context.atts.min = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(context.min);
+      }
+      return context;
+    }
+  },
+  "datetime-local": {
+    componentName: "afInputDateTimeLocal",
+    valueIn: function (val, atts) {
+      //convert Date to string value
+      return (val instanceof Date) ? Utility.dateToNormalizedLocalDateAndTimeString(val, atts.timezoneId) : val;
+    },
+    contextAdjust: function (context) {
+      if (typeof context.atts.max === "undefined" && context.max instanceof Date) {
+        context.atts.max = Utility.dateToNormalizedLocalDateAndTimeString(context.max, context.atts.timezoneId);
+      }
+      if (typeof context.atts.min === "undefined" && context.min instanceof Date) {
+        context.atts.min = Utility.dateToNormalizedLocalDateAndTimeString(context.min, context.atts.timezoneId);
+      }
+      if (context.atts.timezoneId) {
+        context.atts["data-timezone-id"] = context.atts.timezoneId;
+      }
+      delete context.atts.timezoneId;
+      return context;
+    }
+  }
+};
+
 // must be used in a template helper
 expectsArray = function expectsArray(inputAtts) {
 	// If the user overrides the type to anything,
@@ -116,14 +473,15 @@ expectsArray = function expectsArray(inputAtts) {
 
 // Determines based on different options what type of input/control should be used
 getInputType = function getInputType(atts) {
-	// Does the schema/form expect the value of the field to be an array?
-	var expectsArray = AutoForm.expectsArray(atts);
+	var expectsArray = false, defs, schemaType;
 
-	// What is the `type` in the schema definition?
-	var defs = AutoForm.getSchemaForField(atts.name);
-  var schemaType = defs.type;
+	// Get schema definition, using the item definition for array fields
+	defs = AutoForm.getSchemaForField(atts.name);
+  schemaType = defs.type;
   if (schemaType === Array) {
-    schemaType = AutoForm.find().ss.schema(atts.name + ".$");
+    expectsArray = true;
+    defs = AutoForm.getSchemaForField(atts.name + ".$");
+    schemaType = defs.type;
   }
 
   // Based on the `type` attribute, the `type` from the schema, and/or
@@ -135,13 +493,19 @@ getInputType = function getInputType(atts) {
     type = atts.type;
   } else if (atts.options) {
     if (atts.noselect) {
+      // Does the schema expect the value of the field to be an array?
+      // If so, use a check box group, which will return an array value.
       if (expectsArray) {
         type = "select-checkbox";
       } else {
         type = "select-radio";
       }
     } else {
-      type = "select";
+      if (expectsArray) {
+        type = "select-multiple";
+      } else {
+        type = "select";
+      }
     }
   } else if (schemaType === String && defs.regEx === SimpleSchema.RegEx.Email) {
     type = "email";
@@ -164,3 +528,4 @@ getInputType = function getInputType(atts) {
   }
   return type;
 };
+

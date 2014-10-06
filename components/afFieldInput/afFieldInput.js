@@ -1,11 +1,15 @@
 Template.afFieldInput.helpers({
-  getTemplateType: function afFieldInputGetTemplateType() {
-    return getInputTemplateType(this.type);
+  getComponentDef: function getComponentDef() {
+    // Determine what `type` attribute should be if not set
+    var inputType = AutoForm.getInputType(this);
+    var componentDef = inputTypeDefinitions[inputType];
+    if (!componentDef) {
+      throw new Error('AutoForm: No component found for rendering input with type "' + inputType + '"');
+    }
+    return componentDef;
   },
   innerContext: function afFieldInputContext(options) {
-    var c = Utility.normalizeContext(options.hash, "afFieldInput and afFieldSelect");
-    var contentBlock = options.hash.contentBlock; // applies only to afFieldSelect
-    var contentBlockContext = options.hash.contentBlockContext; // applies only to afFieldSelect
+    var c = Utility.normalizeContext(options.hash, "afFieldInput");
 
     // Set up deps, allowing us to re-render the form
     formDeps[c.af.formId] = formDeps[c.af.formId] || new Deps.Dependency;
@@ -22,19 +26,19 @@ Template.afFieldInput.helpers({
       defs = ss.schema(c.atts.name + ".$");
     }
 
-    // Get inputType
-    var inputType = AutoForm.getInputType(c.atts);
+    // Get inputTypeDefinition based on `type` attribute
+    var componentDef = options.hash.componentDef;
 
     // Get input value
-    var value = getInputValue(c.atts.name, c.atts, fieldExpectsArray, inputType, c.atts.value, c.af.mDoc, defaultValue);
+    var value = getInputValue(c.atts, c.atts.value, c.af.mDoc, defaultValue, componentDef);
 
     // Track field's value for reactive show/hide of other fields by value
     updateTrackedFieldValue(c.af.formId, c.atts.name, value);
     
-    // Get input data context
-    var iData = getInputData(defs, c.atts, value, inputType, ss.label(c.atts.name), fieldExpectsArray, c.af.submitType, c.af);
+    // Build input data context
+    var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), fieldExpectsArray, c.af.submitType);
 
-    // Return input data context
-    return _.extend({_af: c.af, contentBlock: contentBlock, contentBlockContext: contentBlockContext, type: inputType}, iData);
+    // Adjust and return context
+    return (typeof componentDef.contextAdjust === "function") ? componentDef.contextAdjust(iData) : iData;
   }
 });

@@ -79,12 +79,100 @@
   </select>
 </template>
 
+<template name="afSelectMultiple_bootstrap3">
+  <select {{atts}} multiple="">
+    {{#each this.items}}
+      <option {{optionAtts}}>{{this.label}}</option>
+    {{/each}}
+  </select>
+</template>
+
 <template name="afTextarea_bootstrap3">
   <textarea {{atts}}>{{this.value}}</textarea>
 </template>
 
-<template name="afInput_bootstrap3">
-  <input type="{{this.type}}" value="{{this.value}}" {{atts}}/>
+<template name="afInputText_bootstrap3">
+  <input type="text" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputPassword_bootstrap3">
+  <input type="password" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputButton_bootstrap3">
+  <input type="button" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputSubmit_bootstrap3">
+  <input type="submit" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputReset_bootstrap3">
+  <input type="reset" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputFile_bootstrap3">
+  <input type="file" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputHidden_bootstrap3">
+  <input type="hidden" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputImage_bootstrap3">
+  <input type="image" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputDateTime_bootstrap3">
+  <input type="datetime" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputDateTimeLocal_bootstrap3">
+  <input type="datetime-local" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputDate_bootstrap3">
+  <input type="date" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputMonth_bootstrap3">
+  <input type="month" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputTime_bootstrap3">
+  <input type="time" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputWeek_bootstrap3">
+  <input type="week" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputNumber_bootstrap3">
+  <input type="number" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputRange_bootstrap3">
+  <input type="range" value="{{this.value}}" {{this.atts}}/>
+</template>
+
+<template name="afInputEmail_bootstrap3">
+  <input type="email" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputUrl_bootstrap3">
+  <input type="url" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputSearch_bootstrap3">
+  <input type="search" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputTel_bootstrap3">
+  <input type="tel" value="{{this.value}}" {{atts}}/>
+</template>
+
+<template name="afInputColor_bootstrap3">
+  <input type="color" value="{{this.value}}" {{atts}}/>
 </template>
 
 <template name="afFormGroup_bootstrap3">

@@ -23,28 +23,21 @@ Template['quickForm_plain'].helpers({
   }
 });
 
-function selectedAttsAdjust() {
-  var atts = _.clone(this.atts);
-  if (this.selected) {
-    atts.checked = "";
-  }
-  return atts;
-}
-
-Template["afCheckbox_plain"].helpers({
-  atts: selectedAttsAdjust
-});
-
-Template["afRadio_plain"].helpers({
-  atts: selectedAttsAdjust
-});
-
-Template["afCheckboxGroup_plain"].helpers({
-  atts: selectedAttsAdjust
-});
-
-Template["afRadioGroup_plain"].helpers({
-  atts: selectedAttsAdjust
+_.each([
+    "afCheckbox_plain",
+    "afRadio_plain",
+    "afCheckboxGroup_plain",
+    "afRadioGroup_plain"
+  ], function (tmplName) {
+  Template[tmplName].helpers({
+    atts: function selectedAttsAdjust() {
+      var atts = _.clone(this.atts);
+      if (this.selected) {
+        atts.checked = "";
+      }
+      return atts;
+    }
+  });
 });
 
 Template["afSelect_plain"].helpers({

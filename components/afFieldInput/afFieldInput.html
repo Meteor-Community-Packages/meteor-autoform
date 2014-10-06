@@ -1,7 +1,9 @@
 <template name="afFieldInput">
-  {{#with innerContext atts=this}}
-    {{#with afTemplateName getTemplateType ../template}}
-      {{> UI.dynamic template=this data=..}}
+  {{#with getComponentDef}}
+    {{#with innerContext atts=.. componentDef=this}}
+      {{#with afTemplateName ../componentName ../../template}}
+        {{> UI.dynamic template=this data=..}}
+      {{/with}}
     {{/with}}
   {{/with}}
 </template>

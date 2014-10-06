@@ -181,6 +181,22 @@ AutoForm.inputValueHandlers = function afInputValueHandlers(handlers) {
 };
 
 /**
+ * @method AutoForm.addInputType
+ * @public
+ * @param {String} name The type string that this definition is for.
+ * @param {Object} definition Defines how the input type should be rendered.
+ * @param {String} definition.componentName The component name. A template with the name <componentName>_bootstrap3, and potentially others, must be defined.
+ * @return {undefined}
+ *
+ * Use this method to add custom input components.
+ */
+AutoForm.addInputType = function afAddInputType(name, definition) {
+  var obj = {};
+  obj[name] = definition;
+  _.extend(inputTypeDefinitions, obj);
+};
+
+/**
  * @method AutoForm.validateField
  * @public
  * @param {String} formId The `id` attribute of the `autoForm` you want to validate.

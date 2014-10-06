@@ -40,54 +40,62 @@ Template['afFormGroup_bootstrap3'].helpers({
   }
 });
 
-function addFormControlAtts() {
-  var atts = _.clone(this.atts);
-  if (typeof atts["class"] === "string") {
-    atts["class"] += " form-control";
-  } else {
-    atts["class"] = "form-control";
-  }
-  return atts;
-}
-
-Template["afFieldSelect_bootstrap3"].helpers({
-  atts: addFormControlAtts
+_.each([
+    "afFieldSelect_bootstrap3",
+    "afSelect_bootstrap3",
+    "afSelectMultiple_bootstrap3",
+    "afTextarea_bootstrap3",
+    "afInputText_bootstrap3",
+    "afInputPassword_bootstrap3",
+    "afInputButton_bootstrap3",
+    "afInputSubmit_bootstrap3",
+    "afInputReset_bootstrap3",
+    "afInputFile_bootstrap3",
+    "afInputHidden_bootstrap3",
+    "afInputImage_bootstrap3",
+    "afInputDateTime_bootstrap3",
+    "afInputDateTimeLocal_bootstrap3",
+    "afInputDate_bootstrap3",
+    "afInputMonth_bootstrap3",
+    "afInputTime_bootstrap3",
+    "afInputWeek_bootstrap3",
+    "afInputNumber_bootstrap3",
+    "afInputEmail_bootstrap3",
+    "afInputUrl_bootstrap3",
+    "afInputSearch_bootstrap3",
+    "afInputTel_bootstrap3",
+    "afInputColor_bootstrap3"
+  ], function (tmplName) {
+  Template[tmplName].helpers({
+    atts: function addFormControlAtts() {
+      var atts = _.clone(this.atts);
+      if (typeof atts["class"] === "string") {
+        atts["class"] += " form-control";
+      } else {
+        atts["class"] = "form-control";
+      }
+      delete atts.type;
+      delete atts.value;
+      return atts;
+    }
+  });
 });
 
-Template["afSelect_bootstrap3"].helpers({
-  atts: addFormControlAtts
-});
-
-Template["afTextarea_bootstrap3"].helpers({
-  atts: addFormControlAtts
-});
-
-Template["afInput_bootstrap3"].helpers({
-  atts: addFormControlAtts
-});
-
-function selectedAttsAdjust() {
-  var atts = _.clone(this.atts);
-  if (this.selected) {
-    atts.checked = "";
-  }
-  return atts;
-}
-
-Template["afCheckbox_bootstrap3"].helpers({
-  atts: selectedAttsAdjust
-});
-
-Template["afRadio_bootstrap3"].helpers({
-  atts: selectedAttsAdjust
-});
-
-Template["afCheckboxGroup_bootstrap3"].helpers({
-  atts: selectedAttsAdjust
-});
-
-Template["afRadioGroup_bootstrap3"].helpers({
-  atts: selectedAttsAdjust
+_.each([
+    "afCheckbox_bootstrap3",
+    "afRadio_bootstrap3",
+    "afCheckboxGroup_bootstrap3",
+    "afRadioGroup_bootstrap3"
+  ], function (tmplName) {
+  Template[tmplName].helpers({
+    atts: function selectedAttsAdjust() {
+      var atts = _.clone(this.atts);
+      if (this.selected) {
+        atts.checked = "";
+      }
+      return atts;
+    }
+  });
 });
 
 Template["afSelect_bootstrap3"].helpers({

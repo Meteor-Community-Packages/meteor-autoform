@@ -16,11 +16,31 @@ defaultTypeTemplates = {
   afCheckboxGroup: null,
   afRadioGroup: null,
   afSelect: null,
+  afSelectMultiple: null,
   afTextarea: null,
   afContenteditable: null,
   afCheckbox: null,
   afRadio: null,
-  afInput: null,
+  afInputText: null,
+  afInputPassword: null,
+  afInputButton: null,
+  afInputSubmit: null,
+  afInputReset: null,
+  afInputFile: null,
+  afInputHidden: null,
+  afInputImage: null,
+  afInputDateTime: null,
+  afInputDateTimeLocal: null,
+  afInputDate: null,
+  afInputMonth: null,
+  afInputTime: null,
+  afInputWeek: null,
+  afInputNumber: null,
+  afInputEmail: null,
+  afInputUrl: null,
+  afInputSearch: null,
+  afInputTel: null,
+  afInputColor: null,
   afFormGroup: null,
   afObjectField: null,
   afArrayField: null
@@ -35,11 +55,31 @@ deps = {
     afCheckboxGroup: new Deps.Dependency,
     afRadioGroup: new Deps.Dependency,
     afSelect: new Deps.Dependency,
+    afSelectMultiple: new Deps.Dependency,
     afTextarea: new Deps.Dependency,
     afContenteditable: new Deps.Dependency,
     afCheckbox: new Deps.Dependency,
     afRadio: new Deps.Dependency,
-    afInput: new Deps.Dependency,
+    afInputText: new Deps.Dependency,
+    afInputPassword: new Deps.Dependency,
+    afInputButton: new Deps.Dependency,
+    afInputSubmit: new Deps.Dependency,
+    afInputReset: new Deps.Dependency,
+    afInputFile: new Deps.Dependency,
+    afInputHidden: new Deps.Dependency,
+    afInputImage: new Deps.Dependency,
+    afInputDateTime: new Deps.Dependency,
+    afInputDateTimeLocal: new Deps.Dependency,
+    afInputDate: new Deps.Dependency,
+    afInputMonth: new Deps.Dependency,
+    afInputTime: new Deps.Dependency,
+    afInputWeek: new Deps.Dependency,
+    afInputNumber: new Deps.Dependency,
+    afInputEmail: new Deps.Dependency,
+    afInputUrl: new Deps.Dependency,
+    afInputSearch: new Deps.Dependency,
+    afInputTel: new Deps.Dependency,
+    afInputColor: new Deps.Dependency,
     afFormGroup: new Deps.Dependency,
     afObjectField: new Deps.Dependency,
     afArrayField: new Deps.Dependency
@@ -176,11 +216,11 @@ getFormValues = function getFormValues(template, formId, ss) {
  * * The value that is set in the `doc` provided on the containing autoForm
  * * The `defaultValue` from the schema
  */
-getInputValue = function getInputValue(name, atts, expectsArray, inputType, value, mDoc, defaultValue) {
+getInputValue = function getInputValue(atts, value, mDoc, defaultValue, typeDefs) {
   if (typeof value === "undefined") {
     // Get the value for this key in the current document
     if (mDoc) {
-      var valueInfo = mDoc.getInfoForKey(name);
+      var valueInfo = mDoc.getInfoForKey(atts.name);
       if (valueInfo) {
         value = valueInfo.value;
       }
@@ -195,31 +235,8 @@ getInputValue = function getInputValue(name, atts, expectsArray, inputType, valu
   // Change null or undefined to an empty string
   value = (value == null) ? '' : value;
 
-  function stringValue(val) {
-    if (val instanceof Date) {
-      //convert Dates to string value based on field inputType
-      if (value instanceof Date) {
-        if (inputType === "datetime") {
-          return Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(val);
-        } else if (inputType === "datetime-local") {
-          return Utility.dateToNormalizedLocalDateAndTimeString(val, atts.timezoneId);
-        } else {
-          // This fallback will be used for type="date" as well
-          // as for select arrays, since it would not make much
-          // sense to do anything other than the date portion
-          // in select controls.
-          return Utility.dateToDateStringUTC(val);
-        }
-      }
-    } else if (val.toString) {
-      return val.toString();
-    } else {
-      return val;
-    }
-  }
-
-  // If we're expecting value to be an array, and it's not, make it one
-  if (expectsArray && !_.isArray(value)) {
+  // If the component expects the value to be an array, and it's not, make it one
+  if (typeDefs.valueIsArray && !_.isArray(value)) {
     if (typeof value === "string") {
       value = value.split(',');
     } else {
@@ -228,6 +245,14 @@ getInputValue = function getInputValue(name, atts, expectsArray, inputType, valu
   }
 
   // Convert to strings
+  function stringValue(val) {
+    if (!(val instanceof Date) && val.toString) {
+      return val.toString();
+    } else {
+      return val;
+    }
+  }
+
   if (_.isArray(value)) {
     value = _.map(value, function (v) {
       return stringValue(v);
@@ -236,23 +261,28 @@ getInputValue = function getInputValue(name, atts, expectsArray, inputType, valu
     value = stringValue(value);
   }
 
-  // Switch to a boolean value for boolean fields
-  if (inputType === "boolean-radios" || inputType === "boolean-select" || inputType === "boolean-checkbox") {
-    value = (value === "true") ? true : false;
+  // At this point we have a Date, a string, or an array of strings.
+  // Run through the components valueIn function if we have one.
+  // It should then be in whatever format the component expects.
+  if (typeof typeDefs.valueIn === "function") {
+    value = typeDefs.valueIn(value, atts);
   }
-
-  // We return either a string, a boolean, or an array of strings
+  
   return value;
 };
 
-getInputData = function getInputData(defs, hash, value, inputType, label, expectsArray, submitType, _af) {
+getInputData = function getInputData(defs, hash, value, label, expectsArray, submitType) {
   var schemaType = defs.type;
 
+  /*
+   * Get HTML attributes
+   */
+
   // We don't want to alter the original hash, so we clone it and
-  // remove some stuff that should not be HTML attributes
-  // XXX It would be better to use a whitelist of allowed attributes
+  // remove some stuff that should not be HTML attributes.
   var inputAtts = _.omit(hash,
           "autoform",
+          "type",
           "value",
           "firstOption",
           "radio",
@@ -261,11 +291,9 @@ getInputData = function getInputData(defs, hash, value, inputType, label, expect
           "trueLabel",
           "falseLabel",
           "options",
-          "offset", //deprecated attr, but we'll remove it for now
-          "timezoneId",
           "template");
 
-  // Add required to every type of element, if required
+  // Add required if required
   if (typeof inputAtts.required === "undefined" && !defs.optional) {
     inputAtts.required = "";
   }
@@ -277,42 +305,13 @@ getInputData = function getInputData(defs, hash, value, inputType, label, expect
     inputAtts.readonly = "";
   }
 
-  var min = (typeof defs.min === "function") ? defs.min() : defs.min;
-  var max = (typeof defs.max === "function") ? defs.max() : defs.max;
+   // Add data-schema-key to every type of element
+  inputAtts['data-schema-key'] = inputAtts['name'];
 
-  if (inputType === "datetime-local") {
-    if (typeof hash.timezoneId === "string") {
-      inputAtts["data-timezone-id"] = hash.timezoneId;
-    }
-  }
-
-  // Extract settings from hash
-  var firstOption = hash.firstOption;
-  var radio = hash.radio;
-  var select = hash.select;
-  var noselect = hash.noselect;
-  var trueLabel = hash.trueLabel || "True";
-  var falseLabel = hash.falseLabel || "False";
-  var selectOptions = hash.options;
-
-  // Handle options="allowed"
-  if (selectOptions === "allowed") {
-    selectOptions = _.map(defs.allowedValues, function(v) {
-      var label = v;
-      if (hash.capitalize && v.length > 0 && schemaType === String) {
-        label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
-      }
-
-      return {label: label, value: v};
-    });
-  }
-  // If options are specified in the schema, they may be a function
-  // that has not yet been evaluated.
-  else if (typeof selectOptions === "function") {
-    selectOptions = selectOptions();
-  }
-
-  // Set placeholder to label from schema if requested
+  // Set placeholder to label from schema if requested.
+  // We check hash.placeholder instead of inputAtts.placeholder because
+  // we're setting inputAtts.placeholder, so it wouldn't be the same on
+  // subsequent reactive runs of this function.
   if (hash.placeholder === "schemaLabel") {
     inputAtts.placeholder = label;
   }
@@ -336,189 +335,47 @@ getInputData = function getInputData(defs, hash, value, inputType, label, expect
     }
   });
 
-  // Add data-schema-key to every type of element
-  inputAtts['data-schema-key'] = inputAtts['name'];
+  /*
+   * Get select options
+   */
 
-  // Determine what options to use
-  var data = {};
+  var selectOptions = hash.options;
 
-  data.name = inputAtts['name'];
-  data.expectsArray = expectsArray;
-
-  if (selectOptions) {
-    // Build anything that should be a select, which is anything with options
-    data.items = [];
-    // For check boxes, we add the "autoform-array-item" class
-    if (noselect && expectsArray) {
-      inputAtts["class"] = (inputAtts["class"] || "") + " autoform-array-item";
-    }
-    // If rendering a select element
-    if (!noselect) {
-      inputAtts.autocomplete = "off"; //can fix issues with some browsers selecting the firstOption instead of the selected option
-      if (expectsArray) {
-        inputAtts.multiple = "";
+  // Handle options="allowed"
+  if (selectOptions === "allowed") {
+    selectOptions = _.map(defs.allowedValues, function(v) {
+      var label = v;
+      if (hash.capitalize && v.length > 0 && schemaType === String) {
+        label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
       }
-      // If a firstOption was provided, add that to the items list first
-      if (firstOption && !expectsArray) {
-        data.items.push({
-          name: data.name,
-          label: firstOption,
-          value: "",
-          // _id must be included because it is a special property that
-          // #each uses to track unique list items when adding and removing them
-          // See https://github.com/meteor/meteor/issues/2174
-          _id: "",
-          selected: false,
-          atts: inputAtts
-        });
-      }
-    }
-    // Add all defined options
-    _.each(selectOptions, function(opt) {
-      var selected = expectsArray ? _.contains(value, opt.value.toString()) : (opt.value.toString() === value.toString());
-      data.items.push({
-        name: data.name,
-        label: opt.label,
-        value: opt.value,
-        // _id must be included because it is a special property that
-        // #each uses to track unique list items when adding and removing them
-        // See https://github.com/meteor/meteor/issues/2174
-        _id: opt.value,
-        selected: selected,
-        atts: inputAtts
-      });
+
+      return {label: label, value: v};
     });
-  } else if (inputType === "textarea") {
-    if (typeof inputAtts.maxlength === "undefined" && typeof max === "number") {
-      inputAtts.maxlength = max;
-    }
-    data.value = value;
-  } else if (inputType === "contenteditable") {
-    if (typeof inputAtts['data-maxlength'] === "undefined" && typeof max === "number") {
-      inputAtts['data-maxlength'] = max;
-    }
-    data.value = value;
-  } else if (inputType === "boolean-radios" || inputType === "boolean-select" || inputType === "boolean-checkbox") {
-
-    // add autoform-boolean class, which we use when building object
-    // from form values later
-    inputAtts["class"] = (inputAtts["class"] || "") + " autoform-boolean";
-
-    function getItems() {
-      return [
-        {
-          name: data.name,
-          value: "false",
-          // _id must be included because it is a special property that
-          // #each uses to track unique list items when adding and removing them
-          // See https://github.com/meteor/meteor/issues/2174
-          _id: "false",
-          selected: !value,
-          label: falseLabel,
-          atts: inputAtts
-        },
-        {
-          name: data.name,
-          value: "true",
-          // _id must be included because it is a special property that
-          // #each uses to track unique list items when adding and removing them
-          // See https://github.com/meteor/meteor/issues/2174
-          _id: "true",
-          selected: value,
-          label: trueLabel,
-          atts: inputAtts
-        }
-      ];
-    }
-    
-    if (inputType === "boolean-radios" || inputType === "boolean-select") {
-      data.items = getItems();
-    } else {
-      //don't add required attribute to checkboxes because some browsers assume that to mean that it must be checked, which is not what we mean by "required"
-      delete inputAtts.required;
-      data.value = "true";
-      data.selected = value;
-    }
-  } else {
-    // All other inputTypes
-    switch (inputType) {
-      case "number":
-        if (typeof inputAtts.max === "undefined" && typeof max === "number") {
-          inputAtts.max = max;
-        }
-        if (typeof inputAtts.min === "undefined" && typeof min === "number") {
-          inputAtts.min = min;
-        }
-        if (typeof inputAtts.step === "undefined" && defs.decimal) {
-          inputAtts.step = '0.01';
-        }
-        break;
-      case "date":
-        if (typeof inputAtts.max === "undefined" && max instanceof Date) {
-          inputAtts.max = Utility.dateToDateStringUTC(max);
-        }
-        if (typeof inputAtts.min === "undefined" && min instanceof Date) {
-          inputAtts.min = Utility.dateToDateStringUTC(min);
-        }
-        break;
-      case "datetime":
-        if (typeof inputAtts.max === "undefined" && max instanceof Date) {
-          inputAtts.max = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(max);
-        }
-        if (typeof inputAtts.min === "undefined" && min instanceof Date) {
-          inputAtts.min = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(min);
-        }
-        break;
-      case "datetime-local":
-        if (typeof inputAtts.max === "undefined" && max instanceof Date) {
-          inputAtts.max = Utility.dateToNormalizedLocalDateAndTimeString(max, inputAtts["data-timezone-id"]);
-        }
-        if (typeof inputAtts.min === "undefined" && min instanceof Date) {
-          inputAtts.min = Utility.dateToNormalizedLocalDateAndTimeString(min, inputAtts["data-timezone-id"]);
-        }
-        break;
-      case "hidden":
-        if (schemaType === Boolean) {
-          // add autoform-boolean class, which we use when building object
-          // from form values later
-          inputAtts["class"] = (inputAtts["class"] || "") + " autoform-boolean";
-        }
-    }
-
-    if (typeof inputAtts.maxlength === "undefined"
-            && typeof max === "number"
-            && _.contains(["text", "email", "search", "password", "tel", "url"], inputType)
-            ) {
-      inputAtts.maxlength = max;
-    }
-
-    data.type = inputType;
-    data.value = value;
+  }
+  // If options are specified in the schema, they may be a function
+  // that has not yet been evaluated.
+  else if (typeof selectOptions === "function") {
+    selectOptions = selectOptions();
   }
 
-  // We set this one down here because some of the code paths above alter inputAtts
-  data.atts = inputAtts;
+  /*
+   * Return the context
+   */
 
-  return data;
-};
-
-getInputTemplateType = function getInputTemplateType(type) {
-  // Special types
-  var typeMap = {
-    "select": "afSelect",
-    "select-checkbox": "afCheckboxGroup",
-    "select-radio": "afRadioGroup",
-    "textarea": "afTextarea",
-    "contenteditable": "afContenteditable",
-    "boolean-radios": "afRadioGroup",
-    "boolean-select": "afSelect",
-    "boolean-checkbox": "afCheckbox",
+  return {
+    name: inputAtts['name'],
+    expectsArray: expectsArray,
+    schemaType: schemaType,
+    min: (typeof defs.min === "function") ? defs.min() : defs.min,
+    max: (typeof defs.max === "function") ? defs.max() : defs.max,
+    decimal: defs.decimal,
+    value: value,
+    trueLabel: hash.trueLabel || "True",
+    falseLabel: hash.falseLabel || "False",
+    atts: inputAtts,
+    firstOption: hash.firstOption,
+    selectOptions: selectOptions
   };
-
-  // All other input types
-  var defaultTemplateType = "afInput";
-  
-  return typeMap[type] || defaultTemplateType;
 };
 
 updateTrackedFieldValue = function updateTrackedFieldValue(formId, key, val) {

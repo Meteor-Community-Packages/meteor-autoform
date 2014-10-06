@@ -1259,7 +1259,26 @@ Here's the list of possible types you can use for the first argument of
 * afSelect
 * afTextarea
 * afContenteditable
-* afInput
+* afInputText
+* afInputPassword
+* afInputButton
+* afInputSubmit
+* afInputReset
+* afInputFile
+* afInputHidden
+* afInputImage
+* afInputDateTime
+* afInputDateTimeLocal
+* afInputDate
+* afInputMonth
+* afInputTime
+* afInputWeek
+* afInputNumber
+* afInputEmail
+* afInputUrl
+* afInputSearch
+* afInputTel
+* afInputColor
 * afObjectField
 * afArrayField
 
