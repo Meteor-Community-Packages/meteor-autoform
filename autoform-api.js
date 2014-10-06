@@ -168,19 +168,6 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(formId, fieldName) {
 };
 
 /**
- * @method AutoForm.inputValueHandlers
- * @public
- * @param {Object} handlers An object defining one or more selectors with corresponding handler function.
- * @return {undefined}
- *
- * Use this method to add custom input value handlers, which will be checked before
- * the built-in handlers.
- */
-AutoForm.inputValueHandlers = function afInputValueHandlers(handlers) {
-  _.extend(customInputValueHandlers, handlers);
-};
-
-/**
  * @method AutoForm.addInputType
  * @public
  * @param {String} name The type string that this definition is for.
@@ -376,3 +363,17 @@ AutoForm.getSchemaForField = function autoFormGetSchemaForField(name, autoform) 
  * Call this method from a UI helper to determine whether the user is expecting the input control to produce an array value.
  */
 AutoForm.expectsArray = expectsArray;
+
+/**
+ * @method AutoForm.invalidateFormContext
+ * @public
+ * @param {String} formId The form ID.
+ * @return {undefined} 
+ *
+ * Call this to force invalidate the form context, such as when you're changing the `doc`
+ * and it does not react by itself.
+ */
+AutoForm.invalidateFormContext = function autoFormInvalidateFormContext(formId) {
+  formDeps[formId] = formDeps[formId] || new Deps.Dependency;
+  formDeps[formId].changed();
+};

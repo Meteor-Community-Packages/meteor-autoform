@@ -458,7 +458,7 @@ Template.autoForm.events({
     // to make Blaze forget about any changes the user made to the form
     if (this.doc) {
       event.preventDefault();
-      invalidateFormContext(formId);
+      AutoForm.invalidateFormContext(formId);
       template.$("[autofocus]").focus();
     } else {
       // Update tracked field values

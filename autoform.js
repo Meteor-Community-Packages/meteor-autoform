@@ -6,7 +6,6 @@ formValues = {}; //for reactive show/hide based on current value of a field
 formDeps = {}; //for invalidating the form inner context and causing rerender
 fd = new FormData();
 arrayTracker = new ArrayTracker();
-customInputValueHandlers = {};
 globalDefaultTemplate = "bootstrap3"
 // All use global template by default
 defaultTypeTemplates = {
@@ -90,47 +89,68 @@ deps = {
  * Private Helper Functions
  */
 
-function getFieldsValues(fields) {
+function getFieldsValues(fields, ss) {
   var doc = {};
   fields.each(function formValuesEach() {
     var field = $(this);
     var fieldName = field.attr("data-schema-key");
 
-    // use custom handlers first, and then use built-in handlers
-    _.every([customInputValueHandlers, defaultInputValueHandlers], function (handlerList) {
-      return _.every(handlerList, function (handler, selector) {
-        if (field.filter(selector).length === 1) {
-          // Special handling for checkboxes that create arrays
-          // XXX maybe there is a way to do this better
-          var isArrayCheckBox = (field.hasClass("autoform-array-item"));
-          if (isArrayCheckBox) {
-            // Add empty array no matter what,
-            // to ensure that unchecking all boxes
-            // will empty the array.
-            if (!_.isArray(doc[fieldName])) {
-              doc[fieldName] = [];
-            }
-          }
-          var val = handler.call(field);
-          if (val !== void 0) {
-            if (isArrayCheckBox) {
-              doc[fieldName].push(val);
-            } else {
-              doc[fieldName] = val;
-            }
-          }
-          return false;
-        }
-        return true;
-      });
+    // Special handling for checkboxes that create arrays
+    // XXX maybe there is a way to do this better
+    var isArrayCheckBox = (field.hasClass("af-array-item-checkbox"));
+    if (isArrayCheckBox) {
+      // Add empty array no matter what,
+      // to ensure that unchecking all boxes
+      // will empty the array.
+      if (!_.isArray(doc[fieldName])) {
+        doc[fieldName] = [];
+      }
+    }
+
+    var val;
+
+    var noHandler = _.every(inputTypeDefinitions, function (def) {
+      if (!def.valueOut) return true;
+
+      if (def.valueOut.get && def.valueOut.selector && field.filter(def.valueOut.selector).length === 1) {
+        val = def.valueOut.get.call(field);
+        return false;
+      }
+
+      return true;
     });
+
+    // Get value in default way
+    if (noHandler) {
+      if (field.attr("data-null-value") !== void 0) {
+        val = null;
+      } else {
+        val = field.val();
+      }
+    }
+
+    if (val !== void 0) {
+      // adjust if boolean is expected
+      if (val === "true" && ss && ss.schema(fieldName).type === Boolean) {
+        val = true;
+      } else if (val === "false" && ss && ss.schema(fieldName).type === Boolean) {
+        val = false;
+      }
+      if (isArrayCheckBox) {
+        doc[fieldName].push(val);
+      } else {
+        doc[fieldName] = val;
+      }
+    }
+
   });
 
   return doc;
 }
 
 getFieldValue = function getFieldValue(template, key) {
-  var doc = getFieldsValues(template.$('[data-schema-key="' + key + '"], [data-schema-key^="' + key + '."]'));
+  var formInfo = formData[template.data.id];
+  var doc = getFieldsValues(template.$('[data-schema-key="' + key + '"], [data-schema-key^="' + key + '."]'), formInfo.ss);
   return doc && doc[key];
 };
 
@@ -158,7 +178,7 @@ getFormValues = function getFormValues(template, formId, ss) {
   }
 
   // Build doc from field values
-  var doc = getFieldsValues(template.$("[data-schema-key]").not("[disabled]"));
+  var doc = getFieldsValues(template.$("[data-schema-key]").not("[disabled]"), ss);
 
   // Expand the object
   doc = Utility.expandObj(doc);
@@ -271,6 +291,9 @@ getInputValue = function getInputValue(atts, value, mDoc, defaultValue, typeDefs
   return value;
 };
 
+/*
+ * Builds the data context that the input component will have.
+ */
 getInputData = function getInputData(defs, hash, value, label, expectsArray, submitType) {
   var schemaType = defs.type;
 
@@ -392,9 +415,4 @@ updateAllTrackedFieldValues = function updateAllTrackedFieldValues(formId) {
   _.each(formValues[formId], function (o, key) {
     updateTrackedFieldValue(formId, key, getFieldValue(template, key));
   });
-};
-
-invalidateFormContext = function invalidateFormContext(formId) {
-  formDeps[formId] = formDeps[formId] || new Deps.Dependency;
-  formDeps[formId].changed();
 };

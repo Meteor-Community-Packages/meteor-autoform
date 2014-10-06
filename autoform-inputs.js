@@ -1,114 +1,19 @@
-// Default Handlers
-defaultInputValueHandlers = {
-	'select.autoform-boolean': function () {
-		var val = this.val();
-		if (val === "true") {
-			return true;
-		} else if (val === "false") {
-			return false;
-		} 
-	},
-	'select[multiple]': function () {
-		return Utility.getSelectValues(this[0]);
-	},
-	'select': function () {
-		return this.val();
-	},
-	'input.autoform-boolean[type=checkbox]': function () {
-		// boolean checkbox
-		return this.is(":checked");
-	},
-	'input.autoform-array-item[type=checkbox]': function () {
-		// array checkbox
-		if (this.is(":checked")) {
-			return this.val();
-		}
-	},
-	'input.autoform-boolean[type=radio]': function () {
-		//boolean radio
-		var val = this.val();
-		if (this.is(":checked")) {
-			if (val === "true") {
-	        	return true;
-	        } else if (val === "false") {
-	         	return false;
-	        }
-		}
-	},
-	'input[type=radio]': function () {
-		if (this.is(":checked")) {
-			return this.val();
-		}
-	},
-	'input.autoform-boolean[type=hidden]': function () {
-		// type overridden to hidden, but schema expects boolean
-		var val = this.val();
-		if (val === "true") {
-			return true;
-		} else if (val === "false") {
-			return false;
-		}
-	},
-	'[type=select]': function () {
-		return Utility.maybeNum(this.val());
-	},
-	'input[type=date]': function () {
-		var val = this.val();
-		if (Utility.isValidDateString(val)) {
-			//Date constructor will interpret val as UTC and create
-			//date at mignight in the morning of val date in UTC time zone
-			return new Date(val);
-		} else {
-			return null;
-		}
-	},
-	'input[type=datetime]': function () {
-		var val = this.val();
-		val = (typeof val === "string") ? val.replace(/ /g, "T") : val;
-		if (Utility.isValidNormalizedForcedUtcGlobalDateAndTimeString(val)) {
-			//Date constructor will interpret val as UTC due to ending "Z"
-			return new Date(val);
-		} else {
-			return null;
-		}
-	},
-	'input[type=datetime-local]': function () {
-		var val = this.val();
-		val = (typeof val === "string") ? val.replace(/ /g, "T") : val;
-		if (Utility.isValidNormalizedLocalDateAndTimeString(val)) {
-			var timezoneId = this.attr("data-timezone-id");
-			// default is local, but if there's a timezoneId, we use that
-			if (typeof timezoneId === "string") {
-				if (typeof moment.tz !== "function") {
-	        throw new Error("If you specify a timezoneId, make sure that you've added a moment-timezone package to your app");
-	      }
-	      return moment.tz(val, timezoneId).toDate();
-			} else {
-				return moment(val).toDate();
-			}
-		} else {
-			return null;
-		}
-	},
-	'[contenteditable]': function () {
-		return this.html();
-	},
-	'[data-null-value]': function () {
-		return null;
-	},
-	'[data-schema-key]': function () {
-		// fallback
-		return this.val();
-	}
-};
-
 // Maps a `type=<typeString>` to the component type that should be used to render it
 inputTypeDefinitions = {
   "select": {
     componentName:"afSelect",
+    valueOut: {
+      selector: 'select.af-select',
+      get: function () {
+        return Utility.maybeNum(this.val());
+      }
+    },
     contextAdjust: function (context) {
       //can fix issues with some browsers selecting the firstOption instead of the selected option
       context.atts.autocomplete = "off";
+
+      // add the "af-select" class
+      context.atts["class"] = (context.atts["class"] || "") + " af-select";
 
       // build items list
       context.items = [];
@@ -149,7 +54,16 @@ inputTypeDefinitions = {
   "select-multiple": {
     componentName:"afSelectMultiple",
     valueIsArray: true,
+    valueOut: {
+      selector: 'select.af-select-multiple',
+      get: function () {
+        return Utility.getSelectValues(this[0]);
+      }
+    },
     contextAdjust: function (context) {
+      // add the "af-select-multiple" class
+      context.atts["class"] = (context.atts["class"] || "") + " af-select-multiple";
+
       // build items list
       context.items = _.map(context.selectOptions, function(opt) {
         return {
@@ -171,14 +85,35 @@ inputTypeDefinitions = {
   "select-checkbox": {
     componentName:"afCheckboxGroup",
     valueIsArray: true,
+    valueOut: {
+      selector: 'input.af-array-item-checkbox',
+      get: function () {
+        if (this.is(":checked")) {
+          return this.val();
+        }
+      }
+    },
     contextAdjust: function (context) {
-      // add the "autoform-array-item" class
-      context.atts["class"] = (context.atts["class"] || "") + " autoform-array-item";
+      // add the "af-array-item-checkbox" class
+      context.atts["class"] = (context.atts["class"] || "") + " af-array-item-checkbox";
       return context;
     }
   },
   "select-radio": {
-    componentName:"afRadioGroup"
+    componentName:"afRadioGroup",
+    valueOut: {
+      selector: 'input.af-select-radio',
+      get: function () {
+        if (this.is(":checked")) {
+          return this.val();
+        }
+      }
+    },
+    contextAdjust: function (context) {
+      // add the "af-select-radio" class
+      context.atts["class"] = (context.atts["class"] || "") + " af-select-radio";
+      return context;
+    }
   },
   "textarea": {
     componentName:"afTextarea",
@@ -191,7 +126,16 @@ inputTypeDefinitions = {
   },
   "contenteditable": {
     componentName:"afContenteditable",
+    valueOut: {
+      selector: '.af-contenteditable[contenteditable]',
+      get: function () {
+        return this.html();
+      }
+    },
     contextAdjust: function (context) {
+      // add the "af-contenteditable" class
+      context.atts["class"] = (context.atts["class"] || "") + " af-contenteditable";
+
       if (typeof context.atts['data-maxlength'] === "undefined" && typeof context.max === "number") {
         context.atts['data-maxlength'] = context.max;
       }
@@ -204,10 +148,22 @@ inputTypeDefinitions = {
       // switch to a boolean
       return (val === "true") ? true : false;
     },
+    valueOut: {
+      selector: 'input.af-boolean-radio',
+      get: function () {
+        var val = this.val();
+        if (this.is(":checked")) {
+          if (val === "true") {
+            return true;
+          } else if (val === "false") {
+            return false;
+          }
+        }
+      }
+    },
     contextAdjust: function (context) {
-      // add autoform-boolean class, which we use when building object
-      // from form values later
-      context.atts["class"] = (context.atts["class"] || "") + " autoform-boolean";
+      // add af-boolean-radio class
+      context.atts["class"] = (context.atts["class"] || "") + " af-boolean-radio";
 
       // build items list
       context.items = [
@@ -244,9 +200,19 @@ inputTypeDefinitions = {
       // switch to a boolean
       return (val === "true") ? true : false;
     },
+    valueOut: {
+      selector: 'select.autoform-boolean',
+      get: function () {
+        var val = this.val();
+        if (val === "true") {
+          return true;
+        } else if (val === "false") {
+          return false;
+        }
+      }
+    },
     contextAdjust: function (context) {
-      // add autoform-boolean class, which we use when building object
-      // from form values later
+      // add autoform-boolean class
       context.atts["class"] = (context.atts["class"] || "") + " autoform-boolean";
 
       // build items list
@@ -284,10 +250,15 @@ inputTypeDefinitions = {
       // switch to a boolean
       return (val === "true") ? true : false;
     },
+    valueOut: {
+      selector: 'input.af-boolean-checkbox',
+      get: function () {
+        return this.is(":checked");
+      }
+    },
     contextAdjust: function (context) {
-      // add autoform-boolean class, which we use when building object
-      // from form values later
-      context.atts["class"] = (context.atts["class"] || "") + " autoform-boolean";
+      // add af-boolean-checkbox class
+      context.atts["class"] = (context.atts["class"] || "") + " af-boolean-checkbox";
 
       //don't add required attribute to checkboxes because some browsers assume that to mean that it must be checked, which is not what we mean by "required"
       delete context.atts.required;
@@ -332,8 +303,7 @@ inputTypeDefinitions = {
     componentName: "afInputHidden",
     contextAdjust: function (context) {
       if (context.schemaType === Boolean) {
-        // add autoform-boolean class, which we use when building object
-        // from form values later
+        // add autoform-boolean class
         context.atts["class"] = (context.atts["class"] || "") + " autoform-boolean";
       }
       return context;
@@ -411,7 +381,23 @@ inputTypeDefinitions = {
       //convert Date to string value
       return (val instanceof Date) ? Utility.dateToDateStringUTC(val) : val;
     },
+    valueOut: {
+      selector: 'input.af-input-date',
+      get: function () {
+        var val = this.val();
+        if (Utility.isValidDateString(val)) {
+          //Date constructor will interpret val as UTC and create
+          //date at mignight in the morning of val date in UTC time zone
+          return new Date(val);
+        } else {
+          return null;
+        }
+      }
+    },
     contextAdjust: function (context) {
+      // add af-input-date class
+      context.atts["class"] = (context.atts["class"] || "") + " af-input-date";
+
       if (typeof context.atts.max === "undefined" && context.max instanceof Date) {
         context.atts.max = Utility.dateToDateStringUTC(context.max);
       }
@@ -427,7 +413,23 @@ inputTypeDefinitions = {
       //convert Date to string value
       return (val instanceof Date) ? Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(val): val;
     },
+    valueOut: {
+      selector: 'input.af-input-datetime',
+      get: function () {
+        var val = this.val();
+        val = (typeof val === "string") ? val.replace(/ /g, "T") : val;
+        if (Utility.isValidNormalizedForcedUtcGlobalDateAndTimeString(val)) {
+          //Date constructor will interpret val as UTC due to ending "Z"
+          return new Date(val);
+        } else {
+          return null;
+        }
+      }
+    },
     contextAdjust: function (context) {
+      // add af-input-datetime class
+      context.atts["class"] = (context.atts["class"] || "") + " af-input-datetime";
+
       if (typeof context.atts.max === "undefined" && context.max instanceof Date) {
         context.atts.max = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(context.max);
       }
@@ -443,7 +445,31 @@ inputTypeDefinitions = {
       //convert Date to string value
       return (val instanceof Date) ? Utility.dateToNormalizedLocalDateAndTimeString(val, atts.timezoneId) : val;
     },
+    valueOut: {
+      selector: 'input.af-input-datetime-local',
+      get: function () {
+        var val = this.val();
+        val = (typeof val === "string") ? val.replace(/ /g, "T") : val;
+        if (Utility.isValidNormalizedLocalDateAndTimeString(val)) {
+          var timezoneId = this.attr("data-timezone-id");
+          // default is local, but if there's a timezoneId, we use that
+          if (typeof timezoneId === "string") {
+            if (typeof moment.tz !== "function") {
+              throw new Error("If you specify a timezoneId, make sure that you've added a moment-timezone package to your app");
+            }
+            return moment.tz(val, timezoneId).toDate();
+          } else {
+            return moment(val).toDate();
+          }
+        } else {
+          return null;
+        }
+      }
+    },
     contextAdjust: function (context) {
+      // add af-input-datetime-local class
+      context.atts["class"] = (context.atts["class"] || "") + " af-input-datetime-local";
+
       if (typeof context.atts.max === "undefined" && context.max instanceof Date) {
         context.atts.max = Utility.dateToNormalizedLocalDateAndTimeString(context.max, context.atts.timezoneId);
       }
