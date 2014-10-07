@@ -6,83 +6,13 @@ formValues = {}; //for reactive show/hide based on current value of a field
 formDeps = {}; //for invalidating the form inner context and causing rerender
 fd = new FormData();
 arrayTracker = new ArrayTracker();
-globalDefaultTemplate = "bootstrap3"
-// All use global template by default
-defaultTypeTemplates = {
-  quickForm: null,
-  afFieldLabel: null,
-  afFieldSelect: null,
-  afCheckboxGroup: null,
-  afRadioGroup: null,
-  afSelect: null,
-  afSelectMultiple: null,
-  afTextarea: null,
-  afContenteditable: null,
-  afCheckbox: null,
-  afRadio: null,
-  afInputText: null,
-  afInputPassword: null,
-  afInputButton: null,
-  afInputSubmit: null,
-  afInputReset: null,
-  afInputFile: null,
-  afInputHidden: null,
-  afInputImage: null,
-  afInputDateTime: null,
-  afInputDateTimeLocal: null,
-  afInputDate: null,
-  afInputMonth: null,
-  afInputTime: null,
-  afInputWeek: null,
-  afInputNumber: null,
-  afInputEmail: null,
-  afInputUrl: null,
-  afInputSearch: null,
-  afInputTel: null,
-  afInputColor: null,
-  afFormGroup: null,
-  afObjectField: null,
-  afArrayField: null
-};
 
+// reactive templates
+globalDefaultTemplate = "bootstrap3"
+defaultTypeTemplates = {};
 deps = {
   defaultTemplate: new Deps.Dependency,
-  defaultTypeTemplates: {
-    quickForm: new Deps.Dependency,
-    afFieldLabel: new Deps.Dependency,
-    afFieldSelect: new Deps.Dependency,
-    afCheckboxGroup: new Deps.Dependency,
-    afRadioGroup: new Deps.Dependency,
-    afSelect: new Deps.Dependency,
-    afSelectMultiple: new Deps.Dependency,
-    afTextarea: new Deps.Dependency,
-    afContenteditable: new Deps.Dependency,
-    afCheckbox: new Deps.Dependency,
-    afRadio: new Deps.Dependency,
-    afInputText: new Deps.Dependency,
-    afInputPassword: new Deps.Dependency,
-    afInputButton: new Deps.Dependency,
-    afInputSubmit: new Deps.Dependency,
-    afInputReset: new Deps.Dependency,
-    afInputFile: new Deps.Dependency,
-    afInputHidden: new Deps.Dependency,
-    afInputImage: new Deps.Dependency,
-    afInputDateTime: new Deps.Dependency,
-    afInputDateTimeLocal: new Deps.Dependency,
-    afInputDate: new Deps.Dependency,
-    afInputMonth: new Deps.Dependency,
-    afInputTime: new Deps.Dependency,
-    afInputWeek: new Deps.Dependency,
-    afInputNumber: new Deps.Dependency,
-    afInputEmail: new Deps.Dependency,
-    afInputUrl: new Deps.Dependency,
-    afInputSearch: new Deps.Dependency,
-    afInputTel: new Deps.Dependency,
-    afInputColor: new Deps.Dependency,
-    afFormGroup: new Deps.Dependency,
-    afObjectField: new Deps.Dependency,
-    afArrayField: new Deps.Dependency
-  }
+  defaultTypeTemplates: {}
 };
 
 /*

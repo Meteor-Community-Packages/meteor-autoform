@@ -103,7 +103,7 @@ AutoForm.getDefaultTemplate = function autoFormGetDefaultTemplate() {
  */
 AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(type, template) {
   if (!deps.defaultTypeTemplates[type]) {
-    throw new Error("invalid template type: " + type);
+    deps.defaultTypeTemplates[type] = new Deps.Dependency;
   }
   if (template !== null && !Template[type + "_" + template]) {
     throw new Error("setDefaultTemplateForType can't set default template to \"" + template + "\" for type \"" + type + "\" because there is no defined template with the name \"" + type + "_" + template + "\"");
@@ -122,7 +122,7 @@ AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(
  */
 AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(type) {
   if (!deps.defaultTypeTemplates[type]) {
-    throw new Error("invalid template type: " + type);
+    deps.defaultTypeTemplates[type] = new Deps.Dependency;
   }
   deps.defaultTypeTemplates[type].depend();
   return defaultTypeTemplates[type];
