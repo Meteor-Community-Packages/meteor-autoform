@@ -19,6 +19,60 @@
   <label {{atts}}>{{afFieldLabelText name=this.atts.name}}</label>
 </template>
 
+<template name="afFormGroup_bootstrap3">
+  <div class="form-group {{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
+    {{#unless skipLabel}}
+    {{> afFieldLabel this.afFieldLabelAtts}}
+    {{/unless}}
+    {{> afFieldInput this.afFieldInputAtts}}
+    <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
+  </div>
+</template>
+
+<template name="afObjectField_bootstrap3">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">{{afFieldLabelText name=this.atts.name}}</h3>
+    </div>
+    <div class="panel-body">
+      {{#if afFieldIsInvalid name=this.atts.name}}
+      <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
+      {{/if}}
+      {{> afQuickFields name=this.atts.name fields=this.atts.fields omitFields=this.atts.omitFields}}
+    </div>
+  </div>
+</template>
+
+<template name="afArrayField_bootstrap3">
+  <div class="panel panel-default">
+    <div class="panel-heading">{{afFieldLabelText name=this.atts.name}}</div>
+    {{#if afFieldIsInvalid name=this.atts.name}}
+    <div class="panel-body has-error">
+      <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
+    </div>
+    {{/if}}
+    <ul class="list-group">
+      {{#afEachArrayItem name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
+      <li class="list-group-item autoform-array-item">
+        <div class="media">
+          {{#if afArrayFieldHasMoreThanMinimum name=../atts.name minCount=../atts.minCount maxCount=../atts.maxCount}}
+          <button class="btn btn-primary autoform-remove-item pull-left"><span class="glyphicon glyphicon-minus"></span></button>
+          {{/if}}
+          <div class="media-body">
+            {{> afQuickField name=this.name label=false options="auto" fields=../atts.fields omitFields=../atts.omitFields}}
+          </div>
+        </div>
+      </li>
+      {{/afEachArrayItem}}
+      {{#if afArrayFieldHasLessThanMaximum name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
+      <li class="list-group-item">
+        <button class="btn btn-primary autoform-add-item" data-autoform-field="{{this.atts.name}}" data-autoform-minCount="{{this.atts.minCount}}" data-autoform-maxCount="{{this.atts.maxCount}}"><span class="glyphicon glyphicon-plus"></span></button>
+      </li>
+      {{/if}}
+    </ul>
+  </div>
+</template>
+
 <template name="afCheckbox_bootstrap3">
   <div class="checkbox">
     <label>
@@ -29,14 +83,16 @@
 </template>
 
 <template name="afCheckboxGroup_bootstrap3">
-  {{#each this.items}}
-    <div class="checkbox">
-      <label>
-        <input type="checkbox" value="{{this.value}}" {{atts}} />
-        {{this.label}}
-      </label>
-    </div>
-  {{/each}}
+  <div class="af-checkbox-group" {{dsk}}>
+    {{#each this.items}}
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="{{this.value}}" {{atts}} />
+          {{this.label}}
+        </label>
+      </div>
+    {{/each}}
+  </div>
 </template>
 
 <template name="afRadio_bootstrap3">
@@ -59,10 +115,6 @@
   {{/each}}
 </template>
 
-<template name="afContenteditable_bootstrap3">
-  {{> afContenteditable_plain}}
-</template>
-
 <template name="afFieldSelect_bootstrap3">
   <select {{atts}}>
     {{#with this.contentBlockContext}}
@@ -79,8 +131,16 @@
   </select>
 </template>
 
+<template name="afBooleanSelect_bootstrap3">
+  <select {{atts}}>
+    {{#each this.items}}
+      <option {{optionAtts}}>{{this.label}}</option>
+    {{/each}}
+  </select>
+</template>
+
 <template name="afSelectMultiple_bootstrap3">
-  <select {{atts}} multiple="">
+  <select {{atts}} multiple>
     {{#each this.items}}
       <option {{optionAtts}}>{{this.label}}</option>
     {{/each}}
@@ -173,58 +233,4 @@
 
 <template name="afInputColor_bootstrap3">
   <input type="color" value="{{this.value}}" {{atts}}/>
-</template>
-
-<template name="afFormGroup_bootstrap3">
-  <div class="form-group {{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
-    {{#unless skipLabel}}
-    {{> afFieldLabel this.afFieldLabelAtts}}
-    {{/unless}}
-    {{> afFieldInput this.afFieldInputAtts}}
-    <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
-  </div>
-</template>
-
-<template name="afObjectField_bootstrap3">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">{{afFieldLabelText name=this.atts.name}}</h3>
-    </div>
-    <div class="panel-body">
-      {{#if afFieldIsInvalid name=this.atts.name}}
-      <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
-      {{/if}}
-      {{> afQuickFields name=this.atts.name fields=this.atts.fields omitFields=this.atts.omitFields}}
-    </div>
-  </div>
-</template>
-
-<template name="afArrayField_bootstrap3">
-  <div class="panel panel-default">
-    <div class="panel-heading">{{afFieldLabelText name=this.atts.name}}</div>
-    {{#if afFieldIsInvalid name=this.atts.name}}
-    <div class="panel-body has-error">
-      <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
-    </div>
-    {{/if}}
-    <ul class="list-group">
-      {{#afEachArrayItem name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
-      <li class="list-group-item autoform-array-item">
-        <div class="media">
-          {{#if afArrayFieldHasMoreThanMinimum name=../atts.name minCount=../atts.minCount maxCount=../atts.maxCount}}
-          <button class="btn btn-primary autoform-remove-item pull-left"><span class="glyphicon glyphicon-minus"></span></button>
-          {{/if}}
-          <div class="media-body">
-            {{> afQuickField name=this.name label=false options="auto" fields=../atts.fields omitFields=../atts.omitFields}}
-          </div>
-        </div>
-      </li>
-      {{/afEachArrayItem}}
-      {{#if afArrayFieldHasLessThanMaximum name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
-      <li class="list-group-item">
-        <button class="btn btn-primary autoform-add-item" data-autoform-field="{{this.atts.name}}" data-autoform-minCount="{{this.atts.minCount}}" data-autoform-maxCount="{{this.atts.maxCount}}"><span class="glyphicon glyphicon-plus"></span></button>
-      </li>
-      {{/if}}
-    </ul>
-  </div>
 </template>

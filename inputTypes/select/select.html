@@ -1,0 +1,7 @@
+<template name="afSelect">
+  <select {{this.atts}}>
+    {{#each this.items}}
+    <option {{optionAtts}}>{{this.label}}</option>
+    {{/each}}
+  </select>
+</template>

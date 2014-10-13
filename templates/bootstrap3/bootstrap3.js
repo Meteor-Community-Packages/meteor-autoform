@@ -12,8 +12,6 @@ Template['afFieldLabel_bootstrap3'].helpers({
     } else {
       labelAtts['class'] = "control-label";
     }
-    // Add "for" attribute if missing
-    labelAtts['for'] = labelAtts['for'] || atts['name'];
     return labelAtts;
   }
 });
@@ -43,6 +41,7 @@ Template['afFormGroup_bootstrap3'].helpers({
 _.each([
     "afFieldSelect_bootstrap3",
     "afSelect_bootstrap3",
+    "afBooleanSelect_bootstrap3",
     "afSelectMultiple_bootstrap3",
     "afTextarea_bootstrap3",
     "afInputText_bootstrap3",
@@ -74,8 +73,6 @@ _.each([
       } else {
         atts["class"] = "form-control";
       }
-      delete atts.type;
-      delete atts.value;
       return atts;
     }
   });
@@ -84,7 +81,6 @@ _.each([
 _.each([
     "afCheckbox_bootstrap3",
     "afRadio_bootstrap3",
-    "afCheckboxGroup_bootstrap3",
     "afRadioGroup_bootstrap3"
   ], function (tmplName) {
   Template[tmplName].helpers({
@@ -98,7 +94,25 @@ _.each([
   });
 });
 
-Template["afSelect_bootstrap3"].helpers({
+Template["afCheckboxGroup_bootstrap3"].helpers({
+  atts: function selectedAttsAdjust() {
+    var atts = _.clone(this.atts);
+    if (this.selected) {
+      atts.checked = "";
+    }
+    // remove data-schema-key attribute because we put it
+    // on the entire group
+    delete atts["data-schema-key"];
+    return atts;
+  },
+  dsk: function dsk() {
+    return {
+      "data-schema-key": this.atts["data-schema-key"]
+    }
+  }
+});
+
+var selectHelpers = {
   optionAtts: function afSelectOptionAtts() {
     var item = this;
     var atts = {
@@ -109,4 +123,6 @@ Template["afSelect_bootstrap3"].helpers({
     }
     return atts;
   }
-});
+};
+Template["afSelect_bootstrap3"].helpers(selectHelpers);
+Template["afBooleanSelect_bootstrap3"].helpers(selectHelpers);
