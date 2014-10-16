@@ -27,7 +27,6 @@ have to add to your app yourself.
   - [quickForm](#quickform)
   - [afFieldInput](#affieldinput)
   - [afFieldSelect](#affieldselect)
-  - [afFieldLabel](#affieldlabel)
   - [afFieldMessage](#affieldmessage)
   - [afFieldIsInvalid](#affieldisinvalid)
   - [afFormGroup](#afformgroup)
@@ -204,7 +203,6 @@ fully customize one of the fields. To do this, you can use the following more
 specific templates and helpers:
 
 * afFieldIsInvalid
-* afFieldLabel
 * afFieldInput
 * afFieldSelect
 * afFieldMessage
@@ -414,19 +412,6 @@ The following attributes are recognized:
 * `template` (default="bootstrap3"): Specify the name of a different built-in or
 custom template to use.
 
-### afFieldLabel
-
-Renders a label for the field. The exact output depends on which template you use, but generally it is a `<label>` element with
-the `label` defined in the schema, or the humanized property name if no label
-is defined.
-
-The following attributes are recognized:
-
-* `name`: Required. The name of the schema key this label is for.
-* `template` (default="bootstrap3"): Specify the name of a different built-in or
-custom template to use.
-* Any other attributes you add will be transferred to the rendered DOM element.
-
 ### afFieldMessage
 
 Accepts and requires just one attribute, `name`, which is the name of the schema key.
@@ -450,9 +435,9 @@ Just as `quickForm` renders a form in one line, `afFormGroup` renders a form
 group, that is, everything related to a single field -- the label, the input,
 and the error message -- in one line.
 
-This component accepts the same attributes as `afFieldInput` and `afFieldLabel`.
-Attributes that are prefixed with `label-` are forwarded to `afFieldLabel` while
-any remaining attributes are forwarded to `afFieldInput`.
+This component accepts the same attributes as `afFieldInput`.
+Attributes that are prefixed with `label-` become attributes on the rendered `label` element while
+any remaining attributes are forwarded to the `afFieldInput` component. You can also set `label=false` to omit the `label` element.
 
 ### afQuickField
 
@@ -1084,7 +1069,7 @@ derive the bestTimes string from her selections. The HTML would look like this:
 {{#autoForm schema="ContactFormSchema" id="contactForm" type="method" meteormethod="contact"}}
   <!-- other fields -->
   <div class="form-group {{#if afFieldIsInvalid name='bestTimes'}}has-error{{/if}}">
-    {{> afFieldLabel name="bestTimes"}}
+    <label class="control-label">{{afFieldLabelText name="bestTimes"}}</label>
     {{> afFieldInput name="bestTimes" type="hidden"}}
     <div class="checkbox"><label><input type="checkbox" id="cfTimes1" name="cfTimes" value="Morning" /> Morning</label></div>
     <div class="checkbox"><label><input type="checkbox" id="cfTimes2" name="cfTimes" value="Afternoon" /> Afternoon</label></div>
@@ -1222,10 +1207,6 @@ also define the column classes to use, for example, `{{> afQuickField name="name
 * `plain-fieldset`: Can be used with `quickForm` only. Wraps the form in a
 `fieldset`. Additionally allows a `label` attribute that determines what the
 fieldset label should be.
-* `plain-span`: Can be used with `afFieldLabel` only. Uses a `span` element
-for the label rather than `label`.
-* `bootstrap3-span`: Can be used with `afFieldLabel` only. Uses a `span` element
-for the label rather than `label`, and uses `bootstrap3`.
 
 ### Using a Different Template
 
@@ -1239,7 +1220,7 @@ AutoForm.setDefaultTemplate('plain');
 
 //OR
 
-AutoForm.setDefaultTemplateForType('afFieldLabel', 'plain-span');
+AutoForm.setDefaultTemplateForType('quickForm', 'plain-fieldset');
 ```
 
 These methods are reactive, meaning that as soon as you call them, you'll
@@ -1250,7 +1231,6 @@ Here's the list of possible types you can use for the first argument of
 
 * quickForm
 * afFormGroup
-* afFieldLabel
 * afFieldSelect
 * afCheckbox
 * afCheckboxGroup
@@ -1419,8 +1399,7 @@ attributes for both inputs and labels (using `label-` prefix), omit labels
 if necessary (`label=false`), and specify field-specific template overrides.
 These features are typically enough to get the appearance you want.
 4. If you really need something truly custom for just one field in just one
-form, you can then switch to using the `afFieldLabel` and `afFieldInput`
-components directly.
+form, you can then switch to using the `afFieldInput` component directly.
 
 ### Can I reuse the same `quickForm` or `autoForm` for both inserts and updates?
 

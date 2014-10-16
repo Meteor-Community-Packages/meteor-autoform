@@ -25,7 +25,7 @@ AutoForm.addInputType("boolean-select", {
         // See https://github.com/meteor/meteor/issues/2174
         _id: "false",
         selected: !context.value,
-        label: context.atts.falseLabel,
+        label: context.atts.falseLabel || "False",
         atts: atts
       },
       {
@@ -36,7 +36,7 @@ AutoForm.addInputType("boolean-select", {
         // See https://github.com/meteor/meteor/issues/2174
         _id: "true",
         selected: context.value,
-        label: context.atts.trueLabel,
+        label: context.atts.trueLabel || "True",
         atts: atts
       }
     ];

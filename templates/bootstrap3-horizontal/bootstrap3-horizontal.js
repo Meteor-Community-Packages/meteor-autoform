@@ -1,25 +1,25 @@
 function findAtts() {
   var c, n = 0;
   do {
-    c = UI._parentData(n++);
+    c = Template.parentData(n++);
   } while (c && !c.atts);
   return c && c.atts;
 }
 
 Template['quickForm_bootstrap3-horizontal'].helpers({
-  inputClass: function inputClassHelper() {
+  inputClass: function () {
     var atts = findAtts();
     if (atts) {
       return atts["input-col-class"];
     }
   },
-  labelClass: function labelClassHelper() {
+  labelClass: function () {
     var atts = findAtts();
     if (atts) {
       return atts["label-class"];
     }
   },
-  submitButtonAtts: function bsQuickFormSubmitButtonAtts() {
+  submitButtonAtts: function () {
     var qfAtts = this.atts;
     var atts = {type: "submit"};
     if (typeof qfAtts.buttonClasses === "string") {
@@ -31,11 +31,7 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   },
   qfAutoFormContext: function () {
     var ctx = _.clone(this.qfAutoFormContext || {});
-    if (typeof ctx["class"] === "string") {
-      ctx["class"] += " form-horizontal";
-    } else {
-      ctx["class"] = "form-horizontal";
-    }
+    ctx = Utility.addClass(ctx, "form-horizontal");
     if (ctx["input-col-class"])
       delete ctx["input-col-class"];
     if (ctx["label-class"])
@@ -61,25 +57,15 @@ Template["afFormGroup_bootstrap3-horizontal"].helpers({
   },
   afFieldLabelAtts: function () {
     var atts = _.clone(this.afFieldLabelAtts || {});
-    atts.template = "bootstrap3";
+    // Add bootstrap class
+    atts = Utility.addClass(atts, "control-label");
     return atts;
-  },
-  afEmptyFieldLabelAtts: function () {
-    var atts = _.clone(this.afFieldLabelAtts || {});
-    var labelAtts = _.omit(atts, 'name', 'autoform', 'template');
-    // Add bootstrap class if necessary
-    if (typeof labelAtts['class'] === "string") {
-      labelAtts['class'] += " control-label"; //might be added twice but that shouldn't hurt anything
-    } else {
-      labelAtts['class'] = "control-label";
-    }
-    return labelAtts;
   },
   rightColumnClass: function () {
     var atts = this.afFieldInputAtts || {};
     return atts['input-col-class'] || "";
   },
-  skipLabel: function bshFormGroupSkipLabel() {
+  skipLabel: function () {
     var self = this;
 
     var type = AutoForm.getInputType(self.afFieldInputAtts);
@@ -93,12 +79,16 @@ Template["afObjectField_bootstrap3-horizontal"].helpers({
     return atts['input-col-class'] || "";
   },
   afFieldLabelAtts: function () {
-    var atts = this.atts;
-    return {
-      template: "bootstrap3",
-      "class": atts["label-class"],
-      "name": atts.name
-    }
+    // Use only atts beginning with label-
+    var labelAtts = {};
+    _.each(this.atts, function (val, key) {
+      if (key.indexOf("label-") === 0) {
+        labelAtts[key.substring(6)] = val;
+      }
+    });
+    // Add bootstrap class
+    labelAtts = Utility.addClass(labelAtts, "control-label");
+    return labelAtts;
   }
 });
 
@@ -108,12 +98,16 @@ Template["afArrayField_bootstrap3-horizontal"].helpers({
     return atts['input-col-class'] || "";
   },
   afFieldLabelAtts: function () {
-    var atts = this.atts || {};
-    return {
-      template: "bootstrap3",
-      "class": atts["label-class"],
-      "name": atts.name
-    };
+    // Use only atts beginning with label-
+    var labelAtts = {};
+    _.each(this.atts, function (val, key) {
+      if (key.indexOf("label-") === 0) {
+        labelAtts[key.substring(6)] = val;
+      }
+    });
+    // Add bootstrap class
+    labelAtts = Utility.addClass(labelAtts, "control-label");
+    return labelAtts;
   }
 });
 
@@ -130,11 +124,7 @@ Template["afCheckbox_bootstrap3-horizontal"].helpers({
     if (this.selected) {
       atts.checked = "";
     }
-    if (atts["class"]) {
-      atts["class"] += " autoform-checkbox-margin-fix";
-    } else {
-      atts["class"] = "autoform-checkbox-margin-fix"
-    }
+    atts = Utility.addClass(atts, "autoform-checkbox-margin-fix");
     return atts;
   },
   useLeftLabel: function () {

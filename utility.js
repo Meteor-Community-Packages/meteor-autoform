@@ -478,25 +478,19 @@ Utility = {
     var defaultAttributes = defs.autoform || {};
 
     // This is where we add default attributes specified in
-    // defs.autoform. We don't add them for afFieldLabel.
-    if (name === "afFieldLabel") {
-      if (_.has(atts, "options")) {
+    // defs.autoform.
+    // If options="auto", we want to use defs.autoform.options
+    // if specified and otherwise fall back to "allowed"
+    if (defaultAttributes.options && atts.options === "auto")
+      delete atts.options;
+    // "autoform" option in the schema provides default atts
+    atts = _.extend({}, defaultAttributes, atts);
+    // If still set to "auto", then there were no options in defs, so we use "allowed"
+    if (atts.options === "auto") {
+      if (allowedValues) {
+        atts.options = "allowed";
+      } else {
         delete atts.options;
-      }
-    } else {
-      // If options="auto", we want to use defs.autoform.options
-      // if specified and otherwise fall back to "allowed"
-      if (defaultAttributes.options && atts.options === "auto")
-        delete atts.options;
-      // "autoform" option in the schema provides default atts
-      atts = _.extend({}, defaultAttributes, atts);
-      // If still set to "auto", then there were no options in defs, so we use "allowed"
-      if (atts.options === "auto") {
-        if (allowedValues) {
-          atts.options = "allowed";
-        } else {
-          delete atts.options;
-        }
       }
     }
 
@@ -520,6 +514,21 @@ Utility = {
     } else {
       return s;
     }
+  },
+  /**
+   * @method Utility.addClass
+   * @private
+   * @param {Object} atts An object that might have a "class" property
+   * @param {String} klass The class string to add
+   * @return {Object} The object with klass added to the "class" property, creating the property if necessary
+   */
+  addClass: function addClass(atts, klass) {
+    if (typeof atts["class"] === "string") {
+      atts["class"] += " " + klass;
+    } else {
+      atts["class"] = klass;
+    }
+    return atts;
   }
 };
 

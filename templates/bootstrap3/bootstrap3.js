@@ -2,20 +2,6 @@
  * Template helpers for "bootstrap3" template
  */
 
-Template['afFieldLabel_bootstrap3'].helpers({
-  atts: function bsFieldLabelAtts() {
-    var atts = (this || {}).atts;
-    var labelAtts = _.omit(atts, 'name', 'autoform', 'template');
-    // Add bootstrap class if necessary
-    if (typeof labelAtts['class'] === "string") {
-      labelAtts['class'] += " control-label"; //might be added twice but that shouldn't hurt anything
-    } else {
-      labelAtts['class'] = "control-label";
-    }
-    return labelAtts;
-  }
-});
-
 Template['quickForm_bootstrap3'].helpers({
   submitButtonAtts: function bsQuickFormSubmitButtonAtts() {
     var qfAtts = this.atts;
@@ -35,6 +21,12 @@ Template['afFormGroup_bootstrap3'].helpers({
 
     var type = AutoForm.getInputType(self.afFieldInputAtts);
     return (self.skipLabel || type === "boolean-checkbox");
+  },
+  bsFieldLabelAtts: function bsFieldLabelAtts() {
+    var atts = _.clone(this.afFieldLabelAtts);
+    // Add bootstrap class
+    atts = Utility.addClass(atts, "control-label");
+    return atts;
   }
 });
 
@@ -68,11 +60,8 @@ _.each([
   Template[tmplName].helpers({
     atts: function addFormControlAtts() {
       var atts = _.clone(this.atts);
-      if (typeof atts["class"] === "string") {
-        atts["class"] += " form-control";
-      } else {
-        atts["class"] = "form-control";
-      }
+      // Add bootstrap class
+      atts = Utility.addClass(atts, "form-control");
       return atts;
     }
   });

@@ -16,10 +16,7 @@ Template.afFormGroup.helpers({
 
 function formGroupLabelAtts(atts) {
   // Separate label options from input options; label items begin with "label-"
-  var labelAtts = {
-    name: atts.name,
-    template: atts.template
-  };
+  var labelAtts = {};
   _.each(atts, function autoFormLabelAttsEach(val, key) {
     if (key.indexOf("label-") === 0) {
       labelAtts[key.substring(6)] = val;

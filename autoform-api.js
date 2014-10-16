@@ -263,7 +263,7 @@ AutoForm.getValidationContext = function autoFormGetValidationContext(formId) {
 AutoForm.find = function autoFormFind(type) {
   var n = 0, af;
   do {
-    af = UI._parentData(n++);
+    af = Template.parentData(n++);
   } while (af && !af._af);
   if (!af || !af._af) {
     throw new Error((type || "AutoForm.find") + " must be used within an autoForm block");
@@ -283,7 +283,7 @@ AutoForm.findAttribute = function autoFormFindAttribute(attrName) {
   var n = 0, af, val, stopAt = -1;
   // we go one level past _af so that we get the original autoForm or quickForm attributes, too
   do {
-    af = UI._parentData(n++);
+    af = Template.parentData(n++);
     if (af && af.atts && af.atts[attrName] !== void 0) {
       val = af.atts[attrName];
     } else if (af && af[attrName] !== void 0) {

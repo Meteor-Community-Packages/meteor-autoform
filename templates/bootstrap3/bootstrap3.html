@@ -15,14 +15,10 @@
   {{/autoForm}}
 </template>
 
-<template name="afFieldLabel_bootstrap3">
-  <label {{atts}}>{{afFieldLabelText name=this.atts.name}}</label>
-</template>
-
 <template name="afFormGroup_bootstrap3">
   <div class="form-group {{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
     {{#unless skipLabel}}
-    {{> afFieldLabel this.afFieldLabelAtts}}
+    <label {{bsFieldLabelAtts}}>{{afFieldLabelText name=this.atts.name}}</label>
     {{/unless}}
     {{> afFieldInput this.afFieldInputAtts}}
     <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>

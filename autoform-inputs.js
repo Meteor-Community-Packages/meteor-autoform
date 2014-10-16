@@ -330,7 +330,7 @@ function getFieldsValues(fields, ss) {
 
     var val;
 
-    var typeDef = _.where(inputTypeDefinitions, {template: inputTypeTemplate});
+    var typeDef = _.where(inputTypeDefinitions, {template: inputTypeTemplate})[0];
     if (typeDef && typeDef.valueOut) {
       val = typeDef.valueOut.call(field);
     } else {

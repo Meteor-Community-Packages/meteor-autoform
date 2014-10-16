@@ -128,7 +128,6 @@ Package.on_use(function(api) {
     'components/afEachArrayItem/afEachArrayItem.js',
     'components/afFieldInput/afFieldInput.html',
     'components/afFieldInput/afFieldInput.js',
-    'components/afFieldLabel/afFieldLabel.html',
     'components/afFieldSelect/afFieldSelect.html',
     'components/afFieldSelect/afFieldSelect.js',
     'components/afFormGroup/afFormGroup.html',
@@ -143,9 +142,6 @@ Package.on_use(function(api) {
     // bootstrap3 Template
     'templates/bootstrap3/bootstrap3.html',
     'templates/bootstrap3/bootstrap3.js',
-    // bootstrap3-span Template
-    'templates/bootstrap3-span/bootstrap3-span.html',
-    'templates/bootstrap3-span/bootstrap3-span.js',
     // bootstrap3-horizontal Template
     'templates/bootstrap3-horizontal/bootstrap3-horizontal.html',
     'templates/bootstrap3-horizontal/bootstrap3-horizontal.js',
@@ -156,9 +152,6 @@ Package.on_use(function(api) {
     // plain-fieldset Template
     'templates/plain-fieldset/plain-fieldset.html',
     'templates/plain-fieldset/plain-fieldset.js',
-    // plain-span Template
-    'templates/plain-span/plain-span.html',
-    'templates/plain-span/plain-span.js'
   ], 'client');
 });
 

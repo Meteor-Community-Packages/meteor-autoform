@@ -2,13 +2,6 @@
  * Template helpers for "plain" template
  */
 
-Template['afFieldLabel_plain'].helpers({
-  atts: function plFieldLabelAtts() {
-    var atts = (_.clone(this || {})).atts;
-    return _.omit(atts, 'name', 'autoform', 'template');
-  }
-});
-
 Template['quickForm_plain'].helpers({
   submitButtonAtts: function plQuickFormSubmitButtonAtts() {
     var qfAtts = this.atts;
