@@ -2,41 +2,32 @@ Package.describe({
   name: "aldeed:autoform",
   summary: "Easily create forms with automatic insert and update, and automatic reactive validation.",
   git: "https://github.com/aldeed/meteor-autoform.git",
-  version: "4.0.0-rc2"
+  version: "4.0.0-rc3"
 });
 
 Package.on_use(function(api) {
   // Dependencies
-
-  // 0.9.0+
-  if (api.versionsFrom) {
-    api.versionsFrom('METEOR@0.9.3');
-    // common
-    api.use('aldeed:simple-schema@1.0.0');
-    api.use('check');
-    // client
-    api.use(['livedata', 'underscore', 'deps', 'templating', 'ui', 'blaze'], 'client');
-    api.use('mrt:moment@2.6.0', 'client');
-    api.use('mrt:moment-timezone@0.2.1', 'client', {weak: true});
-    api.use(['aldeed:collection2@2.0.0', 'reload'], 'client', {weak: true});
-    // Imply SS to make sure SimpleSchema object is available to app
-    api.imply('aldeed:simple-schema');
-  }
-  // Pre-0.9.0
-  else {
-    api.use(['simple-schema', 'check']);
-    api.use(['moment', 'livedata', 'underscore', 'deps', 'templating', 'handlebars', 'ui'], 'client');
-    api.use(['reload'], ['client'], {weak: true});
-    api.use(['collection2'], ['client'], {weak: true});
-    // Imply SS to make sure SimpleSchema object is available to app
-    api.imply('simple-schema');
-  }  
+  api.versionsFrom('METEOR@0.9.3');
+  // common
+  api.use('aldeed:simple-schema@1.0.0');
+  api.use('check');
+  // client
+  api.use(['livedata', 'underscore', 'deps', 'templating', 'ui', 'blaze'], 'client');
+  api.use('mrt:moment@2.6.0', 'client');
+  api.use('mrt:moment-timezone@0.2.1', 'client', {weak: true});
+  api.use(['aldeed:collection2@2.0.0', 'reload'], 'client', {weak: true});
+  
+  // Imply SS to make sure SimpleSchema object is available to app
+  api.imply('aldeed:simple-schema');
   
   // Exports
   api.export('AutoForm', 'client');
   api.export('Utility', 'client', {testOnly: true});
-  // Files
+
+  // Common Files
   api.add_files(['autoform-common.js']);
+
+  // Client Files
   api.add_files([
     // utilities and general init
     'utility.js',
@@ -156,11 +147,6 @@ Package.on_use(function(api) {
 });
 
 Package.on_test(function (api) {
-  if (api.versionsFrom) {
-    api.use(['aldeed:autoform', 'tinytest', 'underscore']);
-  } else {
-    api.use(['autoform', 'tinytest', 'underscore']);
-  }
-  
+  api.use(['aldeed:autoform', 'tinytest', 'underscore']);
   api.add_files(['tests/utility-tests.js', 'tests/autoform-tests.js']);
 });
