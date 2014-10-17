@@ -325,7 +325,7 @@ to set the label used in the radio or select controls.
 * If you supply the `options` attribute, a `<select>` control is used instead. If your schema expects an array for the field, then
 it is a multiple-select control. If you prefer radios or checkboxes (for example, if it is a short list of options),
 then simply add the `noselect` attribute (set to anything).
-* If optional is `false` or not set in the schema, the `required` attribute is added to the DOM element.
+* If `optional` is `false` or not set in the schema, the `required` attribute is added to the DOM element and automatic error messages will be generated if the field is empty on submission.
 * Specifying `max` when type is `String` causes the `maxlength` attribute to be added to the DOM element.
 * Specifying `min` or `max` dates when type is `Date` causes those dates to be added to the DOM element in
 `min` and `max` attributes. For inputs of type `date` or `datetime-local`, which do not
