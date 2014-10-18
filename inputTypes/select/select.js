@@ -7,8 +7,8 @@ AutoForm.addInputType("select", {
     //can fix issues with some browsers selecting the firstOption instead of the selected option
     context.atts.autocomplete = "off";
 
+    var itemAtts = _.omit(context.atts, 'firstOption');
     var firstOption = context.atts.firstOption;
-    delete context.atts.firstOption;
 
     // build items list
     context.items = [];
@@ -24,7 +24,7 @@ AutoForm.addInputType("select", {
         // See https://github.com/meteor/meteor/issues/2174
         _id: "",
         selected: false,
-        atts: context.atts
+        atts: itemAtts
       });
     }
 
@@ -39,7 +39,7 @@ AutoForm.addInputType("select", {
         // See https://github.com/meteor/meteor/issues/2174
         _id: opt.value,
         selected: (opt.value.toString() === context.value.toString()),
-        atts: context.atts
+        atts: itemAtts
       });
     });
 
