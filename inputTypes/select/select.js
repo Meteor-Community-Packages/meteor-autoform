@@ -38,7 +38,7 @@ AutoForm.addInputType("select", {
         // #each uses to track unique list items when adding and removing them
         // See https://github.com/meteor/meteor/issues/2174
         _id: opt.value,
-        selected: (opt.value.toString() === context.value.toString()),
+        selected: (opt.value === context.value),
         atts: itemAtts
       });
     });

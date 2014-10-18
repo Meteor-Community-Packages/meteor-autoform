@@ -103,14 +103,16 @@
 </template>
 
 <template name="afRadioGroup_bootstrap3">
-  {{#each this.items}}
-    <div class="radio">
-      <label>
-        <input type="radio" value="{{this.value}}" {{atts}} />
-        {{this.label}}
-      </label>
-    </div>
-  {{/each}}
+  <div class="af-radio-group" {{dsk}}>
+    {{#each this.items}}
+      <div class="radio">
+        <label>
+          <input type="radio" value="{{this.value}}" {{atts}} />
+          {{this.label}}
+        </label>
+      </div>
+    {{/each}}
+  </div>
 </template>
 
 <template name="afFieldSelect_bootstrap3">

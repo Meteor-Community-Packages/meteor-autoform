@@ -402,8 +402,10 @@ Template.autoForm.events({
     var self = this;
 
     var key = event.target.getAttribute("data-schema-key");
-    if (!key)
-      return;
+    if (!key) {
+      key = $(event.target).closest('[data-schema-key]').attr("data-schema-key");
+      if (!key) return;
+    }
 
     var formId = self.id || defaultFormId;
     var data = formData[formId];
