@@ -27,9 +27,11 @@
 
 <template name="afObjectField_bootstrap3">
   <div class="panel panel-default">
+    {{#with afFieldLabelText name=this.atts.name}}
     <div class="panel-heading">
-      <h3 class="panel-title">{{afFieldLabelText name=this.atts.name}}</h3>
+      <h3 class="panel-title">{{this}}</h3>
     </div>
+    {{/with}}
     <div class="panel-body">
       {{#if afFieldIsInvalid name=this.atts.name}}
       <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>

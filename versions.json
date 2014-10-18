@@ -2,7 +2,7 @@
   "dependencies": [
     [
       "aldeed:simple-schema",
-      "1.0.0"
+      "1.0.3"
     ],
     [
       "base64",
@@ -70,7 +70,7 @@
     ],
     [
       "mrt:moment",
-      "2.6.0"
+      "2.8.1"
     ],
     [
       "observe-sequence",

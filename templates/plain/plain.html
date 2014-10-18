@@ -27,7 +27,9 @@
 
 <template name="afObjectField_plain">
   <fieldset>
-    <legend>{{afFieldLabelText name=this.atts.name}}</legend>
+    {{#with afFieldLabelText name=this.atts.name}}
+    <legend>{{this}}</legend>
+    {{/with}}
     {{> afQuickFields name=this.atts.name fields=this.atts.fields omitFields=this.atts.omitFields}}
   </fieldset>
 </template>

@@ -87,7 +87,18 @@ regHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
 regHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
   options = parseOptions(options, 'afFieldLabelText');
 
-  return options.ss.label(options.name);
+  if (SimpleSchema._makeGeneric(options.name).slice(-1) === "$") {
+    // for array items we don't want to inflect the label because
+    // we will end up with a number
+    var label = options.ss.label(options.name);
+    if (!isNaN(parseInt(label, 10))) {
+      return null;
+    } else {
+      return label;
+    }
+  } else {
+    return options.ss.label(options.name);
+  }
 });
 
 /*
