@@ -1,9 +1,5 @@
 AutoForm.addInputType("boolean-select", {
   template: "afBooleanSelect",
-  valueIn: function (val) {
-    // switch to a boolean
-    return (val === "true") ? true : false;
-  },
   valueOut: function () {
     var val = this.val();
     if (val === "true") {
@@ -19,12 +15,23 @@ AutoForm.addInputType("boolean-select", {
     context.items = [
       {
         name: context.name,
+        value: "",
+        // _id must be included because it is a special property that
+        // #each uses to track unique list items when adding and removing them
+        // See https://github.com/meteor/meteor/issues/2174
+        _id: "",
+        selected: (context.value !== false && context.value !== true),
+        label: context.atts.firstOption || "(Select One)",
+        atts: atts
+      },
+      {
+        name: context.name,
         value: "false",
         // _id must be included because it is a special property that
         // #each uses to track unique list items when adding and removing them
         // See https://github.com/meteor/meteor/issues/2174
         _id: "false",
-        selected: !context.value,
+        selected: (context.value === false),
         label: context.atts.falseLabel || "False",
         atts: atts
       },
@@ -35,7 +42,7 @@ AutoForm.addInputType("boolean-select", {
         // #each uses to track unique list items when adding and removing them
         // See https://github.com/meteor/meteor/issues/2174
         _id: "true",
-        selected: context.value,
+        selected: (context.value === true),
         label: context.atts.trueLabel || "True",
         atts: atts
       }
@@ -47,7 +54,7 @@ AutoForm.addInputType("boolean-select", {
 
 Template["afBooleanSelect"].helpers({
   optionAtts: function afSelectOptionAtts() {
-    var item = this
+    var item = this;
     var atts = {
       value: item.value
     };
