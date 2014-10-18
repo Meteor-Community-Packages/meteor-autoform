@@ -17,6 +17,7 @@ have to add to your app yourself.
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
 - [Installation](#installation)
+- [Demo](#demo)
 - [Example](#example)
   - [A Basic Insert Form](#a-basic-insert-form)
   - [A Basic Update Form](#a-basic-update-form)
@@ -86,6 +87,12 @@ In a Meteor app directory, enter:
 ```
 $ meteor add aldeed:autoform
 ```
+
+## Demo
+
+[Live](http://autoform.meteor.com)
+
+[Source](https://github.com/aldeed/autoform-demo)
 
 ## Example
 
@@ -1518,8 +1525,6 @@ HTML elements such as `<strong>`. Then be sure to wrap your `afFieldMessage`
 tags in triple stashes.
 
 ## Examples
-
-A somewhat messy app used for testing is [here](https://github.com/aldeed/meteor-autoform-example).
 
 I would like to link to examples of public sites using this in production. If you have one,
 please add a link here. You can include a brief description of how you're using autoforms
