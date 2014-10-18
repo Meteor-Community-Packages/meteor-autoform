@@ -14,10 +14,10 @@ AutoForm.addInputType("select", {
     context.items = [];
 
     // If a firstOption was provided, add that to the items list first
-    if (firstOption) {
+    if (firstOption !== false) {
       context.items.push({
         name: context.name,
-        label: firstOption,
+        label: (typeof firstOption === "string" ? firstOption : "(Select One)"),
         value: "",
         // _id must be included because it is a special property that
         // #each uses to track unique list items when adding and removing them
