@@ -113,4 +113,5 @@ var selectHelpers = {
   }
 };
 Template["afSelect_bootstrap3"].helpers(selectHelpers);
+Template["afSelectMultiple_bootstrap3"].helpers(selectHelpers);
 Template["afBooleanSelect_bootstrap3"].helpers(selectHelpers);

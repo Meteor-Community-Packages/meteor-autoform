@@ -26,7 +26,7 @@ AutoForm.addInputType("select-multiple", {
 
 Template["afSelectMultiple"].helpers({
   optionAtts: function afSelectOptionAtts() {
-    var item = this
+    var item = this;
     var atts = {
       value: item.value
     };
