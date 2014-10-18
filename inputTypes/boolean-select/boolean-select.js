@@ -9,7 +9,7 @@ AutoForm.addInputType("boolean-select", {
     }
   },
   contextAdjust: function (context) {
-    var atts = _.omit(context.atts, 'trueLabel', 'falseLabel');
+    var atts = _.omit(context.atts, 'trueLabel', 'falseLabel', 'firstOption');
 
     // build items list
     context.items = [

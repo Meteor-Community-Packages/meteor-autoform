@@ -68,7 +68,6 @@ _.each([
 });
 
 _.each([
-    "afCheckbox_bootstrap3",
     "afRadio_bootstrap3",
     "afRadioGroup_bootstrap3"
   ], function (tmplName) {

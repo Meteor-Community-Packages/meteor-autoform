@@ -207,7 +207,6 @@ getInputData = function getInputData(defs, hash, value, label, expectsArray, sub
           "autoform",
           "type",
           "value",
-          "firstOption",
           "noselect",
           "options",
           "template");
@@ -291,7 +290,6 @@ getInputData = function getInputData(defs, hash, value, label, expectsArray, sub
     decimal: defs.decimal,
     value: value,
     atts: inputAtts,
-    firstOption: hash.firstOption,
     selectOptions: selectOptions
   };
 };

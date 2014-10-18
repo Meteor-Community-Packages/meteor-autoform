@@ -112,18 +112,8 @@ Template["afArrayField_bootstrap3-horizontal"].helpers({
 });
 
 Template["afCheckbox_bootstrap3-horizontal"].helpers({
-  atts: function () {
-    var atts = _.clone(this.atts);
-    if (this.selected) {
-      atts.checked = "";
-    }
-    return atts;
-  },
   attsPlusSpecialClass: function () {
     var atts = _.clone(this.atts);
-    if (this.selected) {
-      atts.checked = "";
-    }
     atts = Utility.addClass(atts, "autoform-checkbox-margin-fix");
     return atts;
   },

@@ -7,14 +7,17 @@ AutoForm.addInputType("select", {
     //can fix issues with some browsers selecting the firstOption instead of the selected option
     context.atts.autocomplete = "off";
 
+    var firstOption = context.atts.firstOption;
+    delete context.atts.firstOption;
+
     // build items list
     context.items = [];
 
     // If a firstOption was provided, add that to the items list first
-    if (context.firstOption) {
+    if (firstOption) {
       context.items.push({
         name: context.name,
-        label: context.firstOption,
+        label: firstOption,
         value: "",
         // _id must be included because it is a special property that
         // #each uses to track unique list items when adding and removing them
