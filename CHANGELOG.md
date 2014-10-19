@@ -6,6 +6,19 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 4.0.0-rc
+
+This is a significant rewrite, and there are a number of changes that are not backwards compatible. The primary reason for the rewrite is to enable easier creation of custom form input types (autoform widgets) that can be provided by add-on packages. Some changes were also made to cut out features that were not providing much added value compared to the code they required.
+
+* **BREAKING** The logic that determines what style template is used for a form or a component of a form is now different. Generally speaking, there are more potential places at which you can define the template to use, and it tries to use the template used by the closest ancestor component if not overridden.
+* **BREAKING** The `AutoForm.inputValueHandlers` function is now gone. If you were using it, you should switch to the new method for defining custom input types. Refer to "Defining Custom Input Types" in the Readme.
+* **BREAKING** When your schema for a field includes the Email or Url regular expression built into SimpleSchema, AutoForm no longer automatically uses the `email` or `url` type, respectively, for the form input. You can manually set the `type` attribute or specify `autoform.type` in the schema.
+* **BREAKING** The `radio` and `select` attributes no longer do anything. Instead, specify an override `type` attribute of "boolean-radios" or "boolean-select", respectively.
+* A new `AutoForm.getSchemaForField` function can be used within a template helper function to get the schema definition for a field by finding the closest autoForm and using the schema attached to it.
+* **BREAKING** The `afFieldLabel` component is gone. If you were using it, you should replace with your own label element using `afFieldLabelText` for the text, something like `<label class="control-label">{{afFieldLabelText name='firstName'}}</label>`
+* **BREAKING** If you don't provide a `firstOption` attribute for a single select control, a default first option that says "(Select One)" is used. You can omit the first option using `firstOption=false`, but it's best to have one in most cases to avoid confusing behavior.
+* A new `AutoForm.invalidateFormContext` function can be called in situations where you reactively change the `doc` attribute of a form and you need to force the form to rerender.
+
 ### 3.2.0
 
 * Documentation corrections. (Thanks @paulellery and @jakozaur)

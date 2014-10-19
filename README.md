@@ -1308,26 +1308,25 @@ common purpose, consider releasing it as a separate add-on package. The goal
 is to keep the built-in templates minimal but to provide many others through
 separate packages.
 
-## Making AutoForm-Ready Components
+## Defining Custom Input Types
 
-Making a custom component for use with autoform is still a complicated task, but it will gradually become easier as the Blaze engine improves and work to make AutoForm more modular is completed. As of right now, you can put anything within an autoForm block and then tell AutoForm how to extract a value from it when the form is validated or submitted. The general steps are:
+Making a custom input type (form widget) is easy.
 
-1. Add your custom input or other markup within the `autoForm` block.
-2. Add the `data-schema-key` attribute to it, specifying the schema key for which the input provides a value.
-3. Add a class or other unique attribute to the element, so that you can provide a selector for it in the next step.
-4. Tell AutoForm how to extract a value from your input by providing a custom input value handler.
+1. Create a template and any necessary helpers for it.
+2. Call `AutoForm.addInputType` to give your new type a name and provide a few other necessary details.
 
-An example custom input value handler:
+`AutoForm.addInputType` accepts to arguments: `name` and `options`. The `name` argument defines the string that will need to be used as the value of the `type` attribute for `afFieldInput`. The `options` argument is an object with some of the following properties:
 
-```js
-AutoForm.inputValueHandlers({
-  'input.myDoubledInput': function () {
-    return parseFloat(this.val()) * 2;
-  }
-});
-```
+* `template`: Required. The name of the template to use, which you've defined in a `.html` file.
+* `valueIn`: Optional. A function that adjusts the initial value of the field, which is then available in your template as `this.value`. You could use this, for example, to change a `Date` object to a string representing the date. You could also use a helper in your template to achieve the same result.
+* `valueOut`: Required. A function that AutoForm calls when it wants to know what the current value stored in your widget is. In this function, `this` is the jQuery object representing the element that has the `data-schema-key` attribute in your custom template. So, for example, in a simple case your `valueOut` function might just do `return this.val()`.
+* `contextAdjust`: Optional. A function that adjusts the context object that your custom template receives. That is, this function accepts an object argument, potentially modifies it, and then returns it. That returned object then becomes `this` in your custom template.
 
-For more examples, see the built-in handlers [here](https://github.com/aldeed/meteor-autoform/blob/master/autoform-inputs.js#L4). Custom handlers are used before default handlers, and the first one with a matching selector is used.
+It's possible to use template helpers instead of `valueIn` and `contextAdjust`, but by keeping template helpers to a minimum, you make it easier for someone to override the template for style reasons, but still use your custom input type. For example, the `bootstrap3` template overrides some of the default input types to add classes and adjust markup a bit, but it does not need to redefine template helpers to make context adjustments since `valueIn` and `contextAdjust` do that.
+
+There is nothing overly special about the HTML template you define. Check out the properties of `this` within the template to get all of the information you need to render your control. Primarily you need to use `this.value` to set the control's value and the provided attributes in `this.atts` should be passed along to one or more of the elements you generate. In particular, you must make sure that the `data-schema-key` attribute in `this.atts` is added to one of the generated elements, the one that you want to be provided as `this` in your `valueOut` function.
+
+For more examples, see the built-in input types [here](https://github.com/aldeed/meteor-autoform/tree/master/inputTypes).
 
 ## Common Questions
 
