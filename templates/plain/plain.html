@@ -18,7 +18,7 @@
 <template name="afFormGroup_plain">
   <div class="{{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
     {{#unless this.skipLabel}}
-    <label {{this.afFieldLabelAtts}}>{{afFieldLabelText name=this.atts.name}}</label>
+    <label {{this.afFieldLabelAtts}}>{{#if this.labelText}}{{this.labelText}}{{else}}{{afFieldLabelText name=this.atts.name}}{{/if}}</label>
     {{/unless}}
     {{> afFieldInput this.afFieldInputAtts}}
     <span>{{{afFieldMessage name=this.atts.name}}}</span>

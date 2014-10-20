@@ -5,7 +5,8 @@ Template.afFormGroup.helpers({
       skipLabel: (c.atts.label === false),
       afFieldLabelAtts: formGroupLabelAtts(c.atts),
       afFieldInputAtts: formGroupInputAtts(c.atts),
-      atts: {name: c.atts.name}
+      atts: {name: c.atts.name},
+      labelText: (typeof c.atts.label === "string") ? c.atts.label : null
     };
   }
 });

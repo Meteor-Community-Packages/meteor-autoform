@@ -18,7 +18,7 @@
 <template name="afFormGroup_bootstrap3">
   <div class="form-group {{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
     {{#unless skipLabel}}
-    <label {{bsFieldLabelAtts}}>{{afFieldLabelText name=this.atts.name}}</label>
+    <label {{bsFieldLabelAtts}}>{{#if this.labelText}}{{this.labelText}}{{else}}{{afFieldLabelText name=this.atts.name}}{{/if}}</label>
     {{/unless}}
     {{> afFieldInput this.afFieldInputAtts}}
     <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>

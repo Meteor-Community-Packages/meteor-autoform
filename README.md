@@ -444,7 +444,7 @@ and the error message -- in one line.
 
 This component accepts the same attributes as `afFieldInput`.
 Attributes that are prefixed with `label-` become attributes on the rendered `label` element while
-any remaining attributes are forwarded to the `afFieldInput` component. You can also set `label=false` to omit the `label` element.
+any remaining attributes are forwarded to the `afFieldInput` component. You can also set `label=false` to omit the `label` element or set `label` to a string to use that text as the label text.
 
 ### afQuickField
 

@@ -24,7 +24,7 @@
     {{! We include the empty label as the easiest way to keep proper field alignment}}
     <label {{afFieldLabelAtts}}></label>
     {{else}}
-    <label {{afFieldLabelAtts}}>{{afFieldLabelText name=this.atts.name}}</label>
+    <label {{afFieldLabelAtts}}>{{#if this.labelText}}{{this.labelText}}{{else}}{{afFieldLabelText name=this.atts.name}}{{/if}}</label>
     {{/if}}
     <div class="{{rightColumnClass}}">
       {{> afFieldInput afFieldInputAtts}}
