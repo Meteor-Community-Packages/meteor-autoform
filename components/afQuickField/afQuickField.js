@@ -1,7 +1,7 @@
 Template.afQuickField.helpers({
   isGroup: function afQuickFieldIsGroup(options) {
     var c = Utility.normalizeContext(options.hash, "afQuickField");
-    // Render an array of fields if we expect an Object and we don't have options
+    // Render a group of fields if we expect an Object and we don't have options
     // and we have not overridden the type
     return (c.defs.type === Object && !c.atts.options && !c.atts.type);
   },

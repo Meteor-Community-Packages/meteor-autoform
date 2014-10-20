@@ -25,7 +25,7 @@ Template['afFormGroup_bootstrap3'].helpers({
   bsFieldLabelAtts: function bsFieldLabelAtts() {
     var atts = _.clone(this.afFieldLabelAtts);
     // Add bootstrap class
-    atts = Utility.addClass(atts, "control-label");
+    atts = AutoForm.Utility.addClass(atts, "control-label");
     return atts;
   }
 });
@@ -61,7 +61,7 @@ _.each([
     atts: function addFormControlAtts() {
       var atts = _.clone(this.atts);
       // Add bootstrap class
-      atts = Utility.addClass(atts, "form-control");
+      atts = AutoForm.Utility.addClass(atts, "form-control");
       return atts;
     }
   });

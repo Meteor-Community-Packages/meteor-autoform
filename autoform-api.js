@@ -4,6 +4,8 @@ AutoForm = AutoForm || {}; //exported
 
 AutoForm.formPreserve = formPreserve;
 
+AutoForm.Utility = Utility;
+
 /**
  * @method AutoForm.addHooks
  * @public
@@ -372,7 +374,7 @@ AutoForm.getInputType = getInputType;
  * @public
  * @param {String} name The field name attribute / schema key.
  * @param {Object} [autoform] The autoform context. Optionally pass this if you've already retrieved it using AutoForm.find as a performance enhancement.
- * @return {Object} 
+ * @return {Object}
  *
  * Call this method from a UI helper to get the field definitions based on the schema used by the closest containing autoForm.
  * Always throws an error or returns the schema object.
@@ -392,7 +394,7 @@ AutoForm.getSchemaForField = function autoFormGetSchemaForField(name, autoform) 
  * @method AutoForm.expectsArray
  * @public
  * @param {Object} atts The attributes provided to afFieldInput.
- * @return {Boolean} 
+ * @return {Boolean}
  *
  * Call this method from a UI helper to determine whether the user is expecting the input control to produce an array value.
  */
@@ -402,7 +404,7 @@ AutoForm.expectsArray = expectsArray;
  * @method AutoForm.invalidateFormContext
  * @public
  * @param {String} formId The form ID.
- * @return {undefined} 
+ * @return {undefined}
  *
  * Call this to force invalidate the form context, such as when you're changing the `doc`
  * and it does not react by itself.

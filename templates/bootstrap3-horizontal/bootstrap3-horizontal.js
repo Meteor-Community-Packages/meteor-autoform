@@ -31,7 +31,7 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   },
   qfAutoFormContext: function () {
     var ctx = _.clone(this.qfAutoFormContext || {});
-    ctx = Utility.addClass(ctx, "form-horizontal");
+    ctx = AutoForm.Utility.addClass(ctx, "form-horizontal");
     if (ctx["input-col-class"])
       delete ctx["input-col-class"];
     if (ctx["label-class"])
@@ -58,7 +58,7 @@ Template["afFormGroup_bootstrap3-horizontal"].helpers({
   afFieldLabelAtts: function () {
     var atts = _.clone(this.afFieldLabelAtts || {});
     // Add bootstrap class
-    atts = Utility.addClass(atts, "control-label");
+    atts = AutoForm.Utility.addClass(atts, "control-label");
     return atts;
   },
   rightColumnClass: function () {
@@ -87,7 +87,7 @@ Template["afObjectField_bootstrap3-horizontal"].helpers({
       }
     });
     // Add bootstrap class
-    labelAtts = Utility.addClass(labelAtts, "control-label");
+    labelAtts = AutoForm.Utility.addClass(labelAtts, "control-label");
     return labelAtts;
   }
 });
@@ -106,7 +106,7 @@ Template["afArrayField_bootstrap3-horizontal"].helpers({
       }
     });
     // Add bootstrap class
-    labelAtts = Utility.addClass(labelAtts, "control-label");
+    labelAtts = AutoForm.Utility.addClass(labelAtts, "control-label");
     return labelAtts;
   }
 });
@@ -114,7 +114,7 @@ Template["afArrayField_bootstrap3-horizontal"].helpers({
 Template["afCheckbox_bootstrap3-horizontal"].helpers({
   attsPlusSpecialClass: function () {
     var atts = _.clone(this.atts);
-    atts = Utility.addClass(atts, "autoform-checkbox-margin-fix");
+    atts = AutoForm.Utility.addClass(atts, "autoform-checkbox-margin-fix");
     return atts;
   },
   useLeftLabel: function () {

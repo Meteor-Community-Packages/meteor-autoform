@@ -22,7 +22,7 @@ Template['quickForm_bootstrap3-inline'].helpers({
   },
   qfAutoFormContext: function () {
     var ctx = _.clone(this.qfAutoFormContext || {});
-    ctx = Utility.addClass(ctx, "form-inline");
+    ctx = AutoForm.Utility.addClass(ctx, "form-inline");
     if (ctx["label-class"])
       delete ctx["label-class"];
     return ctx;
