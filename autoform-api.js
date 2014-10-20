@@ -297,6 +297,40 @@ AutoForm.findAttribute = function autoFormFindAttribute(attrName) {
 };
 
 /**
+ * @method AutoForm.findAttributesWithPrefix
+ * @param {String} prefix Attribute prefix
+ * @public
+ * @return {Object} An object containing all of the found attributes and their values, with the prefix removed from the keys.
+ *
+ * Call this method from a UI helper. Searches for attributes that start with the given prefix, looking up the parent context tree until the closest autoform is reached.
+ */
+AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(prefix) {
+  var n = 0, af, val, searchObj, stopAt = -1, obj = {};
+  // we go one level past _af so that we get the original autoForm or quickForm attributes, too
+  do {
+    af = Template.parentData(n++);
+    if (af) {
+      if (af.atts) {
+        searchObj = af.atts;
+      } else {
+        searchObj = af;
+      }
+      if (_.isObject(searchObj)) {
+        _.each(searchObj, function (v, k) {
+          if (k.indexOf(prefix) === 0) {
+            obj[k.slice(prefix.length)] = v;
+          }
+        });
+      }
+      if (af._af) {
+        stopAt = n + 1;
+      }
+    }
+  } while (af && stopAt < n);
+  return obj;
+};
+
+/**
  * @method AutoForm.debug
  * @public
  *

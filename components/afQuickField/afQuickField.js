@@ -10,5 +10,8 @@ Template.afQuickField.helpers({
     // Render an array of fields if we expect an Array and we don't have options
     // and we have not overridden the type
     return (c.defs.type === Array && !c.atts.options && !c.atts.type);
+  },
+  groupAtts: function afQuickFieldGroupAtts() {
+    return _.omit(this, 'fields', 'omitFields');
   }
 });

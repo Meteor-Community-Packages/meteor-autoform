@@ -2,7 +2,7 @@
   {{#autoForm this.qfAutoFormContext}}
     {{> afQuickFields fields=../atts.fields omitFields=../atts.omitFields}}
     {{#if qfShouldRenderButton}}
-    <div>
+    <div class="form-group">
       <button {{submitButtonAtts}}>
       {{#with ../atts.buttonContent}}
       {{this}}

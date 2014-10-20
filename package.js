@@ -2,7 +2,7 @@ Package.describe({
   name: "aldeed:autoform",
   summary: "Easily create forms with automatic insert and update, and automatic reactive validation.",
   git: "https://github.com/aldeed/meteor-autoform.git",
-  version: "4.0.0-rc4"
+  version: "4.0.0-rc5"
 });
 
 Package.on_use(function(api) {
@@ -137,6 +137,10 @@ Package.on_use(function(api) {
     'templates/bootstrap3-horizontal/bootstrap3-horizontal.html',
     'templates/bootstrap3-horizontal/bootstrap3-horizontal.js',
     'templates/bootstrap3-horizontal/bootstrap3-horizontal.css',
+    // bootstrap3-inline Template
+    'templates/bootstrap3-inline/bootstrap3-inline.html',
+    'templates/bootstrap3-inline/bootstrap3-inline.js',
+    'templates/bootstrap3-inline/bootstrap3-inline.css',
     // plain Template
     'templates/plain/plain.html',
     'templates/plain/plain.js',

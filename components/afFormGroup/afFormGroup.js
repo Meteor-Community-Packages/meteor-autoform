@@ -22,14 +22,17 @@ function formGroupLabelAtts(atts) {
       labelAtts[key.substring(6)] = val;
     }
   });
-
   return labelAtts;
 }
 
 function formGroupInputAtts(atts) {
   // Separate label options from input options; label items begin with "label-"
   // We also don't want the "label" option
-  return _.omit(atts, function (val, key) {
-    return (key === "label" || key.indexOf("label-") === 0);
+  var inputAtts = {};
+  _.each(atts, function autoFormLabelAttsEach(val, key) {
+    if (key !== "label" && key.indexOf("label-") !== 0) {
+      inputAtts[key] = val;
+    }
   });
+  return inputAtts;
 }

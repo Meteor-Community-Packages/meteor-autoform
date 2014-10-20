@@ -452,8 +452,8 @@ Utility = {
   /**
    * @method Utility.normalizeContext
    * @private
-   * @param  {Object} context A context object, potentially with an `atts` or `autoform` property.
-   * @param {String} name The name of the helper or component we're calling from, for in a potential error message.
+   * @param  {Object} context A context object, potentially with an `atts` property.
+   * @param {String} name The name of the helper or component we're calling from.
    * @return {Object} Normalized context object
    *
    * Returns an object with `afc`, `af`, and `atts` properties, normalized from whatever object is passed in.
@@ -462,29 +462,44 @@ Utility = {
    * an error if we can't find an autoform context.
    */
   normalizeContext: function autoFormNormalizeContext(context, name) {
+    var atts, autoform, defs, itemDefs, allowedValues, formComponentAttributes,
+      fieldAttributes, fieldAttributesForComponentType;
+
     context = context || {};
-    var atts = context.atts || context;
-    var autoform = AutoForm.find(name);
-    var defs = Utility.getDefs(autoform.ss, atts.name); //defs will not be undefined
+    atts = context.atts ? _.clone(context.atts) : _.clone(context);
+    autoform = AutoForm.find(name);
+    defs = Utility.getDefs(autoform.ss, atts.name); //defs will not be undefined
 
     // For array fields, `allowedValues` is on the array item definition
     if (defs.type === Array) {
-      var itemDefs = Utility.getDefs(autoform.ss, atts.name + ".$");
-      var allowedValues = itemDefs.allowedValues;
+      itemDefs = Utility.getDefs(autoform.ss, atts.name + ".$");
+      allowedValues = itemDefs.allowedValues;
     } else {
-      var allowedValues = defs.allowedValues;
+      allowedValues = defs.allowedValues;
     }
 
-    var defaultAttributes = defs.autoform || {};
+    // Look up the tree if we're in a helper, checking to see if any ancestor components
+    // had a <componentType>-attribute specified.
+    formComponentAttributes = AutoForm.findAttributesWithPrefix(name + "-");
+
+    // Get any field-specific attributes defined in the schema.
+    // They can be in autoform.attrName or autoform.componentType.attrName, with
+    // the latter overriding the former.
+    fieldAttributes = _.clone(defs.autoform) || {};
+    fieldAttributesForComponentType = fieldAttributes[name] || {};
+    fieldAttributes = _.omit(fieldAttributes, componentTypeList);
+    fieldAttributes = _.extend({}, fieldAttributes, fieldAttributesForComponentType);
 
     // This is where we add default attributes specified in
     // defs.autoform.
     // If options="auto", we want to use defs.autoform.options
     // if specified and otherwise fall back to "allowed"
-    if (defaultAttributes.options && atts.options === "auto")
+    if (fieldAttributes.options && atts.options === "auto")
       delete atts.options;
+
     // "autoform" option in the schema provides default atts
-    atts = _.extend({}, defaultAttributes, atts);
+    atts = _.extend({}, formComponentAttributes, fieldAttributes, atts);
+
     // If still set to "auto", then there were no options in defs, so we use "allowed"
     if (atts.options === "auto") {
       if (allowedValues) {
