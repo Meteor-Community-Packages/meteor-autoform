@@ -1,5 +1,5 @@
 <template name="afQuickFields">
-  {{#each afFieldNames name=this.name fields=this.fields omitFields=this.omitFields}}
+  {{#each afFieldNames name=this.name}}
     {{#with name=this}}
     {{> afQuickField quickFieldAtts}}
     {{/with}}

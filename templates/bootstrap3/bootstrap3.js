@@ -5,7 +5,7 @@
 Template['quickForm_bootstrap3'].helpers({
   submitButtonAtts: function bsQuickFormSubmitButtonAtts() {
     var qfAtts = this.atts;
-    var atts = {type: "submit"};
+    var atts = {};
     if (typeof qfAtts.buttonClasses === "string") {
       atts['class'] = qfAtts.buttonClasses;
     } else {

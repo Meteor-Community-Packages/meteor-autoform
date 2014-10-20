@@ -4,11 +4,11 @@
       {{#with ../atts.legend}}
       <legend>{{this}}</legend>
       {{/with}}
-      {{> afQuickFields fields=../atts.fields omitFields=../atts.omitFields}}
+      {{> afQuickFields}}
     </fieldset>
     {{#if qfShouldRenderButton}}
     <div>
-      <button {{submitButtonAtts}}>
+      <button type="submit" {{submitButtonAtts}}>
         {{#with ../atts.buttonContent}}
         {{this}}
         {{else}}

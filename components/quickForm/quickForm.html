@@ -1,5 +1,5 @@
 <template name="quickForm">
-  {{#with innerContext this}}
+  {{#with innerContext}}
     {{#with afTemplateName 'quickForm' ../template}}
       {{> UI.dynamic template=this data=..}}
     {{/with}}

@@ -110,27 +110,37 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
   var name = options.name;
 
   // Get the list of fields we want included
-  var fieldList = options.fields;
+  var fieldList = AutoForm.findAttribute("fields");
   if (fieldList) {
     fieldList = Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
-  } else if (name) {
-    // If we weren't given a fieldList but were given a field name, use subfields by default
-    
-    // Get list of field names that are descendants of this field's name
-    fieldList = ss.objectKeys(SimpleSchema._makeGeneric(name));
+    // Take only those fields in the fieldList that are descendants of the `name` field
+    if (name) {
+      fieldList = _.filter(fieldList, function filterFieldsByName(field) {
+        return field.indexOf(name+".") === 0;
+      });
+    }
+  } 
 
-    // Tack child field name on to end of parent field name. This
-    // ensures that we keep the desired array index for array items.
-    fieldList = _.map(fieldList, function (field) {
-      return name + "." + field;
-    });
-  } else {
-    // If we weren't given a fieldList or a field name, use all first level schema keys by default
-    fieldList = ss.objectKeys() || [];
+  if (!fieldList || fieldList.length === 0) {
+    if (name) {
+      // If we weren't given a fieldList but were given a field name, use subfields by default
+      
+      // Get list of field names that are descendants of this field's name
+      fieldList = ss.objectKeys(SimpleSchema._makeGeneric(name));
+
+      // Tack child field name on to end of parent field name. This
+      // ensures that we keep the desired array index for array items.
+      fieldList = _.map(fieldList, function (field) {
+        return name + "." + field;
+      });
+    } else {
+      // If we weren't given a fieldList or a field name, use all first level schema keys by default
+      fieldList = ss.objectKeys() || [];
+    }
   }
 
   // If user wants to omit some fields, remove those from the array
-  var omitFields = options.omitFields;
+  var omitFields = AutoForm.findAttribute("omitFields");
   if (omitFields) {
     omitFields = Utility.stringToArray(omitFields, 'AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
     fieldList = _.difference(fieldList, omitFields);

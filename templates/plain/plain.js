@@ -5,7 +5,7 @@
 Template['quickForm_plain'].helpers({
   submitButtonAtts: function plQuickFormSubmitButtonAtts() {
     var qfAtts = this.atts;
-    var atts = {type: "submit"};
+    var atts = {};
     if (typeof qfAtts.buttonClasses === "string") {
       atts['class'] = qfAtts.buttonClasses;
     }
