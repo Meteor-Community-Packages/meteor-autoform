@@ -2,12 +2,12 @@ Package.describe({
   name: "aldeed:autoform",
   summary: "Easily create forms with automatic insert and update, and automatic reactive validation.",
   git: "https://github.com/aldeed/meteor-autoform.git",
-  version: "4.0.0-rc6"
+  version: "4.0.0-rc7"
 });
 
 Package.on_use(function(api) {
   // Dependencies
-  api.versionsFrom('METEOR@0.9.3');
+  api.versionsFrom(['METEOR@0.9.3', 'METEOR@0.9.4']);
   // common
   api.use('aldeed:simple-schema@1.0.0');
   api.use('check');
@@ -16,10 +16,10 @@ Package.on_use(function(api) {
   api.use('mrt:moment@2.6.0', 'client');
   api.use('mrt:moment-timezone@0.2.1', 'client', {weak: true});
   api.use(['aldeed:collection2@2.0.0', 'reload'], 'client', {weak: true});
-  
+
   // Imply SS to make sure SimpleSchema object is available to app
   api.imply('aldeed:simple-schema');
-  
+
   // Exports
   api.export('AutoForm', 'client');
   api.export('Utility', 'client', {testOnly: true});
