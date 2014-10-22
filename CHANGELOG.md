@@ -19,6 +19,7 @@ This is a significant rewrite, and there are a number of changes that are not ba
 * **BREAKING** If you don't provide a `firstOption` attribute for a single select control, a default first option that says "(Select One)" is used. You can omit the first option using `firstOption=false`, but it's best to have one in most cases to avoid confusing behavior.
 * A new `AutoForm.invalidateFormContext` function can be called in situations where you reactively change the `doc` attribute of a form and you need to force the form to rerender.
 * You can now set `label="some text"` on an `afFormGroup` (or `afQuickField`) component to provide some label text instead of using the schema label.
+* Fix which element is passed as the updated element for autosave forms.
 
 ### 3.2.0
 

@@ -106,36 +106,79 @@ regHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
  */
 regHelper("afFieldNames", function autoFormFieldNames(options) {
   options = parseOptions(options, 'afFieldNames');
-  var ss = options.ss;
-  var name = options.name;
+  var ss = options.ss, name = options.name, namePlusDot, genericName, genericNamePlusDot;
+
+  if (name) {
+    namePlusDot = name + ".";
+    genericName = SimpleSchema._makeGeneric(name);
+    genericNamePlusDot = genericName + ".";
+  }
 
   // Get the list of fields we want included
   var fieldList = AutoForm.findAttribute("fields");
   if (fieldList) {
     fieldList = Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
+
     // Take only those fields in the fieldList that are descendants of the `name` field
     if (name) {
+      // Replace generic name with real name. We assume that field names
+      // with $ apply to all array items. Field list will not have the
+      // correct array field item number instead of $.
+      if (genericName !== name) {
+        fieldList = _.map(fieldList, function (field) {
+          if (field.indexOf(genericNamePlusDot) === 0) {
+            return namePlusDot + field.slice(genericNamePlusDot.length);
+          }
+          return field;
+        });
+      }
+
       fieldList = _.filter(fieldList, function filterFieldsByName(field) {
-        return field.indexOf(name+".") === 0;
+        return field.indexOf(namePlusDot) === 0;
       });
     }
-  } 
+
+    // If top level fields, be sure to remove any with $ in them
+    else {
+      fieldList = _.filter(fieldList, function filterFieldsByName(field) {
+        return (field.slice(-2) !== '.$' && field.indexOf('.$.') === -1);
+      });
+    }
+
+    // First we filter out any fields that are subobjects where the
+    // parent object is also in the fieldList and is NOT the current
+    // field name.
+    // This means that if you do `fields="address,address.city"` we
+    // will use an afObjectField for address and include only the
+    // "city" field within that, but if you instead do `fields="address.city"`
+    // we will use a single field for the city, with no afObjectField
+    // template around it.
+    fieldList = _.reject(fieldList, function (field) {
+      var lastDotPos = field.lastIndexOf(".");
+      if (lastDotPos === -1) {
+        return false; //keep
+      }
+
+      var parentField = field.slice(0, lastDotPos);
+      if (parentField.slice(-2) === ".$") {
+        parentField = parentField.slice(0, -2);
+      }
+      return _.contains(fieldList, parentField) && parentField !== name && parentField !== genericName;
+    });
+  }
 
   if (!fieldList || fieldList.length === 0) {
-    if (name) {
-      // If we weren't given a fieldList but were given a field name, use subfields by default
-      
-      // Get list of field names that are descendants of this field's name
-      fieldList = ss.objectKeys(SimpleSchema._makeGeneric(name));
+    // Get list of field names that are descendants of this field's name.
+    // If name/genericName is undefined, this will return top-level
+    // schema keys.
+    fieldList = ss.objectKeys(genericName);
 
+    if (name) {
       // Tack child field name on to end of parent field name. This
       // ensures that we keep the desired array index for array items.
       fieldList = _.map(fieldList, function (field) {
         return name + "." + field;
       });
-    } else {
-      // If we weren't given a fieldList or a field name, use all first level schema keys by default
-      fieldList = ss.objectKeys() || [];
     }
   }
 
@@ -181,7 +224,7 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
  * Returns the full template name. In the simplest scenario, this is templateType_templateName
  * as passed in. However, if templateName is not provided, it is looked up in the following
  * manner:
- * 
+ *
  * 1. autoform.<componentType>.template from the schema (field+type override for all forms)
  * 2. autoform.template from the schema (field override for all forms)
  * 3. template-<componentType> attribute on an ancestor component within the same form (form+type for all fields)
