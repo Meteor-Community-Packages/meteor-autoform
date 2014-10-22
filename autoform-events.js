@@ -425,7 +425,7 @@ Template.autoForm.events({
     // If the form should be auto-saved whenever updated, we do that on field
     // changes instead of validating the field
     if (data.autosave) {
-      lastAutoSaveElement = event.currentTarget;
+      lastAutoSaveElement = event.target;
       $(event.currentTarget).submit();
       return;
     }
