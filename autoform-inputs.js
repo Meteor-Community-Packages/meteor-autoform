@@ -2,18 +2,6 @@
  * package scope functions
  */
 
-// must be used in a template helper
-expectsArray = function expectsArray(inputAtts) {
-	// If the user overrides the type to anything,
-  // then we won't be using a select box and
-  // we won't be expecting an array for the current value.
-  // This logic should probably be more robust. The idea is that
-  // the user should be able to specify any type of control to use
-  // to override the default logic, and then she can use either a custom input
-  // handler or formToDoc hook to change the value into the expected array.
-	return (AutoForm.getSchemaForField(inputAtts.name).type === Array && !inputAtts.type);
-};
-
 // Determines based on different options what type of input/control should be used
 getInputType = function getInputType(atts) {
 	var expectsArray = false, defs, schemaType;
@@ -194,7 +182,7 @@ getInputValue = function getInputValue(atts, value, mDoc, defaultValue, typeDefs
 /*
  * Builds the data context that the input component will have.
  */
-getInputData = function getInputData(defs, hash, value, label, expectsArray, submitType) {
+getInputData = function getInputData(defs, hash, value, label, submitType) {
   var schemaType = defs.type;
 
   /*
@@ -283,7 +271,6 @@ getInputData = function getInputData(defs, hash, value, label, expectsArray, sub
 
   return {
     name: inputAtts['name'],
-    expectsArray: expectsArray,
     schemaType: schemaType,
     min: (typeof defs.min === "function") ? defs.min() : defs.min,
     max: (typeof defs.max === "function") ? defs.max() : defs.max,
@@ -318,40 +305,13 @@ updateAllTrackedFieldValues = function updateAllTrackedFieldValues(formId) {
 function getFieldsValues(fields, ss) {
   var doc = {};
   fields.each(function formValuesEach() {
-    var field = $(this);
-    // Get the field/schema key name
-    var fieldName = field.attr("data-schema-key");
-    // Get the name of the input type template. View names have "Template." at the
-    // beginning so we slice that off. Then we slice off the AF template, after the underscore.
-    var inputTypeTemplate = Blaze.getView(this).name.slice(9);
-    inputTypeTemplate = inputTypeTemplate.split("_")[0];
-
-    var val;
-
-    var typeDef = _.where(inputTypeDefinitions, {template: inputTypeTemplate})[0];
-    if (typeDef && typeDef.valueOut) {
-      val = typeDef.valueOut.call(field);
-    } else {
-      // Get value in default way
-      if (field.attr("data-null-value") !== void 0) {
-        val = null;
-      } else {
-        val = field.val();
-      }
-    }
-
+    var fieldName, val = AutoForm.getInputValue(this, ss);
     if (val !== void 0) {
-      // adjust if boolean is expected
-      if (val === "true" && ss && ss.schema(fieldName).type === Boolean) {
-        val = true;
-      } else if (val === "false" && ss && ss.schema(fieldName).type === Boolean) {
-        val = false;
-      }
+      // Get the field/schema key name
+      fieldName = $(this).attr("data-schema-key");
       doc[fieldName] = val;
     }
-
   });
-
   return doc;
 }
 

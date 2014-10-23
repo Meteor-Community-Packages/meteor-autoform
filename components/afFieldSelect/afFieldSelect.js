@@ -12,8 +12,6 @@ Template.afFieldSelect.helpers({
     var ss = c.af.ss;
     var defs = c.defs;
 
-    var fieldExpectsArray = AutoForm.expectsArray(c.atts);
-
     // Adjust for array fields if necessary
     var defaultValue = defs.defaultValue; //make sure to use pre-adjustment defaultValue for arrays
     if (defs.type === Array) {
@@ -27,7 +25,7 @@ Template.afFieldSelect.helpers({
     updateTrackedFieldValue(c.af.formId, c.atts.name, value);
     
     // Build input data context
-    var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), fieldExpectsArray, c.af.submitType);
+    var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), c.af.submitType);
 
     // Return input data context
     return _.extend({contentBlock: contentBlock, contentBlockContext: contentBlockContext}, iData);

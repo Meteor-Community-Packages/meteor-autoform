@@ -38,12 +38,6 @@ _.each([
     "afTextarea_bootstrap3",
     "afInputText_bootstrap3",
     "afInputPassword_bootstrap3",
-    "afInputButton_bootstrap3",
-    "afInputSubmit_bootstrap3",
-    "afInputReset_bootstrap3",
-    "afInputFile_bootstrap3",
-    "afInputHidden_bootstrap3",
-    "afInputImage_bootstrap3",
     "afInputDateTime_bootstrap3",
     "afInputDateTimeLocal_bootstrap3",
     "afInputDate_bootstrap3",
@@ -62,6 +56,21 @@ _.each([
       var atts = _.clone(this.atts);
       // Add bootstrap class
       atts = AutoForm.Utility.addClass(atts, "form-control");
+      return atts;
+    }
+  });
+});
+
+_.each([
+    "afInputButton_bootstrap3",
+    "afInputSubmit_bootstrap3",
+    "afInputReset_bootstrap3",
+  ], function (tmplName) {
+  Template[tmplName].helpers({
+    atts: function addFormControlAtts() {
+      var atts = _.clone(this.atts);
+      // Add bootstrap class
+      atts = AutoForm.Utility.addClass(atts, "btn");
       return atts;
     }
   });

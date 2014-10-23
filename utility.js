@@ -518,7 +518,8 @@ Utility = {
   /**
    * @method Utility.stringToArray
    * @private
-   * @param {String|Array} A variable that might be a string or an array.
+   * @param {String|Array} s A variable that might be a string or an array.
+   * @param {String} errorMessage Error message to use if it's not a string or an array.
    * @return {Array} The array, building it from a comma-delimited string if necessary.
    */
   stringToArray: function stringToArray(s, errorMessage) {
@@ -529,6 +530,57 @@ Utility = {
     } else {
       return s;
     }
+  },
+  /**
+   * @method Utility.stringToBool
+   * @private
+   * @param {String} val A string or null or undefined.
+   * @return {Boolean|null} The string converted to a Boolean.
+   *
+   * If the string is "true" or "1", returns `true`. If the string is "false" or "0", returns `false`. Otherwise returns `null`.
+   */
+  stringToBool: function stringToBool(val) {
+    if (typeof val === "string" && val.length > 0) {
+      var lval = val.toLowerCase();
+      if (lval === "true" || lval === "1") {
+        return true;
+      } else if (lval === "false" || lval === "0") {
+        return false;
+      }
+    }
+    return null;
+  },
+  /**
+   * @method Utility.stringToNumber
+   * @private
+   * @param {String} val A string or null or undefined.
+   * @return {Number|null} The string converted to a Number.
+   *
+   * Returns Number(val) unless the result is NaN.
+   */
+  stringToNumber: function stringToNumber(val) {
+    if (typeof val === "string" && val.length > 0) {
+      val = Number(val);
+      if (isNaN(val)) {
+        return null;
+      }
+      return val;
+    }
+    return null;
+  },
+  /**
+   * @method Utility.stringToDate
+   * @private
+   * @param {String} val A string or null or undefined.
+   * @return {Date|null} The string converted to a Date instance.
+   *
+   * Returns new Date(val) as long as val is a string with at least one character. Otherwise returns null.
+   */
+  stringToDate: function stringToDate(val) {
+    if (typeof val === "string" && val.length > 0) {
+      return new Date(val);
+    }
+    return null;
   },
   /**
    * @method Utility.addClass

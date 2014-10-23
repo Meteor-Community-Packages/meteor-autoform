@@ -14,6 +14,32 @@ AutoForm.addInputType("datetime", {
       return null;
     }
   },
+  valueConverters: {
+    "string": function (val) {
+      return (val instanceof Date) ? Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(val) : val;
+    },
+    "stringArray": function (val) {
+      if (val instanceof Date) {
+        return [Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(val)];
+      }
+      return null;
+    },
+    "number": function (val) {
+      return (val instanceof Date) ? val.getTime() : val;
+    },
+    "numberArray": function (val) {
+      if (val instanceof Date) {
+        return [val.getTime()];
+      }
+      return null;
+    },
+    "dateArray": function (val) {
+      if (val instanceof Date) {
+        return [val];
+      }
+      return null;
+    }
+  },
   contextAdjust: function (context) {
     if (typeof context.atts.max === "undefined" && context.max instanceof Date) {
       context.atts.max = Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(context.max);

@@ -1,5 +1,13 @@
 AutoForm.addInputType("search", {
   template: "afInputSearch",
+  valueConverters: {
+    "stringArray": function (val) {
+      if (typeof val === "string" && val.length > 0) {
+        return [val];
+      }
+      return null;
+    }
+  },
   contextAdjust: function (context) {
     if (typeof context.atts.maxlength === "undefined" && typeof context.max === "number") {
       context.atts.maxlength = context.max;

@@ -4,6 +4,14 @@ AutoForm.addInputType("radio", {
     if (this.is(":checked")) {
       return this.val();
     }
+  },
+  valueConverters: {
+    "stringArray": function (val) {
+      if (typeof val === "string" && val.length > 0) {
+        return [val];
+      }
+      return null;
+    }
   }
 });
 

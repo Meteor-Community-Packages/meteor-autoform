@@ -22,6 +22,32 @@ AutoForm.addInputType("datetime-local", {
       return null;
     }
   },
+  valueConverters: {
+    "string": function (val) {
+      return (val instanceof Date) ? Utility.dateToNormalizedLocalDateAndTimeString(val, this.attr("data-timezone-id")) : val;
+    },
+    "stringArray": function (val) {
+      if (val instanceof Date) {
+        return [Utility.dateToNormalizedLocalDateAndTimeString(val, this.attr("data-timezone-id"))];
+      }
+      return null;
+    },
+    "number": function (val) {
+      return (val instanceof Date) ? val.getTime() : val;
+    },
+    "numberArray": function (val) {
+      if (val instanceof Date) {
+        return [val.getTime()];
+      }
+      return null;
+    },
+    "dateArray": function (val) {
+      if (val instanceof Date) {
+        return [val];
+      }
+      return null;
+    }
+  },
   contextAdjust: function (context) {
     if (typeof context.atts.max === "undefined" && context.max instanceof Date) {
       context.atts.max = Utility.dateToNormalizedLocalDateAndTimeString(context.max, context.atts.timezoneId);
