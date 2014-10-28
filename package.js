@@ -9,7 +9,7 @@ Package.on_use(function(api) {
   // Dependencies
   api.versionsFrom(['METEOR@0.9.3', 'METEOR@0.9.4']);
   // common
-  api.use('aldeed:simple-schema@1.0.0');
+  api.use('aldeed:simple-schema@1.1.0');
   api.use('check');
   // client
   api.use(['livedata', 'underscore', 'deps', 'templating', 'ui', 'blaze'], 'client');
