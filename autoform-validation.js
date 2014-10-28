@@ -50,6 +50,8 @@ validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, docId, k
 };
 
 _validateForm = function _validateForm(formId, formDetails, formDocs, useCollectionSchema) {
+  var ss, docId, isValid;
+
   if (formDetails.validationType === 'none')
     return true;
 
@@ -57,19 +59,25 @@ _validateForm = function _validateForm(formId, formDetails, formDocs, useCollect
   // else the schema for the collection. If there is a `schema`
   // attribute but you want to force validation against the
   // collection's schema instead, pass useCollectionSchema=true
-  var ss = (useCollectionSchema && formDetails.collection) ? formDetails.collection.simpleSchema() : formDetails.ss;
+  ss = (useCollectionSchema && formDetails.collection) ? formDetails.collection.simpleSchema() : formDetails.ss;
   
-  var docId = formDetails.doc && formDetails.doc._id || null;
+  docId = formDetails.doc && formDetails.doc._id || null;
 
   // Perform validation
   if (formDetails.submitType === "update") {
     // For a type="update" form, we validate the modifier. We don't want to throw
     // errors about missing required fields, etc.
-    return validateFormDoc(formDocs.updateDoc, true, formId, ss, docId);
+    isValid = validateFormDoc(formDocs.updateDoc, true, formId, ss, docId);
   } else {
     // For any other type of form, we validate the document.
-    return validateFormDoc(formDocs.insertDoc, false, formId, ss, docId);
+    isValid = validateFormDoc(formDocs.insertDoc, false, formId, ss, docId);
   }
+
+  if (!isValid) {
+    selectFirstInvalidField(formId, ss);
+  }
+
+  return isValid;
 };
 
 _validateField = function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
@@ -112,11 +120,12 @@ _validateField = function _validateField(key, template, skipEmpty, onlyIfAlready
 validateField = _.throttle(_validateField, 300); 
 
 // Selects the focus the first field with an error
-selectFirstInvalidField = function selectFirstInvalidField(formId, ss, template) {
-  var ctx = ss.namedContext(formId);
+selectFirstInvalidField = function selectFirstInvalidField(formId, ss) {
+  var ctx = ss.namedContext(formId), template, fields;
   if (!ctx.isValid()) {
+    template = templatesById[formId];
     // Exclude fields in sub-forms, since they will belong to a different AutoForm and schema.
-    var fields = template.$('[data-schema-key]').not(template.$('form form [data-schema-key]'));
+    fields = template.$('[data-schema-key]').not(template.$('form form [data-schema-key]'));
     fields.each(function () {
       var f = $(this);
       if (ctx.keyIsInvalid(f.attr('data-schema-key'))) {

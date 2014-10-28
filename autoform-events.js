@@ -84,7 +84,6 @@ Template.autoForm.events({
     }
 
     function failedValidation() {
-      selectFirstInvalidField(formId, ss, template);
       var ec = ss.namedContext(formId);
       var ik = ec.invalidKeys(), err;
       if (ik) {
@@ -124,7 +123,6 @@ Template.autoForm.events({
       return function autoFormActionCallback(error, result) {
         if (error) {
           preventQueuedValidation();
-          selectFirstInvalidField(formId, ss, template);
           if (onError && onError.length) {
             _.each(onError, function onErrorEach(hook) {
               hook.call(cbCtx, name, error, template);

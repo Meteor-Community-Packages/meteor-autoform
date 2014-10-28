@@ -297,22 +297,10 @@ AutoForm.validateForm = function autoFormValidateForm(formId) {
     throw new Error("validateForm: There is currently no autoForm template rendered for the form with id " + formId);
   }
 
-  var data = formData[formId];
-  // ss will be the schema for the `schema` attribute if present,
-  // else the schema for the collection
-  var ss = data.ss;
-
   // Gather all form values
-  var formDocs = getFormValues(template, formId, ss);
+  var formDocs = AutoForm.getFormValues(formId);
 
-  var isValid = _validateForm(formId, data, formDocs);
-
-  if (isValid === false) {
-    selectFirstInvalidField(formId, ss, template);
-    return false;
-  } else {
-    return true;
-  }
+  return _validateForm(formId, formData[formId], formDocs);
 };
 
 /**
