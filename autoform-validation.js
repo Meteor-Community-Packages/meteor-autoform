@@ -1,26 +1,16 @@
-// all form validation logic is here
+/*
+ * all form validation logic is here
+ */
 
-_validateForm = function _validateForm(formId, formDetails, formDocs, useCollectionSchema) {
-  if (formDetails.validationType === 'none')
-    return true;
-
-  // We use the schema for the `schema` attribute if present,
-  // else the schema for the collection. If there is a `schema`
-  // attribute but you want to force validation against the
-  // collection's schema instead, pass useCollectionSchema=true
-  var ss = (useCollectionSchema && formDetails.collection) ? formDetails.collection.simpleSchema() : formDetails.ss;
-  
-  var docId = formDetails.doc && formDetails.doc._id || null;
-
-  // Perform validation
-  if (formDetails.submitType === "update") {
-    // For a type="update" form, we validate the modifier. We don't want to throw
-    // errors about missing required fields, etc.
-    return validateFormDoc(formDocs.updateDoc, true, formId, ss, docId);
-  } else {
-    // For any other type of form, we validate the document.
-    return validateFormDoc(formDocs.insertDoc, false, formId, ss, docId);
-  }
+// To prevent issues with keyup validation firing right after we've
+// invalidated due to submission, we can quickly and temporarily stop
+// field validation.
+var _preventValidation = false;
+preventQueuedValidation = function preventQueuedValidation() {
+  _preventValidation = true;
+  Meteor.setTimeout(function() {
+    _preventValidation = false;
+  }, 500);
 };
 
 validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, docId, key) {
@@ -59,8 +49,31 @@ validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, docId, k
   }
 };
 
+_validateForm = function _validateForm(formId, formDetails, formDocs, useCollectionSchema) {
+  if (formDetails.validationType === 'none')
+    return true;
+
+  // We use the schema for the `schema` attribute if present,
+  // else the schema for the collection. If there is a `schema`
+  // attribute but you want to force validation against the
+  // collection's schema instead, pass useCollectionSchema=true
+  var ss = (useCollectionSchema && formDetails.collection) ? formDetails.collection.simpleSchema() : formDetails.ss;
+  
+  var docId = formDetails.doc && formDetails.doc._id || null;
+
+  // Perform validation
+  if (formDetails.submitType === "update") {
+    // For a type="update" form, we validate the modifier. We don't want to throw
+    // errors about missing required fields, etc.
+    return validateFormDoc(formDocs.updateDoc, true, formId, ss, docId);
+  } else {
+    // For any other type of form, we validate the document.
+    return validateFormDoc(formDocs.insertDoc, false, formId, ss, docId);
+  }
+};
+
 _validateField = function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
-  if (!template || template._notInDOM) {
+  if (!template || template._notInDOM || _preventValidation) {
     return; //skip validation
   }
 
@@ -94,36 +107,11 @@ _validateField = function _validateField(key, template, skipEmpty, onlyIfAlready
   return validateFormDoc(docToValidate, isModifier, formId, ss, docId, key);
 };
 
-//throttling function that calls out to _validateField
-var vok = {}, tm = {}, _prevent = false;
-validateField = function validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
-  if (vok[key] === false) {
-    Meteor.clearTimeout(tm[key]);
-    tm[key] = Meteor.setTimeout(function() {
-      vok[key] = true;
-      if (!_prevent) {
-        _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
-      }
-    }, 300);
-    return;
-  }
-  vok[key] = false;
-  if (!_prevent) {
-    _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid);
-  }
-};
+// Throttle field validation to occur at most every 300ms,
+// with leading and trailing calls.
+validateField = _.throttle(_validateField, 300); 
 
-// To prevent issues with keyup validation firing right after we've
-// invalidated due to submission, we can quickly and temporarily stop
-// field validation.
-preventQueuedValidation = function preventQueuedValidation() {
-  _prevent = true;
-  Meteor.setTimeout(function() {
-    _prevent = false;
-  }, 500);
-};
-
-// Prep function to select the focus the first field with an error
+// Selects the focus the first field with an error
 selectFirstInvalidField = function selectFirstInvalidField(formId, ss, template) {
   var ctx = ss.namedContext(formId);
   if (!ctx.isValid()) {
