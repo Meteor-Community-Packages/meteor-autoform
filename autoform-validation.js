@@ -124,8 +124,7 @@ selectFirstInvalidField = function selectFirstInvalidField(formId, ss) {
   var ctx = ss.namedContext(formId), template, fields;
   if (!ctx.isValid()) {
     template = templatesById[formId];
-    // Exclude fields in sub-forms, since they will belong to a different AutoForm and schema.
-    fields = template.$('[data-schema-key]').not(template.$('form form [data-schema-key]'));
+    fields = getAllFieldsInForm(template);
     fields.each(function () {
       var f = $(this);
       if (ctx.keyIsInvalid(f.attr('data-schema-key'))) {

@@ -292,11 +292,6 @@ AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipE
  * this method causes the reactive validation messages to appear.
  */
 AutoForm.validateForm = function autoFormValidateForm(formId) {
-  var template = templatesById[formId];
-  if (!template || template._notInDOM) {
-    throw new Error("validateForm: There is currently no autoForm template rendered for the form with id " + formId);
-  }
-
   // Gather all form values
   var formDocs = AutoForm.getFormValues(formId);
 
