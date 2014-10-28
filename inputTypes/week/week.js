@@ -5,7 +5,7 @@ AutoForm.addInputType("week", {
       if (typeof val === "string" && val.length > 0) {
         return [val];
       }
-      return null;
+      return val;
     }
   }
 });

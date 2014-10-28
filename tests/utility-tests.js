@@ -102,9 +102,9 @@ if (Meteor.isClient) {
     });
   });
 
-  Tinytest.add('AutoForm - Utility - maybeNum', function(test) {
+  Tinytest.add('AutoForm - Utility - stringToNumber', function(test) {
     function testMaybeNum(val, expect) {
-      var mod = Utility.maybeNum(val);
+      var mod = Utility.stringToNumber(val);
       test.equal(mod, expect);
     }
 

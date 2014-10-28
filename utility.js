@@ -108,24 +108,6 @@ Utility = {
     return result;
   },
   /**
-   * @method Utility.maybeNum
-   * @private
-   * @param {string} val
-   * @returns {String|Number}
-   *
-   * If the given string can be converted to a number, returns the number.
-   * Otherwise returns the string.
-   */
-  maybeNum: function maybeNum(val) {
-    // Convert val to a number if possible; otherwise, just use the value
-    var floatVal = parseFloat(val);
-    if (!isNaN(floatVal)) {
-      return floatVal;
-    } else {
-      return val;
-    }
-  },
-  /**
    * @method Utility.lookup
    * @private
    * @param {Any} obj
@@ -535,9 +517,9 @@ Utility = {
    * @method Utility.stringToBool
    * @private
    * @param {String} val A string or null or undefined.
-   * @return {Boolean|null} The string converted to a Boolean.
+   * @return {Boolean|String} The string converted to a Boolean.
    *
-   * If the string is "true" or "1", returns `true`. If the string is "false" or "0", returns `false`. Otherwise returns `null`.
+   * If the string is "true" or "1", returns `true`. If the string is "false" or "0", returns `false`. Otherwise returns the original string.
    */
   stringToBool: function stringToBool(val) {
     if (typeof val === "string" && val.length > 0) {
@@ -548,39 +530,38 @@ Utility = {
         return false;
       }
     }
-    return null;
+    return val;
   },
   /**
    * @method Utility.stringToNumber
    * @private
    * @param {String} val A string or null or undefined.
-   * @return {Number|null} The string converted to a Number.
+   * @return {Number|String} The string converted to a Number or the original value.
    *
    * Returns Number(val) unless the result is NaN.
    */
   stringToNumber: function stringToNumber(val) {
     if (typeof val === "string" && val.length > 0) {
-      val = Number(val);
-      if (isNaN(val)) {
-        return null;
+      var numVal = Number(val);
+      if (!isNaN(numVal)) {
+        return numVal;
       }
-      return val;
     }
-    return null;
+    return val;
   },
   /**
    * @method Utility.stringToDate
    * @private
    * @param {String} val A string or null or undefined.
-   * @return {Date|null} The string converted to a Date instance.
+   * @return {Date|String} The string converted to a Date instance.
    *
-   * Returns new Date(val) as long as val is a string with at least one character. Otherwise returns null.
+   * Returns new Date(val) as long as val is a string with at least one character. Otherwise returns the original string.
    */
   stringToDate: function stringToDate(val) {
     if (typeof val === "string" && val.length > 0) {
       return new Date(val);
     }
-    return null;
+    return val;
   },
   /**
    * @method Utility.addClass

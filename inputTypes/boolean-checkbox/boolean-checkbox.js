@@ -10,6 +10,7 @@ AutoForm.addInputType("boolean-checkbox", {
       } else if (val === false) {
         return "FALSE";
       }
+      return val;
     },
     "stringArray": function (val) {
       if (val === true) {
@@ -17,6 +18,7 @@ AutoForm.addInputType("boolean-checkbox", {
       } else if (val === false) {
         return ["FALSE"];
       }
+      return val;
     },
     "number": function (val) {
       if (val === true) {
@@ -24,6 +26,7 @@ AutoForm.addInputType("boolean-checkbox", {
       } else if (val === false) {
         return 0;
       }
+      return val;
     },
     "numberArray": function (val) {
       if (val === true) {
@@ -31,6 +34,7 @@ AutoForm.addInputType("boolean-checkbox", {
       } else if (val === false) {
         return [0];
       }
+      return val;
     }
   },
   contextAdjust: function (context) {

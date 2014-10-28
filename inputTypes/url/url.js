@@ -5,7 +5,7 @@ AutoForm.addInputType("url", {
       if (typeof val === "string" && val.length > 0) {
         return [val];
       }
-      return null;
+      return val;
     }
   },
   contextAdjust: function (context) {

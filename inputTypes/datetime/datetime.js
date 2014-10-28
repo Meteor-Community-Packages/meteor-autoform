@@ -22,7 +22,7 @@ AutoForm.addInputType("datetime", {
       if (val instanceof Date) {
         return [Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(val)];
       }
-      return null;
+      return val;
     },
     "number": function (val) {
       return (val instanceof Date) ? val.getTime() : val;
@@ -31,13 +31,13 @@ AutoForm.addInputType("datetime", {
       if (val instanceof Date) {
         return [val.getTime()];
       }
-      return null;
+      return val;
     },
     "dateArray": function (val) {
       if (val instanceof Date) {
         return [val];
       }
-      return null;
+      return val;
     }
   },
   contextAdjust: function (context) {

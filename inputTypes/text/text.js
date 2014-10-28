@@ -11,7 +11,7 @@ AutoForm.addInputType("text", {
           return $.trim(item);
         });
       }
-      return null;
+      return val;
     },
     "number": Utility.stringToNumber,
     "numberArray": function (val) {
@@ -22,7 +22,7 @@ AutoForm.addInputType("text", {
           return Utility.stringToNumber(item);
         });
       }
-      return null;
+      return val;
     },
     "boolean": Utility.stringToBool,
     "booleanArray": function (val) {
@@ -33,7 +33,7 @@ AutoForm.addInputType("text", {
           return Utility.stringToBool(item);
         });
       }
-      return null;
+      return val;
     },
     "date": Utility.stringToDate,
     "dateArray": function (val) {
@@ -44,7 +44,7 @@ AutoForm.addInputType("text", {
           return Utility.stringToDate(item);
         });
       }
-      return null;
+      return val;
     }
   },
   contextAdjust: function (context) {

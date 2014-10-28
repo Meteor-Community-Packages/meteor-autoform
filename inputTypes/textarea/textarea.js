@@ -8,7 +8,7 @@ AutoForm.addInputType("textarea", {
       if (typeof val === "string" && val.length > 0) {
         return linesToArray(val);
       }
-      return null;
+      return val;
     },
     "number": Utility.stringToNumber,
     "numberArray": function (val) {
@@ -18,7 +18,7 @@ AutoForm.addInputType("textarea", {
           return Utility.stringToNumber(item);
         });
       }
-      return null;
+      return val;
     },
     "boolean": Utility.stringToBool,
     "booleanArray": function (val) {
@@ -28,7 +28,7 @@ AutoForm.addInputType("textarea", {
           return Utility.stringToBool(item);
         });
       }
-      return null;
+      return val;
     },
     "date": Utility.stringToDate,
     "dateArray": function (val) {
@@ -38,7 +38,7 @@ AutoForm.addInputType("textarea", {
           return Utility.stringToDate(item);
         });
       }
-      return null;
+      return val;
     }
   },
   contextAdjust: function (context) {
