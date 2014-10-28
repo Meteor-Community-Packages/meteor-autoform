@@ -247,6 +247,8 @@ group with add-ons.
 
 ## Component and Helper Reference
 
+NOTE: The `afDeleteButton` component that used to be part of autoform is now available as [a separate package](https://github.com/aldeed/meteor-delete-button).
+
 ### autoForm
 
 Use this component as a block instead of `<form>` elements to wrap your form and
