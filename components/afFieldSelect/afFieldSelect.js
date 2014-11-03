@@ -1,7 +1,7 @@
 Template.afFieldSelect.helpers({
   // This is similar to the innerContext helper for afFieldInput; keep them in sync
   innerContext: function afFieldInputContext(options) {
-    var c = Utility.normalizeContext(options.hash, "afFieldSelect");
+    var c = AutoForm.Utility.normalizeContext(options.hash, "afFieldSelect");
     var contentBlock = options.hash.contentBlock;
     var contentBlockContext = options.hash.contentBlockContext;
 

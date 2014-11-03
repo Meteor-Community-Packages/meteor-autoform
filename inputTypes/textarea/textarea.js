@@ -10,32 +10,32 @@ AutoForm.addInputType("textarea", {
       }
       return val;
     },
-    "number": Utility.stringToNumber,
+    "number": AutoForm.Utility.stringToNumber,
     "numberArray": function (val) {
       if (typeof val === "string" && val.length > 0) {
         var arr = linesToArray(val);
         return _.map(arr, function (item) {
-          return Utility.stringToNumber(item);
+          return AutoForm.Utility.stringToNumber(item);
         });
       }
       return val;
     },
-    "boolean": Utility.stringToBool,
+    "boolean": AutoForm.Utility.stringToBool,
     "booleanArray": function (val) {
       if (typeof val === "string" && val.length > 0) {
         var arr = linesToArray(val);
         return _.map(arr, function (item) {
-          return Utility.stringToBool(item);
+          return AutoForm.Utility.stringToBool(item);
         });
       }
       return val;
     },
-    "date": Utility.stringToDate,
+    "date": AutoForm.Utility.stringToDate,
     "dateArray": function (val) {
       if (typeof val === "string" && val.length > 0) {
         var arr = linesToArray(val);
         return _.map(arr, function (item) {
-          return Utility.stringToDate(item);
+          return AutoForm.Utility.stringToDate(item);
         });
       }
       return val;

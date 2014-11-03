@@ -117,7 +117,7 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
   // Get the list of fields we want included
   var fieldList = AutoForm.findAttribute("fields");
   if (fieldList) {
-    fieldList = Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
+    fieldList = AutoForm.Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
 
     // Take only those fields in the fieldList that are descendants of the `name` field
     if (name) {
@@ -185,7 +185,7 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
   // If user wants to omit some fields, remove those from the array
   var omitFields = AutoForm.findAttribute("omitFields");
   if (omitFields) {
-    omitFields = Utility.stringToArray(omitFields, 'AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
+    omitFields = AutoForm.Utility.stringToArray(omitFields, 'AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
     fieldList = _.difference(fieldList, omitFields);
     // If omitFields contains generic field names (with $) we omit those too
     fieldList = _.reject(fieldList, function (f) {
@@ -299,6 +299,6 @@ function parseOptions(options, helperName) {
   // Find the autoform context
   var afContext = AutoForm.find(helperName);
   // Call getDefs for side effect of throwing errors when name is not in schema
-  hash.name && Utility.getDefs(afContext.ss, hash.name);
+  hash.name && AutoForm.Utility.getDefs(afContext.ss, hash.name);
   return _.extend({}, afContext, hash);
 }

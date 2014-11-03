@@ -8,7 +8,7 @@ ArrayTracker = function afArrayTracker() {
 };
 
 ArrayTracker.prototype.getMinMax = function atGetMinMax(ss, field, overrideMinCount, overrideMaxCount) {
-  var defs = Utility.getDefs(ss, field);
+  var defs = AutoForm.Utility.getDefs(ss, field);
 
   // minCount is set by the schema, but can be set higher on the field attribute
   overrideMinCount = overrideMinCount || 0;

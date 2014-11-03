@@ -2,7 +2,7 @@ AutoForm.addInputType("select-multiple", {
   template: "afSelectMultiple",
   valueIsArray: true,
   valueOut: function () {
-    return Utility.getSelectValues(this[0]);
+    return AutoForm.Utility.getSelectValues(this[0]);
   },
   contextAdjust: function (context) {
     // build items list

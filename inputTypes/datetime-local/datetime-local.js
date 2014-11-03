@@ -2,12 +2,12 @@ AutoForm.addInputType("datetime-local", {
   template: "afInputDateTimeLocal",
   valueIn: function (val, atts) {
     //convert Date to string value
-    return (val instanceof Date) ? Utility.dateToNormalizedLocalDateAndTimeString(val, atts.timezoneId) : val;
+    return (val instanceof Date) ? AutoForm.Utility.dateToNormalizedLocalDateAndTimeString(val, atts.timezoneId) : val;
   },
   valueOut: function () {
     var val = this.val();
     val = (typeof val === "string") ? val.replace(/ /g, "T") : val;
-    if (Utility.isValidNormalizedLocalDateAndTimeString(val)) {
+    if (AutoForm.Utility.isValidNormalizedLocalDateAndTimeString(val)) {
       var timezoneId = this.attr("data-timezone-id");
       // default is local, but if there's a timezoneId, we use that
       if (typeof timezoneId === "string") {
@@ -24,11 +24,11 @@ AutoForm.addInputType("datetime-local", {
   },
   valueConverters: {
     "string": function (val) {
-      return (val instanceof Date) ? Utility.dateToNormalizedLocalDateAndTimeString(val, this.attr("data-timezone-id")) : val;
+      return (val instanceof Date) ? AutoForm.Utility.dateToNormalizedLocalDateAndTimeString(val, this.attr("data-timezone-id")) : val;
     },
     "stringArray": function (val) {
       if (val instanceof Date) {
-        return [Utility.dateToNormalizedLocalDateAndTimeString(val, this.attr("data-timezone-id"))];
+        return [AutoForm.Utility.dateToNormalizedLocalDateAndTimeString(val, this.attr("data-timezone-id"))];
       }
       return val;
     },
@@ -50,10 +50,10 @@ AutoForm.addInputType("datetime-local", {
   },
   contextAdjust: function (context) {
     if (typeof context.atts.max === "undefined" && context.max instanceof Date) {
-      context.atts.max = Utility.dateToNormalizedLocalDateAndTimeString(context.max, context.atts.timezoneId);
+      context.atts.max = AutoForm.Utility.dateToNormalizedLocalDateAndTimeString(context.max, context.atts.timezoneId);
     }
     if (typeof context.atts.min === "undefined" && context.min instanceof Date) {
-      context.atts.min = Utility.dateToNormalizedLocalDateAndTimeString(context.min, context.atts.timezoneId);
+      context.atts.min = AutoForm.Utility.dateToNormalizedLocalDateAndTimeString(context.min, context.atts.timezoneId);
     }
     if (context.atts.timezoneId) {
       context.atts["data-timezone-id"] = context.atts.timezoneId;

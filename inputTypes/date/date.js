@@ -2,11 +2,11 @@ AutoForm.addInputType("date", {
   template: "afInputDate",
   valueIn: function (val) {
     //convert Date to string value
-    return (val instanceof Date) ? Utility.dateToDateStringUTC(val) : val;
+    return (val instanceof Date) ? AutoForm.Utility.dateToDateStringUTC(val) : val;
   },
   valueOut: function () {
     var val = this.val();
-    if (Utility.isValidDateString(val)) {
+    if (AutoForm.Utility.isValidDateString(val)) {
       //Date constructor will interpret val as UTC and create
       //date at mignight in the morning of val date in UTC time zone
       return new Date(val);
@@ -16,11 +16,11 @@ AutoForm.addInputType("date", {
   },
   valueConverters: {
     "string": function (val) {
-      return (val instanceof Date) ? Utility.dateToDateStringUTC(val) : val;
+      return (val instanceof Date) ? AutoForm.Utility.dateToDateStringUTC(val) : val;
     },
     "stringArray": function (val) {
       if (val instanceof Date) {
-        return [Utility.dateToDateStringUTC(val)];
+        return [AutoForm.Utility.dateToDateStringUTC(val)];
       }
       return val;
     },
@@ -42,10 +42,10 @@ AutoForm.addInputType("date", {
   },
   contextAdjust: function (context) {
     if (typeof context.atts.max === "undefined" && context.max instanceof Date) {
-      context.atts.max = Utility.dateToDateStringUTC(context.max);
+      context.atts.max = AutoForm.Utility.dateToDateStringUTC(context.max);
     }
     if (typeof context.atts.min === "undefined" && context.min instanceof Date) {
-      context.atts.min = Utility.dateToDateStringUTC(context.min);
+      context.atts.min = AutoForm.Utility.dateToDateStringUTC(context.min);
     }
     return context;
   }

@@ -1,7 +1,7 @@
 AutoForm.addInputType("select", {
   template: "afSelect",
   valueOut: function () {
-    return Utility.stringToNumber(this.val());
+    return AutoForm.Utility.stringToNumber(this.val());
   },
   contextAdjust: function (context) {
     //can fix issues with some browsers selecting the firstOption instead of the selected option

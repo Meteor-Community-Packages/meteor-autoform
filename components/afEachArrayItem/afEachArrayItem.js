@@ -1,6 +1,6 @@
 Template.afEachArrayItem.helpers({
   innerContext: function afEachArrayItemContext(options) {
-    var c = Utility.normalizeContext(options.hash, "afEachArrayItem");
+    var c = AutoForm.Utility.normalizeContext(options.hash, "afEachArrayItem");
     var formId = c.af.formId;
     var name = c.atts.name;
 

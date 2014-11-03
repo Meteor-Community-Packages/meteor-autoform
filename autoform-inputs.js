@@ -86,19 +86,19 @@ getFormValues = function getFormValues(template, formId, ss) {
   var doc = getFieldsValues(getAllFieldsInForm(template), ss);
 
   // Expand the object
-  doc = Utility.expandObj(doc);
+  doc = AutoForm.Utility.expandObj(doc);
 
   // As array items are removed, gaps can appear in the numbering,
   // which results in arrays that have undefined items. Here we
   // remove any array items that are undefined.
-  Utility.compactArrays(doc);
+  AutoForm.Utility.compactArrays(doc);
 
   // When all fields that comprise a sub-object are empty, we should unset
   // the whole subobject and not complain about required fields in it. For example,
   // if `profile.address` has several properties but they are all null or undefined,
   // we will set `profile.address=null`. This ensures that we don't get incorrect validation
   // errors about required fields that are children of optional objects.
-  Utility.bubbleEmpty(doc, keepEmptyStrings);
+  AutoForm.Utility.bubbleEmpty(doc, keepEmptyStrings);
 
   // Pass expanded doc through formToDoc hooks
   var hookCtx = {
@@ -115,14 +115,14 @@ getFormValues = function getFormValues(template, formId, ss) {
   // For updateDoc, convert to modifier object with $set and $unset.
   // Do not add auto values to either.
   var result = {
-    insertDoc: ss.clean(Utility.cleanNulls(doc, false, keepEmptyStrings), {
+    insertDoc: ss.clean(AutoForm.Utility.cleanNulls(doc, false, keepEmptyStrings), {
       isModifier: false,
       getAutoValues: false,
       filter: filter,
       autoConvert: autoConvert,
       trimStrings: trimStrings
     }),
-    updateDoc: ss.clean(Utility.docToModifier(doc, keepEmptyStrings), {
+    updateDoc: ss.clean(AutoForm.Utility.docToModifier(doc, keepEmptyStrings), {
       isModifier: true,
       getAutoValues: false,
       filter: filter,

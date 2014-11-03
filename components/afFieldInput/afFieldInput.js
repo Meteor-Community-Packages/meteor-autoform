@@ -49,7 +49,7 @@ Template.afFieldInput.helpers({
     return inputTemplateName;
   },
   innerContext: function afFieldInputContext(options) {
-    var c = Utility.normalizeContext(options.hash, "afFieldInput");
+    var c = AutoForm.Utility.normalizeContext(options.hash, "afFieldInput");
 
     // Set up deps, allowing us to re-render the form
     formDeps[c.af.formId] = formDeps[c.af.formId] || new Deps.Dependency;

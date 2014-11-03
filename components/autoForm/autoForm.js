@@ -43,8 +43,8 @@ Template.autoForm.created = function autoFormCreated() {
     // we also want to reset the array counts for the form
     arrayTracker.resetForm(formId);
 
-    var collection = Utility.lookup(data.collection);
-    var ss = Utility.getSimpleSchemaFromContext(data, formId);
+    var collection = AutoForm.Utility.lookup(data.collection);
+    var ss = AutoForm.Utility.getSimpleSchemaFromContext(data, formId);
 
     // Retain doc values after a "hot code push", if possible
     var retrievedDoc = formPreserve.getDocument(formId);

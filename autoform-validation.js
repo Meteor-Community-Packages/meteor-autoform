@@ -109,7 +109,7 @@ _validateField = function _validateField(key, template, skipEmpty, onlyIfAlready
 
   // Skip validation if skipEmpty is true and the field we're validating
   // has no value.
-  if (skipEmpty && !Utility.objAffectsKey(docToValidate, key))
+  if (skipEmpty && !AutoForm.Utility.objAffectsKey(docToValidate, key))
     return true; //skip validation
 
   return validateFormDoc(docToValidate, isModifier, formId, ss, docId, key);

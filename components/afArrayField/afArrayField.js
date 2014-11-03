@@ -1,6 +1,6 @@
 Template.afArrayField.helpers({
   innerContext: function afArrayFieldContext(options) {
-    var c = Utility.normalizeContext(options.hash, "afArrayField");
+    var c = AutoForm.Utility.normalizeContext(options.hash, "afArrayField");
     var name = c.atts.name;
     var fieldMinCount = c.atts.minCount || 0;
     var fieldMaxCount = c.atts.maxCount || Infinity;

@@ -148,7 +148,7 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId) {
   // Get a reference to the SimpleSchema instance that should be used for
   // determining what types we want back for each field.
   var context = template.data;
-  var ss = Utility.getSimpleSchemaFromContext(context, formId);
+  var ss = AutoForm.Utility.getSimpleSchemaFromContext(context, formId);
   return getFormValues(template, formId, ss);
 };
 
@@ -442,7 +442,7 @@ AutoForm.getSchemaForField = function autoFormGetSchemaForField(name, autoform) 
   if (!ss) {
     ss = AutoForm.find().ss;
   }
-  return Utility.getDefs(ss, name);
+  return AutoForm.Utility.getDefs(ss, name);
 };
 
 /**

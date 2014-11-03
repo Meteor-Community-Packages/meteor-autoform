@@ -1,6 +1,6 @@
 Template.afFormGroup.helpers({
   innerContext: function afFormGroupContext(options) {
-    var c = Utility.normalizeContext(options.hash, "afFormGroup");
+    var c = AutoForm.Utility.normalizeContext(options.hash, "afFormGroup");
     return {
       skipLabel: (c.atts.label === false),
       afFieldLabelAtts: formGroupLabelAtts(c.atts),

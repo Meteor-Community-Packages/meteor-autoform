@@ -1,7 +1,7 @@
 AutoForm.addInputType("number", {
   template: "afInputNumber",
   valueOut: function () {
-    return Utility.stringToNumber(this.val());
+    return AutoForm.Utility.stringToNumber(this.val());
   },
   valueConverters: {
     "string": function (val) {
