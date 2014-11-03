@@ -2,7 +2,7 @@ Package.describe({
   name: "aldeed:autoform",
   summary: "Easily create forms with automatic insert and update, and automatic reactive validation.",
   git: "https://github.com/aldeed/meteor-autoform.git",
-  version: "4.0.0-rc9"
+  version: "4.0.0-rc10"
 });
 
 Package.on_use(function(api) {
@@ -89,10 +89,14 @@ Package.on_use(function(api) {
     'inputTypes/select/select.js',
     'inputTypes/select-checkbox/select-checkbox.html',
     'inputTypes/select-checkbox/select-checkbox.js',
+    'inputTypes/select-checkbox-inline/select-checkbox-inline.html',
+    'inputTypes/select-checkbox-inline/select-checkbox-inline.js',
     'inputTypes/select-multiple/select-multiple.html',
     'inputTypes/select-multiple/select-multiple.js',
     'inputTypes/select-radio/select-radio.html',
     'inputTypes/select-radio/select-radio.js',
+    'inputTypes/select-radio-inline/select-radio-inline.html',
+    'inputTypes/select-radio-inline/select-radio-inline.js',
     'inputTypes/submit/submit.html',
     'inputTypes/submit/submit.js',
     'inputTypes/tel/tel.html',

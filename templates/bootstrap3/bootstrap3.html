@@ -93,6 +93,17 @@
   </div>
 </template>
 
+<template name="afCheckboxGroupInline_bootstrap3">
+  <div class="af-checkbox-group" {{dsk}}>
+    {{#each this.items}}
+      <label class="checkbox-inline">
+        <input type="checkbox" value="{{this.value}}" {{atts}} />
+        {{this.label}}
+      </label>
+    {{/each}}
+  </div>
+</template>
+
 <template name="afRadio_bootstrap3">
   <div class="radio">
     <label>
@@ -111,6 +122,17 @@
           {{this.label}}
         </label>
       </div>
+    {{/each}}
+  </div>
+</template>
+
+<template name="afRadioGroupInline_bootstrap3">
+  <div class="af-radio-group" {{dsk}}>
+    {{#each this.items}}
+      <label class="radio-inline">
+        <input type="radio" value="{{this.value}}" {{atts}} />
+        {{this.label}}
+      </label>
     {{/each}}
   </div>
 </template>

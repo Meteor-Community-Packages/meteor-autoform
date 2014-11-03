@@ -319,7 +319,7 @@ Renders an appropriate input for the field. This could be one of several differe
 input types, such a `input`, `textarea`, etc. Here's an overview of the logic
 that is used to determine which type of input to use:
 
-* If you include your own `type` attribute, that input type is used.
+* If you include your own `type` attribute, that input type is used. Supports custom input types that can be added by other packages.
 * If type is `String`, `<input type="text">`.
 * If you include the `rows` attribute for a `String` type property, a `<textarea>` is used instead of an `<input type="text">`.
 * If type is `Number`, `<input type="number">`. You may specify the step, min, and max attributes to further restrict entry. The min and max values defined in your schema are automatically transferred to the DOM element, too.
@@ -1241,39 +1241,9 @@ Here's the list of possible types you can use for the first argument of
 * quickForm
 * afFormGroup
 * afFieldSelect
-* afCheckbox
-* afCheckboxGroup
-* afRadio
-* afRadioGroup
-* afSelect
-* afTextarea
-* afContenteditable
-* afInputText
-* afInputPassword
-* afInputButton
-* afInputSubmit
-* afInputReset
-* afInputFile
-* afInputHidden
-* afInputImage
-* afInputDateTime
-* afInputDateTimeLocal
-* afInputDate
-* afInputMonth
-* afInputTime
-* afInputWeek
-* afInputNumber
-* afInputEmail
-* afInputUrl
-* afInputSearch
-* afInputTel
-* afInputColor
 * afObjectField
 * afArrayField
-
-Note that there is not a single "afFieldInput" type but rather various types
-corresponding to the different elements or element groups that `afFieldInput`
-might render.
+* Any custom or built-in input type template name
 
 ### Creating a Custom Template
 

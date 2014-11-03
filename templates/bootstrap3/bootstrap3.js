@@ -88,7 +88,9 @@ Template["afRadio_bootstrap3"].helpers({
 
 _.each([
     "afCheckboxGroup_bootstrap3",
-    "afRadioGroup_bootstrap3"
+    "afRadioGroup_bootstrap3",
+    "afCheckboxGroupInline_bootstrap3",
+    "afRadioGroupInline_bootstrap3"
   ], function (tmplName) {
   Template[tmplName].helpers({
     atts: function selectedAttsAdjust() {
