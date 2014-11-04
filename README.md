@@ -832,11 +832,11 @@ AutoForm.hooks({
     onSubmit: function(insertDoc, updateDoc, currentDoc) {},
 
     // Called when any operation succeeds, where operation will be
-    // "insert", "update", or the method name.
+    // "insert", "update", "submit", or the method name.
     onSuccess: function(operation, result, template) {}, 
 
     // Called when any operation fails, where operation will be
-    // "validation", "insert", "update", or the method name.
+    // "validation", "insert", "update", "submit", or the method name.
     onError: function(operation, error, template) {},
     formToDoc: function(doc, ss, formId) {},
     docToForm: function(doc, ss, formId) {},
@@ -928,8 +928,9 @@ AutoForm.hooks({
   contactForm: {
     onSubmit: function (insertDoc, updateDoc, currentDoc) {
       if (customHandler(insertDoc)) {
-        this.resetForm();
         this.done();
+      } else {
+        this.done(new Error("Submission failed"));
       }
       return false;
     }
@@ -950,9 +951,8 @@ This object has *not* been validated.
 
 And `this` provides the following:
 
-* A `done` method, which you must call when you are done with your custom client submission logic. This allows you to do asynchronous tasks if necessary.
-* A `resetForm` method, which you can call to reset the corresponding autoform
-if necessary
+* A `done` method, which you must call when you are done with your custom client submission logic. This allows you to do asynchronous tasks if necessary. If you pass an `Error` object as the only argument, then any `onError` hooks will be called; otherwise, any `onSuccess` hooks will be called.
+* A `resetForm` method, which you can call to reset the corresponding autoform if necessary. But this is also done automatically after all `onSubmit` hooks have called `this.done()` without error.
 * The form submit event, in `event`
 * The template, in `template`
 

@@ -218,7 +218,7 @@ Template.autoForm.events({
       // result of all of them immediately because they can return
       // false to stop normal form submission.
 
-      var hookCount = hooks.length, doneCount = 0;
+      var hookCount = hooks.length, doneCount = 0, submitError;
 
       if (hookCount === 0) {
         // Run endSubmit hooks (re-enabled submit button or form, etc.)
@@ -236,11 +236,15 @@ Template.autoForm.events({
         resetForm: function () {
           AutoForm.resetForm(formId, template);
         },
-        done: function () {
+        done: function (error) {
           doneCount++;
+          if (!submitError && error) {
+            submitError = error;
+          }
           if (doneCount === hookCount) {
-            // Run endSubmit hooks (re-enabled submit button or form, etc.)
-            endSubmit(formId, template);
+            var submitCallback = makeCallback('submit');
+            // run onError, onSuccess, endSubmit
+            submitCallback(submitError);
           }
         }
       };
@@ -248,7 +252,7 @@ Template.autoForm.events({
       // Call all hooks at once.
       // Pass both types of doc plus the doc attached to the form.
       // If any return false, we stop normal submission, but we don't
-      // run endSubmit hooks until they all call this.done().
+      // run onError, onSuccess, endSubmit hooks until they all call this.done().
       var shouldStop = false;
       _.each(hooks, function eachOnSubmit(hook) {
         var result = hook.call(ctx, insertDoc, updateDoc, currentDoc);
