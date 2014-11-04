@@ -3,7 +3,7 @@ AutoForm
 
 [![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
 
-AutoForm is a smart package for Meteor that adds UI components and helpers to easily
+AutoForm is a Meteor package that adds UI components and helpers to easily
 create basic forms with automatic insert and update events, and automatic
 reactive validation. This package requires and automatically installs the
 [simple-schema](https://github.com/aldeed/meteor-simple-schema) package.
@@ -146,7 +146,7 @@ That's it! This gives you:
 * Appropriate HTML5 fields for all keys in the "Books" collection schema.
 * A submit button that gathers the entered values and inserts them into
 the "Books" collection.
-* Form validation based on the "Books" collection schema. By default the form
+* Form validation based on the schema attached to the "Books" collection. By default the form
 is validated when the user submits. If anything is invalid, the form is
 continually re-validated on keyup (throttled) as the user fixes the issues.
 * Default validation error messages that appear under the fields, and can be
@@ -159,19 +159,11 @@ document with the original values to be updated:
 
 ```html
 <template name="updateBookForm">
-  {{> quickForm collection="Books" doc=editingDoc id="updateBookForm" type="update"}}
+  {{> quickForm collection="Books" doc=this id="updateBookForm" type="update"}}
 </template>
 ```
 
-And the helper:
-
-```js
-Template.updateBookForm.helpers({
-  editingDoc: function editingDocHelper() {
-    return Books.findOne({_id: Session.get("selectedDocId")});
-  }
-});
-```
+This example uses `doc=this`, assuming that you use something like iron:router's `data` function to set the template's data context to the book document. This is a common way to do it, but you could also use a helper function that returns the document.
 
 ### A Custom Insert Form
 
@@ -263,9 +255,9 @@ instance of `Mongo.Collection` that has a schema defined.
 a schema defined and is in the `window` namespace.
 * `schema`: Required if `collection` is not set. This schema will be used to generate
 and validate the form prior to submission, so you can specify this along with a
-`collection` if you want to use a slightly different schema for the form than
+`collection` if you want to use a schema that is slightly different from
 the one your collection uses. However, the final object will still have to pass
-validation when `insert` or `update` is called on the collection. Set to one of the following:
+validation against the collection schema. Set to one of the following:
     * The name of a helper function (no quotation marks) that returns an
 instance of `SimpleSchema`.
     * The name (in quotation marks) of a `SimpleSchema` instance that is in
@@ -313,40 +305,26 @@ fields listed here (and their subfields, if any) will be included.
 Any other attributes you specify will be output as attributes of the `<form>`
 element, just like when using the `autoForm` component.
 
+See [this demo](http://autoform.meteor.com/qfdetails) for examples of what happens when you specify various types of fields in the `fields` or `omitFields` attributes.
+
 ### afFieldInput
 
-Renders an appropriate input for the field. This could be one of several different
-input types, such a `input`, `textarea`, etc. Here's an overview of the logic
-that is used to determine which type of input to use:
+Renders an input control for the field. The type of control depends on what you set the `type` attribute to. All of the HTML5 input types plus a few more are built in. There are add-on packages that provide additional input types (widgets, UI controls).
 
-* If you include your own `type` attribute, that input type is used. Supports custom input types that can be added by other packages.
-* If type is `String`, `<input type="text">`.
-* If you include the `rows` attribute for a `String` type property, a `<textarea>` is used instead of an `<input type="text">`.
-* If type is `Number`, `<input type="number">`. You may specify the step, min, and max attributes to further restrict entry. The min and max values defined in your schema are automatically transferred to the DOM element, too.
-* If type is `Date`, `<input type="date">`. If you want `datetime` or `datetime-local` instead, specify your own `type`
-attribute.
-* If type is `String` and regEx is `SimpleSchema.RegEx.Email`, `<input type="email">`.
-* If type is `String` and regEx is `SimpleSchema.RegEx.Url`, `<input type="url">`.
-* If type is `Boolean`, a checkbox is used by default. However, if you set the
-`radio` or `select` attributes, then a radio or select
-control will be used instead. Use the `trueLabel` and `falseLabel` attributes
-to set the label used in the radio or select controls.
-* If you supply the `options` attribute, a `<select>` control is used instead. If your schema expects an array for the field, then
-it is a multiple-select control. If you prefer radios or checkboxes (for example, if it is a short list of options),
-then simply add the `noselect` attribute (set to anything).
-* If `optional` is `false` or not set in the schema, the `required` attribute is added to the DOM element and automatic error messages will be generated if the field is empty on submission.
-* Specifying `max` when type is `String` causes the `maxlength` attribute to be added to the DOM element.
-* Specifying `min` or `max` dates when type is `Date` causes those dates to be added to the DOM element in
-`min` and `max` attributes. For inputs of type `date` or `datetime-local`, which do not
-have a time zone component, the date and time in the UTC time zone is used as the minimum
-or maximum value. Pass an ISO-compliant string (e.g., "2013-12-12") into the `Date` constructor
-when defining your min/max values in SimpleSchema and it should work correctly.
+If you don't include a `type` attribute, the following logic is used to automatically select an appropriate type:
+
+* If you supply the `options` attribute, a `<select>` control is used. If your schema expects an array for the field, then it is a multiple-select control. If you prefer radios or checkboxes (for example, if it is a short list of options), then add `noselect=true` attribute.
+* Otherwise if the schema type is `String` and you include the `rows` attribute, a `<textarea>` is used.
+* Otherwise if the schema type is `Number`, `<input type="number">` is used.
+* Otherwise if the schema type is `Date`, `<input type="date">` is used.
+* Otherwise if the schema type is `Boolean`, the "boolean-checkbox" type is used. You may want to specify an override type of "boolean-radios" or "boolean-select" instead. If you do so, use the `trueLabel` and `falseLabel` attributes to set the labels used in the radio or select control.
+* Otherwise `<input type="text">` is used.
 
 The following attributes are recognized:
 
 * `name`: Required. The name of the schema key this field is for.
 * `template` (default="bootstrap3"): Specify the name of a different built-in or
-custom template to use.
+custom theme template to use.
 * `options`: An array of objects, where each object has a `label` property
 and a `value` property. By specifying options, you cause the generated DOM
 element to be a `select` element with these options, unless you also use
@@ -357,14 +335,10 @@ option selected, set `firstOption="(My Select One Label)"`.
 to capitalize the labels generated from `allowedValues`.
 * `noselect`: Use in conjunction with `options` attribute. Set this attribute
 to anything to render radios or checkboxes for the `options` instead of `select`.
-* `radio`: Set to `true` to render two `radio` elements instead of a `checkbox`
-for boolean fields.
-* `select`: Set to `true` to render a `select` element with two options instead
-of a `checkbox` for boolean fields.
 * `trueLabel`: Set to the string that should be used as the label for the `true`
-option for a boolean field. (See `radio` and `select` options.)
+option for a boolean field.
 * `falseLabel`: Set to the string that should be used as the label for the `false`
-option for a boolean field. (See `radio` and `select` options.)
+option for a boolean field.
 *  Any additional attributes are passed along to the generated DOM element,
 meaning that you can add `class`, etc. You can also use this feature to set
 default values for inputs by supplying a `value` attribute.
@@ -372,6 +346,7 @@ default values for inputs by supplying a `value` attribute.
 generated DOM element, but you can also optionally do
 `placeholder="schemaLabel"` to use the field label defined in the schema as
 the input's placeholder value.
+* Each individual input type might accept and use additional attributes.
 
 Here's an example of passing `options` to generate a `select` field:
 
@@ -464,86 +439,18 @@ Refer to the "Objects and Arrays" section for additional information.
 {{> afQuickField name='firstField' autofocus=''}}
 {{> afQuickField name='weirdColors' style="color: orange" label-style="color: green"}}
 {{> afQuickField name="longString" rows="5"}}
-{{> afQuickField name="radioBoolean" radio="true" trueLabel="Yes" falseLabel="No"}}
-{{> afQuickField name="selectBoolean" select="true" trueLabel="Yes" falseLabel="No"}}
+{{> afQuickField name="radioBoolean" type="boolean-radios" trueLabel="Yes" falseLabel="No"}}
+{{> afQuickField name="selectBoolean" type="boolean-select" trueLabel="Yes" falseLabel="No"}}
 {{> afQuickField name="optionsButNoSelect" options=numSelectOptions noselect="true"}}
 {{> afQuickField name="firstOptionSelect" firstOption="(Select Something)" options=numSelectOptions}}
 {{> afQuickField name="decimal" step="0.01"}}
 ```
 
-### afFieldValueIs
+### afFieldValueIs and afFieldValueContains
 
 Use this helper with `#if` to dynamically show and hide sections of a form based on the current value of any non-array field on the form.
 
-Here's an example where we want the user to select a type, and if he selects the "Other" type, we want to show an additional field where the other type can be entered as text.
-
-```html
-{{#autoForm id="itemEditForm" type="update" collection="Items" doc=itemEditFormDoc}}
-    {{> afQuickField name="type" options="allowed"}}
-    {{#if afFieldValueIs name="type" value="Other"}}
-    {{> afQuickField name="customType"}}
-    {{/if}}
-    ...
-{{/autoForm}}
-```
-
-In an example like this, you would probably also want "customType" to be required when type="Other". This can be done with a schema similar to this:
-
-```js
-{
-    type: {
-        type: String,
-        allowedValues: ["A", "B", "Other"]
-    },
-    customType: {
-        type: String,
-        optional: true,
-        // Required for "Other" type; otherwise should not be set
-        custom: function () {
-            var type = this.field('type');
-            if (type.isSet) {
-                if (type.value === "Other" && (!this.isSet || this.operator === "$unset")) {
-                    return "required";
-                } else if (type.value !== "Other" && this.isSet && this.operator !== "$unset") {
-                    this.unset();
-                }
-            }
-        }
-    }
-}
-```
-
-### afFieldValueContains
-
-Use this helper with `#if` to dynamically show and hide sections of a form based on a value being present in the current value array of any array field on the form.
-
-```html
-<template name="containsForm">
-  <p>A "B" field is displayed only when the current value of the "A" field contains "foo".</p>
-  {{#autoForm collection="FieldValueContains" type="insert" id="FieldValueContainsForm"}}
-  {{> afQuickField name="a" options="allowed" noselect=true}}
-  {{#if afFieldValueContains name="a" value="foo"}}
-  {{> afQuickField name="b"}}
-  {{/if}}
-  <button type="submit" class="btn btn-primary">Insert</button>
-  {{/autoForm}}
-</template>
-```
-
-With the collection:
-
-```js
-FieldValueContains = new Mongo.Collection("FieldValueContains");
-FieldValueContains.attachSchema(new SimpleSchema({
-  a: {
-    type: [String],
-    allowedValues: ["foo", "bar"]
-  },
-  b: {
-    type: String
-  }
-}));
-```
+See [the demo](http://autoform.meteor.com/fieldvalues)
 
 ### afFieldNames
 
@@ -569,7 +476,7 @@ Or you can provide a `name` attribute for an object field:
 {{/autoForm}}
 ```
 
-You can optionally pass `fields` or `omitFields` attributes.
+You can optionally pass `fields` or `omitFields` attributes to `afFieldNames`.
 
 ### afQuickFields
 
@@ -585,7 +492,7 @@ Render an `afQuickField` for each field in the form schema or an object field.
 {{/autoForm}}
 ```
 
-You can optionally pass `fields` or `omitFields` attributes.
+You can optionally pass `fields` or `omitFields` attributes to `afQuickFields`.
 
 ## Objects and Arrays
 
@@ -595,13 +502,13 @@ Fields with type `Object` or `Array` are treated specially.
 
 When you use the `afQuickField` component for a field that is an `Object`, it is rendered using the `afObjectField` component unless you override the type or specify options. This happens by default when you use a `quickForm` for a schema that has a field of type `Object`.
 
-The `afObjectField` component renders all of an object field's subfields together as one group. The group is labeled with the name of the object field. The actual visual representation of the group will vary based on which template you use. For the "bootstrap3" default template, the group appears in a panel with a heading.
+The `afObjectField` component renders all of an object field's subfields together as one group. The group is labeled with the name of the object field. The actual visual representation of the group will vary based on which theme template you use. For the "bootstrap3" default template, the group appears in a panel with a heading.
 
 ### afArrayField
 
 When you use the `afQuickField` component for a field that is an `Array`, it is rendered using the `afArrayField` component unless you override the type or specify options. This happens by default when you use a `quickForm` for a schema that has a field of type `Array`.
 
-The `afArrayField` component renders all of an array field's array items together as one group. The group is labeled with the name of the array field. The actual visual representation of the group will vary based on which template you use. For the "bootstrap3" default template, the group appears in a panel with a heading.
+The `afArrayField` component renders all of an array field's array items together as one group. The group is labeled with the name of the array field. The actual visual representation of the group will vary based on which theme template you use. For the "bootstrap3" default template, the group appears in a panel with a heading.
 
 Additionally, buttons for adding and removing array items are automatically added to the UI. This is also done by the template, which means that you can easily make your own "afArrayField" template if you don't like the default appearance of the add/remove buttons.
 
@@ -742,7 +649,7 @@ but you do have to call `check()` on the server when submitting to a Meteor meth
 ## Fine Tuning Validation
 
 To control when and how fields should be validated, use the `validation`
-attribute on the `autoform` block helper. Supported values are:
+attribute on `autoform` or `quickForm`. Supported values are:
 
 * `none`: Do not validate any form fields at any time.
 * `submit`: Validate all form fields only when the form is submitted.
@@ -766,7 +673,7 @@ __Notes:__
 is automatically added to the rendered form.
 * If you choose `keyup` validation, there is sometimes a bug in Safari where
 the autofill mechanism will cause the text in the input to be selected after
-each keypress.  This has the effect of making it near impossible to
+each keypress. This has the effect of making it near impossible to
 actually type anything because you keep "overwriting" your input. To fix this,
 simply add the `autocomplete="off"` attribute to your input fields.
 
@@ -775,8 +682,7 @@ simply add the `autocomplete="off"` attribute to your input fields.
 In addition to telling your form to validate on certain events, sometimes you
 need to manually validate.
 
-* To validate a particular field, call `AutoForm.validateField(formId, fieldName, skipEmpty)`. It returns `true` or `false` depending on the validity
-of the field's current value, and it also causes reactive display of any errors for that field in the UI.
+* To validate a particular field, call `AutoForm.validateField(formId, fieldName, skipEmpty)`. It returns `true` or `false` depending on the validity of the field's current value, and it also causes reactive display of any errors for that field in the UI.
 * To validate a form, call `AutoForm.validateForm(formId)`. It returns `true` or `false` depending on the validity
 of the current values in the entire form, and it also causes reactive display of any errors for that form in the UI.
 
@@ -1048,84 +954,31 @@ summary: {
 
 You can also set `autoform.omit` to `true` in the schema definition for a field to prevent it from ever being included in quickForms, afObjectFields, afArrayFields, etc. This is useful for autoValue properties such as `createdAt` that you know you will not want on a form.
 
+You can set the `type` for the field in the `autoform` object in the schema, too.
+
+You can (and in most cases, should) target your attributes to a particular component by nesting them under the component name:
+
+```js
+summary: {
+  type: String,
+  optional: true,
+  max: 2000,
+  autoform: {
+    afFieldInput: {
+      type: "textarea",
+      rows: 10,
+      class: "foo"
+    }
+  }
+}
+```
+
 ## Complex Schemas
 
 You can use mongo dot notation to map an input to a subdocument. For example:
 
 * If you use `{{> afFieldInput 'address.street'}}`, whatever is entered in the field will be assigned to `doc.address.street`.
 * If you use `{{> afFieldInput 'addresses.1.street'}}`, whatever is entered in the field will be assigned to the `street` property of the object at index 1 in the `doc.addresses` array.
-
-## Complex Controls
-
-If you need to have more complex form controls but still want to use an
-`autoForm`, a good trick is to use change events to update a hidden form field
-that is actually the one being validated and submitted.
-
-Say that you want to submit a comma-delimited string of the best times to call someone
-as part of your contact form. The relevant part of the schema would be:
-
-```js
-bestTimes: {
-    type: String,
-    label: "Best times to call"
-}
-```
-
-Pretty simple. But now you want to give the user check boxes to select those times, and
-derive the bestTimes string from her selections. The HTML would look like this:
-
-```html
-{{#autoForm schema="ContactFormSchema" id="contactForm" type="method" meteormethod="contact"}}
-  <!-- other fields -->
-  <div class="form-group {{#if afFieldIsInvalid name='bestTimes'}}has-error{{/if}}">
-    <label class="control-label">{{afFieldLabelText name="bestTimes"}}</label>
-    {{> afFieldInput name="bestTimes" type="hidden"}}
-    <div class="checkbox"><label><input type="checkbox" id="cfTimes1" name="cfTimes" value="Morning" /> Morning</label></div>
-    <div class="checkbox"><label><input type="checkbox" id="cfTimes2" name="cfTimes" value="Afternoon" /> Afternoon</label></div>
-    <div class="checkbox"><label><input type="checkbox" id="cfTimes3" name="cfTimes" value="Evening" /> Evening</label></div>
-    {{#if afFieldIsInvalid name="bestTimes"}}
-    <span class="help-block">{{afFieldMessage name="bestTimes"}}</span>
-    {{/if}}
-  </div>
-{{/autoForm}}
-```
-
-Notice that the check boxes are normal HTML form elements, nothing special. We also have
-an input field above that, though, and we've overridden the type to be hidden. Now
-we can set up an event handler to update the hidden input whenever the check box
-selections change:
-
-```js
-Template.contact.events({
-    'change [name=cfTimes]': function(event, template) {
-        var bestTimes = "";
-        _.each(template.findAll("[name=cfTimes]:checked"), function(checkbox) {
-            bestTimes += checkbox.value + ", ";
-        });
-
-        if (bestTimes.length) {
-            bestTimes = bestTimes.slice(0, -2);
-        }
-
-        $(template.find('[data-schema-key=bestTimes]')).val(bestTimes);
-    },
-    'reset form': function(event, template) {
-        $(template.find('[data-schema-key=bestTimes]')).val("");
-    }
-});
-```
-
-This is pretty straightforward code. Note that you can find an input element generated by
-autoform by examining the "data-schema-key" attributes. The corresponding schema key
-is stored in this attribute for all generated form elements.
-
-Now the form will be successfully submitted when at least one check box is selected,
-but it will be invalid if none are selected because the hidden bestTimes field's value
-will be an empty string, and bestTimes is required.
-
-NOTE: This is for illustration, but a case like this might be better accomplished
-by simply changing the schema and then adjusting the value into a string once
-the validated doc arrives on the server.
 
 ## Dates
 
@@ -1201,7 +1054,7 @@ object that represents the exact minimum or maximum date and time
 in the corresponding time zone. This may mean returning the min or max value
 from a function based on a time zone ID you are storing elsewhere.
 
-## Templates
+## Theme Templates
 
 AutoForm has a robust and extendable template system. The following templates are built in:
 
