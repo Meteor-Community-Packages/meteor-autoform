@@ -271,13 +271,15 @@ Template.autoForm.events({
     var insertDoc = formDocs.insertDoc;
     var updateDoc = formDocs.updateDoc;
 
-    // Pre-validate
-    // For inserts and updates, which have their
-    // own validation, we validate here only if
-    // there is a `schema` attribute on the form.
-    // Otherwise we let collection2 do the validation
-    // after before hooks have run.
-    if (data.validationType !== 'none' && (ssIsOverride || isMethod || isNormalSubmit)) {
+    // This validation pass happens before any "before" hooks run. It should happen
+    // only when there is both a collection AND a schema specified, in which case we
+    // validate first against the form schema. Then before hooks can add any missing
+    // properties before we validate against the full collection schema.
+    //
+    // We also validate at this time if we're doing normal form submission, in which
+    // case there are no "before" hooks, and this is the only validation pass we do
+    // before running onSubmit hooks and potentially allowing the browser to submit.
+    if (data.validationType !== 'none' && (ssIsOverride || isNormalSubmit)) {
       // Catch exceptions in validation functions which will bubble up here, cause a form with
       // onSubmit() to submit prematurely and prevent the error from being reported
       // (due to a page refresh).
@@ -291,8 +293,6 @@ Template.autoForm.events({
       if (isValid === false) {
         return failedValidation();
       }
-      // NOTE: For method forms when ssIsOverride, we will validate again, later, after before hooks
-      // but before calling the method, against the collection schema
     }
 
     // Run beginSubmit hooks (disable submit button or form, etc.)
@@ -303,10 +303,7 @@ Template.autoForm.events({
     beginSubmit(formId, template);
 
     // Now we will do the requested insert, update, method, or normal
-    // browser form submission. Even though we may have already validated above,
-    // we do it again upon insert or update
-    // because collection2 validation catches additional stuff like unique and
-    // because our form schema need not be the same as our collection schema.
+    // browser form submission.
     var validationOptions = {
       validationContext: formId,
       filter: data.filter,
@@ -347,9 +344,10 @@ Template.autoForm.events({
         if (_.isEmpty(modifier)) { // make sure this check stays after the before hooks
           // Nothing to update. Just treat it as a successful update.
           updateCallback(null, 0);
+        } else {
+          // Perform update
+          collection.update(docId, modifier, validationOptions, updateCallback);
         }
-        // Perform update
-        collection.update(docId, modifier, validationOptions, updateCallback);
       });
     }
 
@@ -362,14 +360,12 @@ Template.autoForm.events({
       var beforeMethodHooks = Hooks.getHooks(formId, 'before', method);
       // Run "before.methodName" hooks
       doBefore(null, insertDoc, beforeMethodHooks, 'before.method hook', function (doc) {
-        // When both `schema` and `collection` are supplied, we do a
-        // second validation now, against the collection schema,
-        // before calling the method.
-        if (ssIsOverride) {
-          isValid = _validateForm(formId, data, formDocs, true);
-          if (isValid === false) {
-            return failedValidation();
-          }
+        // Validate. If both schema and collection were provided, then we validate
+        // against the collection schema here. Otherwise we validate against whichever
+        // one was passed.
+        isValid = _validateForm(formId, data, formDocs, ssIsOverride);
+        if (isValid === false) {
+          return failedValidation();
         }
         // Make callback for Meteor.call
         var methodCallback = makeCallback(method);
