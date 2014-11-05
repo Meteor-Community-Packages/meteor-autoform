@@ -281,20 +281,15 @@ getInputData = function getInputData(defs, hash, value, label, submitType) {
   };
 };
 
-// TODO move these to a FieldValueTracker object
-updateTrackedFieldValue = function updateTrackedFieldValue(formId, key, val) {
+updateTrackedFieldValue = function updateTrackedFieldValue(formId, key) {
   formValues[formId] = formValues[formId] || {};
-  formValues[formId][key] = formValues[formId][key] || {_deps: new Deps.Dependency};
-  formValues[formId][key]._val = val;
-  formValues[formId][key]._deps.changed();
+  formValues[formId][key] = formValues[formId][key] || new Deps.Dependency;
+  formValues[formId][key].changed();
 };
 
 updateAllTrackedFieldValues = function updateAllTrackedFieldValues(formId) {
-  var template = templatesById[formId];
-  if (!template)
-    return;
   _.each(formValues[formId], function (o, key) {
-    updateTrackedFieldValue(formId, key, getFieldValue(template, key));
+    updateTrackedFieldValue(formId, key);
   });
 };
 

@@ -21,8 +21,8 @@ Template.afFieldSelect.helpers({
     // Get input value
     var value = getInputValue(c.atts, c.atts.value, c.af.mDoc, defaultValue, {valueIsArray: !!c.atts.multiple});
 
-    // Track field's value for reactive show/hide of other fields by value
-    updateTrackedFieldValue(c.af.formId, c.atts.name, value);
+    // Mark field value as changed for reactive updates
+    updateTrackedFieldValue(c.af.formId, c.atts.name);
     
     // Build input data context
     var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), c.af.submitType);

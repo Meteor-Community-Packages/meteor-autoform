@@ -417,8 +417,8 @@ Template.autoForm.events({
       });
     }
 
-    // Update field's value for reactive show/hide of other fields by value
-    updateTrackedFieldValue(formId, key, getFieldValue(template, key));
+    // Mark field value as changed for reactive updates
+    updateTrackedFieldValue(formId, key);
 
     // If the form should be auto-saved whenever updated, we do that on field
     // changes instead of validating the field
@@ -461,16 +461,18 @@ Template.autoForm.events({
       AutoForm.invalidateFormContext(formId);
       template.$("[autofocus]").focus();
     } else {
-      // Update tracked field values
       // This must be done after we allow this event handler to return
       // because we have to let the browser reset all fields before we
       // update their values for deps.
-      Meteor.setTimeout(function () {
+      Meteor.defer(function () {
+        // Mark all fields as changed
         updateAllTrackedFieldValues(formId);
+
+        // Focus the autofocus element
         if (template && !template._notInDOM) {
           template.$("[autofocus]").focus();
         }
-      }, 0);
+      });
     }
 
   },

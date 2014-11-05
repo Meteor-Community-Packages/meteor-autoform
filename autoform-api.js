@@ -163,10 +163,27 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId) {
  * This is a reactive method that will rerun whenever the current value of the requested field changes.
  */
 AutoForm.getFieldValue = function autoFormGetFieldValue(formId, fieldName) {
+  // reactive dependency
   formValues[formId] = formValues[formId] || {};
-  formValues[formId][fieldName] = formValues[formId][fieldName] || {_deps: new Deps.Dependency};
-  formValues[formId][fieldName]._deps.depend();
-  return formValues[formId][fieldName]._val;
+  formValues[formId][fieldName] = formValues[formId][fieldName] || new Deps.Dependency;
+  formValues[formId][fieldName].depend();
+
+  // find AutoForm template
+  var template = templatesById[formId];
+  if (!template) {
+    return;
+  }
+
+  // find AutoForm schema
+  var data = formData[formId];
+  // ss will be the schema for the `schema` attribute if present,
+  // else the schema for the collection
+  var ss = data.ss;
+
+  // get element reference
+  var element = template.$('[data-schema-key="' + fieldName + '"]')[0];
+
+  return AutoForm.getInputValue(element, ss);
 };
 
 /**
