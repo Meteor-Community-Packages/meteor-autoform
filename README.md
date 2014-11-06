@@ -27,7 +27,6 @@ have to add to your app yourself.
   - [autoForm](#autoform)
   - [quickForm](#quickform)
   - [afFieldInput](#affieldinput)
-  - [afFieldSelect](#affieldselect)
   - [afFieldMessage](#affieldmessage)
   - [afFieldIsInvalid](#affieldisinvalid)
   - [afFormGroup](#afformgroup)
@@ -203,7 +202,6 @@ specific templates and helpers:
 
 * afFieldIsInvalid
 * afFieldInput
-* afFieldSelect
 * afFieldMessage
 
 Here's an example:
@@ -325,8 +323,7 @@ The following attributes are recognized:
 * `name`: Required. The name of the schema key this field is for.
 * `template` (default="bootstrap3"): Specify the name of a different built-in or
 custom theme template to use.
-* `options`: An array of objects, where each object has a `label` property
-and a `value` property. By specifying options, you cause the generated DOM
+* `options`: An array of options objects (see below). By specifying options, you cause the generated DOM
 element to be a `select` element with these options, unless you also use
 `noselect`. To use the `allowedValues` from the schema as the options, set
 `options="allowed"`. To specify a label to be displayed when there is no
@@ -368,33 +365,7 @@ Template.registerHelper("yearOptions", function() {
 });
 ```
 
-As an alternative to passing options, or if you need optgroups, you can use an `afFieldSelect`
-block helper. Refer to the next section.
-
-### afFieldSelect
-
-Renders a `select` element with the given block content. This is basically the same as
-using `afFieldInput` with `options` attribute, except that you can define your select options
-in the HTML and optgroups are supported.
-
-```html
-{{#afFieldSelect name="year"}}
-  <optgroup label="Fun Years">
-    <option value="2013">2013</option>
-    <option value="2012">2012</option>
-  </optgroup>
-  <optgroup label="Boring Years">
-    <option value="2011">2011</option>
-    <option value="2010">2010</option>
-  </optgroup>
-{{/afFieldSelect}}
-```
-
-The following attributes are recognized:
-
-* `name`: Required. The name of the schema key this field is for.
-* `template` (default="bootstrap3"): Specify the name of a different built-in or
-custom template to use.
+You can also mix in optgroups. See [the demo](http://autoform.meteor.com/select).
 
 ### afFieldMessage
 
@@ -1093,7 +1064,6 @@ Here's the list of possible types you can use for the first argument of
 
 * quickForm
 * afFormGroup
-* afFieldSelect
 * afObjectField
 * afArrayField
 * Any custom or built-in input type template name

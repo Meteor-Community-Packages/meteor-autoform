@@ -137,18 +137,18 @@
   </div>
 </template>
 
-<template name="afFieldSelect_bootstrap3">
-  <select {{atts}}>
-    {{#with this.contentBlockContext}}
-    {{> ../contentBlock}}
-    {{/with}}
-  </select>
-</template>
-
 <template name="afSelect_bootstrap3">
   <select {{atts}}>
     {{#each this.items}}
-      <option {{optionAtts}}>{{this.label}}</option>
+      {{#if this.optgroup}}
+        <optgroup label="{{this.optgroup}}">
+        {{#each this.items}}
+        <option {{optionAtts}}>{{this.label}}</option>
+        {{/each}}
+        </optgroup>
+      {{else}}
+        <option {{optionAtts}}>{{this.label}}</option>
+      {{/if}}
     {{/each}}
   </select>
 </template>
@@ -164,7 +164,15 @@
 <template name="afSelectMultiple_bootstrap3">
   <select {{atts}} multiple>
     {{#each this.items}}
-      <option {{optionAtts}}>{{this.label}}</option>
+      {{#if this.optgroup}}
+        <optgroup label="{{this.optgroup}}">
+        {{#each this.items}}
+        <option {{optionAtts}}>{{this.label}}</option>
+        {{/each}}
+        </optgroup>
+      {{else}}
+        <option {{optionAtts}}>{{this.label}}</option>
+      {{/if}}
     {{/each}}
   </select>
 </template>

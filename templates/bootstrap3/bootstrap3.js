@@ -31,7 +31,6 @@ Template['afFormGroup_bootstrap3'].helpers({
 });
 
 _.each([
-    "afFieldSelect_bootstrap3",
     "afSelect_bootstrap3",
     "afBooleanSelect_bootstrap3",
     "afSelectMultiple_bootstrap3",

@@ -30,17 +30,37 @@ AutoForm.addInputType("select", {
 
     // Add all defined options
     _.each(context.selectOptions, function(opt) {
-      context.items.push({
-        name: context.name,
-        label: opt.label,
-        value: opt.value,
-        // _id must be included because it is a special property that
-        // #each uses to track unique list items when adding and removing them
-        // See https://github.com/meteor/meteor/issues/2174
-        _id: opt.value,
-        selected: (opt.value === context.value),
-        atts: itemAtts
-      });
+      if (opt.optgroup) {
+        var subItems = _.map(opt.options, function(subOpt) {
+          return {
+            name: context.name,
+            label: subOpt.label,
+            value: subOpt.value,
+            // _id must be included because it is a special property that
+            // #each uses to track unique list items when adding and removing them
+            // See https://github.com/meteor/meteor/issues/2174
+            _id: subOpt.value,
+            selected: (subOpt.value === context.value),
+            atts: itemAtts
+          };
+        });
+        context.items.push({
+          optgroup: opt.optgroup,
+          items: subItems
+        });
+      } else {
+        context.items.push({
+          name: context.name,
+          label: opt.label,
+          value: opt.value,
+          // _id must be included because it is a special property that
+          // #each uses to track unique list items when adding and removing them
+          // See https://github.com/meteor/meteor/issues/2174
+          _id: opt.value,
+          selected: (opt.value === context.value),
+          atts: itemAtts
+        });
+      }
     });
 
     return context;

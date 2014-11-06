@@ -2,12 +2,12 @@ Package.describe({
   name: "aldeed:autoform",
   summary: "Easily create forms with automatic insert and update, and automatic reactive validation.",
   git: "https://github.com/aldeed/meteor-autoform.git",
-  version: "4.0.0-rc10"
+  version: "4.0.0"
 });
 
 Package.on_use(function(api) {
   // Dependencies
-  api.versionsFrom(['METEOR@0.9.3', 'METEOR@0.9.4']);
+  api.versionsFrom(['METEOR@0.9.3', 'METEOR@0.9.4', 'METEOR@1.0']);
   // common
   api.use('aldeed:simple-schema@1.1.0');
   api.use('check');
@@ -123,8 +123,6 @@ Package.on_use(function(api) {
     'components/afEachArrayItem/afEachArrayItem.js',
     'components/afFieldInput/afFieldInput.html',
     'components/afFieldInput/afFieldInput.js',
-    'components/afFieldSelect/afFieldSelect.html',
-    'components/afFieldSelect/afFieldSelect.js',
     'components/afFormGroup/afFormGroup.html',
     'components/afFormGroup/afFormGroup.js',
     'components/afObjectField/afObjectField.html',

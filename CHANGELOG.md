@@ -6,7 +6,7 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
-### 4.0.0-rc
+### 4.0.0
 
 This is a significant rewrite, and there are a number of changes that are not backwards compatible. The primary reason for the rewrite is to enable easier creation of custom form input types (autoform widgets) that can be provided by add-on packages. Some changes were also made to cut out features that were not providing much added value compared to the code they required.
 
@@ -17,6 +17,7 @@ This is a significant rewrite, and there are a number of changes that are not ba
 * A new `AutoForm.getSchemaForField` function can be used within a template helper function to get the schema definition for a field by finding the closest autoForm and using the schema attached to it.
 * **BREAKING** The `afFieldLabel` component is gone. If you were using it, you should replace with your own label element using `afFieldLabelText` for the text, something like `<label class="control-label">{{afFieldLabelText name='firstName'}}</label>`
 * **BREAKING** If you don't provide a `firstOption` attribute for a single select control, a default first option that says "(Select One)" is used. You can omit the first option using `firstOption=false`, but it's best to have one in most cases to avoid confusing behavior.
+* **BREAKING** The `afFieldSelect` component is gone. See [the demo](http://autoform.meteor.com/select) for the new way to provide optgroups.
 * A new `AutoForm.invalidateFormContext` function can be called in situations where you reactively change the `doc` attribute of a form and you need to force the form to rerender.
 * You can now set `label="some text"` on an `afFormGroup` (or `afQuickField`) component to provide some label text instead of using the schema label.
 * Fix which element is passed as the updated element for autosave forms.
