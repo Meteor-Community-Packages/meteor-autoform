@@ -2,9 +2,13 @@ AutoForm
 =========================
 
 AutoForm is a smart package for Meteor that adds handlebars helpers to easily create basic
-forms with automatic insert and update events, and automatic reactive validation. 
+forms with automatic insert and update events, and automatic reactive validation.
 
 ## Change Log
+
+### 4.0.1
+
+Bug fix
 
 ### 4.0.0
 
