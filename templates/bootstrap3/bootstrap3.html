@@ -137,6 +137,15 @@
   </div>
 </template>
 
+<template name="afBooleanRadioGroup_bootstrap3">
+  <div class="radio">
+    <label><input type="radio" value="false" name="{{this.name}}" {{falseAtts}} /> {{#with this.atts.falseLabel}}{{this}}{{else}}False{{/with}}</label>
+  </div>
+  <div class="radio">
+    <label><input type="radio" value="true" name="{{this.name}}" {{trueAtts}} /> {{#with this.atts.trueLabel}}{{this}}{{else}}True{{/with}}</label>
+  </div>
+</template>
+
 <template name="afSelect_bootstrap3">
   <select {{atts}}>
     {{#each this.items}}

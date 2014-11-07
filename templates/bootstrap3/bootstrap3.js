@@ -125,3 +125,20 @@ var selectHelpers = {
 Template["afSelect_bootstrap3"].helpers(selectHelpers);
 Template["afSelectMultiple_bootstrap3"].helpers(selectHelpers);
 Template["afBooleanSelect_bootstrap3"].helpers(selectHelpers);
+
+Template["afBooleanRadioGroup_bootstrap3"].helpers({
+  falseAtts: function falseAtts() {
+    var atts = _.omit(this.atts, 'trueLabel', 'falseLabel');
+    if (this.value === false) {
+      atts.checked = "";
+    }
+    return atts;
+  },
+  trueAtts: function trueAtts() {
+    var atts = _.omit(this.atts, 'trueLabel', 'falseLabel');
+    if (this.value === true) {
+      atts.checked = "";
+    }
+    return atts;
+  }
+});

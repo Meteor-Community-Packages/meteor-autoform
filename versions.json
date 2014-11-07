@@ -10,7 +10,7 @@
     ],
     [
       "blaze",
-      "2.0.3"
+      "2.0.2"
     ],
     [
       "callback-hook",
@@ -22,7 +22,7 @@
     ],
     [
       "ddp",
-      "1.0.11"
+      "1.0.10"
     ],
     [
       "deps",
@@ -58,19 +58,19 @@
     ],
     [
       "logging",
-      "1.0.5"
+      "1.0.4"
     ],
     [
       "meteor",
-      "1.1.3"
+      "1.1.2"
     ],
     [
       "minimongo",
-      "1.0.5"
+      "1.0.4"
     ],
     [
       "mrt:moment",
-      "2.6.0"
+      "2.8.1"
     ],
     [
       "observe-sequence",
@@ -94,7 +94,7 @@
     ],
     [
       "templating",
-      "1.0.9"
+      "1.0.8"
     ],
     [
       "tracker",
@@ -110,6 +110,6 @@
     ]
   ],
   "pluginDependencies": [],
-  "toolVersion": "meteor-tool@1.0.35",
+  "toolVersion": "meteor-tool@1.0.34",
   "format": "1.0"
 }
