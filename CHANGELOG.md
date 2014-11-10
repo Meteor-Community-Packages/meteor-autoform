@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 4.0.2
+
+Several fixes
+
 ### 4.0.1
 
 Bug fix

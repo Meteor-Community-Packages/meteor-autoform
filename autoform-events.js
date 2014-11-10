@@ -2,7 +2,7 @@
 var lastAutoSaveElement = null;
 
 function beginSubmit(formId, template) {
-  if (!template || template._notInDOM)
+  if (!template || !template.view._domrange)
     return;
   // Get user-defined hooks
   var hooks = Hooks.getHooks(formId, 'beginSubmit');
@@ -20,7 +20,7 @@ function beginSubmit(formId, template) {
 }
 
 function endSubmit(formId, template) {
-  if (!template || template._notInDOM)
+  if (!template || !template.view._domrange)
     return;
   // Try to avoid incorrect reporting of which input caused autosave
   lastAutoSaveElement = null;
@@ -204,7 +204,7 @@ Template.autoForm.events({
           ctx.result(result);
         }
       }
-      
+
       runHook(0, doc);
     }
 
@@ -469,7 +469,7 @@ Template.autoForm.events({
         updateAllTrackedFieldValues(formId);
 
         // Focus the autofocus element
-        if (template && !template._notInDOM) {
+        if (template && template.view._domrange) {
           template.$("[autofocus]").focus();
         }
       });

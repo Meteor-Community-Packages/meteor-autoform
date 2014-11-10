@@ -60,7 +60,7 @@ _validateForm = function _validateForm(formId, formDetails, formDocs, useCollect
   // attribute but you want to force validation against the
   // collection's schema instead, pass useCollectionSchema=true
   ss = (useCollectionSchema && formDetails.collection) ? formDetails.collection.simpleSchema() : formDetails.ss;
-  
+
   docId = formDetails.doc && formDetails.doc._id || null;
 
   // Perform validation
@@ -81,7 +81,7 @@ _validateForm = function _validateForm(formId, formDetails, formDocs, useCollect
 };
 
 _validateField = function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
-  if (!template || template._notInDOM || _preventValidation) {
+  if (!template || !template.view._domrange || _preventValidation) {
     return; //skip validation
   }
 
@@ -117,7 +117,7 @@ _validateField = function _validateField(key, template, skipEmpty, onlyIfAlready
 
 // Throttle field validation to occur at most every 300ms,
 // with leading and trailing calls.
-validateField = _.throttle(_validateField, 300); 
+validateField = _.throttle(_validateField, 300);
 
 // Selects the focus the first field with an error
 selectFirstInvalidField = function selectFirstInvalidField(formId, ss) {

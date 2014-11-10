@@ -6,6 +6,8 @@
 getInputType = function getInputType(atts) {
 	var expectsArray = false, defs, schemaType;
 
+  atts = AutoForm.Utility.normalizeContext(atts, 'afFieldInput').atts;
+
   // If a `type` attribute is specified, we just use that
   if (atts.type) {
     return atts.type;
@@ -175,7 +177,7 @@ getInputValue = function getInputValue(atts, value, mDoc, defaultValue, typeDefs
   if (typeof typeDefs.valueIn === "function") {
     value = typeDefs.valueIn(value, atts);
   }
-  
+
   return value;
 };
 

@@ -71,7 +71,8 @@ AutoForm.hooks = function autoFormHooks(hooks, replace) {
  */
 AutoForm.resetForm = function autoFormResetForm(formId, template) {
   template = template || templatesById[formId];
-  if (template && !template._notInDOM) {
+
+  if (template && template.view._domrange) {
     template.$("form")[0].reset();
   }
 };
@@ -142,7 +143,7 @@ AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(
  */
 AutoForm.getFormValues = function autoFormGetFormValues(formId) {
   var template = templatesById[formId];
-  if (!template || template._notInDOM) {
+  if (!template || !template.view._domrange) {
     throw new Error("getFormValues: There is currently no autoForm template rendered for the form with id " + formId);
   }
   // Get a reference to the SimpleSchema instance that should be used for
@@ -170,7 +171,7 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(formId, fieldName) {
 
   // find AutoForm template
   var template = templatesById[formId];
-  if (!template) {
+  if (!template || !template.view._domrange) {
     return;
   }
 
@@ -197,7 +198,9 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(formId, fieldName) {
  * Unlike `AutoForm.getFieldValue`, this function is not reactive.
  */
 AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
-  var field, fieldName, fieldType, arrayItemFieldType, val, typeDef, inputTypeTemplate;
+  var field, fieldName, fieldType, arrayItemFieldType, val, typeDef, inputTypeTemplate, dataContext;
+
+  dataContext = Blaze.getData(element);
 
   // Get jQuery field reference
   field = $(element);
@@ -232,7 +235,7 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   }
 
   // run through input's type converter if provided
-  if (val !== void 0 && typeDef && typeDef.valueConverters && fieldType) {
+  if (val !== void 0 && dataContext.atts.autoConvert !== false && typeDef && typeDef.valueConverters && fieldType) {
     var converterFunc;
     if (fieldType === String) {
       converterFunc = typeDef.valueConverters["string"];
@@ -292,7 +295,7 @@ AutoForm.addInputType = function afAddInputType(name, definition) {
  */
 AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipEmpty) {
   var template = templatesById[formId];
-  if (!template || template._notInDOM) {
+  if (!template || !template.view._domrange) {
     throw new Error("validateField: There is currently no autoForm template rendered for the form with id " + formId);
   }
 

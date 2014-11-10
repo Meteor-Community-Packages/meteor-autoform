@@ -31,7 +31,7 @@ Template.autoForm.helpers({
 
 Template.autoForm.created = function autoFormCreated() {
   var template = this;
-  
+
   template.autorun(function () {
     var data = Template.currentData(); // reactive
     var formId = data.id || defaultFormId;
@@ -106,7 +106,6 @@ Template.autoForm.created = function autoFormCreated() {
 
 Template.autoForm.destroyed = function autoFormDestroyed() {
   var self = this;
-  self._notInDOM = true;
   var formId = self.data.id || defaultFormId;
 
   // TODO if formId was changing reactively during life of instance,

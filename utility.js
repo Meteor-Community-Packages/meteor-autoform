@@ -472,8 +472,6 @@ Utility = {
     fieldAttributes = _.omit(fieldAttributes, componentTypeList);
     fieldAttributes = _.extend({}, fieldAttributes, fieldAttributesForComponentType);
 
-    // This is where we add default attributes specified in
-    // defs.autoform.
     // If options="auto", we want to use defs.autoform.options
     // if specified and otherwise fall back to "allowed"
     if (fieldAttributes.options && atts.options === "auto")
