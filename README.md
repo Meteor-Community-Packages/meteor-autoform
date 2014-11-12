@@ -11,6 +11,10 @@ You can optionally use it with the
 [collection2](https://github.com/aldeed/meteor-collection2) package, which you
 have to add to your app yourself.
 
+## UPDATING TO 4.0
+
+AutoForm 4.0 is out with support for custom input types, but also lots of compatibility breaks. Be sure to check out the [change log](https://github.com/aldeed/meteor-autoform/blob/master/CHANGELOG.md) when updating your app!
+
 ## Table of Contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
