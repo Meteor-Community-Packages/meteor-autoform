@@ -198,9 +198,12 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(formId, fieldName) {
  * Unlike `AutoForm.getFieldValue`, this function is not reactive.
  */
 AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
-  var field, fieldName, fieldType, arrayItemFieldType, val, typeDef, inputTypeTemplate, dataContext;
+  var field, fieldName, fieldType, arrayItemFieldType, val, typeDef, inputTypeTemplate, dataContext, autoConvert;
 
   dataContext = Blaze.getData(element);
+  if (dataContext && dataContext.atts) {
+    autoConvert = dataContext.atts.autoConvert;
+  }
 
   // Get jQuery field reference
   field = $(element);
@@ -235,26 +238,26 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   }
 
   // run through input's type converter if provided
-  if (val !== void 0 && dataContext.atts.autoConvert !== false && typeDef && typeDef.valueConverters && fieldType) {
+  if (val !== void 0 && autoConvert !== false && typeDef && typeDef.valueConverters && fieldType) {
     var converterFunc;
     if (fieldType === String) {
-      converterFunc = typeDef.valueConverters["string"];
+      converterFunc = typeDef.valueConverters.string;
     } else if (fieldType === Number) {
-      converterFunc = typeDef.valueConverters["number"];
+      converterFunc = typeDef.valueConverters.number;
     } else if (fieldType === Boolean) {
-      converterFunc = typeDef.valueConverters["boolean"];
+      converterFunc = typeDef.valueConverters.boolean;
     } else if (fieldType === Date) {
-      converterFunc = typeDef.valueConverters["date"];
+      converterFunc = typeDef.valueConverters.date;
     } else if (fieldType === Array) {
       arrayItemFieldType = ss.schema(fieldName + ".$").type;
       if (arrayItemFieldType === String) {
-        converterFunc = typeDef.valueConverters["stringArray"];
+        converterFunc = typeDef.valueConverters.stringArray;
       } else if (arrayItemFieldType === Number) {
-        converterFunc = typeDef.valueConverters["numberArray"];
+        converterFunc = typeDef.valueConverters.numberArray;
       } else if (arrayItemFieldType === Boolean) {
-        converterFunc = typeDef.valueConverters["booleanArray"];
+        converterFunc = typeDef.valueConverters.booleanArray;
       } else if (arrayItemFieldType === Date) {
-        converterFunc = typeDef.valueConverters["dateArray"];
+        converterFunc = typeDef.valueConverters.dateArray;
       }
     }
 

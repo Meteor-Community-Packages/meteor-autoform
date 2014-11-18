@@ -191,7 +191,7 @@ ArrayTracker.prototype.removeFromFieldAtIndex = function atRemoveFromFieldAtInde
   	return;
   }
 
-  var currentCount = self.info[formId][field].visibleCount
+  var currentCount = self.info[formId][field].visibleCount;
   var minCount = self.getMinMax(ss, field, overrideMinCount, overrideMaxCount).minCount;
 
   if (currentCount > minCount) {
