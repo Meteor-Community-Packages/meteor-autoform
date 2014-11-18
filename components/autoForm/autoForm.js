@@ -1,4 +1,4 @@
-var contextDependency = new Tracker.Dependency;
+var contextDependency = new Tracker.Dependency();
 
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
@@ -99,6 +99,14 @@ Template.autoForm.created = function autoFormCreated() {
       removeEmptyStrings: data.removeEmptyStrings,
       trimStrings: data.trimStrings
     };
+
+    // This ensures that anything dependent on field values will properly
+    // react to field values set from the database document. That is,
+    // computations dependent on AutoForm.getFieldValue will rerun properly
+    // when the form is initially rendered using values from `doc`.
+    Meteor.defer(function () {
+      updateAllTrackedFieldValues(formId);
+    });
 
     contextDependency.changed();
   });
