@@ -9,10 +9,15 @@ fd = new FormData();
 arrayTracker = new ArrayTracker();
 componentTypeList = ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'];
 
+// backwards compatibility
+if (typeof Tracker === "undefined" && typeof Deps !== "undefined") {
+  Tracker = Deps;
+}
+
 // reactive templates
 globalDefaultTemplate = "bootstrap3"
 defaultTypeTemplates = {};
 deps = {
-  defaultTemplate: new Deps.Dependency,
+  defaultTemplate: new Tracker.Dependency,
   defaultTypeTemplates: {}
 };

@@ -14,7 +14,7 @@ FormData.prototype.initForm = function fdInitForm(formId) {
 	self.forms[formId] = {
 		sourceDoc: null,
 		deps: {
-			sourceDoc: new Deps.Dependency
+			sourceDoc: new Tracker.Dependency()
 		}
 	};
 };

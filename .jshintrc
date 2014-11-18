@@ -16,13 +16,12 @@
     "quotmark"      : false,
     "undef"         : true,
     "unused"        : true,
-    "strict"        : true,
+    "strict"        : false,
     "trailing"      : true,
     "maxparams"     : false,
     "maxdepth"      : false,
     "maxstatements" : false,
     "maxcomplexity" : false,
-    "maxlen"        : 80,
     "asi"           : false,
     "boss"          : false,
     "debug"         : false,
@@ -72,10 +71,12 @@
         "check",
         "Match",
         "Tracker",
+        "Deps",
         "EJSON",
         "Email",
         "Package",
         "Tinytest",
+        "Mongo",
         "Npm",
         "Assets",
         "Packages",
@@ -83,6 +84,9 @@
         "LocalCollection",
         "_",
         "Random",
-        "HTTP"
+        "HTTP",
+        "$",
+        "UI",
+        "Blaze"
     ]
 }

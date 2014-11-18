@@ -84,7 +84,7 @@ ArrayTracker.prototype.resetField = function atResetField(formId, field) {
 
 	if (!self.info[formId][field]) {
 		self.info[formId][field] = {
-			deps: new Deps.Dependency
+			deps: new Tracker.Dependency()
 		};
 	}
 

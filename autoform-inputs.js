@@ -1,3 +1,30 @@
+/* global AutoForm */
+/* global getInputType:true */
+/* global getFieldValue:true */
+/* global getFormValues:true */
+/* global formData */
+/* global getInputValue:true */
+/* global getFieldsValues:true */
+/* global getAllFieldsInForm:true */
+/* global Hooks */
+/* global getInputData:true */
+/* global updateTrackedFieldValue:true */
+/* global updateAllTrackedFieldValues:true */
+/* global formValues */
+
+function getFieldsValues(fields, ss) {
+  var doc = {};
+  fields.each(function formValuesEach() {
+    var fieldName, val = AutoForm.getInputValue(this, ss);
+    if (val !== void 0) {
+      // Get the field/schema key name
+      fieldName = $(this).attr("data-schema-key");
+      doc[fieldName] = val;
+    }
+  });
+  return doc;
+}
+
 /*
  * package scope functions
  */
@@ -160,7 +187,7 @@ getInputValue = function getInputValue(atts, value, mDoc, defaultValue, typeDefs
   }
 
   // Change null or undefined to an empty string
-  value = (value == null) ? '' : value;
+  value = (value === null || value === void 0) ? '' : value;
 
   // If the component expects the value to be an array, and it's not, make it one
   if (typeDefs.valueIsArray && !_.isArray(value)) {
@@ -214,7 +241,7 @@ getInputData = function getInputData(defs, hash, value, label, submitType) {
   }
 
    // Add data-schema-key to every type of element
-  inputAtts['data-schema-key'] = inputAtts['name'];
+  inputAtts['data-schema-key'] = inputAtts.name;
 
   // Set placeholder to label from schema if requested.
   // We check hash.placeholder instead of inputAtts.placeholder because
@@ -229,8 +256,9 @@ getInputData = function getInputData(defs, hash, value, label, submitType) {
   // only if their value is `true`. That is, unlike in
   // HTML, their mere presence does not matter.
   _.each(["disabled", "readonly", "checked", "required", "autofocus"], function (booleanProp) {
-    if (!_.has(hash, booleanProp))
+    if (!_.has(hash, booleanProp)) {
       return;
+    }
 
     // For historical reasons, we treat the string "true" and an empty string as `true`, too.
     // But an empty string value results in the cleanest rendered output for boolean props,
@@ -272,7 +300,7 @@ getInputData = function getInputData(defs, hash, value, label, submitType) {
    */
 
   return {
-    name: inputAtts['name'],
+    name: inputAtts.name,
     schemaType: schemaType,
     min: (typeof defs.min === "function") ? defs.min() : defs.min,
     max: (typeof defs.max === "function") ? defs.max() : defs.max,
@@ -285,7 +313,7 @@ getInputData = function getInputData(defs, hash, value, label, submitType) {
 
 updateTrackedFieldValue = function updateTrackedFieldValue(formId, key) {
   formValues[formId] = formValues[formId] || {};
-  formValues[formId][key] = formValues[formId][key] || new Deps.Dependency;
+  formValues[formId][key] = formValues[formId][key] || new Tracker.Dependency();
   formValues[formId][key].changed();
 };
 
@@ -294,23 +322,6 @@ updateAllTrackedFieldValues = function updateAllTrackedFieldValues(formId) {
     updateTrackedFieldValue(formId, key);
   });
 };
-
-/*
- * file scope functions
- */
-
-function getFieldsValues(fields, ss) {
-  var doc = {};
-  fields.each(function formValuesEach() {
-    var fieldName, val = AutoForm.getInputValue(this, ss);
-    if (val !== void 0) {
-      // Get the field/schema key name
-      fieldName = $(this).attr("data-schema-key");
-      doc[fieldName] = val;
-    }
-  });
-  return doc;
-}
 
 getAllFieldsInForm = function getAllFieldsInForm(template) {
   // Get all elements with `data-schema-key` attribute, unless disabled
