@@ -115,7 +115,7 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
   }
 
   // Get the list of fields we want included
-  var fieldList = AutoForm.findAttribute("fields");
+  var fieldList = options.fields || AutoForm.findAttribute("fields");
   if (fieldList) {
     fieldList = AutoForm.Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
 
@@ -183,7 +183,7 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
   }
 
   // If user wants to omit some fields, remove those from the array
-  var omitFields = AutoForm.findAttribute("omitFields");
+  var omitFields = options.omitFields || AutoForm.findAttribute("omitFields");
   if (omitFields) {
     omitFields = AutoForm.Utility.stringToArray(omitFields, 'AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
     fieldList = _.difference(fieldList, omitFields);
