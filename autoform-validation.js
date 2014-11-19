@@ -2,17 +2,6 @@
  * all form validation logic is here
  */
 
-// To prevent issues with keyup validation firing right after we've
-// invalidated due to submission, we can quickly and temporarily stop
-// field validation.
-var _preventValidation = false;
-preventQueuedValidation = function preventQueuedValidation() {
-  _preventValidation = true;
-  Meteor.setTimeout(function() {
-    _preventValidation = false;
-  }, 500);
-};
-
 validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, docId, key) {
   var ec = {
     userId: (Meteor.userId && Meteor.userId()) || null,
@@ -81,8 +70,10 @@ _validateForm = function _validateForm(formId, formDetails, formDocs, useCollect
 };
 
 _validateField = function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
-  if (!template || !template.view._domrange || _preventValidation) {
-    return; //skip validation
+  // Due to throttling, this can be called after the autoForm template is destroyed.
+  // If that happens, we exit without error.
+  if (!template || !template.view._domrange || template.view.isDestroyed) {
+    return;
   }
 
   var context = template.data;

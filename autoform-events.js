@@ -122,7 +122,6 @@ Template.autoForm.events({
       var afterHooks = Hooks.getHooks(formId, 'after', name);
       return function autoFormActionCallback(error, result) {
         if (error) {
-          preventQueuedValidation();
           if (onError && onError.length) {
             _.each(onError, function onErrorEach(hook) {
               hook.call(cbCtx, name, error, template);
