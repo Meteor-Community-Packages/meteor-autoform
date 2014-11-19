@@ -33,8 +33,14 @@ Template.autoForm.created = function autoFormCreated() {
   var template = this;
 
   template.autorun(function () {
-    var data = Template.currentData(); // reactive
+    var data = Template.currentData(); // rerun when current data changes
     var formId = data.id || defaultFormId;
+
+    // rerun when manually invalidated
+    if (!formDeps[formId]) {
+      formDeps[formId] = new Tracker.Dependency();
+    }
+    formDeps[formId].depend();
 
     // cache template instance for lookup by formId
     templatesById[formId] = template;
@@ -46,25 +52,27 @@ Template.autoForm.created = function autoFormCreated() {
     var collection = AutoForm.Utility.lookup(data.collection);
     var ss = AutoForm.Utility.getSimpleSchemaFromContext(data, formId);
 
+    // Clone the doc so that docToForm and other modifications do not change
+    // the original referenced object.
+    var doc = data.doc ? EJSON.clone(data.doc) : null;
+
     // Retain doc values after a "hot code push", if possible
     var retrievedDoc = formPreserve.getDocument(formId);
     if (retrievedDoc !== false) {
       // Ensure we keep the _id property which may not be present in retrievedDoc.
-      data.doc = _.extend({}, data.doc || {}, retrievedDoc);
+      doc = _.extend(doc || {}, retrievedDoc);
     }
 
     var mDoc;
-    if (data.doc && !_.isEmpty(data.doc)) {
-      // Clone doc
-      var copy = _.clone(data.doc);
+    if (doc && !_.isEmpty(doc)) {
       var hookCtx = {formId: formId};
       // Pass doc through docToForm hooks
       _.each(Hooks.getHooks(formId, 'docToForm'), function autoFormEachDocToForm(hook) {
-        copy = hook.call(hookCtx, copy, ss, formId);
+        doc = hook.call(hookCtx, doc, ss, formId);
       });
       // Create a "flat doc" that can be used to easily get values for corresponding
       // form fields.
-      mDoc = new MongoObject(copy);
+      mDoc = new MongoObject(doc);
       fd.sourceDoc(formId, mDoc);
     } else {
       fd.sourceDoc(formId, null);
@@ -87,7 +95,7 @@ Template.autoForm.created = function autoFormCreated() {
       collection: collection,
       ss: ss,
       ssIsOverride: !!collection && !!data.schema,
-      doc: data.doc || null,
+      doc: doc,
       mDoc: mDoc,
       validationType: (data.validation == null ? "submitThenKeyup" : data.validation),
       submitType: data.type,

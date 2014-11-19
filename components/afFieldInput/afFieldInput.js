@@ -51,10 +51,6 @@ Template.afFieldInput.helpers({
   innerContext: function afFieldInputContext(options) {
     var c = AutoForm.Utility.normalizeContext(options.hash, "afFieldInput");
 
-    // Set up deps, allowing us to re-render the form
-    formDeps[c.af.formId] = formDeps[c.af.formId] || new Tracker.Dependency();
-    formDeps[c.af.formId].depend();
-
     var ss = c.af.ss;
     var defs = c.defs;
 
