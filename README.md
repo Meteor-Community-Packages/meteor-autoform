@@ -491,6 +491,20 @@ An `afArrayField` (or an `afQuickField` for an array) supports the additional at
 
 An `afArrayField` (or an `afQuickField` for an array) also supports the `initialCount` attribute. Use it to override the default initial count to be something other than 1, including 0. Note that `minCount` will still always take precedence. That is, if the `minCount` is 1 and you specify `initialCount=0`, the initial count will be 1.
 
+To specify options for each item in the array you can set 
+```
+'arrayFieldName.$': {
+  ...
+  autoform: {
+    afFieldInput: {
+      options: function () {
+        //return options object
+      }
+    }
+  }
+}
+```
+
 At the moment, the add and remove buttons disappear when you can't use them. This could be changed to make them disabled. You can do this yourself with a custom template, but if you have thoughts about how it should work out of the box, submit an issue to discuss.
 
 ### afEachArrayItem
