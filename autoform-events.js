@@ -468,7 +468,7 @@ Template.autoForm.events({
         updateAllTrackedFieldValues(formId);
 
         // Focus the autofocus element
-        if (template && template.view._domrange) {
+        if (template && template.view._domrange && !template.view.isDestroyed) {
           template.$("[autofocus]").focus();
         }
       });
