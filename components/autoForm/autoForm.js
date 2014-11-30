@@ -25,6 +25,10 @@ Template.autoForm.helpers({
 
     // Preserve outer context, allowing access within autoForm block without needing ..
     _.extend(innerContext, outerContext);
+    // Prevent the change to the innerContext from triggering the autorun block, since the
+    // innerContent should react to changes in the data and not vice-versa. This prevents infinite
+    // loops with subforms.
+    formData[formId].ignoreNextDataChange = true;
     return innerContext;
   }
 });
@@ -35,6 +39,10 @@ Template.autoForm.created = function autoFormCreated() {
   template.autorun(function () {
     var data = Template.currentData(); // rerun when current data changes
     var formId = data.id || defaultFormId;
+    if (formData[formId] && formData[formId].ignoreNextDataChange) {
+      formData[formId].ignoreNextDataChange = false;
+      return;
+    }
 
     // rerun when manually invalidated
     if (!formDeps[formId]) {
@@ -105,7 +113,8 @@ Template.autoForm.created = function autoFormCreated() {
       filter: data.filter,
       autoConvert: data.autoConvert,
       removeEmptyStrings: data.removeEmptyStrings,
-      trimStrings: data.trimStrings
+      trimStrings: data.trimStrings,
+      ignoreNextDataChange: false
     };
 
     // This ensures that anything dependent on field values will properly

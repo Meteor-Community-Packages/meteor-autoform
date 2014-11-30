@@ -325,8 +325,15 @@ updateAllTrackedFieldValues = function updateAllTrackedFieldValues(formId) {
 
 getAllFieldsInForm = function getAllFieldsInForm(template) {
   // Get all elements with `data-schema-key` attribute, unless disabled
-  return template.$("[data-schema-key]").not("[disabled]");
+  // return template.$("[data-schema-key]").not("[disabled]");
   // Exclude fields in sub-forms, since they will belong to a different AutoForm and schema.
   // TODO need some selector/filter that actually works correctly for excluding subforms
-  // return template.$('[data-schema-key]').not("[disabled]").not(template.$('form form [data-schema-key]'));
+  return template.$('[data-schema-key]').not("[disabled]").not(template.$('form form [data-schema-key]'));
+};
+
+// TODO(aramk) Use this to stop event handlers being called for subform fields.
+isFieldInForm = function isFieldInForm(template, element) {
+  var $em = $(element),
+    $form = template.$('form');
+  return $em.closest('form').is($form);
 };
