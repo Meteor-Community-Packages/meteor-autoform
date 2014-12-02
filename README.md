@@ -21,6 +21,7 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
 - [Installation](#installation)
+  - [Community Add-On Packages](#community-add-on-packages)
 - [Demo](#demo)
 - [Example](#example)
   - [A Basic Insert Form](#a-basic-insert-form)
@@ -90,6 +91,27 @@ In a Meteor app directory, enter:
 ```
 $ meteor add aldeed:autoform
 ```
+
+### Community Add-On Packages
+
+*Submit a pull request to add your package to this list!*
+
+The following community packages provide additional custom input types that you can use in your autoforms:
+
+* [aldeed:autoform-select2](https://atmospherejs.com/aldeed/autoform-select2)
+* [aldeed:autoform-bs-datepicker](https://atmospherejs.com/aldeed/autoform-bs-datepicker)
+* [cfs:autoform](https://atmospherejs.com/cfs/autoform)
+* [yogiben:autoform-file](https://atmospherejs.com/yogiben/autoform-file)
+* [naxio:autoform-file](https://atmospherejs.com/naxio/autoform-file)
+* [mpowaga:autoform-summernote](https://atmospherejs.com/mpowaga/autoform-summernote)
+
+[yogiben:admin](https://github.com/yogiben/meteor-admin) provides CRUD admin pages using autoforms.
+
+[forwarder:autoform-wizard](https://atmospherejs.com/forwarder/autoform-wizard) and [planifica:wizard](https://atmospherejs.com/planifica/wizard) provide wizard components for autoform.
+
+[yogiben:autoform-modals](https://atmospherejs.com/yogiben/autoform-modals) provides autoform bootstrap modals to insert, update, remove docs from collections.
+
+[jameslefrere:autoform-semantic-ui](https://atmospherejs.com/jameslefrere/autoform-semantic-ui) provides a Semantic UI theme for autoform.
 
 ## Demo
 
