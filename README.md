@@ -736,17 +736,40 @@ all the supported hooks:
 AutoForm.hooks({
   myFormId: {
     before: {
-      insert: function(doc, template) {},
-      update: function(docId, modifier, template) {},
-      "methodName": function(doc, template) {}
+      insert: function(doc, template) {
+        //return doc; (synchronous)
+        //return false; (synchronous, cancel)
+        //this.result(doc); (asynchronous)
+        //this.result(false); (asynchronous, cancel)
+      },
+      update: function(docId, modifier, template) {
+        //return modifier; (synchronous)
+        //return false; (synchronous, cancel)
+        //this.result(modifier); (asynchronous)
+        //this.result(false); (asynchronous, cancel)
+      },
+      "methodName": function(doc, template) {
+        //return doc; (synchronous)
+        //return false; (synchronous, cancel)
+        //this.result(doc); (asynchronous)
+        //this.result(false); (asynchronous, cancel)
+      }
     },
+    
+    // The same as the callbacks you would normally provide when calling
+    // collection.insert, collection.update, or Meteor.call
     after: {
       insert: function(error, result, template) {},
       update: function(error, result, template) {},
       "methodName": function(error, result, template) {}
     },
+    
     // Called when form does not have a `type` attribute
-    onSubmit: function(insertDoc, updateDoc, currentDoc) {},
+    onSubmit: function(insertDoc, updateDoc, currentDoc) {
+      // You must call this.done()!
+      //this.done(); // submitted successfully, call onSuccess
+      //this.done(new Error('foo')); // failed to submit, call onError with the provided error
+    },
 
     // Called when any operation succeeds, where operation will be
     // "insert", "update", "submit", or the method name.
@@ -755,7 +778,13 @@ AutoForm.hooks({
     // Called when any operation fails, where operation will be
     // "validation", "insert", "update", "submit", or the method name.
     onError: function(operation, error, template) {},
+    
+    // Called every time the form is revalidated, which can be often if keyup
+    // validation is used.
     formToDoc: function(doc, ss, formId) {},
+    
+    // Called whenever `doc` attribute reactively changes, before values
+    // are set in the form fields.
     docToForm: function(doc, ss, formId) {},
 
     // Called at the beginning and end of submission, respectively.
@@ -1370,6 +1399,7 @@ on the site, too. If the code is publicly available, link to that, too.
 * While developing, be sure to call `AutoForm.debug()` in your client code to enable extra logging.
 * If nothing happens when you click the submit button for your form and there are
 no errors, make sure the button's type is `submit`.
+* If your `before` hook is called but the form is never submitted, make sure you are returning the `doc` or `modifier` from the hook or eventually calling `this.result(doc)` if you're doing something asynchronous.
 
 ## Contributing
 
