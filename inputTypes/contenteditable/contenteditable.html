@@ -1,3 +1,4 @@
 <template name="afContenteditable">
+  <input type="hidden" value="{{this.value}}" {{this.atts}}/>
   <div contenteditable="true" {{this.atts}}>{{{this.value}}}</div>
 </template>
