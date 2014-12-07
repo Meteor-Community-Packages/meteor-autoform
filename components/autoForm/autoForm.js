@@ -20,15 +20,17 @@ Template.autoForm.helpers({
 
     contextDependency.depend();
 
+    var data = formData[formId];
     // Set up the context to be used for everything within the autoform.
-    var innerContext = {_af: formData[formId]};
-
+    var innerContext = {_af: data};
+    if (data) {
+      // Prevent the change to the innerContext from triggering the autorun block, since the
+      // innerContent should react to changes in the data and not vice-versa. This prevents infinite
+      // loops with subforms.
+      data.ignoreNextDataChange = true;
+    }
     // Preserve outer context, allowing access within autoForm block without needing ..
     _.extend(innerContext, outerContext);
-    // Prevent the change to the innerContext from triggering the autorun block, since the
-    // innerContent should react to changes in the data and not vice-versa. This prevents infinite
-    // loops with subforms.
-    formData[formId].ignoreNextDataChange = true;
     return innerContext;
   }
 });
