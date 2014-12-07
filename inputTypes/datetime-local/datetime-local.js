@@ -19,7 +19,7 @@ AutoForm.addInputType("datetime-local", {
         return moment(val).toDate();
       }
     } else {
-      return null;
+      return this.val();
     }
   },
   valueConverters: {
