@@ -527,3 +527,15 @@ AutoForm.invalidateFormContext = function autoFormInvalidateFormContext(formId) 
   formDeps[formId] = formDeps[formId] || new Tracker.Dependency();
   formDeps[formId].changed();
 };
+
+/**
+ * @method AutoForm.isSubForm
+ * @param {[type]} formId The form ID.
+ * @param {[type]} [template] The current template for the form with the given ID.
+ * @return {Boolean} Whether the given form is a subform (is contained within another form).
+ */
+AutoForm.isSubForm = function autoFormIsSubForm(formId, template) {
+  template = template || templatesById[formId];
+  var $form = template.$('form').first();
+  return $form.parents('form').length > 0;
+}

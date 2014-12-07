@@ -71,6 +71,13 @@ Template.autoForm.events({
       event.preventDefault();
     }
 
+    // Prevent the event from propagating to outer forms if we are submitting a subform. Subform
+    // submission is expected to be triggered from outer forms and the line below prevents
+    // infinite loops.
+    if (AutoForm.isSubForm(formId, template)) {
+      event.stopPropagation();
+    }
+
     // Gather hooks
     var onSuccess = Hooks.getHooks(formId, 'onSuccess');
     var onError = Hooks.getHooks(formId, 'onError');
