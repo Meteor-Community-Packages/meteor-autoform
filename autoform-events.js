@@ -409,13 +409,6 @@ Template.autoForm.events({
     if (!data)
       return;
 
-    // Update cached form values for hot code reload persistence
-    if (self.preserveForm !== false) {
-      formPreserve.registerForm(formId, function autoFormRegFormCallback() {
-        return getFormValues(template, formId, data.ss).insertDoc;
-      });
-    }
-
     // Mark field value as changed for reactive updates
     updateTrackedFieldValue(formId, key);
 
@@ -436,7 +429,7 @@ Template.autoForm.events({
   'reset form': function autoFormResetHandler(event, template) {
     var formId = this.id || defaultFormId;
 
-    formPreserve.unregisterForm(formId);
+    formPreserve.clearDocument(formId);
 
     // Reset array counts
     arrayTracker.resetForm(formId);
@@ -452,12 +445,16 @@ Template.autoForm.events({
       // there is no need to reset validation for it. No error need be thrown.
     }
 
-    //XXX We should ideally be able to call invalidateFormContext
-    // in all cases and that's it, but we need to figure out how
-    // to make Blaze forget about any changes the user made to the form
     if (this.doc) {
       event.preventDefault();
-      AutoForm.invalidateFormContext(formId);
+
+      // Use destroy form hack since Meteor doesn't give us an easy way to
+      // invalidate changed form attributes yet.
+      afDestroyUpdateForm.set(true);
+      Tracker.flush();
+      afDestroyUpdateForm.set(false);
+      Tracker.flush();
+
       template.$("[autofocus]").focus();
     } else {
       // This must be done after we allow this event handler to return

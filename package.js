@@ -12,7 +12,7 @@ Package.on_use(function(api) {
   api.use('aldeed:simple-schema@1.1.0');
   api.use('check');
   // client
-  api.use(['livedata', 'underscore', 'deps', 'templating', 'ui', 'blaze', 'ejson'], 'client');
+  api.use(['livedata', 'underscore', 'deps', 'templating', 'ui', 'blaze', 'ejson', 'reactive-var'], 'client');
   api.use('mrt:moment@2.6.0', 'client');
   api.use('mrt:moment-timezone@0.2.1', 'client', {weak: true});
   api.use(['aldeed:collection2@2.0.0', 'reload'], 'client', {weak: true});

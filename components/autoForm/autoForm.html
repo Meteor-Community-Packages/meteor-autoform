@@ -1,7 +1,11 @@
 <template name="autoForm">
+  {{#unless afDestroyUpdateForm}}
+  {{! afDestroyUpdateForm is a workaround for sticky input attributes}}
+  {{! See https://github.com/meteor/meteor/issues/2431 }}
   <form {{atts}}>
     {{#with innerContext ..}}
     {{> UI.contentBlock this}}
     {{/with}}
   </form>
+  {{/unless}}
 </template>
