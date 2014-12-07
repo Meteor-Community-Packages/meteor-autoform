@@ -138,6 +138,10 @@ Template.autoForm.events({
           if (data.resetOnSuccess !== false) {
             AutoForm.resetForm(formId, template);
           }
+          // Set docId in the context for insert forms, too
+          if (name === "insert") {
+            cbCtx.docId = result;
+          }
           _.each(onSuccess, function onSuccessEach(hook) {
             hook.call(cbCtx, name, result, template);
           });
