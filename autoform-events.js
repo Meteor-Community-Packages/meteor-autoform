@@ -221,7 +221,7 @@ Template.autoForm.events({
       // result of all of them immediately because they can return
       // false to stop normal form submission.
 
-      var hookCount = hooks.length, doneCount = 0, submitError;
+      var hookCount = hooks.length, doneCount = 0, submitError, submitResult;
 
       if (hookCount === 0) {
         // Run endSubmit hooks (re-enabled submit button or form, etc.)
@@ -239,15 +239,18 @@ Template.autoForm.events({
         resetForm: function () {
           AutoForm.resetForm(formId, template);
         },
-        done: function (error) {
+        done: function (error, result) {
           doneCount++;
           if (!submitError && error) {
             submitError = error;
           }
+          if (!submitResult && result) {
+            submitResult = result;
+          }
           if (doneCount === hookCount) {
             var submitCallback = makeCallback('submit');
             // run onError, onSuccess, endSubmit
-            submitCallback(submitError);
+            submitCallback(submitError, submitResult);
           }
         }
       };
