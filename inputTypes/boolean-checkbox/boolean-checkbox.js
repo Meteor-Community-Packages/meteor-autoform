@@ -1,7 +1,7 @@
 AutoForm.addInputType("boolean-checkbox", {
   template: "afCheckbox",
   valueOut: function () {
-    return this.is(":checked");
+    return !!this.is(":checked");
   },
   valueConverters: {
     "string": function (val) {
