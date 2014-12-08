@@ -78,7 +78,7 @@ regHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
   options = parseOptions(options, 'afFieldValueContains');
 
   var currentValue = AutoForm.getFieldValue(options.formId, options.name);
-  return _.isArray(currentValue) && _.contains(currentValue, options.value);
+  return _.isArray(currentValue) && (_.contains(currentValue, options.value) || options.values && _.intersection(currentValue, options.values.split(",")));
 });
 
 /*
