@@ -6,7 +6,19 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
-### 4.0.2 - 4.0.6
+### 4.1.0
+
+* The "boolean-radios" input type now outputs the correct field value (`true`, `false`, or `undefined`) in all cases.
+* The "boolean-checkbox" input type now always returns either `true` or `false` as its value. Previously, it could return `undefined` instead of `false` sometimes.
+* You can now pass a comma-separated list of values to `afFieldValueContains` and it will return `true` if any of those values are in the array. (thanks @comerc)
+* The "select-multiple" input type now has initial values set properly. (thanks @BigDSK)
+* The "select-checkbox-inline" input type now has initial values set properly. (thanks @AlainPaumen)
+* When handling submission with `onSubmit`, you can now call `this.done(null, result)` when done, and `result` will be passed to `onSuccess` as the second argument. If there are multiple `onSubmit` hooks, only the first provided result will be passed to `onSuccess`.
+* When `onSuccess` is called after an `insert`, `this.docId` is now set to the new document `_id`.
+* Update forms should now reset properly (to values from database).
+* Other fixes (thanks @zimme and @mjgallag)
+
+### 4.0.2 - 4.0.7
 
 Several fixes
 
