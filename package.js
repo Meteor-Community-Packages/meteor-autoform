@@ -119,6 +119,7 @@ Package.on_use(function(api) {
     // components that render controls within a form
     'components/afArrayField/afArrayField.html',
     'components/afArrayField/afArrayField.js',
+    'components/afArrayField/afArrayField.css',
     'components/afEachArrayItem/afEachArrayItem.html',
     'components/afEachArrayItem/afEachArrayItem.js',
     'components/afFieldInput/afFieldInput.html',
