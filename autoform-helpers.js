@@ -78,7 +78,7 @@ regHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
   options = parseOptions(options, 'afFieldValueContains');
 
   var currentValue = AutoForm.getFieldValue(options.formId, options.name);
-  return _.isArray(currentValue) && (_.contains(currentValue, options.value) || options.values && _.intersection(currentValue, options.values.split(",")));
+  return _.isArray(currentValue) && (_.contains(currentValue, options.value) || options.values && containsEx(currentValue, options.values));
 });
 
 /*
@@ -301,4 +301,14 @@ function parseOptions(options, helperName) {
   // Call getDefs for side effect of throwing errors when name is not in schema
   hash.name && AutoForm.Utility.getDefs(afContext.ss, hash.name);
   return _.extend({}, afContext, hash);
+}
+
+function containsEx(list, values) {
+  function contains2and(v) {
+    return _.contains(this, v);
+  }
+  function contains2or(v) {
+    return _.every(v.split("&&"), contains2and, this);
+  }
+  return _.some(values.split("||"), contains2or, list);
 }
