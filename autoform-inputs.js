@@ -294,9 +294,9 @@ getInputData = function getInputData(defs, hash, value, label, submitType) {
     selectOptions = selectOptions();
   }
   // Hashtable
-  else if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
-    selectOptions = _.map(selectOptions, function(k, v) {
-      return {label: k, value: v};
+  if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
+    selectOptions = _.map(selectOptions, function(v, k) {
+      return {label: v, value: k};
     });
   }
 
