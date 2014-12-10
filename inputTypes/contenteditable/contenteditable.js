@@ -10,3 +10,14 @@ AutoForm.addInputType("contenteditable", {
     return context;
   }
 });
+
+
+Template.afContenteditable.events({
+    'blur div[contenteditable=true]': function (event, template) {
+        var el = $(event.target),
+            text = el.text(),
+            input = el.siblings('input');
+
+        input.val(text).change();
+    }
+});
