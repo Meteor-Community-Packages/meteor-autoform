@@ -6,6 +6,12 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 4.2.0
+
+* As an alternative to the current method of specifying `options` as an array of objects, you can now specify options as an object with {value: label} format. Values are coerced into the expected type. (Thanks @comerc)
+* When you have an update form with `autosave=true`, fields with `type="contenteditable"` now properly autosave. (Thanks @MichalW)
+
+
 ### 4.1.0
 
 * The "boolean-radios" input type now outputs the correct field value (`true`, `false`, or `undefined`) in all cases.
