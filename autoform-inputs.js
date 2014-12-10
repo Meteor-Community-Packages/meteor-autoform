@@ -296,7 +296,7 @@ getInputData = function getInputData(defs, hash, value, label, submitType) {
   // Hashtable
   if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
     selectOptions = _.map(selectOptions, function(v, k) {
-      return {label: v, value: k};
+      return {label: v, value: schemaType(k)};
     });
   }
 
