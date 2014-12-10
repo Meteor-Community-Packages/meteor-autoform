@@ -157,6 +157,8 @@ Books.attachSchema(new SimpleSchema({
 }));
 ```
 
+*Be sure to define proper insert security for untrusted code if you've removed the `insecure` package. Call allow/deny or use [ongoworks:security](https://atmospherejs.com/ongoworks/security).*
+
 ### A Basic Insert Form
 
 ```html
@@ -189,6 +191,8 @@ document with the original values to be updated:
 ```
 
 This example uses `doc=this`, assuming that you use something like iron:router's `data` function to set the template's data context to the book document. This is a common way to do it, but you could also use a helper function that returns the document.
+
+*Be sure to define proper update security for untrusted code if you've removed the `insecure` package. Call allow/deny or use [ongoworks:security](https://atmospherejs.com/ongoworks/security).*
 
 ### A Custom Insert Form
 
