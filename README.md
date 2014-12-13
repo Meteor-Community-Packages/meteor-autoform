@@ -100,6 +100,7 @@ The following community packages provide additional custom input types that you 
 
 * [aldeed:autoform-select2](https://atmospherejs.com/aldeed/autoform-select2)
 * [aldeed:autoform-bs-datepicker](https://atmospherejs.com/aldeed/autoform-bs-datepicker)
+* [aldeed:autoform-bs-datetimepicker](https://atmospherejs.com/aldeed/autoform-bs-datetimepicker)
 * [cfs:autoform](https://atmospherejs.com/cfs/autoform)
 * [yogiben:autoform-file](https://atmospherejs.com/yogiben/autoform-file)
 * [naxio:autoform-file](https://atmospherejs.com/naxio/autoform-file)
