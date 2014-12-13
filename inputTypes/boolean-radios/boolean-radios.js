@@ -1,13 +1,10 @@
 AutoForm.addInputType("boolean-radios", {
   template: "afBooleanRadioGroup",
   valueOut: function () {
-    var val = this.val();
-    if (this.is(":checked")) {
-      if (val === "true") {
-        return true;
-      } else if (val === "false") {
-        return false;
-      }
+    if (this.find('input[value=false]').is(":checked")) {
+      return false;
+    } else if (this.find('input[value=true]').is(":checked")) {
+      return true;
     }
   },
   valueConverters: {
@@ -48,18 +45,20 @@ AutoForm.addInputType("boolean-radios", {
 
 Template["afBooleanRadioGroup"].helpers({
   falseAtts: function falseAtts() {
-    var atts = _.omit(this.atts, 'trueLabel', 'falseLabel');
+    var atts = _.omit(this.atts, 'trueLabel', 'falseLabel', 'data-schema-key');
     if (this.value === false) {
       atts.checked = "";
     }
     return atts;
   },
   trueAtts: function trueAtts() {
-    var atts = _.omit(this.atts, 'trueLabel', 'falseLabel');
+    var atts = _.omit(this.atts, 'trueLabel', 'falseLabel', 'data-schema-key');
     if (this.value === true) {
       atts.checked = "";
     }
     return atts;
+  },
+  dsk: function () {
+    return {'data-schema-key': this.atts['data-schema-key']};
   }
 });
-  

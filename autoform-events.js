@@ -145,6 +145,10 @@ Template.autoForm.events({
           if (data.resetOnSuccess !== false) {
             AutoForm.resetForm(formId, template);
           }
+          // Set docId in the context for insert forms, too
+          if (name === "insert") {
+            cbCtx.docId = result;
+          }
           _.each(onSuccess, function onSuccessEach(hook) {
             hook.call(cbCtx, name, result, template);
           });
@@ -224,7 +228,7 @@ Template.autoForm.events({
       // result of all of them immediately because they can return
       // false to stop normal form submission.
 
-      var hookCount = hooks.length, doneCount = 0, submitError;
+      var hookCount = hooks.length, doneCount = 0, submitError, submitResult;
 
       if (hookCount === 0) {
         // Run endSubmit hooks (re-enabled submit button or form, etc.)
@@ -242,15 +246,18 @@ Template.autoForm.events({
         resetForm: function () {
           AutoForm.resetForm(formId, template);
         },
-        done: function (error) {
+        done: function (error, result) {
           doneCount++;
           if (!submitError && error) {
             submitError = error;
           }
+          if (!submitResult && result) {
+            submitResult = result;
+          }
           if (doneCount === hookCount) {
             var submitCallback = makeCallback('submit');
             // run onError, onSuccess, endSubmit
-            submitCallback(submitError);
+            submitCallback(submitError, submitResult);
           }
         }
       };
@@ -416,13 +423,6 @@ Template.autoForm.events({
     if (!data)
       return;
 
-    // Update cached form values for hot code reload persistence
-    if (self.preserveForm !== false) {
-      formPreserve.registerForm(formId, function autoFormRegFormCallback() {
-        return getFormValues(template, formId, data.ss).insertDoc;
-      });
-    }
-
     // Mark field value as changed for reactive updates
     updateTrackedFieldValue(formId, key);
 
@@ -443,7 +443,7 @@ Template.autoForm.events({
   'reset form': function autoFormResetHandler(event, template) {
     var formId = this.id || defaultFormId;
 
-    formPreserve.unregisterForm(formId);
+    formPreserve.clearDocument(formId);
 
     // Reset array counts
     arrayTracker.resetForm(formId);
@@ -459,12 +459,16 @@ Template.autoForm.events({
       // there is no need to reset validation for it. No error need be thrown.
     }
 
-    //XXX We should ideally be able to call invalidateFormContext
-    // in all cases and that's it, but we need to figure out how
-    // to make Blaze forget about any changes the user made to the form
     if (this.doc) {
       event.preventDefault();
-      AutoForm.invalidateFormContext(formId);
+
+      // Use destroy form hack since Meteor doesn't give us an easy way to
+      // invalidate changed form attributes yet.
+      afDestroyUpdateForm.set(true);
+      Tracker.flush();
+      afDestroyUpdateForm.set(false);
+      Tracker.flush();
+
       template.$("[autofocus]").focus();
     } else {
       // This must be done after we allow this event handler to return
@@ -475,7 +479,7 @@ Template.autoForm.events({
         updateAllTrackedFieldValues(formId);
 
         // Focus the autofocus element
-        if (template && template.view._domrange) {
+        if (template && template.view._domrange && !template.view.isDestroyed) {
           template.$("[autofocus]").focus();
         }
       });

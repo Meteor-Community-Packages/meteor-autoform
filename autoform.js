@@ -14,6 +14,8 @@ if (typeof Tracker === "undefined" && typeof Deps !== "undefined") {
   Tracker = Deps;
 }
 
+afDestroyUpdateForm = new ReactiveVar(false);
+
 // reactive templates
 globalDefaultTemplate = "bootstrap3"
 defaultTypeTemplates = {};
