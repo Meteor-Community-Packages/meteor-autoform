@@ -104,8 +104,10 @@ The following community packages provide additional custom input types that you 
 * [yogiben:autoform-file](https://atmospherejs.com/yogiben/autoform-file)
 * [naxio:autoform-file](https://atmospherejs.com/naxio/autoform-file)
 * [mpowaga:autoform-summernote](https://atmospherejs.com/mpowaga/autoform-summernote)
+* [aldeed:autoform-bs-button-group-input](https://atmospherejs.com/aldeed/autoform-bs-button-group-input)
+* [yogiben:autoform-map](https://atmospherejs.com/yogiben/autoform-map)
 
-[yogiben:admin](https://github.com/yogiben/meteor-admin) provides CRUD admin pages using autoforms.
+[yogiben:admin](https://atmospherejs.com/yogiben/admin) provides CRUD admin pages using autoforms.
 
 [forwarder:autoform-wizard](https://atmospherejs.com/forwarder/autoform-wizard) and [planifica:wizard](https://atmospherejs.com/planifica/wizard) provide wizard components for autoform.
 
