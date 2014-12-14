@@ -26,6 +26,9 @@ Template.autoForm.helpers({
     // Preserve outer context, allowing access within autoForm block without needing ..
     _.extend(innerContext, outerContext);
     return innerContext;
+  },
+  afDestroyUpdateForm: function () {
+    return afDestroyUpdateForm.get();
   }
 });
 
@@ -55,6 +58,15 @@ Template.autoForm.created = function autoFormCreated() {
     // Clone the doc so that docToForm and other modifications do not change
     // the original referenced object.
     var doc = data.doc ? EJSON.clone(data.doc) : null;
+
+    // Update cached form values for hot code reload persistence
+    if (data.preserveForm === false) {
+      formPreserve.unregisterForm(formId);
+    } else if (!formPreserve.formIsRegistered(formId)) {
+      formPreserve.registerForm(formId, function autoFormRegFormCallback() {
+        return getFormValues(template, formId, ss).insertDoc;
+      });
+    }
 
     // Retain doc values after a "hot code push", if possible
     var retrievedDoc = formPreserve.getDocument(formId);

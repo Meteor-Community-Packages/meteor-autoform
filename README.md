@@ -21,6 +21,7 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
 **Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
 
 - [Installation](#installation)
+  - [Community Add-On Packages](#community-add-on-packages)
 - [Demo](#demo)
 - [Example](#example)
   - [A Basic Insert Form](#a-basic-insert-form)
@@ -91,6 +92,30 @@ In a Meteor app directory, enter:
 $ meteor add aldeed:autoform
 ```
 
+### Community Add-On Packages
+
+*Submit a pull request to add your package to this list!*
+
+The following community packages provide additional custom input types that you can use in your autoforms:
+
+* [aldeed:autoform-select2](https://atmospherejs.com/aldeed/autoform-select2)
+* [aldeed:autoform-bs-datepicker](https://atmospherejs.com/aldeed/autoform-bs-datepicker)
+* [aldeed:autoform-bs-datetimepicker](https://atmospherejs.com/aldeed/autoform-bs-datetimepicker)
+* [cfs:autoform](https://atmospherejs.com/cfs/autoform)
+* [yogiben:autoform-file](https://atmospherejs.com/yogiben/autoform-file)
+* [naxio:autoform-file](https://atmospherejs.com/naxio/autoform-file)
+* [mpowaga:autoform-summernote](https://atmospherejs.com/mpowaga/autoform-summernote)
+* [aldeed:autoform-bs-button-group-input](https://atmospherejs.com/aldeed/autoform-bs-button-group-input)
+* [yogiben:autoform-map](https://atmospherejs.com/yogiben/autoform-map)
+
+[yogiben:admin](https://atmospherejs.com/yogiben/admin) provides CRUD admin pages using autoforms.
+
+[forwarder:autoform-wizard](https://atmospherejs.com/forwarder/autoform-wizard) and [planifica:wizard](https://atmospherejs.com/planifica/wizard) provide wizard components for autoform.
+
+[yogiben:autoform-modals](https://atmospherejs.com/yogiben/autoform-modals) provides autoform bootstrap modals to insert, update, remove docs from collections.
+
+[jameslefrere:autoform-semantic-ui](https://atmospherejs.com/jameslefrere/autoform-semantic-ui) provides a Semantic UI theme for autoform.
+
 ## Demo
 
 [Live](http://autoform.meteor.com)
@@ -135,6 +160,8 @@ Books.attachSchema(new SimpleSchema({
 }));
 ```
 
+*Be sure to define proper insert security for untrusted code if you've removed the `insecure` package. Call allow/deny or use [ongoworks:security](https://atmospherejs.com/ongoworks/security).*
+
 ### A Basic Insert Form
 
 ```html
@@ -167,6 +194,8 @@ document with the original values to be updated:
 ```
 
 This example uses `doc=this`, assuming that you use something like iron:router's `data` function to set the template's data context to the book document. This is a common way to do it, but you could also use a helper function that returns the document.
+
+*Be sure to define proper update security for untrusted code if you've removed the `insecure` package. Call allow/deny or use [ongoworks:security](https://atmospherejs.com/ongoworks/security).*
 
 ### A Custom Insert Form
 
@@ -366,6 +395,18 @@ Template.registerHelper("yearOptions", function() {
         {label: "2014", value: 2014},
         {label: "2015", value: 2015}
     ];
+});
+```
+
+Alternatively, you can specify options as an object with {value: label} format. Values are coerced into the expected type.
+
+```js
+Template.registerHelper("yearOptions", function() {
+    return {
+      2013: "2013",
+      2014: "2014",
+      2015: "2015"
+    };
 });
 ```
 
@@ -714,17 +755,41 @@ all the supported hooks:
 AutoForm.hooks({
   myFormId: {
     before: {
-      insert: function(doc, template) {},
-      update: function(docId, modifier, template) {},
-      "methodName": function(doc, template) {}
+      insert: function(doc, template) {
+        //return doc; (synchronous)
+        //return false; (synchronous, cancel)
+        //this.result(doc); (asynchronous)
+        //this.result(false); (asynchronous, cancel)
+      },
+      update: function(docId, modifier, template) {
+        //return modifier; (synchronous)
+        //return false; (synchronous, cancel)
+        //this.result(modifier); (asynchronous)
+        //this.result(false); (asynchronous, cancel)
+      },
+      "methodName": function(doc, template) {
+        //return doc; (synchronous)
+        //return false; (synchronous, cancel)
+        //this.result(doc); (asynchronous)
+        //this.result(false); (asynchronous, cancel)
+      }
     },
+    
+    // The same as the callbacks you would normally provide when calling
+    // collection.insert, collection.update, or Meteor.call
     after: {
       insert: function(error, result, template) {},
       update: function(error, result, template) {},
       "methodName": function(error, result, template) {}
     },
+    
     // Called when form does not have a `type` attribute
-    onSubmit: function(insertDoc, updateDoc, currentDoc) {},
+    onSubmit: function(insertDoc, updateDoc, currentDoc) {
+      // You must call this.done()!
+      //this.done(); // submitted successfully, call onSuccess
+      //this.done(new Error('foo')); // failed to submit, call onError with the provided error
+      //this.done(null, "foo"); // submitted successfully, call onSuccess with `result` arg set to "foo"
+    },
 
     // Called when any operation succeeds, where operation will be
     // "insert", "update", "submit", or the method name.
@@ -733,7 +798,13 @@ AutoForm.hooks({
     // Called when any operation fails, where operation will be
     // "validation", "insert", "update", "submit", or the method name.
     onError: function(operation, error, template) {},
+    
+    // Called every time the form is revalidated, which can be often if keyup
+    // validation is used.
     formToDoc: function(doc, ss, formId) {},
+    
+    // Called whenever `doc` attribute reactively changes, before values
+    // are set in the form fields.
     docToForm: function(doc, ss, formId) {},
 
     // Called at the beginning and end of submission, respectively.
@@ -1263,6 +1334,8 @@ To specify options for any field, use the `options` attribute and provide an arr
 objects, where each object has a `label` property and a `value` property. There are several
 different ways you can do this.
 
+Alternatively, you can specify options as an object with {value: label} format. Values are coerced into the expected type.
+
 #### Use allowed values array from the schema as both the label and the value
 
 ```js
@@ -1293,6 +1366,24 @@ Fields generated by `quickForm` or `afObjectField` or `afArrayField` use `allowe
         {label: "Green", value: "green"},
         {label: "Blue", value: "blue"}
       ]
+    }
+  }
+}
+```
+
+*Alternative syntax:*
+
+```js
+{
+  favoriteColor: {
+    type: String,
+    allowedValues: ['red', 'green', 'blue'],
+    autoform: {
+      options: {
+        red: "Red",
+        green: "Green",
+        blue: "Blue
+      }
     }
   }
 }
@@ -1372,6 +1463,7 @@ on the site, too. If the code is publicly available, link to that, too.
 * While developing, be sure to call `AutoForm.debug()` in your client code to enable extra logging.
 * If nothing happens when you click the submit button for your form and there are
 no errors, make sure the button's type is `submit`.
+* If your `before` hook is called but the form is never submitted, make sure you are returning the `doc` or `modifier` from the hook or eventually calling `this.result(doc)` if you're doing something asynchronous.
 
 ## Contributing
 

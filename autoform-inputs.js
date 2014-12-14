@@ -293,6 +293,12 @@ getInputData = function getInputData(defs, hash, value, label, submitType) {
   else if (typeof selectOptions === "function") {
     selectOptions = selectOptions();
   }
+  // Hashtable
+  if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
+    selectOptions = _.map(selectOptions, function(v, k) {
+      return {label: v, value: schemaType(k)};
+    });
+  }
 
   /*
    * Return the context. This is the object that becomes `this` in the
