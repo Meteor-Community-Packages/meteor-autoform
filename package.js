@@ -63,6 +63,8 @@ Package.on_use(function(api) {
     'inputTypes/datetime/datetime.js',
     'inputTypes/datetime-local/datetime-local.html',
     'inputTypes/datetime-local/datetime-local.js',
+    'inputTypes/date-local/date-local.html',
+    'inputTypes/date-local/date-local.js',
     'inputTypes/email/email.html',
     'inputTypes/email/email.js',
     'inputTypes/file/file.html',

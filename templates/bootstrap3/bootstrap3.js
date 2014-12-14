@@ -38,6 +38,7 @@ _.each([
     "afInputText_bootstrap3",
     "afInputPassword_bootstrap3",
     "afInputDateTime_bootstrap3",
+    "afInputDateLocal_bootstrap3",
     "afInputDateTimeLocal_bootstrap3",
     "afInputDate_bootstrap3",
     "afInputMonth_bootstrap3",

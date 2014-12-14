@@ -1069,6 +1069,30 @@ like this: `moment.utc(myDate).format("LL")`
 object that represents midnight on the morning of the minimum or maximum date
 in the UTC time zone.
 
+### type=date-local
+
+* **Saving:** If you use an input with `type="date-local"`, the date string that is entered will be assumed to be in the client's local timezone. To use a different specific timezone, add a `moment-timezone` package to your app and specify a `timezoneId` attribute on the `afFieldInput` or `afFormGroup` helper.
+Set this attribute to a timezone ID that moment-timezone understands, such as "America/Los_Angeles". For example, if you use an input with `type="date-local"` in a form
+in which a user is setting up a meeting, you would need to previously determine
+the time zone in which the meeting will take place. When generating the autoform
+field, set the `timezoneId` attribute to the ID for this time zone.
+(Chrome and some mobile browsers provide
+date pickers that set the input value to a string in the expected format automatically,
+but users of other browsers will have to manually enter the datetime in the correct
+format, which is `date string`.)
+* **Loading:** If you are binding an object containing `Date` objects to an update autoform
+and using them in an input with `type="date-local"`, be sure to set the
+`timezoneId` attribute on the component to the time zone ID that applies. This will
+ensure that the date and time you expect are shown in the input element.
+* **Displaying:** Before displaying the saved date, determine the equivalent
+date and time in the corresponding time zone. The easiest way to do this is
+using `moment(myDate).tz(timezoneId).format()`
+from the `moment` and `moment-timezone` packages/libraries.
+* **Min/Max:** When specifying min or max values in your schema, use a `Date`
+object that represents the exact minimum or maximum date
+in the corresponding time zone. This may mean returning the min or max value
+from a function based on a time zone ID you are storing elsewhere.
+
 ### type=datetime
 
 *Note: Using this type of input requires that the user do all the work to convert
