@@ -415,6 +415,27 @@ Utility = {
     return m.format("YYYY-MM-DD[T]HH:mm:ss.SSS");
   },
   /**
+   * @method Utility.dateToNormalizedLocalDateString
+   * @private
+   * @param {Date} date The Date object
+   * @param {String} [timezoneId] A valid timezoneId that moment-timezone understands, e.g., "America/Los_Angeles"
+   * @return {String}
+   *
+   * Returns a "valid normalized local date string".
+   */
+  dateToNormalizedLocalDateString: function dateToNormalizedLocalDateString(date, timezoneId) {
+    var m = moment(date);
+    // by default, we assume local timezone; add moment-timezone to app and pass timezoneId
+    // to use a different timezone
+    if (typeof timezoneId === "string") {
+      if (typeof m.tz !== "function") {
+        throw new Error("If you specify a timezoneId, make sure that you've added a moment-timezone package to your app");
+      }
+      m.tz(timezoneId);
+    }
+    return m.format("YYYY-MM-DD");
+  },
+  /**
    * @method  Utility.isValidNormalizedLocalDateAndTimeString
    * @private
    * @param  {String} dtString
