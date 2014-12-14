@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 4.2.1
+
+Fix `AutoForm.getFieldValue` reactivity when the field is in an `#if` block
+
 ### 4.2.0
 
 * As an alternative to the current method of specifying `options` as an array of objects, you can now specify options as an object with {value: label} format. Values are coerced into the expected type. (Thanks @comerc)
