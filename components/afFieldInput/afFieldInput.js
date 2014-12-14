@@ -67,7 +67,14 @@ Template.afFieldInput.helpers({
     var value = getInputValue(c.atts, c.atts.value, c.af.mDoc, defaultValue, componentDef);
 
     // Mark field value as changed for reactive updates
-    updateTrackedFieldValue(c.af.formId, c.atts.name);
+    // We need to defer this until the element will be
+    // added to the DOM. Otherwise, AutoForm.getFieldValue
+    // will not pick up the new value when there are #if etc.
+    // blocks involved.
+    // See https://github.com/aldeed/meteor-autoform/issues/461
+    Meteor.defer(function () {
+      updateTrackedFieldValue(c.af.formId, c.atts.name);
+    });
     
     // Build input data context
     var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), c.af.submitType);
