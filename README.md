@@ -29,7 +29,7 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
   - [A Custom Insert Form](#a-custom-insert-form)
   - [Another Custom Insert Form](#another-custom-insert-form)
 - [Component and Helper Reference](#component-and-helper-reference)
-  - [autoForm](#autoform)
+  - [autoForm](#autoform-1)
   - [quickForm](#quickform)
   - [afFieldInput](#affieldinput)
   - [afFieldMessage](#affieldmessage)
