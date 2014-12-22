@@ -49,6 +49,7 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
 - [Public API](#public-api)
 - [Non-Collection Forms](#non-collection-forms)
   - [An Example Contact Form](#an-example-contact-form)
+- [Submitting to Methods](#submitting-to-methods)
 - [Fine Tuning Validation](#fine-tuning-validation)
 - [Manual Validation](#manual-validation)
 - [Resetting Validation](#resetting-validation)
@@ -675,6 +676,16 @@ match the schema. **To reiterate, you must call `check()` in the method or perfo
 own validation since a user could bypass the client side validation.** You do
 not have to do any of your own validation with collection inserts or updates,
 but you do have to call `check()` on the server when submitting to a Meteor method.
+
+## Submitting To Methods
+
+When you specify `type="method"`, Autoform will pass the result of the form to a Meteor method of that name.
+
+That method will be called with three arguments:
+
+- `document`: the document resulting from the form submission. 
+- `modifier`: the modifier object.
+- `documentId`: when updating an existing document, that document's `_id` (optional).
 
 ## Fine Tuning Validation
 
