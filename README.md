@@ -49,6 +49,7 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
 - [Public API](#public-api)
 - [Non-Collection Forms](#non-collection-forms)
   - [An Example Contact Form](#an-example-contact-form)
+- [Submitting to Methods](#submitting-to-methods)
 - [Fine Tuning Validation](#fine-tuning-validation)
 - [Manual Validation](#manual-validation)
 - [Resetting Validation](#resetting-validation)
