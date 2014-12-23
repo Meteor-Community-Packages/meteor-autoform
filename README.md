@@ -109,6 +109,7 @@ The following community packages provide additional custom input types that you 
 * [aldeed:autoform-bs-button-group-input](https://atmospherejs.com/aldeed/autoform-bs-button-group-input)
 * [yogiben:autoform-map](https://atmospherejs.com/yogiben/autoform-map)
 * [comerc:autoform-placecomplete](https://atmospherejs.com/comerc/autoform-placecomplete)
+* [comerc:autoform-bs-more](https://atmospherejs.com/comerc/autoform-bs-more)
 
 [yogiben:admin](https://atmospherejs.com/yogiben/admin) provides CRUD admin pages using autoforms.
 
