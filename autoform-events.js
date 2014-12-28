@@ -467,7 +467,7 @@ Template.autoForm.events({
       // This must be done after we allow this event handler to return
       // because we have to let the browser reset all fields before we
       // update their values for deps.
-      Meteor.defer(function () {
+      setTimeout(function () {
         // Mark all fields as changed
         updateAllTrackedFieldValues(formId);
 
@@ -475,7 +475,7 @@ Template.autoForm.events({
         if (template && template.view._domrange && !template.view.isDestroyed) {
           template.$("[autofocus]").focus();
         }
-      });
+      }, 0);
     }
 
   },
