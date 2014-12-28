@@ -124,9 +124,9 @@ Template.autoForm.created = function autoFormCreated() {
     // react to field values set from the database document. That is,
     // computations dependent on AutoForm.getFieldValue will rerun properly
     // when the form is initially rendered using values from `doc`.
-    Meteor.defer(function () {
+    Meteor.setTimeout(function () {
       updateAllTrackedFieldValues(formId);
-    });
+    }, 0);
 
     contextDependency.changed();
   });
