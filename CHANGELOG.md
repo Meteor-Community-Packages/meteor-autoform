@@ -6,6 +6,11 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 4.2.2
+
+* Fixed "Can't set timers inside simulations" error (Thanks @SachaG)
+* Switched Moment dependency to official `momentjs:moment` package
+
 ### 4.2.1
 
 Fix `AutoForm.getFieldValue` reactivity when the field is in an `#if` block
