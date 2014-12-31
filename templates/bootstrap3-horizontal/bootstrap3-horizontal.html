@@ -19,7 +19,7 @@
 </template>
 
 <template name="afFormGroup_bootstrap3-horizontal">
-  <div class="form-group {{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
+  <div class="form-group{{#if afFieldIsInvalid name=this.atts.name}} has-error{{/if}}">
     {{#if skipLabel}}
     {{! We include the empty label as the easiest way to keep proper field alignment}}
     <label {{afFieldLabelAtts}}></label>
@@ -34,7 +34,7 @@
 </template>
 
 <template name="afObjectField_bootstrap3-horizontal">
-  <div class="form-group {{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
+  <div class="form-group{{#if afFieldIsInvalid name=this.atts.name}} has-error{{/if}}">
     <label {{afFieldLabelAtts}}>{{afFieldLabelText name=this.atts.name}}</label>
     <div class="{{rightColumnClass}}">
       <div class="panel panel-default autoform-padding-fix">
@@ -48,7 +48,7 @@
 </template>
 
 <template name="afArrayField_bootstrap3-horizontal">
-  <div class="form-group {{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
+  <div class="form-group{{#if afFieldIsInvalid name=this.atts.name}} has-error{{/if}}">
     <label {{afFieldLabelAtts}}>{{afFieldLabelText name=this.atts.name}}</label>
     <div class="{{rightColumnClass}}">
       <div class="panel panel-default autoform-padding-fix">
