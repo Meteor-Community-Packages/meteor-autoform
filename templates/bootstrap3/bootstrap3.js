@@ -3,6 +3,9 @@
  */
 
 Template['quickForm_bootstrap3'].helpers({
+  idPrefix: function () {
+    return this.atts["id-prefix"];
+  },
   submitButtonAtts: function bsQuickFormSubmitButtonAtts() {
     var qfAtts = this.atts;
     var atts = {};

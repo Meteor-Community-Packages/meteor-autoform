@@ -1,10 +1,15 @@
 Template.afFormGroup.helpers({
   innerContext: function afFormGroupContext(options) {
     var c = AutoForm.Utility.normalizeContext(options.hash, "afFormGroup");
+    var afFieldLabelAtts = formGroupLabelAtts(c.atts);
+    var afFieldInputAtts = formGroupInputAtts(c.atts);
+    var id = c.atts["id-prefix"] || "";
+    id += c.atts.id || c.atts.name.replace(".", "-");
+    afFieldLabelAtts.for = afFieldInputAtts.id = id;
     return {
       skipLabel: (c.atts.label === false),
-      afFieldLabelAtts: formGroupLabelAtts(c.atts),
-      afFieldInputAtts: formGroupInputAtts(c.atts),
+      afFieldLabelAtts: afFieldLabelAtts,
+      afFieldInputAtts: afFieldInputAtts,
       atts: {name: c.atts.name},
       labelText: (typeof c.atts.label === "string") ? c.atts.label : null
     };
@@ -31,7 +36,7 @@ function formGroupInputAtts(atts) {
   // We also don't want the "label" option
   var inputAtts = {};
   _.each(atts, function autoFormLabelAttsEach(val, key) {
-    if (key !== "label" && key.indexOf("label-") !== 0) {
+    if (key !== "id-prefix" && key !== "id" && key !== "label" && key.indexOf("label-") !== 0) {
       inputAtts[key] = val;
     }
   });
