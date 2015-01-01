@@ -3,6 +3,9 @@
  */
 
 Template['quickForm_plain'].helpers({
+  idPrefix: function () {
+    return this.atts["id-prefix"];
+  },
   submitButtonAtts: function plQuickFormSubmitButtonAtts() {
     var qfAtts = this.atts;
     var atts = {};

@@ -1,6 +1,6 @@
 <template name="quickForm_plain">
   {{#autoForm this.qfAutoFormContext}}
-    {{> afQuickFields}}
+    {{> afQuickFields id-prefix=idPrefix}}
     {{#if qfShouldRenderButton}}
     <div>
       <button type="submit" {{submitButtonAtts}}>

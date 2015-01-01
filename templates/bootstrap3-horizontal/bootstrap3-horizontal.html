@@ -1,6 +1,6 @@
 <template name="quickForm_bootstrap3-horizontal">
   {{#autoForm qfAutoFormContext}}
-    {{> afQuickFields input-col-class=inputClass label-class=labelClass}}
+    {{> afQuickFields input-col-class=inputClass label-class=labelClass id-prefix=idPrefix}}
     {{#if qfShouldRenderButton}}
     <div class="form-group">
       <div class="{{labelClass}}"></div>
