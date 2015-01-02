@@ -1,14 +1,9 @@
-function findAtts() {
-  var c, n = 0;
-  do {
-    c = Template.parentData(n++);
-  } while (c && !c.atts);
-  return c && c.atts;
-}
-
 Template['quickForm_bootstrap3-inline'].helpers({
   labelClass: function () {
     return this.atts["label-class"];
+  },
+  idPrefix: function () {
+    return this.atts["id-prefix"];
   },
   submitButtonAtts: function () {
     var qfAtts = this.atts;

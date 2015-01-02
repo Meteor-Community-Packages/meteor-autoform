@@ -253,7 +253,7 @@ Here's an example:
     {{> afQuickField name='summary' rows=6}}
     {{> afQuickField name='copies'}}
     {{> afQuickField name='lastCheckedOut'}}
-    <div class="form-group {{#if afFieldIsInvalid name='cost'}}has-error{{/if}}">
+    <div class="form-group{{#if afFieldIsInvalid name='cost'}} has-error{{/if}}">
       <div class="input-group">
         <span class="input-group-addon">$</span>
         {{> afFieldInput name='cost'}}
@@ -430,7 +430,7 @@ for information on customizing the messages.
 
 Accepts and requires just one attribute, `name`, which is the name of the schema key.
 
-Returns `true` if the specified key is currently invalid. This value updates 
+Returns `true` if the specified key is currently invalid. This value updates
 reactively whenever validation is performed.
 
 ### afFormGroup
@@ -536,7 +536,7 @@ An `afArrayField` (or an `afQuickField` for an array) supports the additional at
 
 An `afArrayField` (or an `afQuickField` for an array) also supports the `initialCount` attribute. Use it to override the default initial count to be something other than 1, including 0. Note that `minCount` will still always take precedence. That is, if the `minCount` is 1 and you specify `initialCount=0`, the initial count will be 1.
 
-To specify options for each item in the array you can set 
+To specify options for each item in the array you can set
 ```
 'arrayFieldName.$': {
   ...
@@ -686,7 +686,7 @@ When you specify `type="method"`, Autoform will pass the result of the form to a
 
 That method will be called with three arguments:
 
-- `document`: the document resulting from the form submission. 
+- `document`: the document resulting from the form submission.
 - `modifier`: the modifier object.
 - `documentId`: when updating an existing document, that document's `_id` (optional).
 
@@ -788,7 +788,7 @@ AutoForm.hooks({
         //this.result(false); (asynchronous, cancel)
       }
     },
-    
+
     // The same as the callbacks you would normally provide when calling
     // collection.insert, collection.update, or Meteor.call
     after: {
@@ -796,7 +796,7 @@ AutoForm.hooks({
       update: function(error, result, template) {},
       "methodName": function(error, result, template) {}
     },
-    
+
     // Called when form does not have a `type` attribute
     onSubmit: function(insertDoc, updateDoc, currentDoc) {
       // You must call this.done()!
@@ -807,16 +807,16 @@ AutoForm.hooks({
 
     // Called when any operation succeeds, where operation will be
     // "insert", "update", "submit", or the method name.
-    onSuccess: function(operation, result, template) {}, 
+    onSuccess: function(operation, result, template) {},
 
     // Called when any operation fails, where operation will be
     // "validation", "insert", "update", "submit", or the method name.
     onError: function(operation, error, template) {},
-    
+
     // Called every time the form is revalidated, which can be often if keyup
     // validation is used.
     formToDoc: function(doc, ss, formId) {},
-    
+
     // Called whenever `doc` attribute reactively changes, before values
     // are set in the form fields.
     docToForm: function(doc, ss, formId) {},
@@ -1089,7 +1089,7 @@ in the UTC time zone.
 from the applicable time zone to the UTC time zone since the entered time is
 assumed to be UTC. It's generally better to use datetime-local.*
 
-* **Saving:** The user-entered value must be of the format `date string + "T" + 
+* **Saving:** The user-entered value must be of the format `date string + "T" +
 time string + "Z"`, and it will be saved as a `Date` object representing that
 exact datetime in the UTC time zone.
 * **Loading:** If you are binding an object containing `Date` objects to an update autoform
@@ -1137,7 +1137,7 @@ and classes.
 * `bootstrap3-horizontal`: Can be used with `afFormGroup` or `afQuickField` or `quickForm` only. Generates markup and
 classes necessary to make the form appear with labels aligned horizontally with the fields.
 In additional to setting `template="bootstrap3-horizontal"` on your `afQuickField`, you must
-also define the column classes to use, for example, `{{> afQuickField name="name" template="bootstrap3-horizontal" label-class="col-sm-3" input-col-class="col-sm-9"}}` or `{{> quickForm schema=Schemas.ContactForm id="contactForm" type="method" meteormethod="sendEmail" template="bootstrap3-horizontal" label-class="col-sm-3" input-col-class="col-sm-9"}}`.
+also define the column classes to use, for example, `{{> afQuickField name="name" template="bootstrap3-horizontal" label-class="col-sm-3" input-col-class="col-sm-9"}}` or `{{> quickForm schema=Schemas.ContactForm id="contactForm" type="method" meteormethod="sendEmail" template="bootstrap3-horizontal" label-class="col-sm-3" input-col-class="col-sm-9" id-prefix="my-prefix-"}}`.
 * `plain`: UI elements will be generated with no particular UI framework in mind.
 (You can of course add your own classes to customize.)
 * `plain-fieldset`: Can be used with `quickForm` only. Wraps the form in a
