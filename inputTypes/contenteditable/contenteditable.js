@@ -23,5 +23,16 @@ Template.afContenteditable.events({
         $element.empty();
     }
     $element.change();
-  },
+  }
+});
+
+Template.afContenteditable.helpers({
+  out: function () {
+    var atts = "";
+    for (key in this.atts) {
+      atts += ' ' + key + '="' + this.atts[key] + '"';
+    }
+    // BUGFIX: https://github.com/aldeed/meteor-autoform/issues/383
+    return '<div contenteditable="true"' + atts + '>' + this.value + '</div>';
+  }
 });
