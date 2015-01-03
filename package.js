@@ -55,6 +55,7 @@ Package.on_use(function(api) {
     'inputTypes/button/button.js',
     'inputTypes/color/color.html',
     'inputTypes/color/color.js',
+    'inputTypes/contenteditable/contenteditable.css',
     'inputTypes/contenteditable/contenteditable.html',
     'inputTypes/contenteditable/contenteditable.js',
     'inputTypes/date/date.html',
