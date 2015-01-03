@@ -151,6 +151,83 @@ AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(
 };
 
 /**
+ * @method AutoForm.getTemplateName
+ * @public
+ * @param {String} templateType
+ * @param {String} templateName
+ * @param {String} [fieldName]
+ * @return {String} Template name
+ *
+ * Returns the full template name. In the simplest scenario, this is templateType_templateName
+ * as passed in. However, if templateName is not provided, it is looked up in the following
+ * manner:
+ *
+ * 1. autoform.<componentType>.template from the schema (field+type override for all forms)
+ * 2. autoform.template from the schema (field override for all forms)
+ * 3. template-<componentType> attribute on an ancestor component within the same form (form+type for all fields)
+ * 4. template attribute on an ancestor component within the same form (form specificity for all types and fields)
+ * 5. Default template for component type, as set by AutoForm.setDefaultTemplateForType
+ * 6. Default template, as set by AutoForm.setDefaultTemplate.
+ * 7. Built-in default template, currently bootstrap-3.
+ */
+AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templateName, fieldName) {
+  var result, schemaAutoFormDefs, templateFromAncestor, defaultTemplate;
+
+  result = templateType + '_' + templateName; // templateName might be undefined, but the result will be the same
+  if (Template[result]) {
+    return result;
+  }
+
+  // If the attributes provided a templateName but that template didn't exist, show a warning
+  if (templateName && AutoForm._debug) {
+    console.warn(templateType + ': "' + templateName + '" is not a valid template name. Falling back to a different template.');
+  }
+
+  // Get `autoform` object from the schema, if present.
+  // Skip for quickForm because it renders a form and not a field.
+  if (templateType !== 'quickForm' && fieldName) {
+    schemaAutoFormDefs = AutoForm.getSchemaForField(fieldName).autoform;
+  }
+
+  // Fallback #1: autoform.<componentType>.template from the schema
+  if (schemaAutoFormDefs && schemaAutoFormDefs[templateType] && schemaAutoFormDefs[templateType].template && Template[templateType + '_' + schemaAutoFormDefs[templateType].template]) {
+    return templateType + '_' + schemaAutoFormDefs[templateType].template;
+  }
+
+  // Fallback #2: autoform.template from the schema
+  if (schemaAutoFormDefs && schemaAutoFormDefs.template && Template[templateType + '_' + schemaAutoFormDefs.template]) {
+    return templateType + '_' + schemaAutoFormDefs.template;
+  }
+
+  // Fallback #3: template-<componentType> attribute on an ancestor component within the same form
+  templateFromAncestor = AutoForm.findAttribute("template-" + templateType);
+  if (templateFromAncestor && Template[templateType + '_' + templateFromAncestor]) {
+    return templateType + '_' + templateFromAncestor;
+  }
+
+  // Fallback #4: template attribute on an ancestor component within the same form
+  templateFromAncestor = AutoForm.findAttribute("template");
+  if (templateFromAncestor && Template[templateType + '_' + templateFromAncestor]) {
+    return templateType + '_' + templateFromAncestor;
+  }
+
+  // Fallback #5: Default template for component type, as set by AutoForm.setDefaultTemplateForType
+  defaultTemplate = AutoForm.getDefaultTemplateForType(templateType);
+  if (defaultTemplate && Template[templateType + '_' + defaultTemplate]) {
+    return templateType + '_' + defaultTemplate;
+  }
+
+  // Fallback #6: Default template, as set by AutoForm.setDefaultTemplate
+  defaultTemplate = AutoForm.getDefaultTemplate();
+  if (defaultTemplate && Template[templateType + '_' + defaultTemplate]) {
+    return templateType + '_' + defaultTemplate;
+  }
+
+  // Fallback #7: hard-coded default
+  return "bootstrap3";
+};
+
+/**
  * @method AutoForm.getFormValues
  * @public
  * @param {String} formId The `id` attribute of the `autoForm` you want current values for.
@@ -413,17 +490,17 @@ AutoForm.find = function autoFormFind(type) {
 AutoForm.findAttribute = function autoFormFindAttribute(attrName) {
   var n = 0, af, val, stopAt = -1;
   // we go one level past _af so that we get the original autoForm or quickForm attributes, too
-  do {
-    af = Template.parentData(n++);
-    if (af && af.atts && af.atts[attrName] !== void 0) {
-      val = af.atts[attrName];
-    } else if (af && af[attrName] !== void 0) {
-      val = af[attrName];
-    }
-    if (af && af._af) {
-      stopAt = n + 1;
-    }
-  } while (af && stopAt < n && val === void 0);
+//  do {
+//    af = Template.parentData(n++);
+//    if (af && af.atts && af.atts[attrName] !== void 0) {
+//      val = af.atts[attrName];
+//    } else if (af && af[attrName] !== void 0) {
+//      val = af[attrName];
+//    }
+//    if (af && af._af) {
+//      stopAt = n + 1;
+//    }
+//  } while (af && stopAt < n && val === void 0);
   return val;
 };
 

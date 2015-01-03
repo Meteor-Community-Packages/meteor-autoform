@@ -1,6 +1,10 @@
 Template.afFormGroup.helpers({
-  innerContext: function afFormGroupContext(options) {
-    var c = AutoForm.Utility.normalizeContext(options.hash, "afFormGroup");
+  getTemplateName: function () {
+    var self = this;
+    return AutoForm.getTemplateName('afFormGroup', self.template, self.atts && self.atts.name);
+  },
+  innerContext: function afFormGroupContext() {
+    var c = AutoForm.Utility.normalizeContext(this, "afFormGroup");
     var afFieldLabelAtts = formGroupLabelAtts(c.atts);
     var afFieldInputAtts = formGroupInputAtts(c.atts);
     var id = c.atts["id-prefix"] || "";

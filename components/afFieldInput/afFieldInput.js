@@ -1,17 +1,20 @@
+/* global AutoForm, inputTypeDefinitions, getInputValue, getInputData, updateTrackedFieldValue */
+
 Template.afFieldInput.helpers({
-  getComponentDef: function getComponentDef() {
+  // similar to AutoForm.getTemplateName, but we have fewer layers of fallback, and we fall back
+  // lastly to a template without an _ piece at the end
+  getTemplateName: function getTemplateName() {
+    var self = this, schemaAutoFormDefs, templateFromAncestor, defaultTemplate;
+
     // Determine what `type` attribute should be if not set
     var inputType = AutoForm.getInputType(this);
     var componentDef = inputTypeDefinitions[inputType];
     if (!componentDef) {
       throw new Error('AutoForm: No component found for rendering input with type "' + inputType + '"');
     }
-    return componentDef;
-  },
-  // similar to afTemplateName helper, but we have fewer layers of fallback, and we fall back
-  // lastly to a template without an _ piece at the end
-  getTemplateName: function getTemplateName(inputTemplateName, styleTemplateName) {
-    var self = this, schemaAutoFormDefs, templateFromAncestor, defaultTemplate;
+
+    var inputTemplateName = componentDef.template;
+    var styleTemplateName = this.template;
 
     // In simplest case, just try to combine the two given strings.
     if (styleTemplateName && Template[inputTemplateName + '_' + styleTemplateName]) {
@@ -48,8 +51,8 @@ Template.afFieldInput.helpers({
     // Fallback #4: Just the inputTemplateName with no custom styled piece
     return inputTemplateName;
   },
-  innerContext: function afFieldInputContext(options) {
-    var c = AutoForm.Utility.normalizeContext(options.hash, "afFieldInput");
+  innerContext: function afFieldInputContext() {
+    var c = AutoForm.Utility.normalizeContext(this, "afFieldInput");
 
     var ss = c.af.ss;
     var defs = c.defs;
@@ -60,8 +63,12 @@ Template.afFieldInput.helpers({
       defs = ss.schema(c.atts.name + ".$");
     }
 
-    // Get inputTypeDefinition based on `type` attribute
-    var componentDef = options.hash.componentDef;
+    // Determine what `type` attribute should be if not set
+    var inputType = AutoForm.getInputType(this);
+    var componentDef = inputTypeDefinitions[inputType];
+    if (!componentDef) {
+      throw new Error('AutoForm: No component found for rendering input with type "' + inputType + '"');
+    }
 
     // Get input value
     var value = getInputValue(c.atts, c.atts.value, c.af.mDoc, defaultValue, componentDef);

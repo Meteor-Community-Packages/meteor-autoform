@@ -1,4 +1,8 @@
 Template.quickForm.helpers({
+  getTemplateName: function () {
+    var self = this;
+    return AutoForm.getTemplateName('quickForm', self.template, self.atts && self.atts.name);
+  },
   innerContext: function quickFormContext() {
     var atts = this;
     
