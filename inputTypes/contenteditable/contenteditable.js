@@ -48,6 +48,14 @@ Template.afContenteditable.events({
       $element.data("poll-timeout", setTimeout(checkForContentChanged, 500));
     }
     $element.data("poll-timeout", setTimeout(checkForContentChanged, 500));
+  },
+  "keyup [contenteditable]": function (event, template) {
+    // [esc] support
+    if (event.which == 27) {
+      var $element = template.$(event.target);
+      $element.html($element.data("initial-value"));
+      $element.blur();
+    }
   }
 });
 
