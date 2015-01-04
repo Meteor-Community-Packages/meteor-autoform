@@ -17,12 +17,37 @@ AutoForm.addInputType("contenteditable", {
 
 Template.afContenteditable.events({
   "blur [contenteditable]": function (event, template) {
-    // placeholder issue: http://stackoverflow.com/a/27755631/4315996
     var $element = template.$(event.target);
+    var pollTimeout = $element.data("poll-timeout");
+    if (pollTimeout) {
+      $element.data("poll-timeout", false);
+      clearTimeout(pollTimeout);
+    }
+    // placeholder issue: http://stackoverflow.com/a/27755631/4315996
     if ($element.html().length && !$element.text().trim().length) {
         $element.empty();
     }
-    $element.change();
+    var initial = $element.data("initial-value");
+    var current = $element.html();
+    if (initial != current) {
+      $element.change();
+    }
+    // field may lost value: https://github.com/aldeed/meteor-autoform/issues/590
+  },
+  "focus [contenteditable]": function (event, template) {
+    var $element = template.$(event.target);
+    $element.data("initial-value", $element.html());
+    $element.data("previous-value", $element.html());
+    function checkForContentChanged() {
+      var previous = $element.data("previous-value");
+      var current = $element.html();
+      if (previous != current) {
+        $element.trigger("input2"); // final event - change
+        $element.data("previous-value", current);
+      }
+      $element.data("poll-timeout", setTimeout(checkForContentChanged, 500));
+    }
+    $element.data("poll-timeout", setTimeout(checkForContentChanged, 500));
   }
 });
 
