@@ -19,7 +19,7 @@ Template.afContenteditable.events({
   "blur [contenteditable]": function (event, template) {
     // placeholder issue: http://stackoverflow.com/a/27755631/4315996
     var $element = template.$(event.target);
-    if ($element.html() && !$element.text().trim().length) {
+    if ($element.html().length && !$element.text().trim().length) {
         $element.empty();
     }
     $element.change();
