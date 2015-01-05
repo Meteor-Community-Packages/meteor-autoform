@@ -1,5 +1,5 @@
 [contenteditable]:empty:before {
     content: attr(data-placeholder);
-    color: grey;
+    opacity: 0.5;
     display: inline-block;
 }
