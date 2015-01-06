@@ -7,7 +7,7 @@ Template.afFormGroup.helpers({
     if (id) {
       id += "-";
     }
-    id += c.atts.id || name.replace(".", "-");
+    id += c.atts.id || c.atts.name.replace(".", "-");
     afFieldLabelAtts.for = afFieldInputAtts.id = id;
     return {
       skipLabel: (c.atts.label === false),
