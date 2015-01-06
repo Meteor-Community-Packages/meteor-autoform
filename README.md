@@ -1137,7 +1137,7 @@ and classes.
 * `bootstrap3-horizontal`: Can be used with `afFormGroup` or `afQuickField` or `quickForm` only. Generates markup and
 classes necessary to make the form appear with labels aligned horizontally with the fields.
 In additional to setting `template="bootstrap3-horizontal"` on your `afQuickField`, you must
-also define the column classes to use, for example, `{{> afQuickField name="name" template="bootstrap3-horizontal" label-class="col-sm-3" input-col-class="col-sm-9"}}` or `{{> quickForm schema=Schemas.ContactForm id="contactForm" type="method" meteormethod="sendEmail" template="bootstrap3-horizontal" label-class="col-sm-3" input-col-class="col-sm-9" id-prefix="my-prefix-"}}`.
+also define the column classes to use, for example, `{{> afQuickField name="name" template="bootstrap3-horizontal" label-class="col-sm-3" input-col-class="col-sm-9"}}` or `{{> quickForm schema=Schemas.ContactForm id="contactForm" type="method" meteormethod="sendEmail" template="bootstrap3-horizontal" label-class="col-sm-3" input-col-class="col-sm-9" id-prefix="my-prefix"}}`.
 * `plain`: UI elements will be generated with no particular UI framework in mind.
 (You can of course add your own classes to customize.)
 * `plain-fieldset`: Can be used with `quickForm` only. Wraps the form in a

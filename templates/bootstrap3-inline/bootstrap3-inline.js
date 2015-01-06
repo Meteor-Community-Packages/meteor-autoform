@@ -1,9 +1,14 @@
 Template['quickForm_bootstrap3-inline'].helpers({
-  labelClass: function () {
-    return this.atts["label-class"];
-  },
-  idPrefix: function () {
-    return this.atts["id-prefix"];
+  afQuickFieldAtts: function () {
+    var qfAtts = this.atts;
+    var atts = {};
+    if (qfAtts["id-prefix"]) {
+      atts["id-prefix"] = qfAtts["id-prefix"];
+    }
+    if (qfAtts["label-class"]) {
+      atts["label-class"] = qfAtts["label-class"];
+    }
+    return atts;
   },
   submitButtonAtts: function () {
     var qfAtts = this.atts;
@@ -18,6 +23,8 @@ Template['quickForm_bootstrap3-inline'].helpers({
   qfAutoFormContext: function () {
     var ctx = _.clone(this.qfAutoFormContext || {});
     ctx = AutoForm.Utility.addClass(ctx, "form-inline");
+    if (ctx["id-prefix"])
+      delete ctx["id-prefix"];
     if (ctx["label-class"])
       delete ctx["label-class"];
     return ctx;
