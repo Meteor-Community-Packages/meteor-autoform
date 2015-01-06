@@ -26,3 +26,16 @@ Template['quickForm_plain'].helpers({
     return ctx;
   }
 });
+
+Template["afObjectField_plain"].helpers({
+  quickFieldsAtts: function () {
+    var qfAtts = this.atts;
+    var atts = {
+      name: qfAtts.name
+    };
+    if (qfAtts["id-prefix"]) {
+      atts["id-prefix"] = qfAtts["id-prefix"];
+    }
+    return atts;
+  }
+});

@@ -70,7 +70,7 @@ Template["afFormGroup_bootstrap3-horizontal"].helpers({
 });
 
 Template["afObjectField_bootstrap3-horizontal"].helpers({
-  afQuickFieldAtts: function () {
+  quickFieldsAtts: function () {
     var qfAtts = this.atts;
     var atts = {
       name: qfAtts.name,

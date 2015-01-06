@@ -45,7 +45,7 @@ Template['afFormGroup_bootstrap3'].helpers({
 });
 
 Template["afObjectField_bootstrap3"].helpers({
-  afQuickFieldAtts: function () {
+  quickFieldsAtts: function () {
     var qfAtts = this.atts;
     var atts = {
       name: qfAtts.name

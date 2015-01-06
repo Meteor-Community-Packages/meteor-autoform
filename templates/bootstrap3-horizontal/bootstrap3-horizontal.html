@@ -27,7 +27,7 @@
     <label {{afFieldLabelAtts}}>{{#if this.labelText}}{{this.labelText}}{{else}}{{afFieldLabelText name=this.atts.name}}{{/if}}</label>
     {{/if}}
     <div class="{{rightColumnClass}}">
-      {{> afFieldInput quickFieldsAtts}}
+      {{> afFieldInput afFieldInputAtts}}
       <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
     </div>
   </div>
@@ -39,7 +39,7 @@
     <div class="{{rightColumnClass}}">
       <div class="panel panel-default autoform-padding-fix">
         <div class="panel-body">
-        {{> afQuickFields afQuickFieldAtts}}
+        {{> afQuickFields quickFieldsAtts}}
         </div>
       </div>
     </div>
