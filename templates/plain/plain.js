@@ -3,7 +3,7 @@
  */
 
 Template['quickForm_plain'].helpers({
-  afQuickFieldAtts: function () {
+  quickFieldsAtts: function () {
     var qfAtts = this.atts;
     var atts = {};
     if (qfAtts["id-prefix"]) {

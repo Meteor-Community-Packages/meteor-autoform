@@ -1,5 +1,5 @@
 Template['quickForm_plain-fieldset'].helpers({
-  afQuickFieldAtts: function () {
+  quickFieldsAtts: function () {
     var qfAtts = this.atts;
     var atts = {};
     if (qfAtts["id-prefix"]) {

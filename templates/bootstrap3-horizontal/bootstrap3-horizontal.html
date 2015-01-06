@@ -1,6 +1,6 @@
 <template name="quickForm_bootstrap3-horizontal">
   {{#autoForm qfAutoFormContext}}
-    {{> afQuickFields afQuickFieldAtts}}
+    {{> afQuickFields quickFieldsAtts}}
     {{#if qfShouldRenderButton}}
     <div class="form-group">
       <div class="{{labelClass}}"></div>
@@ -27,7 +27,7 @@
     <label {{afFieldLabelAtts}}>{{#if this.labelText}}{{this.labelText}}{{else}}{{afFieldLabelText name=this.atts.name}}{{/if}}</label>
     {{/if}}
     <div class="{{rightColumnClass}}">
-      {{> afFieldInput afFieldInputAtts}}
+      {{> afFieldInput quickFieldsAtts}}
       <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
     </div>
   </div>

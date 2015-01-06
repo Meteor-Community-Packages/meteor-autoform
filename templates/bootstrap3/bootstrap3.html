@@ -1,6 +1,6 @@
 <template name="quickForm_bootstrap3">
   {{#autoForm qfAutoFormContext}}
-    {{> afQuickFields afQuickFieldAtts}}
+    {{> afQuickFields quickFieldsAtts}}
     {{#if qfShouldRenderButton}}
     <div class="form-group">
       <button type="submit" {{submitButtonAtts}}>
@@ -36,7 +36,7 @@
       {{#if afFieldIsInvalid name=this.atts.name}}
       <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
       {{/if}}
-      {{> afQuickFields afQuickFieldAtts}}
+      {{> afQuickFields quickFieldsAtts}}
     </div>
   </div>
 </template>
