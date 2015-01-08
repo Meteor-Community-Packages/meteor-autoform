@@ -72,10 +72,10 @@ Template.afFieldInput.helpers({
     // will not pick up the new value when there are #if etc.
     // blocks involved.
     // See https://github.com/aldeed/meteor-autoform/issues/461
-   setTimeout(function () {
+    setTimeout(function () {
       updateTrackedFieldValue(c.af.formId, c.atts.name);
     }, 0);
-    
+
     // Build input data context
     var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), c.af.submitType);
 
