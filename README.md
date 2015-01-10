@@ -114,14 +114,14 @@ The following community packages provide additional custom input types that you 
 * [comerc:autoform-typeahead](https://atmospherejs.com/comerc/autoform-typeahead)
 * [comerc:autoform-contenteditable2](https://atmospherejs.com/comerc/autoform-contenteditable2)
 * [meteoric:autoform-ionic](https://github.com/meteoric/autoform-ionic)
+ 
+More features:
 
-[yogiben:admin](https://atmospherejs.com/yogiben/admin) provides CRUD admin pages using autoforms.
-
-[forwarder:autoform-wizard](https://atmospherejs.com/forwarder/autoform-wizard) and [planifica:wizard](https://atmospherejs.com/planifica/wizard) provide wizard components for autoform.
-
-[yogiben:autoform-modals](https://atmospherejs.com/yogiben/autoform-modals) provides autoform bootstrap modals to insert, update, remove docs from collections.
-
-[jameslefrere:autoform-semantic-ui](https://atmospherejs.com/jameslefrere/autoform-semantic-ui) provides a Semantic UI theme for autoform.
+* [comerc:autoform-fixtures](https://github.com/comerc/meteor-autoform-fixtures/) provides fixtures data for Collection2.
+* [yogiben:admin](https://atmospherejs.com/yogiben/admin) provides CRUD admin pages using autoforms.
+* [forwarder:autoform-wizard](https://atmospherejs.com/forwarder/autoform-wizard) and [planifica:wizard](https://atmospherejs.com/planifica/wizard) provide wizard components for autoform.
+* [yogiben:autoform-modals](https://atmospherejs.com/yogiben/autoform-modals) provides autoform bootstrap modals to insert, update, remove docs from collections.
+* [jameslefrere:autoform-semantic-ui](https://atmospherejs.com/jameslefrere/autoform-semantic-ui) provides a Semantic UI theme for autoform.
 
 ## Demo
 
