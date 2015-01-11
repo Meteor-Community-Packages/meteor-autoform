@@ -1,23 +1,12 @@
-function findAtts() {
-  var c, n = 0;
-  do {
-    c = Template.parentData(n++);
-  } while (c && !c.atts);
-  return c && c.atts;
-}
-
 Template['quickForm_bootstrap3-horizontal'].helpers({
   inputClass: function () {
-    var atts = findAtts();
-    if (atts) {
-      return atts["input-col-class"];
-    }
+    return this.atts["input-col-class"];
   },
   labelClass: function () {
-    var atts = findAtts();
-    if (atts) {
-      return atts["label-class"];
-    }
+    return this.atts["label-class"];
+  },
+  idPrefix: function () {
+    return this.atts["id-prefix"];
   },
   submitButtonAtts: function () {
     var qfAtts = this.atts;
@@ -36,6 +25,8 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
       delete ctx["input-col-class"];
     if (ctx["label-class"])
       delete ctx["label-class"];
+    if (ctx["id-prefix"])
+      delete ctx["id-prefix"];
     return ctx;
   }
 });

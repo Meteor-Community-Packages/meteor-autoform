@@ -1,6 +1,6 @@
 <template name="quickForm_bootstrap3">
   {{#autoForm this.qfAutoFormContext}}
-    {{> afQuickFields}}
+    {{> afQuickFields id-prefix=idPrefix}}
     {{#if qfShouldRenderButton}}
     <div class="form-group">
       <button type="submit" {{submitButtonAtts}}>
@@ -16,7 +16,7 @@
 </template>
 
 <template name="afFormGroup_bootstrap3">
-  <div class="form-group {{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
+  <div class="form-group{{#if afFieldIsInvalid name=this.atts.name}} has-error{{/if}}">
     {{#unless skipLabel}}
     <label {{bsFieldLabelAtts}}>{{#if this.labelText}}{{this.labelText}}{{else}}{{afFieldLabelText name=this.atts.name}}{{/if}}</label>
     {{/unless}}
