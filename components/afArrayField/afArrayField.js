@@ -1,7 +1,8 @@
+/* global AutoForm, arrayTracker, fd */
+
 Template.afArrayField.helpers({
   getTemplateName: function () {
-    var self = this;
-    return AutoForm.getTemplateName('afArrayField', self.template, self.atts && self.atts.name);
+    return AutoForm.getTemplateName('afArrayField', this.template, this.name);
   },
   innerContext: function afArrayFieldContext() {
     var c = AutoForm.Utility.normalizeContext(this, "afArrayField");

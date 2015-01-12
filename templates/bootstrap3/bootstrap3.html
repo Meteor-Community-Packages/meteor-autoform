@@ -1,17 +1,17 @@
 <template name="quickForm_bootstrap3">
   {{#autoForm this.qfAutoFormContext}}
-    {{> afQuickFields id-prefix=idPrefix}}
-    {{#if qfShouldRenderButton}}
-    <div class="form-group">
-      <button type="submit" {{submitButtonAtts}}>
+  {{> afQuickFields id-prefix=idPrefix}}
+  {{#if qfShouldRenderButton}}
+  <div class="form-group">
+    <button type="submit" {{submitButtonAtts}}>
       {{#with ../atts.buttonContent}}
       {{this}}
       {{else}}
       Submit
       {{/with}}
-      </button>
-    </div>
-    {{/if}}
+    </button>
+  </div>
+  {{/if}}
   {{/autoForm}}
 </template>
 
@@ -27,16 +27,16 @@
 
 <template name="afObjectField_bootstrap3">
   <div class="panel panel-default">
-    {{#with afFieldLabelText name=this.atts.name}}
+    {{#with afFieldLabelText name=this.name}}
     <div class="panel-heading">
       <h3 class="panel-title">{{this}}</h3>
     </div>
     {{/with}}
     <div class="panel-body">
-      {{#if afFieldIsInvalid name=this.atts.name}}
-      <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
+      {{#if afFieldIsInvalid name=this.name}}
+      <span class="help-block">{{{afFieldMessage name=this.name}}}</span>
       {{/if}}
-      {{> afQuickFields name=this.atts.name}}
+      {{> afQuickFields name=this.name}}
     </div>
   </div>
 </template>
@@ -52,11 +52,13 @@
     <ul class="list-group">
       {{#afEachArrayItem name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
       <li class="list-group-item autoform-array-item">
-        <div class="media">
-          {{#if afArrayFieldHasMoreThanMinimum name=../atts.name minCount=../atts.minCount maxCount=../atts.maxCount}}
-          <button type="button" class="btn btn-primary autoform-remove-item pull-left"><span class="glyphicon glyphicon-minus"></span></button>
-          {{/if}}
-          <div class="media-body">
+        <div>
+          <div class="autoform-remove-item-wrap">
+            {{#if afArrayFieldHasMoreThanMinimum name=../atts.name minCount=../atts.minCount maxCount=../atts.maxCount}}
+            <button type="button" class="btn btn-primary autoform-remove-item"><span class="glyphicon glyphicon-minus"></span></button>
+            {{/if}}
+          </div>
+          <div class="autoform-array-item-body">
             {{> afQuickField name=this.name label=false options="auto"}}
           </div>
         </div>
@@ -83,12 +85,12 @@
 <template name="afCheckboxGroup_bootstrap3">
   <div class="af-checkbox-group" {{dsk}}>
     {{#each this.items}}
-      <div class="checkbox">
-        <label>
-          <input type="checkbox" value="{{this.value}}" {{atts}} />
-          {{this.label}}
-        </label>
-      </div>
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" value="{{this.value}}" {{atts}} />
+        {{this.label}}
+      </label>
+    </div>
     {{/each}}
   </div>
 </template>
@@ -96,10 +98,10 @@
 <template name="afCheckboxGroupInline_bootstrap3">
   <div class="af-checkbox-group" {{dsk}}>
     {{#each this.items}}
-      <label class="checkbox-inline">
-        <input type="checkbox" value="{{this.value}}" {{atts}} />
-        {{this.label}}
-      </label>
+    <label class="checkbox-inline">
+      <input type="checkbox" value="{{this.value}}" {{atts}} />
+      {{this.label}}
+    </label>
     {{/each}}
   </div>
 </template>
@@ -116,12 +118,12 @@
 <template name="afRadioGroup_bootstrap3">
   <div class="af-radio-group" {{dsk}}>
     {{#each this.items}}
-      <div class="radio">
-        <label>
-          <input type="radio" value="{{this.value}}" {{atts}} />
-          {{this.label}}
-        </label>
-      </div>
+    <div class="radio">
+      <label>
+        <input type="radio" value="{{this.value}}" {{atts}} />
+        {{this.label}}
+      </label>
+    </div>
     {{/each}}
   </div>
 </template>
@@ -129,10 +131,10 @@
 <template name="afRadioGroupInline_bootstrap3">
   <div class="af-radio-group" {{dsk}}>
     {{#each this.items}}
-      <label class="radio-inline">
-        <input type="radio" value="{{this.value}}" {{atts}} />
-        {{this.label}}
-      </label>
+    <label class="radio-inline">
+      <input type="radio" value="{{this.value}}" {{atts}} />
+      {{this.label}}
+    </label>
     {{/each}}
   </div>
 </template>
@@ -151,15 +153,15 @@
 <template name="afSelect_bootstrap3">
   <select {{atts}}>
     {{#each this.items}}
-      {{#if this.optgroup}}
-        <optgroup label="{{this.optgroup}}">
-        {{#each this.items}}
-        <option {{optionAtts}}>{{this.label}}</option>
-        {{/each}}
-        </optgroup>
-      {{else}}
-        <option {{optionAtts}}>{{this.label}}</option>
-      {{/if}}
+    {{#if this.optgroup}}
+    <optgroup label="{{this.optgroup}}">
+      {{#each this.items}}
+      <option {{optionAtts}}>{{this.label}}</option>
+      {{/each}}
+    </optgroup>
+    {{else}}
+    <option {{optionAtts}}>{{this.label}}</option>
+    {{/if}}
     {{/each}}
   </select>
 </template>
@@ -167,7 +169,7 @@
 <template name="afBooleanSelect_bootstrap3">
   <select {{atts}}>
     {{#each this.items}}
-      <option {{optionAtts}}>{{this.label}}</option>
+    <option {{optionAtts}}>{{this.label}}</option>
     {{/each}}
   </select>
 </template>
@@ -175,15 +177,15 @@
 <template name="afSelectMultiple_bootstrap3">
   <select {{atts}} multiple>
     {{#each this.items}}
-      {{#if this.optgroup}}
-        <optgroup label="{{this.optgroup}}">
-        {{#each this.items}}
-        <option {{optionAtts}}>{{this.label}}</option>
-        {{/each}}
-        </optgroup>
-      {{else}}
-        <option {{optionAtts}}>{{this.label}}</option>
-      {{/if}}
+    {{#if this.optgroup}}
+    <optgroup label="{{this.optgroup}}">
+      {{#each this.items}}
+      <option {{optionAtts}}>{{this.label}}</option>
+      {{/each}}
+    </optgroup>
+    {{else}}
+    <option {{optionAtts}}>{{this.label}}</option>
+    {{/if}}
     {{/each}}
   </select>
 </template>

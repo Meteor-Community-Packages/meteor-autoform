@@ -2,7 +2,7 @@
   "dependencies": [
     [
       "aldeed:simple-schema",
-      "1.2.0"
+      "1.1.0"
     ],
     [
       "base64",
@@ -22,7 +22,7 @@
     ],
     [
       "ddp",
-      "1.0.12"
+      "1.0.11"
     ],
     [
       "deps",
@@ -69,8 +69,8 @@
       "1.0.5"
     ],
     [
-      "mrt:moment",
-      "2.6.0"
+      "momentjs:moment",
+      "2.8.4"
     ],
     [
       "observe-sequence",
@@ -110,6 +110,6 @@
     ]
   ],
   "pluginDependencies": [],
-  "toolVersion": "meteor-tool@1.0.36",
+  "toolVersion": "meteor-tool@1.0.35",
   "format": "1.0"
 }

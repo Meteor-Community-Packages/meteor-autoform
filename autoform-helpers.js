@@ -1,9 +1,24 @@
-// Global template helpers (exported)
+/* global arrayTracker, SimpleSchema, AutoForm */
 
 var regHelper = Template.registerHelper;
 if (typeof regHelper !== "function") {
   regHelper = UI.registerHelper;
 }
+
+function parseOptions(options, helperName) {
+  var hash = (options || {}).hash || {};
+  // Find the autoform context
+  var afContext = AutoForm.find(helperName);
+  // Call getDefs for side effect of throwing errors when name is not in schema
+  if (hash.name) {
+    AutoForm.Utility.getDefs(afContext.ss, hash.name);
+  }
+  return _.extend({}, afContext, hash);
+}
+
+/*
+ * Global template helpers (exported to app)
+ */
 
 /*
  * afFieldMessage
@@ -198,16 +213,19 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
     var fieldDefs = ss.schema(field);
 
     // Don't include fields with autoform.omit=true
-    if (fieldDefs.autoform && fieldDefs.autoform.omit === true)
+    if (fieldDefs.autoform && fieldDefs.autoform.omit === true) {
       return false;
+    }
 
     // Don't include fields with denyInsert=true when it's an insert form
-    if (fieldDefs.denyInsert && options.submitType === "insert")
+    if (fieldDefs.denyInsert && options.submitType === "insert") {
       return false;
+    }
 
     // Don't include fields with denyUpdate=true when it's an update form
-    if (fieldDefs.denyUpdate && options.submitType === "update")
+    if (fieldDefs.denyUpdate && options.submitType === "update") {
       return false;
+    }
 
     return true;
   });
@@ -224,18 +242,6 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
  */
 regHelper('afTemplateName', function afTemplateNameHelper(templateType, templateName) {
   var self = this;
+  console.log('The afTemplateName template helper is deprecated. Use AutoForm.getTemplateName method in your own helper.');
   return AutoForm.getTemplateName(templateType, templateName, self.atts && self.atts.name);
 });
-
-/*
- * PRIVATE
- */
-
-function parseOptions(options, helperName) {
-  var hash = (options || {}).hash || {};
-  // Find the autoform context
-  var afContext = AutoForm.find(helperName);
-  // Call getDefs for side effect of throwing errors when name is not in schema
-  hash.name && AutoForm.Utility.getDefs(afContext.ss, hash.name);
-  return _.extend({}, afContext, hash);
-}

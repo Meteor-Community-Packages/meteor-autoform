@@ -1,7 +1,8 @@
+/* global AutoForm */
+
 Template.afFormGroup.helpers({
   getTemplateName: function () {
-    var self = this;
-    return AutoForm.getTemplateName('afFormGroup', self.template, self.atts && self.atts.name);
+    return AutoForm.getTemplateName('afFormGroup', this.template, this.name);
   },
   innerContext: function afFormGroupContext() {
     var c = AutoForm.Utility.normalizeContext(this, "afFormGroup");

@@ -1,3 +1,5 @@
+/* global AutoForm */
+
 Template.afQuickField.helpers({
   isGroup: function afQuickFieldIsGroup(options) {
     var c = AutoForm.Utility.normalizeContext(options.hash, "afQuickField");
@@ -12,6 +14,8 @@ Template.afQuickField.helpers({
     return (c.defs.type === Array && !c.atts.options && !c.atts.type);
   },
   groupAtts: function afQuickFieldGroupAtts() {
+    // afQuickField passes `fields` and `omitFields` on to `afObjectField`
+    // and `afArrayField`, but not to `afFormGroup`
     return _.omit(this, 'fields', 'omitFields');
   }
 });

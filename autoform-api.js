@@ -156,6 +156,7 @@ AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(
  * @param {String} templateType
  * @param {String} templateName
  * @param {String} [fieldName]
+ * @param {Boolean} [skipExistsCheck] Pass `true` to return a template name even if that template hasn't been defined.
  * @return {String} Template name
  *
  * Returns the full template name. In the simplest scenario, this is templateType_templateName
@@ -170,12 +171,16 @@ AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(
  * 6. Default template, as set by AutoForm.setDefaultTemplate.
  * 7. Built-in default template, currently bootstrap-3.
  */
-AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templateName, fieldName) {
-  var result, schemaAutoFormDefs, templateFromAncestor, defaultTemplate;
+AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templateName, fieldName, skipExistsCheck) {
+  var schemaAutoFormDefs, templateFromAncestor, defaultTemplate;
 
-  result = templateType + '_' + templateName; // templateName might be undefined, but the result will be the same
-  if (Template[result]) {
-    return result;
+  function templateExists(t) {
+    return !!(skipExistsCheck || Template[t]);
+  }
+
+  // Default case: use the `template` attribute provided
+  if (templateName && templateExists(templateType + '_' + templateName)) {
+    return templateType + '_' + templateName;
   }
 
   // If the attributes provided a templateName but that template didn't exist, show a warning
@@ -190,41 +195,41 @@ AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templa
   }
 
   // Fallback #1: autoform.<componentType>.template from the schema
-  if (schemaAutoFormDefs && schemaAutoFormDefs[templateType] && schemaAutoFormDefs[templateType].template && Template[templateType + '_' + schemaAutoFormDefs[templateType].template]) {
+  if (schemaAutoFormDefs && schemaAutoFormDefs[templateType] && schemaAutoFormDefs[templateType].template && templateExists(templateType + '_' + schemaAutoFormDefs[templateType].template)) {
     return templateType + '_' + schemaAutoFormDefs[templateType].template;
   }
 
   // Fallback #2: autoform.template from the schema
-  if (schemaAutoFormDefs && schemaAutoFormDefs.template && Template[templateType + '_' + schemaAutoFormDefs.template]) {
+  if (schemaAutoFormDefs && schemaAutoFormDefs.template && templateExists(templateType + '_' + schemaAutoFormDefs.template)) {
     return templateType + '_' + schemaAutoFormDefs.template;
   }
 
   // Fallback #3: template-<componentType> attribute on an ancestor component within the same form
   templateFromAncestor = AutoForm.findAttribute("template-" + templateType);
-  if (templateFromAncestor && Template[templateType + '_' + templateFromAncestor]) {
+  if (templateFromAncestor && templateExists(templateType + '_' + templateFromAncestor)) {
     return templateType + '_' + templateFromAncestor;
   }
 
   // Fallback #4: template attribute on an ancestor component within the same form
   templateFromAncestor = AutoForm.findAttribute("template");
-  if (templateFromAncestor && Template[templateType + '_' + templateFromAncestor]) {
+  if (templateFromAncestor && templateExists(templateType + '_' + templateFromAncestor)) {
     return templateType + '_' + templateFromAncestor;
   }
 
   // Fallback #5: Default template for component type, as set by AutoForm.setDefaultTemplateForType
   defaultTemplate = AutoForm.getDefaultTemplateForType(templateType);
-  if (defaultTemplate && Template[templateType + '_' + defaultTemplate]) {
+  if (defaultTemplate && templateExists(templateType + '_' + defaultTemplate)) {
     return templateType + '_' + defaultTemplate;
   }
 
   // Fallback #6: Default template, as set by AutoForm.setDefaultTemplate
   defaultTemplate = AutoForm.getDefaultTemplate();
-  if (defaultTemplate && Template[templateType + '_' + defaultTemplate]) {
+  if (defaultTemplate && templateExists(templateType + '_' + defaultTemplate)) {
     return templateType + '_' + defaultTemplate;
   }
 
-  // Fallback #7: hard-coded default
-  return "bootstrap3";
+  // Found nothing. Return undefined
+  return;
 };
 
 /**
@@ -490,17 +495,21 @@ AutoForm.find = function autoFormFind(type) {
 AutoForm.findAttribute = function autoFormFindAttribute(attrName) {
   var n = 0, af, val, stopAt = -1;
   // we go one level past _af so that we get the original autoForm or quickForm attributes, too
-//  do {
-//    af = Template.parentData(n++);
-//    if (af && af.atts && af.atts[attrName] !== void 0) {
-//      val = af.atts[attrName];
-//    } else if (af && af[attrName] !== void 0) {
-//      val = af[attrName];
-//    }
-//    if (af && af._af) {
-//      stopAt = n + 1;
-//    }
-//  } while (af && stopAt < n && val === void 0);
+  do {
+    af = Template.parentData(n++);
+    if (af && af.atts && af.atts[attrName] !== void 0) {
+      val = af.atts[attrName];
+    } else if (af && af[attrName] !== void 0) {
+      // When searching for "template", make sure we didn't just
+      // find the one that's on Template.dynamic
+      if (attrName !== 'template' || !('data' in af)) {
+        val = af[attrName];
+      }
+    }
+    if (af && af._af) {
+      stopAt = n + 1;
+    }
+  } while (af && stopAt < n && val === void 0);
   return val;
 };
 

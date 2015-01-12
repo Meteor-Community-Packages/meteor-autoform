@@ -21,12 +21,9 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   qfAutoFormContext: function () {
     var ctx = _.clone(this.qfAutoFormContext || {});
     ctx = AutoForm.Utility.addClass(ctx, "form-horizontal");
-    if (ctx["input-col-class"])
-      delete ctx["input-col-class"];
-    if (ctx["label-class"])
-      delete ctx["label-class"];
-    if (ctx["id-prefix"])
-      delete ctx["id-prefix"];
+    delete ctx["input-col-class"];
+    delete ctx["label-class"];
+    delete ctx["id-prefix"];
     return ctx;
   }
 });

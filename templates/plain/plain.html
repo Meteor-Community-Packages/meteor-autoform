@@ -27,10 +27,10 @@
 
 <template name="afObjectField_plain">
   <fieldset>
-    {{#with afFieldLabelText name=this.atts.name}}
+    {{#with afFieldLabelText name=this.name}}
     <legend>{{this}}</legend>
     {{/with}}
-    {{> afQuickFields name=this.atts.name}}
+    {{> afQuickFields name=this.name}}
   </fieldset>
 </template>
 

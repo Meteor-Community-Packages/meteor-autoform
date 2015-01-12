@@ -4,7 +4,7 @@ Template.afFieldInput.helpers({
   // similar to AutoForm.getTemplateName, but we have fewer layers of fallback, and we fall back
   // lastly to a template without an _ piece at the end
   getTemplateName: function getTemplateName() {
-    var self = this, schemaAutoFormDefs, templateFromAncestor, defaultTemplate;
+    var self = this;
 
     // Determine what `type` attribute should be if not set
     var inputType = AutoForm.getInputType(this);
@@ -16,40 +16,16 @@ Template.afFieldInput.helpers({
     var inputTemplateName = componentDef.template;
     var styleTemplateName = this.template;
 
-    // In simplest case, just try to combine the two given strings.
-    if (styleTemplateName && Template[inputTemplateName + '_' + styleTemplateName]) {
-      return inputTemplateName + '_' + styleTemplateName;
+    var templateName = AutoForm.getTemplateName(inputTemplateName, styleTemplateName, self.name, true);
+
+    // Special case: the built-in "plain" template uses the basic input templates for
+    // everything, so if we found _plain, we use inputTemplateName instead
+    if (templateName.indexOf('_plain') !== -1) {
+      templateName = null;
     }
 
-    // If the attributes provided a styleTemplateName but that template didn't exist, show a warning
-    if (styleTemplateName && AutoForm._debug) {
-      console.warn(inputTemplateName + '_' + styleTemplateName + ' is not a valid template name. Falling back to a different template.');
-    }
-
-    // Get `autoform` object from the schema, if present.
-    if (self.atts && self.atts.name) {
-      schemaAutoFormDefs = AutoForm.getSchemaForField(self.atts.name).autoform;
-    }
-
-    // Fallback #1: autoform.template from the schema
-    if (schemaAutoFormDefs && schemaAutoFormDefs.template && Template[inputTemplateName + '_' + schemaAutoFormDefs.template]) {
-      return inputTemplateName + '_' + schemaAutoFormDefs.template;
-    }
-
-    // Fallback #2: template attribute on an ancestor component within the same form
-    templateFromAncestor = AutoForm.findAttribute("template");
-    if (templateFromAncestor && Template[inputTemplateName + '_' + templateFromAncestor]) {
-      return inputTemplateName + '_' + templateFromAncestor;
-    }
-
-    // Fallback #3: Default template, as set by AutoForm.setDefaultTemplate
-    defaultTemplate = AutoForm.getDefaultTemplate();
-    if (defaultTemplate && Template[inputTemplateName + '_' + defaultTemplate]) {
-      return inputTemplateName + '_' + defaultTemplate;
-    }
-
-    // Fallback #4: Just the inputTemplateName with no custom styled piece
-    return inputTemplateName;
+    // If no override templateName found, use the exact name from the input type definition
+    return templateName ? templateName : inputTemplateName;
   },
   innerContext: function afFieldInputContext() {
     var c = AutoForm.Utility.normalizeContext(this, "afFieldInput");
