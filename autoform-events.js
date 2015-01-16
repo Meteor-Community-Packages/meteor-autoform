@@ -1,7 +1,7 @@
 // all form events handled here
 var lastAutoSaveElement = null;
 
-function beginSubmit(formId, template) {
+function beginSubmit(formId, template, hookContext) {
   if (!template || !template.view._domrange || template.view.isDestroyed) {
     return;
   }
@@ -10,7 +10,7 @@ function beginSubmit(formId, template) {
   var hooks = Hooks.getHooks(formId, 'beginSubmit');
   if (hooks.length) {
     _.each(hooks, function beginSubmitHooks(hook) {
-      hook(formId, template);
+      hook.call(hookContext, formId, template);
     });
   } else {
     // If there are no user-defined hooks, by default we disable the submit button during submission
@@ -21,7 +21,7 @@ function beginSubmit(formId, template) {
   }
 }
 
-function endSubmit(formId, template) {
+function endSubmit(formId, template, hookContext) {
   if (!template || !template.view._domrange || template.view.isDestroyed) {
     return;
   }
@@ -32,7 +32,7 @@ function endSubmit(formId, template) {
   var hooks = Hooks.getHooks(formId, 'endSubmit');
   if (hooks.length) {
     _.each(hooks, function endSubmitHooks(hook) {
-      hook(formId, template);
+      hook.call(hookContext, formId, template);
     });
   } else {
     // If there are no user-defined hooks, by default we disable the submit button during submission
@@ -80,17 +80,30 @@ Template.autoForm.events({
     var onSuccess = Hooks.getHooks(formId, 'onSuccess');
     var onError = Hooks.getHooks(formId, 'onError');
 
+    // Prep context with which hooks are called
+    var hookContext = {
+      event: event,
+      template: template,
+      formId: formId,
+      docId: docId,
+      autoSaveChangedElement: lastAutoSaveElement,
+      resetForm: function () {
+        AutoForm.resetForm(formId, template);
+      },
+      validationContext: AutoForm.getValidationContext(formId)
+    };
+
     // Prep haltSubmission function
     function haltSubmission() {
       event.preventDefault();
       event.stopPropagation();
       // Run endSubmit hooks (re-enabled submit button or form, etc.)
-      endSubmit(formId, template);
+      endSubmit(formId, template, hookContext);
     }
 
     function failedValidation() {
       var ec = ss.namedContext(formId);
-      var ik = ec.invalidKeys(), err;
+      var ik = ec.invalidKeys(), error;
       if (ik) {
         if (ik.length) {
           // We add `message` prop to the invalidKeys.
@@ -98,44 +111,33 @@ Template.autoForm.events({
           ik = _.map(ik, function (o) {
             return _.extend({message: ec.keyErrorMessage(o.name)}, o);
           });
-          err = new Error(ik[0].message);
+          error = new Error(ik[0].message);
         } else {
-          err = new Error('form failed validation');
+          error = new Error('form failed validation');
         }
-        err.invalidKeys = ik;
+        error.invalidKeys = ik;
       } else {
-        err = new Error('form failed validation');
+        error = new Error('form failed validation');
       }
       _.each(onError, function onErrorEach(hook) {
-        hook('pre-submit validation', err, template);
+        hook.call(hookContext, 'pre-submit validation', error, template);
       });
       haltSubmission();
     }
 
     // Prep callback creator function
     function makeCallback(name) {
-      var cbCtx = {
-        event: event,
-        template: template,
-        formId: formId,
-        docId: docId,
-        autoSaveChangedElement: lastAutoSaveElement,
-        resetForm: function () {
-          AutoForm.resetForm(formId, template);
-        }
-      };
       var afterHooks = Hooks.getHooks(formId, 'after', name);
       return function autoFormActionCallback(error, result) {
         if (error) {
           if (onError && onError.length) {
             _.each(onError, function onErrorEach(hook) {
-              hook.call(cbCtx, name, error, template);
+              hook.call(hookContext, name, error, template);
             });
           } else if ((!afterHooks || !afterHooks.length) && ss.namedContext(formId).isValid()) {
-            // if there are no onError or "after" hooks or validation errors, throw the error
+            // if there are no onError or "after" hooks or validation errors, log the error
             // because it must be some other error from the server
-            endSubmit(formId, template);
-            throw error;
+            console.log(error);
           }
         } else {
           // By default, we reset form after successful submit, but
@@ -146,17 +148,17 @@ Template.autoForm.events({
           }
           // Set docId in the context for insert forms, too
           if (name === "insert") {
-            cbCtx.docId = result;
+            hookContext.docId = result;
           }
           _.each(onSuccess, function onSuccessEach(hook) {
-            hook.call(cbCtx, name, result, template);
+            hook.call(hookContext, name, result, template);
           });
         }
         _.each(afterHooks, function afterHooksEach(hook) {
-          hook.call(cbCtx, error, result, template);
+          hook.call(hookContext, error, result, template);
         });
         // Run endSubmit hooks (re-enabled submit button or form, etc.)
-        endSubmit(formId, template);
+        endSubmit(formId, template, hookContext);
       };
     }
 
@@ -168,7 +170,7 @@ Template.autoForm.events({
       // passing the result of the first hook to the
       // second hook, etc.
       function runHook(i, doc) {
-        hook = hooks[i];
+        var hook = hooks[i];
 
         if (!hook) {
           // We've run all hooks; continue submission
@@ -189,17 +191,9 @@ Template.autoForm.events({
             runHook(i+1, d);
           }
         };
-        var ctx = {
-          event: event,
-          template: template,
-          formId: formId,
-          docId: docId,
-          autoSaveChangedElement: lastAutoSaveElement,
-          resetForm: function () {
-            AutoForm.resetForm(formId, template);
-          },
+        var ctx = _.extend({
           result: _.once(cb)
-        };
+        }, hookContext);
 
         var result;
         if (docId) {
@@ -236,15 +230,7 @@ Template.autoForm.events({
       }
 
       // Set up onSubmit hook context
-      var ctx = {
-        event: event,
-        template: template,
-        formId: formId,
-        docId: docId,
-        autoSaveChangedElement: lastAutoSaveElement,
-        resetForm: function () {
-          AutoForm.resetForm(formId, template);
-        },
+      var ctx = _.extend({
         done: function (error, result) {
           doneCount++;
           if (!submitError && error) {
@@ -259,7 +245,7 @@ Template.autoForm.events({
             submitCallback(submitError, submitResult);
           }
         }
-      };
+      }, hookContext);
 
       // Call all hooks at once.
       // Pass both types of doc plus the doc attached to the form.
@@ -312,7 +298,7 @@ Template.autoForm.events({
     // beginSubmit hook disables inputs. We don't get values for
     // disabled inputs, but if they are just disabling during submission,
     // then we actually do want the values.
-    beginSubmit(formId, template);
+    beginSubmit(formId, template, hookContext);
 
     // Now we will do the requested insert, update, method, or normal
     // browser form submission.

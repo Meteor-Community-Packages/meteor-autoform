@@ -882,22 +882,32 @@ before all global hooks.
 * Passing `null` as the first argument of `AutoForm.addHooks` adds global hooks, that is,
 hooks that run for every form that has been created and every form that ever will be created
 in the app.
-* The before hooks are called just before the insert, update, or method
-call. These hooks are passed the document or
-modifier as gathered from the form fields. If necessary they can modify the document or modifier. These functions can perform asynchronous tasks if necessary. If asynchronicity is not needed, simply return the document or modifier, or return `false` to cancel submission. If you don't return anything, then you must call `this.result()` eventually and pass it either the document or modifier, or `false` to cancel submission. *This is run only on the client.
+* The `before` hooks are called just before the insert, update, or method
+call. These hooks are passed the document or modifier as gathered from the form fields. If necessary they can modify the document or modifier. These functions can perform asynchronous tasks if necessary. If asynchronicity is not needed, simply return the document or modifier, or return `false` to cancel submission. If you don't return anything, then you must call `this.result()` eventually and pass it either the document or modifier, or `false` to cancel submission. *This is run only on the client.
 Therefore, you should not assume that this will always run since a devious user
 could skip it.*
-* The after hooks are the same as those you would normally specify as the last
+* The `after` hooks are the same as those you would normally specify as the last
 argument of the `insert` or `update` methods on a Mongo.Collection or the
 Meteor.call method. Notice, though, that they are passed one additional final
 argument, which is the template object. One use for the template object
 might be so that you can clean up certain form fields if the result was successful
 or show additional error-related elements if not. This should be rarely needed unless you have complex custom controls in your form.
-* Within most hooks, you can do `this.event`, `this.template`, `this.formId` (useful in a global hook), and `this.resetForm()`.
 * Refer to the next sections for details about the `onSubmit`, `formToDoc`,
 and `docToForm` hooks.
 
+The following properties and functions are available in all hooks when they are called:
+
+* `this.event`: The browser submit event
+* `this.template`: The `autoForm` template instance
+* `this.formId`: The form's `id` attribute (useful in a global hook)
+* `this.validationContext`: The validation context used for the form. You can use this to check or add invalid keys.
+* `this.autoSaveChangedElement`: The input element that was changed to cause this form submission (if the submission was due to autosave)
+* `this.docId`: The `_id` attribute of the `doc` attached to the form, if there is one, or for an `type='insert'` form, the `_id` of the newly inserted doc, if one has been inserted.
+* `this.resetForm()`: Call this if you need to reset the form
+
 ### onSubmit
+
+*Note: `onSubmit` hooks are called only when your form does not have a `type` attribute.*
 
 Submitting to a server method allows you to do anything you want with the form
 data on the server, but what if you want to do something with the form data on
@@ -918,8 +928,6 @@ AutoForm.hooks({
 });
 ```
 
-`onSubmit` hooks are called only when your form does not have a `type` attribute.
-
 The arguments passed to your function are as follows:
 
 * `insertDoc`: The form input values in a document, suitable for use with insert().
@@ -929,12 +937,9 @@ have not been added to it.
 This object has *not* been validated.
 * `currentDoc`: The object that's currently bound to the form through the `doc` attribute
 
-And `this` provides the following:
+In addition to the normal `this` context:
 
-* A `done` method, which you must call when you are done with your custom client submission logic. This allows you to do asynchronous tasks if necessary. If you pass an `Error` object as the only argument, then any `onError` hooks will be called; otherwise, any `onSuccess` hooks will be called.
-* A `resetForm` method, which you can call to reset the corresponding autoform if necessary. But this is also done automatically after all `onSubmit` hooks have called `this.done()` without error.
-* The form submit event, in `event`
-* The template, in `template`
+* A `this.done()` method, which you *must* call when you are done with your custom client submission logic. This allows you to do asynchronous tasks if necessary. You may optionally pass one argument. If you pass an `Error` object, then any `onError` hooks will be called; otherwise, any `onSuccess` hooks will be called.
 
 If you return `false`, no further submission will happen, and it is equivalent
 to calling `this.event.preventDefault()` and `this.event.stopPropagation()`. If you return anything other than `false`, the browser will submit the form.
