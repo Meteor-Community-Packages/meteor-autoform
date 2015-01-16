@@ -1,17 +1,29 @@
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
-    var context = _.clone(this);
+    // After removing all of the props we know about, everything else should
+    // become a form attribute.
+    var context = _.omit(this,
+                  "schema",
+                  "collection",
+                  "validation",
+                  "doc",
+                  "resetOnSuccess",
+                  "type",
+                  "template",
+                  "autosave",
+                  "meteormethod",
+                  "filter",
+                  "autoConvert",
+                  "removeEmptyStrings",
+                  "trimStrings");
 
     // By default, we add the `novalidate="novalidate"` attribute to our form,
     // unless the user passes `validation="browser"`.
-    if (context.validation !== "browser" && !context.novalidate) {
+    if (this.validation !== "browser" && !context.novalidate) {
       context.novalidate = "novalidate";
     }
-    // After removing all of the props we know about, everything else should
-    // become a form attribute.
-    // XXX Would be better to use a whitelist of HTML attributes allowed on form elements
-    return _.omit(context, "schema", "collection", "validation", "doc", "resetOnSuccess",
-        "type", "template", "autosave", "meteormethod", "filter", "autoConvert", "removeEmptyStrings", "trimStrings");
+
+    return context;
   },
   innerContext: function autoFormTplContext(outerContext) {
     // Set up the context to be used for everything within the autoform.
