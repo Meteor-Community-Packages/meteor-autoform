@@ -73,7 +73,7 @@ _validateForm = function _validateForm(formId, formDocs, useCollectionSchema) {
   return isValid;
 };
 
-_validateField = function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
+function _validateField(key, template, ss, skipEmpty, onlyIfAlreadyInvalid) {
   var docToValidate, isModifier;
 
   // Due to throttling, this can be called after the autoForm template is destroyed.
@@ -86,7 +86,6 @@ _validateField = function _validateField(key, template, skipEmpty, onlyIfAlready
   var formId = context.id;
   var form = AutoForm.getCurrentDataForForm(formId);
   var docId = (form.doc && form.doc._id) || null;
-  var ss = AutoForm.getFormSchema();
 
   if (onlyIfAlreadyInvalid && ss.namedContext(formId).isValid()) {
     return; //skip validation
@@ -111,7 +110,7 @@ _validateField = function _validateField(key, template, skipEmpty, onlyIfAlready
   }
 
   return validateFormDoc(docToValidate, isModifier, formId, ss, docId, key);
-};
+}
 
 // Throttle field validation to occur at most every 300ms,
 // with leading and trailing calls.

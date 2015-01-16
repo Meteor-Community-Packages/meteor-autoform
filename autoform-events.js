@@ -384,7 +384,9 @@ Template.autoForm.events({
     var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup');
     var skipEmpty = !(event.keyCode === 8 || event.keyCode === 46); //if deleting or backspacing, don't skip empty
     if ((validationType === 'keyup' || validationType === 'submitThenKeyup')) {
-      validateField(event.currentTarget.getAttribute("data-schema-key"), template, skipEmpty, onlyIfAlreadyInvalid);
+      // validateField is throttled, so we need to get form schema here
+      var ss = AutoForm.getFormSchema();
+      validateField(event.currentTarget.getAttribute("data-schema-key"), template, ss, skipEmpty, onlyIfAlreadyInvalid);
     }
   },
   'blur [data-schema-key]': function autoFormBlurHandler(event, template) {
@@ -395,7 +397,9 @@ Template.autoForm.events({
         validationType === 'blur' ||
         validationType === 'submitThenKeyup' ||
         validationType === 'submitThenBlur') {
-      validateField(event.currentTarget.getAttribute("data-schema-key"), template, false, onlyIfAlreadyInvalid);
+      // validateField is throttled, so we need to get form schema here
+      var ss = AutoForm.getFormSchema();
+      validateField(event.currentTarget.getAttribute("data-schema-key"), template, ss, false, onlyIfAlreadyInvalid);
     }
   },
   'change form': function autoFormChangeHandler(event, template) {
@@ -430,7 +434,9 @@ Template.autoForm.events({
         validationType === 'blur' ||
         validationType === 'submitThenKeyup' ||
         validationType === 'submitThenBlur') {
-      validateField(key, template, false, onlyIfAlreadyInvalid);
+      // validateField is throttled, so we need to get form schema here
+      var ss = AutoForm.getFormSchema();
+      validateField(key, template, ss, false, onlyIfAlreadyInvalid);
     }
   },
   'reset form': function autoFormResetHandler(event, template) {
