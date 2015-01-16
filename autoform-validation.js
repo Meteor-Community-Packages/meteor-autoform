@@ -38,22 +38,26 @@ validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, docId, k
   }
 };
 
-_validateForm = function _validateForm(formId, formDetails, formDocs, useCollectionSchema) {
-  var ss, docId, isValid;
+_validateForm = function _validateForm(formId, formDocs, useCollectionSchema) {
+  var ss, docId, isValid, collection;
+  var form = AutoForm.getCurrentDataForForm(formId);
 
-  if (formDetails.validationType === 'none')
+  if (form.validation === 'none') {
     return true;
+  }
 
+  ss = AutoForm.getFormSchema(formId);
+  collection = AutoForm.getFormCollection(formId);
   // We use the schema for the `schema` attribute if present,
   // else the schema for the collection. If there is a `schema`
   // attribute but you want to force validation against the
   // collection's schema instead, pass useCollectionSchema=true
-  ss = (useCollectionSchema && formDetails.collection) ? formDetails.collection.simpleSchema() : formDetails.ss;
+  ss = (useCollectionSchema && collection) ? collection.simpleSchema() : ss;
 
-  docId = formDetails.doc && formDetails.doc._id || null;
+  docId = (form.doc && form.doc._id) || null;
 
   // Perform validation
-  if (formDetails.submitType === "update") {
+  if (form.type === "update") {
     // For a type="update" form, we validate the modifier. We don't want to throw
     // errors about missing required fields, etc.
     isValid = validateFormDoc(formDocs.updateDoc, true, formId, ss, docId);
@@ -70,6 +74,8 @@ _validateForm = function _validateForm(formId, formDetails, formDocs, useCollect
 };
 
 _validateField = function _validateField(key, template, skipEmpty, onlyIfAlreadyInvalid) {
+  var docToValidate, isModifier;
+
   // Due to throttling, this can be called after the autoForm template is destroyed.
   // If that happens, we exit without error.
   if (!template || !template.view._domrange || template.view.isDestroyed) {
@@ -77,10 +83,10 @@ _validateField = function _validateField(key, template, skipEmpty, onlyIfAlready
   }
 
   var context = template.data;
-  var formId = context.id || defaultFormId;
-  var formDetails = formData[formId];
-  var docId = formDetails.doc && formDetails.doc._id || null;
-  var ss = formDetails.ss;
+  var formId = context.id;
+  var form = AutoForm.getCurrentDataForForm(formId);
+  var docId = (form.doc && form.doc._id) || null;
+  var ss = AutoForm.getFormSchema();
 
   if (onlyIfAlreadyInvalid && ss.namedContext(formId).isValid()) {
     return; //skip validation
@@ -90,18 +96,19 @@ _validateField = function _validateField(key, template, skipEmpty, onlyIfAlready
   var formDocs = getFormValues(template, formId, ss);
 
   // Clean and validate doc
-  if (formDetails.submitType === "update") {
-    var docToValidate = formDocs.updateDoc;
-    var isModifier = true;
+  if (form.type === "update") {
+    docToValidate = formDocs.updateDoc;
+    isModifier = true;
   } else {
-    var docToValidate = formDocs.insertDoc;
-    var isModifier = false;
+    docToValidate = formDocs.insertDoc;
+    isModifier = false;
   }
 
   // Skip validation if skipEmpty is true and the field we're validating
   // has no value.
-  if (skipEmpty && !AutoForm.Utility.objAffectsKey(docToValidate, key))
+  if (skipEmpty && !AutoForm.Utility.objAffectsKey(docToValidate, key)) {
     return true; //skip validation
+  }
 
   return validateFormDoc(docToValidate, isModifier, formId, ss, docId, key);
 };
@@ -114,7 +121,7 @@ validateField = _.throttle(_validateField, 300);
 selectFirstInvalidField = function selectFirstInvalidField(formId, ss) {
   var ctx = ss.namedContext(formId), template, fields;
   if (!ctx.isValid()) {
-    template = templatesById[formId];
+    template = AutoForm.templateInstanceForForm(formId);
     fields = getAllFieldsInForm(template);
     fields.each(function () {
       var f = $(this);

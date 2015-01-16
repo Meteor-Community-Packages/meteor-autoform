@@ -2,7 +2,6 @@
 /* global getInputType:true */
 /* global getFieldValue:true */
 /* global getFormValues:true */
-/* global formData */
 /* global getInputValue:true */
 /* global getFieldsValues:true */
 /* global getAllFieldsInForm:true */
@@ -83,31 +82,31 @@ getInputType = function getInputType(atts) {
 };
 
 getFieldValue = function getFieldValue(template, key) {
-  var formInfo = formData[template.data.id];
-  var doc = getFieldsValues(getAllFieldsInForm(template).filter('[data-schema-key="' + key + '"], [data-schema-key^="' + key + '."]'), formInfo.ss);
+  var ss = AutoForm.getFormSchema(template.data.id);
+  var doc = getFieldsValues(getAllFieldsInForm(template).filter('[data-schema-key="' + key + '"], [data-schema-key^="' + key + '."]'), ss);
   return doc && doc[key];
 };
 
 getFormValues = function getFormValues(template, formId, ss) {
-  var formInfo = formData[formId];
+  var form = AutoForm.getCurrentDataForForm(formId);
   // By default, we do not keep empty strings
   var keepEmptyStrings = false;
-  if (formInfo.removeEmptyStrings === false) {
+  if (form.removeEmptyStrings === false) {
     keepEmptyStrings = true;
   }
   // By default, we do filter
   var filter = true;
-  if (formInfo.filter === false) {
+  if (form.filter === false) {
     filter = false;
   }
   // By default, we do autoConvert
   var autoConvert = true;
-  if (formInfo.autoConvert === false) {
+  if (form.autoConvert === false) {
     autoConvert = false;
   }
   // By default, we do trimStrings
   var trimStrings = true;
-  if (formInfo.trimStrings === false) {
+  if (form.trimStrings === false) {
     trimStrings = false;
   }
 

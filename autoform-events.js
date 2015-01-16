@@ -2,8 +2,10 @@
 var lastAutoSaveElement = null;
 
 function beginSubmit(formId, template) {
-  if (!template || !template.view._domrange)
+  if (!template || !template.view._domrange || template.view.isDestroyed) {
     return;
+  }
+
   // Get user-defined hooks
   var hooks = Hooks.getHooks(formId, 'beginSubmit');
   if (hooks.length) {
@@ -20,8 +22,10 @@ function beginSubmit(formId, template) {
 }
 
 function endSubmit(formId, template) {
-  if (!template || !template.view._domrange)
+  if (!template || !template.view._domrange || template.view.isDestroyed) {
     return;
+  }
+
   // Try to avoid incorrect reporting of which input caused autosave
   lastAutoSaveElement = null;
   // Get user-defined hooks
@@ -42,19 +46,20 @@ function endSubmit(formId, template) {
 Template.autoForm.events({
   'submit form': function autoFormSubmitHandler(event, template) {
     // Gather necessary form info
-    var formId = this.id || defaultFormId;
-    var data = formData[formId];
-    var isInsert = (data.submitType === "insert");
-    var isUpdate = (data.submitType === "update");
-    var isMethod = (data.submitType === "method");
-    var method = data.submitMethod;
+    var formId = this.id;
+    var form = AutoForm.getCurrentDataForForm(formId);
+    var isInsert = (form.type === "insert");
+    var isUpdate = (form.type === "update");
+    var isMethod = (form.type === "method");
+    var method = form.meteormethod;
     var isNormalSubmit = (!isInsert && !isUpdate && !isMethod);
     // ss will be the schema for the `schema` attribute if present,
     // else the schema for the collection
-    var ss = data.ss;
-    var ssIsOverride = data.ssIsOverride;
-    var collection = data.collection;
-    var currentDoc = data.doc;
+    var ss = AutoForm.getFormSchema(formId);
+    var collection = AutoForm.getFormCollection(formId);
+    var ssIsOverride = !!(collection && form.schema);
+
+    var currentDoc = form.doc;
     var docId = currentDoc ? currentDoc._id : null;
     var isValid;
 
@@ -134,8 +139,9 @@ Template.autoForm.events({
           }
         } else {
           // By default, we reset form after successful submit, but
-          // you can opt out.
-          if (data.resetOnSuccess !== false) {
+          // you can opt out. We should never reset after submit
+          // when autosaving.
+          if (form.resetOnSuccess !== false && form.autosave !== true) {
             AutoForm.resetForm(formId, template);
           }
           // Set docId in the context for insert forms, too
@@ -285,12 +291,12 @@ Template.autoForm.events({
     // We also validate at this time if we're doing normal form submission, in which
     // case there are no "before" hooks, and this is the only validation pass we do
     // before running onSubmit hooks and potentially allowing the browser to submit.
-    if (data.validationType !== 'none' && (ssIsOverride || isNormalSubmit)) {
+    if (form.validation !== 'none' && (ssIsOverride || isNormalSubmit)) {
       // Catch exceptions in validation functions which will bubble up here, cause a form with
       // onSubmit() to submit prematurely and prevent the error from being reported
       // (due to a page refresh).
       try {
-        isValid = _validateForm(formId, data, formDocs);
+        isValid = _validateForm(formId, formDocs);
       } catch (e) {
         console.error('Validation error', e);
         isValid = false;
@@ -312,10 +318,10 @@ Template.autoForm.events({
     // browser form submission.
     var validationOptions = {
       validationContext: formId,
-      filter: data.filter,
-      autoConvert: data.autoConvert,
-      removeEmptyStrings: data.removeEmptyStrings,
-      trimStrings: data.trimStrings
+      filter: form.filter,
+      autoConvert: form.autoConvert,
+      removeEmptyStrings: form.removeEmptyStrings,
+      trimStrings: form.trimStrings
     };
 
     // INSERT FORM SUBMIT
@@ -369,7 +375,7 @@ Template.autoForm.events({
         // Validate. If both schema and collection were provided, then we validate
         // against the collection schema here. Otherwise we validate against whichever
         // one was passed.
-        isValid = _validateForm(formId, data, formDocs, ssIsOverride);
+        isValid = _validateForm(formId, formDocs, ssIsOverride);
         if (isValid === false) {
           return failedValidation();
         }
@@ -397,8 +403,12 @@ Template.autoForm.events({
   },
   'blur [data-schema-key]': function autoFormBlurHandler(event, template) {
     var validationType = template.data.validation || 'submitThenKeyup';
-    var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
-    if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
+    var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' ||
+                                validationType === 'submitThenBlur');
+    if (validationType === 'keyup' ||
+        validationType === 'blur' ||
+        validationType === 'submitThenKeyup' ||
+        validationType === 'submitThenBlur') {
       validateField(event.currentTarget.getAttribute("data-schema-key"), template, false, onlyIfAlreadyInvalid);
     }
   },
@@ -411,43 +421,43 @@ Template.autoForm.events({
       if (!key) return;
     }
 
-    var formId = self.id || defaultFormId;
-    var data = formData[formId];
-    if (!data)
-      return;
+    var formId = self.id;
 
     // Mark field value as changed for reactive updates
     updateTrackedFieldValue(formId, key);
 
+    // Get current form data context
+    var data = AutoForm.getCurrentDataForForm(formId);
+
     // If the form should be auto-saved whenever updated, we do that on field
     // changes instead of validating the field
-    if (data.autosave) {
+    if (data.autosave === true) {
       lastAutoSaveElement = event.target;
       $(event.currentTarget).submit();
       return;
     }
 
-    var validationType = data.validationType || 'submitThenKeyup';
-    var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' || validationType === 'submitThenBlur');
-    if (validationType === 'keyup' || validationType === 'blur' || validationType === 'submitThenKeyup' || validationType === 'submitThenBlur') {
+    var validationType = data.validation || 'submitThenKeyup';
+    var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' ||
+                                validationType === 'submitThenBlur');
+    if (validationType === 'keyup' ||
+        validationType === 'blur' ||
+        validationType === 'submitThenKeyup' ||
+        validationType === 'submitThenBlur') {
       validateField(key, template, false, onlyIfAlreadyInvalid);
     }
   },
   'reset form': function autoFormResetHandler(event, template) {
-    var formId = this.id || defaultFormId;
+    var formId = this.id;
 
-    formPreserve.clearDocument(formId);
+    AutoForm.formPreserve.clearDocument(formId);
 
     // Reset array counts
     arrayTracker.resetForm(formId);
 
-    var fd = formData[formId];
-
-    if (!fd)
-      return;
-
-    if (fd.ss) {
-      fd.ss.namedContext(formId).resetValidation();
+    var vc = AutoForm.getValidationContext(formId);
+    if (vc) {
+      vc.resetValidation();
       // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
       // there is no need to reset validation for it. No error need be thrown.
     }
@@ -462,7 +472,10 @@ Template.autoForm.events({
       afDestroyUpdateForm.set(false);
       Tracker.flush();
 
-      template.$("[autofocus]").focus();
+      // Focus the autofocus element
+      if (template && template.view._domrange && !template.view.isDestroyed) {
+        template.$("[autofocus]").focus();
+      }
     } else {
       // This must be done after we allow this event handler to return
       // because we have to let the browser reset all fields before we
@@ -497,8 +510,8 @@ Template.autoForm.events({
     var maxCount = self.maxCount; // optional, overrides schema
     var index = self.index;
     var data = template.data;
-    var formId = data && data.id || defaultFormId;
-    var ss = formData[formId].ss;
+    var formId = data && data.id;
+    var ss = AutoForm.getFormSchema(formId);
 
     // remove the item we clicked
     arrayTracker.removeFromFieldAtIndex(formId, name, index, ss, minCount, maxCount);
@@ -512,9 +525,10 @@ Template.autoForm.events({
     var name = btn.attr("data-autoform-field");
     var minCount = btn.attr("data-autoform-minCount"); // optional, overrides schema
     var maxCount = btn.attr("data-autoform-maxCount"); // optional, overrides schema
+
     var data = template.data;
-    var formId = data && data.id || defaultFormId;
-    var ss = formData[formId].ss;
+    var formId = data && data.id;
+    var ss = AutoForm.getFormSchema(formId);
 
     arrayTracker.addOneToField(formId, name, ss, minCount, maxCount);
   }

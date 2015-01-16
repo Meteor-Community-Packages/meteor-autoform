@@ -444,17 +444,17 @@ Utility = {
    * an error if we can't find an autoform context.
    */
   normalizeContext: function autoFormNormalizeContext(context, name) {
-    var atts, autoform, defs, itemDefs, allowedValues, formComponentAttributes,
-      fieldAttributes, fieldAttributesForComponentType;
+    var atts, defs, itemDefs, allowedValues, formComponentAttributes,
+      fieldAttributes, fieldAttributesForComponentType, ss;
 
     context = context || {};
     atts = context.atts ? _.clone(context.atts) : _.clone(context);
-    autoform = AutoForm.find(name);
-    defs = Utility.getDefs(autoform.ss, atts.name); //defs will not be undefined
+    ss = AutoForm.getFormSchema();
+    defs = Utility.getDefs(ss, atts.name); //defs will not be undefined
 
     // For array fields, `allowedValues` is on the array item definition
     if (defs.type === Array) {
-      itemDefs = Utility.getDefs(autoform.ss, atts.name + ".$");
+      itemDefs = Utility.getDefs(ss, atts.name + ".$");
       allowedValues = itemDefs.allowedValues;
     } else {
       allowedValues = defs.allowedValues;
@@ -490,7 +490,6 @@ Utility = {
     }
 
     return {
-      af: autoform,
       atts: atts,
       defs: defs
     };

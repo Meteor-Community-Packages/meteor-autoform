@@ -5,15 +5,15 @@ if (typeof regHelper !== "function") {
   regHelper = UI.registerHelper;
 }
 
-function parseOptions(options, helperName) {
+function parseOptions(options) {
   var hash = (options || {}).hash || {};
-  // Find the autoform context
-  var afContext = AutoForm.find(helperName);
+  // Find the form's schema
+  var ss = AutoForm.getFormSchema();
   // Call getDefs for side effect of throwing errors when name is not in schema
   if (hash.name) {
-    AutoForm.Utility.getDefs(afContext.ss, hash.name);
+    AutoForm.Utility.getDefs(ss, hash.name);
   }
-  return _.extend({}, afContext, hash);
+  return _.extend({}, hash, {ss: ss});
 }
 
 /*
@@ -25,8 +25,9 @@ function parseOptions(options, helperName) {
  */
 regHelper('afFieldMessage', function autoFormFieldMessage(options) {
   options = parseOptions(options, 'afFieldMessage');
+  var formId = AutoForm.getFormId();
 
-  return options.ss.namedContext(options.formId).keyErrorMessage(options.name);
+  return options.ss.namedContext(formId).keyErrorMessage(options.name);
 });
 
 /*
@@ -34,8 +35,9 @@ regHelper('afFieldMessage', function autoFormFieldMessage(options) {
  */
 regHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
   options = parseOptions(options, 'afFieldIsInvalid');
+  var formId = AutoForm.getFormId();
 
-  return options.ss.namedContext(options.formId).keyIsInvalid(options.name);
+  return options.ss.namedContext(formId).keyIsInvalid(options.name);
 });
 
 /*
@@ -43,9 +45,10 @@ regHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
  */
 regHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreThanMinimum(options) {
   options = parseOptions(options, 'afArrayFieldHasMoreThanMinimum');
+  var formId = AutoForm.getFormId();
 
   var range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
-  var visibleCount = arrayTracker.getVisibleCount(options.formId, options.name);
+  var visibleCount = arrayTracker.getVisibleCount(formId, options.name);
   return (visibleCount > range.minCount);
 });
 
@@ -54,9 +57,10 @@ regHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreTh
  */
 regHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessThanMaximum(options) {
   options = parseOptions(options, 'afArrayFieldHasLessThanMaximum');
+  var formId = AutoForm.getFormId();
 
   var range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
-  var visibleCount = arrayTracker.getVisibleCount(options.formId, options.name);
+  var visibleCount = arrayTracker.getVisibleCount(formId, options.name);
   return (visibleCount < range.maxCount);
 });
 
@@ -65,8 +69,9 @@ regHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessTh
  */
 regHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
   options = parseOptions(options, 'afFieldValueIs');
+  var formId = AutoForm.getFormId();
 
-  var currentValue = AutoForm.getFieldValue(options.formId, options.name);
+  var currentValue = AutoForm.getFieldValue(formId, options.name);
   return currentValue === options.value;
 });
 
@@ -91,8 +96,9 @@ regHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLastVisible(
  */
 regHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
   options = parseOptions(options, 'afFieldValueContains');
+  var formId = AutoForm.getFormId();
 
-  var currentValue = AutoForm.getFieldValue(options.formId, options.name);
+  var currentValue = AutoForm.getFieldValue(formId, options.name);
   return _.isArray(currentValue) && (_.contains(currentValue, options.value) || options.values && _.intersection(currentValue, options.values.split(",")));
 });
 
@@ -122,6 +128,7 @@ regHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
 regHelper("afFieldNames", function autoFormFieldNames(options) {
   options = parseOptions(options, 'afFieldNames');
   var ss = options.ss, name = options.name, namePlusDot, genericName, genericNamePlusDot;
+  var form = AutoForm.getCurrentDataForForm();
 
   if (name) {
     namePlusDot = name + ".";
@@ -218,12 +225,12 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
     }
 
     // Don't include fields with denyInsert=true when it's an insert form
-    if (fieldDefs.denyInsert && options.submitType === "insert") {
+    if (fieldDefs.denyInsert && form.type === "insert") {
       return false;
     }
 
     // Don't include fields with denyUpdate=true when it's an update form
-    if (fieldDefs.denyUpdate && options.submitType === "update") {
+    if (fieldDefs.denyUpdate && form.type === "update") {
       return false;
     }
 
