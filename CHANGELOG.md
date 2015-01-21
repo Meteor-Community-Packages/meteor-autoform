@@ -6,6 +6,11 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### vNext
+
+* `data-required` attribute is now present on the form group `div` element for all built-in `afFormGroup` templates if the field is required. This allows you to use css like the following to display an asterisk after required fields: `[data-required] label:after {content: '*'}`
+* Compatibility break: If you have custom templates for `afFormGroup` or `afObjectField`, change all `this.atts` references to `this`.
+
 ### 4.2.2
 
 * Fixed "Can't set timers inside simulations" error (Thanks @SachaG)

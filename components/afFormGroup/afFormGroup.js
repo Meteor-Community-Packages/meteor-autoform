@@ -11,11 +11,15 @@ Template.afFormGroup.helpers({
     var id = c.atts["id-prefix"] || "";
     id += c.atts.id || c.atts.name.replace(".", "-");
     afFieldLabelAtts.for = afFieldInputAtts.id = id;
+
+    var fieldSchema = AutoForm.getSchemaForField(c.atts.name);
+
     return {
       skipLabel: (c.atts.label === false),
       afFieldLabelAtts: afFieldLabelAtts,
       afFieldInputAtts: afFieldInputAtts,
-      atts: {name: c.atts.name},
+      name: c.atts.name,
+      required: !fieldSchema.optional,
       labelText: (typeof c.atts.label === "string") ? c.atts.label : null
     };
   }
