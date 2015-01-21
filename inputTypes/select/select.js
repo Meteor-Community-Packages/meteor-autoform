@@ -22,7 +22,12 @@ AutoForm.addInputType("select", {
         // _id must be included because it is a special property that
         // #each uses to track unique list items when adding and removing them
         // See https://github.com/meteor/meteor/issues/2174
-        _id: "",
+        //
+        // Setting this to an empty string caused problems if option with value
+        // 1 was in the options list because Spacebars evaluates "" to 1 and
+        // considers that a duplicate.
+        // See https://github.com/aldeed/meteor-autoform/issues/656
+        _id: "AUTOFORM_EMPTY_FIRST_OPTION",
         selected: false,
         atts: itemAtts
       });
@@ -39,7 +44,12 @@ AutoForm.addInputType("select", {
             // _id must be included because it is a special property that
             // #each uses to track unique list items when adding and removing them
             // See https://github.com/meteor/meteor/issues/2174
-            _id: subOpt.value,
+            //
+            // The toString() is necessary because otherwise Spacebars evaluates
+            // any string to 1 if the other values are numbers, and then considers
+            // that a duplicate.
+            // See https://github.com/aldeed/meteor-autoform/issues/656
+            _id: subOpt.value.toString(),
             selected: (subOpt.value === context.value),
             atts: itemAtts
           };
@@ -56,7 +66,12 @@ AutoForm.addInputType("select", {
           // _id must be included because it is a special property that
           // #each uses to track unique list items when adding and removing them
           // See https://github.com/meteor/meteor/issues/2174
-          _id: opt.value,
+          //
+          // The toString() is necessary because otherwise Spacebars evaluates
+          // any string to 1 if the other values are numbers, and then considers
+          // that a duplicate.
+          // See https://github.com/aldeed/meteor-autoform/issues/656
+          _id: opt.value.toString(),
           selected: (opt.value === context.value),
           atts: itemAtts
         });
