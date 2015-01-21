@@ -1,15 +1,9 @@
+[![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
+
 AutoForm
 =========================
 
-[![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
-
-AutoForm is a Meteor package that adds UI components and helpers to easily
-create basic forms with automatic insert and update events, and automatic
-reactive validation. This package requires and automatically installs the
-[simple-schema](https://github.com/aldeed/meteor-simple-schema) package.
-You can optionally use it with the
-[collection2](https://github.com/aldeed/meteor-collection2) package, which you
-have to add to your app yourself.
+AutoForm is a Meteor package that adds UI components and helpers to easily create basic forms with automatic insert and update events, and automatic reactive validation. This package requires and automatically installs the [simple-schema](https://github.com/aldeed/meteor-simple-schema) package. You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you have to add to your app yourself.
 
 ## UPDATING TO 4.0
 
