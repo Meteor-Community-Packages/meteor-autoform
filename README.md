@@ -769,19 +769,19 @@ all the supported hooks:
 AutoForm.hooks({
   myFormId: {
     before: {
-      insert: function(doc, template) {
+      insert: function(doc) {
         //return doc; (synchronous)
         //return false; (synchronous, cancel)
         //this.result(doc); (asynchronous)
         //this.result(false); (asynchronous, cancel)
       },
-      update: function(docId, modifier, template) {
+      update: function(modifier) {
         //return modifier; (synchronous)
         //return false; (synchronous, cancel)
         //this.result(modifier); (asynchronous)
         //this.result(false); (asynchronous, cancel)
       },
-      "methodName": function(doc, template) {
+      method: function(doc) {
         //return doc; (synchronous)
         //return false; (synchronous, cancel)
         //this.result(doc); (asynchronous)
@@ -794,7 +794,7 @@ AutoForm.hooks({
     after: {
       insert: function(error, result, template) {},
       update: function(error, result, template) {},
-      "methodName": function(error, result, template) {}
+      method: function(error, result, template) {}
     },
 
     // Called when form does not have a `type` attribute
@@ -805,13 +805,13 @@ AutoForm.hooks({
       //this.done(null, "foo"); // submitted successfully, call onSuccess with `result` arg set to "foo"
     },
 
-    // Called when any operation succeeds, where operation will be
-    // "insert", "update", "submit", or the method name.
-    onSuccess: function(operation, result, template) {},
+    // Called when any submit operation succeeds, where formType will be
+    // "insert", "update", "submit", or "method".
+    onSuccess: function(formType, result, template) {},
 
-    // Called when any operation fails, where operation will be
-    // "validation", "insert", "update", "submit", or the method name.
-    onError: function(operation, error, template) {},
+    // Called when any submit operation fails, where formType will be
+    // "validation", "insert", "update", "submit", or "method".
+    onError: function(formType, error, template) {},
 
     // Called every time the form is revalidated, which can be often if keyup
     // validation is used.
