@@ -13,7 +13,8 @@ AutoForm.reactiveFormData = new FormData();
 
 formValues = {}; //for reactive show/hide based on current value of a field
 formDeps = {}; //for invalidating the form inner context and causing rerender
-inputTypeDefinitions = {}; //for storing input type definitions added by AutoForm.addInputType
+AutoForm._inputTypeDefinitions = {}; //for storing input type definitions added by AutoForm.addInputType
+AutoForm._formTypeDefinitions = {}; //for storing submit type definitions added by AutoForm.addFormType
 
 arrayTracker = new ArrayTracker();
 componentTypeList = ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'];

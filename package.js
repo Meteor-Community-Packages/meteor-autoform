@@ -44,6 +44,11 @@ Package.on_use(function(api) {
     'autoform-inputs.js',
     // public API
     'autoform-api.js',
+    // form types
+    'formTypes/insert.js',
+    'formTypes/update.js',
+    'formTypes/method.js',
+    'formTypes/normal.js',
     // input types
     'inputTypes/boolean-checkbox/boolean-checkbox.html',
     'inputTypes/boolean-checkbox/boolean-checkbox.js',

@@ -9,6 +9,8 @@ forms with automatic insert and update events, and automatic reactive validation
 ### vNext
 
 * `data-required` attribute is now present on the form group `div` element for all built-in `afFormGroup` templates if the field is required. This allows you to use css like the following to display an asterisk after required fields: `[data-required] label:after {content: '*'}`
+* Compatibility break: The arguments passed to "before" hooks have changed. `docId` and `template` are no longer passed as arguments but are available as `this.docId` and `this.template`. Only a single object, `doc` is passed to every "before" hook.
+* Compatibility break: When defining "before" and "after" hooks for methods, use the word "method" instead of the method name. If you need different logic based on method name, you can examine `this.formAttributes.meteormethod` in your hook function.
 * Compatibility break: If you have custom templates for `afFormGroup` or `afObjectField`, change all `this.atts` references to `this`.
 
 ### 4.2.2

@@ -1,4 +1,4 @@
-/* global AutoForm, inputTypeDefinitions, getInputValue, getInputData, updateTrackedFieldValue */
+/* global AutoForm, getInputValue, getInputData, updateTrackedFieldValue */
 
 Template.afFieldInput.helpers({
   // similar to AutoForm.getTemplateName, but we have fewer layers of fallback, and we fall back
@@ -8,7 +8,7 @@ Template.afFieldInput.helpers({
 
     // Determine what `type` attribute should be if not set
     var inputType = AutoForm.getInputType(this);
-    var componentDef = inputTypeDefinitions[inputType];
+    var componentDef = AutoForm._inputTypeDefinitions[inputType];
     if (!componentDef) {
       throw new Error('AutoForm: No component found for rendering input with type "' + inputType + '"');
     }
@@ -42,7 +42,7 @@ Template.afFieldInput.helpers({
 
     // Determine what `type` attribute should be if not set
     var inputType = AutoForm.getInputType(this);
-    var componentDef = inputTypeDefinitions[inputType];
+    var componentDef = AutoForm._inputTypeDefinitions[inputType];
     if (!componentDef) {
       throw new Error('AutoForm: No component found for rendering input with type "' + inputType + '"');
     }

@@ -48,11 +48,7 @@ Template.autoForm.events({
     // Gather necessary form info
     var formId = this.id;
     var form = AutoForm.getCurrentDataForForm(formId);
-    var isInsert = (form.type === "insert");
-    var isUpdate = (form.type === "update");
-    var isMethod = (form.type === "method");
-    var method = form.meteormethod;
-    var isNormalSubmit = (!isInsert && !isUpdate && !isMethod);
+    var formType = form.type || 'normal';
     // ss will be the schema for the `schema` attribute if present,
     // else the schema for the collection
     var ss = AutoForm.getFormSchema(formId);
@@ -63,45 +59,52 @@ Template.autoForm.events({
     var docId = currentDoc ? currentDoc._id : null;
     var isValid;
 
-    // Make sure we have a collection if we need one for the requested submit type
-    if (!collection) {
-      if (isInsert)
-        throw new Error("AutoForm: You must specify a collection when form type is insert.");
-      else if (isUpdate)
-        throw new Error("AutoForm: You must specify a collection when form type is update.");
-    }
+    var validationOptions = {
+      validationContext: formId,
+      filter: form.filter,
+      autoConvert: form.autoConvert,
+      removeEmptyStrings: form.removeEmptyStrings,
+      trimStrings: form.trimStrings
+    };
 
-    // Prevent browser form submission if we're planning to do our own thing
-    if (!isNormalSubmit) {
-      event.preventDefault();
-    }
+    // Gather all form values
+    var formDocs = getFormValues(template, formId, ss);
 
     // Gather hooks
-    var onSuccess = Hooks.getHooks(formId, 'onSuccess');
-    var onError = Hooks.getHooks(formId, 'onError');
+    var onSuccessHooks = Hooks.getHooks(formId, 'onSuccess');
+    var onErrorHooks = Hooks.getHooks(formId, 'onError');
+    var beforeHooks = Hooks.getHooks(formId, 'before', formType);
+    var afterHooks = Hooks.getHooks(formId, 'after', formType);
 
     // Prep context with which hooks are called
     var hookContext = {
       event: event,
       template: template,
       formId: formId,
+      formAttributes: form,
+      currentDoc: currentDoc,
       docId: docId,
       autoSaveChangedElement: lastAutoSaveElement,
       resetForm: function () {
         AutoForm.resetForm(formId, template);
       },
-      validationContext: AutoForm.getValidationContext(formId)
+      validationContext: AutoForm.getValidationContext(formId),
+      ss: ss,
+      collection: collection,
+      ssIsOverride: ssIsOverride,
+      insertDoc: formDocs.insertDoc,
+      updateDoc: formDocs.updateDoc
     };
 
-    // Prep haltSubmission function
-    function haltSubmission() {
-      event.preventDefault();
-      event.stopPropagation();
+    function endSubmission() {
       // Run endSubmit hooks (re-enabled submit button or form, etc.)
       endSubmit(formId, template, hookContext);
     }
 
     function failedValidation() {
+      // add invalidKeys array as a property
+      // of the Error object before we call
+      // onError hooks
       var ec = ss.namedContext(formId);
       var ik = ec.invalidKeys(), error;
       if (ik) {
@@ -119,58 +122,21 @@ Template.autoForm.events({
       } else {
         error = new Error('form failed validation');
       }
-      _.each(onError, function onErrorEach(hook) {
+      _.each(onErrorHooks, function onErrorEach(hook) {
         hook.call(hookContext, 'pre-submit validation', error, template);
       });
-      haltSubmission();
-    }
-
-    // Prep callback creator function
-    function makeCallback(name) {
-      var afterHooks = Hooks.getHooks(formId, 'after', name);
-      return function autoFormActionCallback(error, result) {
-        if (error) {
-          if (onError && onError.length) {
-            _.each(onError, function onErrorEach(hook) {
-              hook.call(hookContext, name, error, template);
-            });
-          } else if ((!afterHooks || !afterHooks.length) && ss.namedContext(formId).isValid()) {
-            // if there are no onError or "after" hooks or validation errors, log the error
-            // because it must be some other error from the server
-            console.log(error);
-          }
-        } else {
-          // By default, we reset form after successful submit, but
-          // you can opt out. We should never reset after submit
-          // when autosaving.
-          if (form.resetOnSuccess !== false && form.autosave !== true) {
-            AutoForm.resetForm(formId, template);
-          }
-          // Set docId in the context for insert forms, too
-          if (name === "insert") {
-            hookContext.docId = result;
-          }
-          _.each(onSuccess, function onSuccessEach(hook) {
-            hook.call(hookContext, name, result, template);
-          });
-        }
-        _.each(afterHooks, function afterHooksEach(hook) {
-          hook.call(hookContext, error, result, template);
-        });
-        // Run endSubmit hooks (re-enabled submit button or form, etc.)
-        endSubmit(formId, template, hookContext);
-      };
+      event.preventDefault();
+      event.stopPropagation();
+      endSubmission();
     }
 
     // Prep function that calls before hooks.
-    // We pass the template instance in case the hook
-    // needs the data context.
-    function doBefore(docId, doc, hooks, name, next) {
+    function runBeforeHooks(doc, next) {
       // We call the hooks recursively, in order added,
       // passing the result of the first hook to the
       // second hook, etc.
       function runHook(i, doc) {
-        var hook = hooks[i];
+        var hook = beforeHooks[i];
 
         if (!hook) {
           // We've run all hooks; continue submission
@@ -178,29 +144,25 @@ Template.autoForm.events({
           return;
         }
 
-        // Set up before hook context
+        // Define a `result` function
         var cb = function (d) {
           // If the hook returns false, we cancel
           if (d === false) {
-            // Run endSubmit hooks (re-enabled submit button or form, etc.)
-            endSubmit(formId, template);
+            endSubmission();
+          } else if (!_.isObject(d)) {
+            throw new Error("A 'before' hook must return an object");
           } else {
-            if (!_.isObject(d)) {
-              throw new Error(name + " must return an object");
-            }
             runHook(i+1, d);
           }
         };
+
+        // Add the `result` function to the before hook context
         var ctx = _.extend({
           result: _.once(cb)
         }, hookContext);
 
-        var result;
-        if (docId) {
-          result = hook.call(ctx, docId, doc, template);
-        } else {
-          result = hook.call(ctx, doc, template);
-        }
+        var result = hook.call(ctx, doc);
+
         // If the hook returns undefined, we wait for it
         // to call this.result()
         if (result !== void 0) {
@@ -211,73 +173,44 @@ Template.autoForm.events({
       runHook(0, doc);
     }
 
-    // Prep function that calls onSubmit hooks.
-    // We pass the template instance in case the hook
-    // needs the data context, and event in case they
-    // need to prevent default, etc.
-    function doOnSubmit(hooks, insertDoc, updateDoc, currentDoc) {
-      // These are called differently from the before hooks because
-      // they run async, but they can run in parallel and we need the
-      // result of all of them immediately because they can return
-      // false to stop normal form submission.
-
-      var hookCount = hooks.length, doneCount = 0, submitError, submitResult;
-
-      if (hookCount === 0) {
-        // Run endSubmit hooks (re-enabled submit button or form, etc.)
-        endSubmit(formId, template);
-        return;
+    // Prep function that calls after, onError, and onSuccess hooks.
+    // Also resets the form on success.
+    function resultCallback(error, result) {
+      if (error) {
+        if (onErrorHooks && onErrorHooks.length) {
+          _.each(onErrorHooks, function onErrorEach(hook) {
+            hook.call(hookContext, formType, error, template);
+          });
+        } else if ((!afterHooks || !afterHooks.length) && ss.namedContext(formId).isValid()) {
+          // if there are no onError or "after" hooks or validation errors, log the error
+          // because it must be some other error from the server
+          console.log(error);
+        }
+      } else {
+        // By default, we reset form after successful submit, but
+        // you can opt out. We should never reset after submit
+        // when autosaving.
+        if (form.resetOnSuccess !== false && form.autosave !== true) {
+          AutoForm.resetForm(formId, template);
+        }
+        // Set docId in the context for insert forms, too
+        if (formType === "insert") {
+          hookContext.docId = result;
+        }
+        _.each(onSuccessHooks, function onSuccessEach(hook) {
+          hook.call(hookContext, formType, result, template);
+        });
       }
-
-      // Set up onSubmit hook context
-      var ctx = _.extend({
-        done: function (error, result) {
-          doneCount++;
-          if (!submitError && error) {
-            submitError = error;
-          }
-          if (!submitResult && result) {
-            submitResult = result;
-          }
-          if (doneCount === hookCount) {
-            var submitCallback = makeCallback('submit');
-            // run onError, onSuccess, endSubmit
-            submitCallback(submitError, submitResult);
-          }
-        }
-      }, hookContext);
-
-      // Call all hooks at once.
-      // Pass both types of doc plus the doc attached to the form.
-      // If any return false, we stop normal submission, but we don't
-      // run onError, onSuccess, endSubmit hooks until they all call this.done().
-      var shouldStop = false;
-      _.each(hooks, function eachOnSubmit(hook) {
-        var result = hook.call(ctx, insertDoc, updateDoc, currentDoc);
-        if (shouldStop === false && result === false) {
-          shouldStop = true;
-        }
+      _.each(afterHooks, function afterHooksEach(hook) {
+        hook.call(hookContext, error, result, template);
       });
-      if (shouldStop) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
+      endSubmission();
     }
 
-    // Gather all form values
-    var formDocs = getFormValues(template, formId, ss);
-    var insertDoc = formDocs.insertDoc;
-    var updateDoc = formDocs.updateDoc;
-
-    // This validation pass happens before any "before" hooks run. It should happen
-    // only when there is both a collection AND a schema specified, in which case we
-    // validate first against the form schema. Then before hooks can add any missing
+    // This validation pass happens before any "before" hooks run. We
+    // validate against the form schema. Then before hooks can add any missing
     // properties before we validate against the full collection schema.
-    //
-    // We also validate at this time if we're doing normal form submission, in which
-    // case there are no "before" hooks, and this is the only validation pass we do
-    // before running onSubmit hooks and potentially allowing the browser to submit.
-    if (form.validation !== 'none' && (ssIsOverride || isNormalSubmit)) {
+    if (form.validation !== 'none') {
       // Catch exceptions in validation functions which will bubble up here, cause a form with
       // onSubmit() to submit prematurely and prevent the error from being reported
       // (due to a page refresh).
@@ -289,7 +222,8 @@ Template.autoForm.events({
       }
       // If we failed pre-submit validation, we stop submission.
       if (isValid === false) {
-        return failedValidation();
+        failedValidation();
+        return;
       }
     }
 
@@ -300,84 +234,20 @@ Template.autoForm.events({
     // then we actually do want the values.
     beginSubmit(formId, template, hookContext);
 
-    // Now we will do the requested insert, update, method, or normal
-    // browser form submission.
-    var validationOptions = {
-      validationContext: formId,
-      filter: form.filter,
-      autoConvert: form.autoConvert,
-      removeEmptyStrings: form.removeEmptyStrings,
-      trimStrings: form.trimStrings
-    };
-
-    // INSERT FORM SUBMIT
-    if (isInsert) {
-      // Get "before.insert" hooks
-      var beforeInsertHooks = Hooks.getHooks(formId, 'before', 'insert');
-      // Run "before.insert" hooks
-      doBefore(null, insertDoc, beforeInsertHooks, 'before.insert hook', function (doc) {
-        // Make callback for insert
-        var insertCallback = makeCallback('insert');
-        // Perform insert
-        if (typeof collection.simpleSchema === "function" && collection.simpleSchema() != null) {
-          // If the collection2 pkg is used and a schema is attached, we pass a validationContext
-          collection.insert(doc, validationOptions, insertCallback);
-        } else {
-          // If the collection2 pkg is not used or no schema is attached, we don't pass options
-          // because core Meteor's `insert` function does not accept
-          // an options argument.
-          collection.insert(doc, insertCallback);
-        }
-      });
+    // Call onSubmit from the requested form type definition
+    var ftd = AutoForm._formTypeDefinitions[form.type];
+    if (!ftd) {
+      throw new Error('AutoForm: Form type "' + form.type + '" has not been defined');
     }
 
-    // UPDATE FORM SUBMIT
-    else if (isUpdate) {
-      // Get "before.update" hooks
-      var beforeUpdateHooks = Hooks.getHooks(formId, 'before', 'update');
-      // Run "before.update" hooks
-      doBefore(docId, updateDoc, beforeUpdateHooks, 'before.update hook', function (modifier) {
-        // Make callback for update
-        var updateCallback = makeCallback('update');
-        if (_.isEmpty(modifier)) { // make sure this check stays after the before hooks
-          // Nothing to update. Just treat it as a successful update.
-          updateCallback(null, 0);
-        } else {
-          // Perform update
-          collection.update(docId, modifier, validationOptions, updateCallback);
-        }
-      });
-    }
-
-    // METHOD FORM SUBMIT
-    else if (isMethod) {
-      // Get "before.methodName" hooks
-      if (!method) {
-        throw new Error('When form type is "method", you must also provide a "meteormethod" attribute');
-      }
-      var beforeMethodHooks = Hooks.getHooks(formId, 'before', method);
-      // Run "before.methodName" hooks
-      doBefore(null, insertDoc, beforeMethodHooks, 'before.method hook', function (doc) {
-        // Validate. If both schema and collection were provided, then we validate
-        // against the collection schema here. Otherwise we validate against whichever
-        // one was passed.
-        isValid = _validateForm(formId, formDocs, ssIsOverride);
-        if (isValid === false) {
-          return failedValidation();
-        }
-        // Make callback for Meteor.call
-        var methodCallback = makeCallback(method);
-        // Call the method
-        Meteor.call(method, doc, updateDoc, docId, methodCallback);
-      });
-    }
-
-    // NORMAL FORM SUBMIT
-    else if (isNormalSubmit) {
-      // Get onSubmit hooks
-      var onSubmitHooks = Hooks.getHooks(formId, 'onSubmit');
-      doOnSubmit(onSubmitHooks, insertDoc, updateDoc, currentDoc);
-    }
+    ftd.onSubmit.call(_.extend({
+      runBeforeHooks: runBeforeHooks,
+      result: resultCallback,
+      endSubmission: endSubmission,
+      failedValidation: failedValidation,
+      validationOptions: validationOptions,
+      hookContext: hookContext
+    }, hookContext));
   },
   'keyup [data-schema-key]': function autoFormKeyUpHandler(event, template) {
     var validationType = template.data.validation || 'submitThenKeyup';

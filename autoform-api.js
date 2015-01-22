@@ -1,18 +1,4 @@
-/* global AutoForm:true */
-/* global Utility */
-/* global Hooks */
-/* global deps */
-/* global globalDefaultTemplate:true */
-/* global defaultTypeTemplates:true */
-/* global SimpleSchema */
-/* global getFormValues */
-/* global formValues */
-/* global inputTypeDefinitions */
-/* global _validateField */
-/* global _validateForm */
-/* global arrayTracker */
-/* global getInputType */
-/* global formDeps */
+/* global AutoForm:true, SimpleSchema, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, getFormValues, formValues, _validateForm, validateField, arrayTracker, getInputType, formDeps */
 
 // This file defines the public, exported API
 
@@ -342,7 +328,7 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   inputTypeTemplate = inputTypeTemplate.split("_")[0];
 
   // Figure out what registered input type was used to render this element
-  typeDef = _.where(inputTypeDefinitions, {template: inputTypeTemplate})[0];
+  typeDef = _.where(AutoForm._inputTypeDefinitions, {template: inputTypeTemplate})[0];
 
   // If field has a "data-null-value" attribute, value should always be null
   if (field.attr("data-null-value") !== void 0) {
@@ -402,7 +388,23 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
 AutoForm.addInputType = function afAddInputType(name, definition) {
   var obj = {};
   obj[name] = definition;
-  _.extend(inputTypeDefinitions, obj);
+  _.extend(AutoForm._inputTypeDefinitions, obj);
+};
+
+/**
+ * @method AutoForm.addFormType
+ * @public
+ * @param {String} name The type string that this definition is for.
+ * @param {Object} definition Defines how the submit type should work
+ * @param {String} definition.componentName The component name. A template with the name <componentName>_bootstrap3, and potentially others, must be defined.
+ * @return {undefined}
+ *
+ * Use this method to add custom input components.
+ */
+AutoForm.addFormType = function afAddFormType(name, definition) {
+  var obj = {};
+  obj[name] = definition;
+  _.extend(AutoForm._formTypeDefinitions, obj);
 };
 
 /**

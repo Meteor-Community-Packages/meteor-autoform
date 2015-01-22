@@ -210,7 +210,7 @@ getInputValue = function getInputValue(atts, value, mDoc, defaultValue, typeDefs
 /*
  * Builds the data context that the input component will have.
  */
-getInputData = function getInputData(defs, hash, value, label, submitType) {
+getInputData = function getInputData(defs, hash, value, label, formType) {
   var schemaType = defs.type;
 
   /*
@@ -233,9 +233,10 @@ getInputData = function getInputData(defs, hash, value, label, submitType) {
   }
 
   // Add disabled or readonly if the form has that submit type
-  if (submitType === "disabled") {
+  // TODO somehow make this part of the form type definition object.
+  if (formType === "disabled") {
     inputAtts.disabled = "";
-  } else if (submitType === "readonly") {
+  } else if (formType === "readonly") {
     inputAtts.readonly = "";
   }
 
