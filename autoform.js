@@ -12,7 +12,6 @@ AutoForm.formPreserve = new FormPreserve("autoforms");
 AutoForm.reactiveFormData = new FormData();
 
 formValues = {}; //for reactive show/hide based on current value of a field
-formDeps = {}; //for invalidating the form inner context and causing rerender
 AutoForm._inputTypeDefinitions = {}; //for storing input type definitions added by AutoForm.addInputType
 AutoForm._formTypeDefinitions = {}; //for storing submit type definitions added by AutoForm.addFormType
 

@@ -44,15 +44,9 @@ Template.autoForm.helpers({
 Template.autoForm.created = function autoFormCreated() {
   var template = this;
 
-  template.autorun(function () {
+  template.autorun(function (c) {
     var data = Template.currentData(); // rerun when current data changes
     var formId = data.id;
-
-    // rerun when manually invalidated
-    if (!formDeps[formId]) {
-      formDeps[formId] = new Tracker.Dependency();
-    }
-    formDeps[formId].depend();
 
     // When we change the form, loading a different doc, reloading the current doc, etc.,
     // we also want to reset the array counts for the form
@@ -74,10 +68,12 @@ Template.autoForm.created = function autoFormCreated() {
     }
 
     // Retain doc values after a "hot code push", if possible
-    var retrievedDoc = AutoForm.formPreserve.getDocument(formId);
-    if (retrievedDoc !== false) {
-      // Ensure we keep the _id property which may not be present in retrievedDoc.
-      doc = _.extend(doc || {}, retrievedDoc);
+    if (c.firstRun) {
+      var retrievedDoc = AutoForm.formPreserve.getDocument(formId);
+      if (retrievedDoc !== false) {
+        // Ensure we keep the _id property which may not be present in retrievedDoc.
+        doc = _.extend(doc || {}, retrievedDoc);
+      }
     }
 
     var mDoc;

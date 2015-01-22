@@ -587,20 +587,6 @@ AutoForm.getSchemaForField = function autoFormGetSchemaForField(name) {
 };
 
 /**
- * @method AutoForm.invalidateFormContext
- * @public
- * @param {String} formId The form ID.
- * @return {undefined}
- *
- * Call this to force invalidate the form context, such as when you're changing the `doc`
- * and it does not react by itself.
- */
-AutoForm.invalidateFormContext = function autoFormInvalidateFormContext(formId) {
-  formDeps[formId] = formDeps[formId] || new Tracker.Dependency();
-  formDeps[formId].changed();
-};
-
-/**
  * Gets the template instance for the form. The form
  * must be currently rendered. If not, returns `undefined`.
  * @param   {String}                     formId The form's `id` attribute
