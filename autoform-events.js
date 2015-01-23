@@ -235,9 +235,9 @@ Template.autoForm.events({
     beginSubmit(formId, template, hookContext);
 
     // Call onSubmit from the requested form type definition
-    var ftd = AutoForm._formTypeDefinitions[form.type];
+    var ftd = AutoForm._formTypeDefinitions[formType];
     if (!ftd) {
-      throw new Error('AutoForm: Form type "' + form.type + '" has not been defined');
+      throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
     }
 
     ftd.onSubmit.call(_.extend({
