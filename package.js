@@ -2,10 +2,10 @@ Package.describe({
   name: "aldeed:autoform",
   summary: "Easily create forms with automatic insert and update, and automatic reactive validation.",
   git: "https://github.com/aldeed/meteor-autoform.git",
-  version: "4.2.2"
+  version: "5.0.0-pre.1"
 });
 
-Package.on_use(function(api) {
+Package.onUse(function(api) {
   // Dependencies
   api.versionsFrom(['METEOR@0.9.3', 'METEOR@0.9.4', 'METEOR@1.0']);
   // common
@@ -25,10 +25,10 @@ Package.on_use(function(api) {
   api.export('Utility', 'client', {testOnly: true});
 
   // Common Files
-  api.add_files(['autoform-common.js']);
+  api.addFiles(['autoform-common.js']);
 
   // Client Files
-  api.add_files([
+  api.addFiles([
     // utilities and general init
     'utility.js',
     'form-preserve.js',
@@ -159,7 +159,7 @@ Package.on_use(function(api) {
   ], 'client');
 });
 
-Package.on_test(function (api) {
+Package.onTest(function (api) {
   api.use(['aldeed:autoform', 'tinytest', 'underscore']);
-  api.add_files(['tests/utility-tests.js', 'tests/autoform-tests.js']);
+  api.addFiles(['tests/utility-tests.js', 'tests/autoform-tests.js']);
 });
