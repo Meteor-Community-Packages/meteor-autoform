@@ -105,6 +105,8 @@ The following community packages provide additional custom input types that you 
 * [comerc:autoform-placecomplete](https://atmospherejs.com/comerc/autoform-placecomplete)
 * [comerc:autoform-bs-more](https://atmospherejs.com/comerc/autoform-bs-more)
 * [comerc:autoform-selectize](https://atmospherejs.com/comerc/autoform-selectize)
+* [miguelalarcos:afwrap-xautocomplete](https://atmospherejs.com/miguelalarcos/afwrap-xautocomplete)
+* [miguelalarcos:afwrap-xdatetime](https://atmospherejs.com/miguelalarcos/afwrap-xdatetime)
 
 [yogiben:admin](https://atmospherejs.com/yogiben/admin) provides CRUD admin pages using autoforms.
 
