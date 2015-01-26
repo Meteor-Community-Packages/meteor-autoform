@@ -1,29 +1,42 @@
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
     // After removing all of the props we know about, everything else should
-    // become a form attribute.
-    var context = _.omit(this,
-                  "schema",
-                  "collection",
-                  "validation",
-                  "doc",
-                  "resetOnSuccess",
-                  "type",
-                  "template",
-                  "autosave",
-                  "meteormethod",
-                  "filter",
-                  "autoConvert",
-                  "removeEmptyStrings",
-                  "trimStrings");
+    // become a form attribute unless it's an array or object.
+    var val, htmlAttributes = {}, context = this;
+    var removeProps = [
+      "schema",
+      "collection",
+      "validation",
+      "doc",
+      "resetOnSuccess",
+      "type",
+      "template",
+      "autosave",
+      "meteormethod",
+      "filter",
+      "autoConvert",
+      "removeEmptyStrings",
+      "trimStrings"
+    ];
+
+    // Filter out arrays and objects, which are obviously not meant to be
+    // HTML attributes.
+    for (var prop in context) {
+      if (context.hasOwnProperty(prop) && !_.contains(removeProps, prop)) {
+        val = context[prop];
+        if (!_.isArray(val) && !_.isObject(val)) {
+          htmlAttributes[prop] = val;
+        }
+      }
+    }
 
     // By default, we add the `novalidate="novalidate"` attribute to our form,
     // unless the user passes `validation="browser"`.
-    if (this.validation !== "browser" && !context.novalidate) {
-      context.novalidate = "novalidate";
+    if (this.validation !== "browser" && !htmlAttributes.novalidate) {
+      htmlAttributes.novalidate = "novalidate";
     }
 
-    return context;
+    return htmlAttributes;
   },
   innerContext: function autoFormTplContext(outerContext) {
     // Set up the context to be used for everything within the autoform.
