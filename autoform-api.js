@@ -60,6 +60,10 @@ AutoForm.hooks = function autoFormHooks(hooks, replace) {
   });
 };
 
+// Expose the hooks references to aid with automated testing
+AutoForm._hooks = Hooks.form;
+AutoForm._globalHooks = Hooks.global;
+
 /**
  * @method AutoForm.resetForm
  * @public
