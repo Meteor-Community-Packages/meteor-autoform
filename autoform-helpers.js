@@ -241,6 +241,14 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
   return fieldList;
 });
 
+regHelper('afSelectOptionAtts', function afSelectOptionAtts() {
+  var atts = _.pick(this, 'value');
+  if (this.selected) {
+    atts.selected = "";
+  }
+  return atts;
+});
+
 /*
  * afTemplateName
  * Deprecated. Don't use this. Eventually remove it.
