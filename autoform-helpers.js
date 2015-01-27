@@ -187,7 +187,7 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
     });
   }
 
-  if (!fieldList || fieldList.length === 0) {
+  if (!fieldList) {
     // Get list of field names that are descendants of this field's name.
     // If name/genericName is undefined, this will return top-level
     // schema keys.
