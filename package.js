@@ -184,6 +184,7 @@ Package.onUse(function(api) {
     'templates/bootstrap3/inputTypes/select-radio/select-radio.js',
     'templates/bootstrap3/inputTypes/select-radio-inline/select-radio-inline.html',
     'templates/bootstrap3/inputTypes/select-radio-inline/select-radio-inline.js',
+    'templates/bootstrap3/inputTypes/select-radio-inline/select-radio-inline.css',
     'templates/bootstrap3/inputTypes/submit/submit.html',
     'templates/bootstrap3/inputTypes/tel/tel.html',
     'templates/bootstrap3/inputTypes/text/text.html',
