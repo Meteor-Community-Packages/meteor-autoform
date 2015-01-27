@@ -151,6 +151,18 @@ AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(
 };
 
 /**
+ * @method AutoForm.getFormData
+ * @public
+ * @param {String} formId The `id` attribute of the `autoForm` you want data for.
+ * @return {Object}
+ *
+ * Returns an object containing all of the data for the specified form.
+ */
+AutoForm.getFormData = function autoFormGetFormData(formId) {
+  return formData[formId];
+};
+
+/**
  * @method AutoForm.getFormValues
  * @public
  * @param {String} formId The `id` attribute of the `autoForm` you want current values for.
