@@ -752,7 +752,7 @@ AutoForm.getFormCollection = function (formId) {
 AutoForm.getFormSchema = function (formId) {
   var schema = AutoForm.getCurrentDataForForm(formId).schema;
   if (schema) {
-    return schema;
+    return AutoForm.Utility.lookup(schema);
   } else {
     var collection = AutoForm.getFormCollection(formId);
     if (collection && typeof collection.simpleSchema === 'function') {
