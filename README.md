@@ -12,7 +12,7 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
 ## Table of Contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Installation](#installation)
   - [Community Add-On Packages](#community-add-on-packages)
@@ -23,7 +23,7 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
   - [A Custom Insert Form](#a-custom-insert-form)
   - [Another Custom Insert Form](#another-custom-insert-form)
 - [Component and Helper Reference](#component-and-helper-reference)
-  - [autoForm](#autoform-1)
+  - [autoForm](#autoform)
   - [quickForm](#quickform)
   - [afFieldInput](#affieldinput)
   - [afFieldMessage](#affieldmessage)
@@ -31,8 +31,7 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
   - [afFormGroup](#afformgroup)
   - [afQuickField](#afquickfield)
     - [afQuickField Examples](#afquickfield-examples)
-  - [afFieldValueIs](#affieldvalueis)
-  - [afFieldValueContains](#affieldvaluecontains)
+  - [afFieldValueIs and afFieldValueContains](#affieldvalueis-and-affieldvaluecontains)
   - [afFieldNames](#affieldnames)
   - [afQuickFields](#afquickfields)
 - [Objects and Arrays](#objects-and-arrays)
@@ -43,7 +42,7 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
 - [Public API](#public-api)
 - [Non-Collection Forms](#non-collection-forms)
   - [An Example Contact Form](#an-example-contact-form)
-- [Submitting to Methods](#submitting-to-methods)
+- [Submitting To Methods](#submitting-to-methods)
 - [Fine Tuning Validation](#fine-tuning-validation)
 - [Manual Validation](#manual-validation)
 - [Resetting Validation](#resetting-validation)
@@ -54,15 +53,14 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
   - [formToDoc and docToForm](#formtodoc-and-doctoform)
 - [Putting Field Attribute Defaults in the Schema](#putting-field-attribute-defaults-in-the-schema)
 - [Complex Schemas](#complex-schemas)
-- [Complex Controls](#complex-controls)
 - [Dates](#dates)
-  - [type=date](#type=date)
-  - [type=datetime](#type=datetime)
-  - [type=datetime-local](#type=datetime-local)
-- [Templates](#templates)
+  - [type=date](#typedate)
+  - [type=datetime](#typedatetime)
+  - [type=datetime-local](#typedatetime-local)
+- [Theme Templates](#theme-templates)
   - [Using a Different Template](#using-a-different-template)
   - [Creating a Custom Template](#creating-a-custom-template)
-- [Making AutoForm-Ready Components](#making-autoform-ready-components)
+- [Defining Custom Input Types](#defining-custom-input-types)
 - [Common Questions](#common-questions)
   - [Should the value of `schema` and `collection` have quotation marks around it?](#should-the-value-of-schema-and-collection-have-quotation-marks-around-it)
   - [Which components should I use?](#which-components-should-i-use)
