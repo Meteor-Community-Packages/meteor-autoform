@@ -177,6 +177,7 @@ Package.onUse(function(api) {
     'templates/bootstrap3/inputTypes/select-checkbox/select-checkbox.js',
     'templates/bootstrap3/inputTypes/select-checkbox-inline/select-checkbox-inline.html',
     'templates/bootstrap3/inputTypes/select-checkbox-inline/select-checkbox-inline.js',
+    'templates/bootstrap3/inputTypes/select-checkbox-inline/select-checkbox-inline.css',
     'templates/bootstrap3/inputTypes/select-multiple/select-multiple.html',
     'templates/bootstrap3/inputTypes/select-multiple/select-multiple.js',
     'templates/bootstrap3/inputTypes/select-radio/select-radio.html',
