@@ -107,6 +107,38 @@ Utility = {
     }
     return result;
   },
+  /*
+   * Get select options
+   */
+  getSelectOptions: function getSelectOptions(defs, hash) {
+    var schemaType = defs.type;
+    var selectOptions = hash.options;
+
+    // Handle options="allowed"
+    if (selectOptions === "allowed") {
+      selectOptions = _.map(defs.allowedValues, function(v) {
+        var label = v;
+        if (hash.capitalize && v.length > 0 && schemaType === String) {
+          label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+        }
+
+        return {label: label, value: v};
+      });
+    }
+    // If options are specified in the schema, they may be a function
+    // that has not yet been evaluated.
+    else if (typeof selectOptions === "function") {
+      selectOptions = selectOptions();
+    }
+    // Hashtable
+    if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
+      selectOptions = _.map(selectOptions, function(v, k) {
+        return {label: v, value: schemaType(k)};
+      });
+    }
+
+    return selectOptions;
+  },
   /**
    * @method Utility.lookup
    * @private

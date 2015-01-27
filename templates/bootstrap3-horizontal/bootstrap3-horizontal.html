@@ -1,6 +1,6 @@
 <template name="quickForm_bootstrap3-horizontal">
   {{#autoForm qfAutoFormContext}}
-    {{> afQuickFields input-col-class=inputClass label-class=labelClass id-prefix=idPrefix}}
+    {{> afQuickFields quickFieldsAtts}}
     {{#if qfShouldRenderButton}}
     <div class="form-group">
       <div class="{{labelClass}}"></div>
@@ -39,8 +39,7 @@
     <div class="{{rightColumnClass}}">
       <div class="panel panel-default autoform-padding-fix">
         <div class="panel-body">
-        {{! We want to default to using bootstrap3 template below this point because we don't want horizontal within horizontal}}
-        {{> afQuickFields name=this.atts.name template="bootstrap3"}}
+        {{> afQuickFields quickFieldsAtts}}
         </div>
       </div>
     </div>

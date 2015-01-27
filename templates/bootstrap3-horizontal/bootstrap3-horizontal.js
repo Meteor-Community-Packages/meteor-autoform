@@ -1,12 +1,17 @@
 Template['quickForm_bootstrap3-horizontal'].helpers({
-  inputClass: function () {
-    return this.atts["input-col-class"];
-  },
-  labelClass: function () {
-    return this.atts["label-class"];
-  },
-  idPrefix: function () {
-    return this.atts["id-prefix"];
+  quickFieldsAtts: function () {
+    var qfAtts = this.atts;
+    var atts = {};
+    if (qfAtts["id-prefix"]) {
+      atts["id-prefix"] = qfAtts["id-prefix"];
+    }
+    if (qfAtts["input-col-class"]) {
+      atts["input-col-class"] = qfAtts["input-col-class"];
+    }
+    if (qfAtts["label-class"]) {
+      atts["label-class"] = qfAtts["label-class"];
+    }
+    return atts;
   },
   submitButtonAtts: function () {
     var qfAtts = this.atts;
@@ -21,12 +26,12 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   qfAutoFormContext: function () {
     var ctx = _.clone(this.qfAutoFormContext || {});
     ctx = AutoForm.Utility.addClass(ctx, "form-horizontal");
+    if (ctx["id-prefix"])
+      delete ctx["id-prefix"];
     if (ctx["input-col-class"])
       delete ctx["input-col-class"];
     if (ctx["label-class"])
       delete ctx["label-class"];
-    if (ctx["id-prefix"])
-      delete ctx["id-prefix"];
     return ctx;
   }
 });
@@ -65,6 +70,19 @@ Template["afFormGroup_bootstrap3-horizontal"].helpers({
 });
 
 Template["afObjectField_bootstrap3-horizontal"].helpers({
+  quickFieldsAtts: function () {
+    var qfAtts = this.atts;
+    var atts = {
+      name: qfAtts.name,
+      // We want to default to using bootstrap3 template below this point
+      // because we don't want horizontal within horizontal
+      template: "bootstrap3"
+    };
+    if (qfAtts["id-prefix"]) {
+      atts["id-prefix"] = qfAtts["id-prefix"];
+    }
+    return atts;
+  },
   rightColumnClass: function () {
     var atts = this.atts || {};
     return atts['input-col-class'] || "";

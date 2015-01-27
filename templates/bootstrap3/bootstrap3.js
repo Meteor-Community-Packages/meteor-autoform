@@ -3,8 +3,13 @@
  */
 
 Template['quickForm_bootstrap3'].helpers({
-  idPrefix: function () {
-    return this.atts["id-prefix"];
+  quickFieldsAtts: function () {
+    var qfAtts = this.atts;
+    var atts = {};
+    if (qfAtts["id-prefix"]) {
+      atts["id-prefix"] = qfAtts["id-prefix"];
+    }
+    return atts;
   },
   submitButtonAtts: function bsQuickFormSubmitButtonAtts() {
     var qfAtts = this.atts;
@@ -15,6 +20,12 @@ Template['quickForm_bootstrap3'].helpers({
       atts['class'] = 'btn btn-primary';
     }
     return atts;
+  },
+  qfAutoFormContext: function () {
+    var ctx = _.clone(this.qfAutoFormContext || {});
+    if (ctx["id-prefix"])
+      delete ctx["id-prefix"];
+    return ctx;
   }
 });
 
@@ -29,6 +40,19 @@ Template['afFormGroup_bootstrap3'].helpers({
     var atts = _.clone(this.afFieldLabelAtts);
     // Add bootstrap class
     atts = AutoForm.Utility.addClass(atts, "control-label");
+    return atts;
+  }
+});
+
+Template["afObjectField_bootstrap3"].helpers({
+  quickFieldsAtts: function () {
+    var qfAtts = this.atts;
+    var atts = {
+      name: qfAtts.name
+    };
+    if (qfAtts["id-prefix"]) {
+      atts["id-prefix"] = qfAtts["id-prefix"];
+    }
     return atts;
   }
 });

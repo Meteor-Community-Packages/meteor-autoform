@@ -514,6 +514,23 @@ AutoForm.getSchemaForField = function autoFormGetSchemaForField(name, autoform) 
   return AutoForm.Utility.getDefs(ss, name);
 };
 
+AutoForm.getSelectedOptions = function autoFormGetSelectedOptions(values, name, ss) {
+  var defs = AutoForm.Utility.getDefs(ss, name);
+  var hash = defs.autoform;
+  if (defs.type === Array) {
+    defs = ss.schema(name + ".$");
+  }
+  var option, options = AutoForm.Utility.getSelectOptions(defs, hash);
+  var result = [];
+  for (var k in options) {
+    option = options[k];
+    if (values.indexOf(option.value) !== -1) {
+      result.push(option.label);
+    }
+  }
+  return result;
+};
+
 /**
  * @method AutoForm.invalidateFormContext
  * @public

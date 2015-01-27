@@ -4,6 +4,9 @@ Template.afFormGroup.helpers({
     var afFieldLabelAtts = formGroupLabelAtts(c.atts);
     var afFieldInputAtts = formGroupInputAtts(c.atts);
     var id = c.atts["id-prefix"] || "";
+    if (id) {
+      id += "-";
+    }
     id += c.atts.id || c.atts.name.replace(".", "-");
     afFieldLabelAtts.for = afFieldInputAtts.id = id;
     return {
@@ -36,7 +39,7 @@ function formGroupInputAtts(atts) {
   // We also don't want the "label" option
   var inputAtts = {};
   _.each(atts, function autoFormLabelAttsEach(val, key) {
-    if (key !== "id-prefix" && key !== "id" && key !== "label" && key.indexOf("label-") !== 0) {
+    if (["id-prefix", "id", "label"].indexOf(key) === -1 && key.indexOf("label-") !== 0) {
       inputAtts[key] = val;
     }
   });
