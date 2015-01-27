@@ -587,6 +587,26 @@ AutoForm.getSchemaForField = function autoFormGetSchemaForField(name) {
 };
 
 /**
+ * @method AutoForm.getLabelForField
+ * @public
+ * @param {String} name The field name attribute / schema key.
+ * @return {Object}
+ *
+ * Call this method from a UI helper to get the field definitions based on the schema used by the closest containing autoForm.
+ * Always throws an error or returns the schema object.
+ */
+AutoForm.getLabelForField = function autoFormGetSchemaForField(name) {
+  var ss = AutoForm.getFormSchema(), label = ss.label(name);
+  // for array items we don't want to inflect the label because
+  // we will end up with a number;
+  // TODO this check should probably be in the SimpleSchema code
+  if (SimpleSchema._makeGeneric(name).slice(-1) === "$" && !isNaN(parseInt(label, 10))) {
+    label = null;
+  }
+  return label;
+};
+
+/**
  * Gets the template instance for the form. The form
  * must be currently rendered. If not, returns `undefined`.
  * @param   {String}                     formId The form's `id` attribute
