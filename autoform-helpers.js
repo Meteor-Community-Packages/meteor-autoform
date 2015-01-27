@@ -246,6 +246,9 @@ regHelper('afSelectOptionAtts', function afSelectOptionAtts() {
   if (this.selected) {
     atts.selected = "";
   }
+  if (this.htmlAtts) {
+    _.extend(atts, this.htmlAtts);
+  }
   return atts;
 });
 
