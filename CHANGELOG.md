@@ -8,6 +8,7 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ### vNext
 
+* When providing options for a `select` or `select-multiple` input type, you can now add additional props to the objects in the options array and those properties will become attributes on the `option` element in the generated HTML.
 * `data-required` attribute is now present on the form group `div` element for all built-in `afFormGroup` templates if the field is required. This allows you to use css like the following to display an asterisk after required fields: `[data-required] label:after {content: '*'}`
 * Compatibility break: The arguments passed to "before" hooks have changed. `docId` and `template` are no longer passed as arguments but are available as `this.docId` and `this.template`. Only a single object, `doc` is passed to every "before" hook.
 * Compatibility break: When defining "before" and "after" hooks for methods, use the word "method" instead of the method name. If you need different logic based on method name, you can examine `this.formAttributes.meteormethod` in your hook function.
