@@ -45,10 +45,15 @@ regHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
  */
 regHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreThanMinimum(options) {
   options = parseOptions(options, 'afArrayFieldHasMoreThanMinimum');
-  var formId = AutoForm.getFormId();
+  var form = AutoForm.getCurrentDataPlusExtrasForForm();
+
+  // Registered form types can disable adding/removing array items
+  if (form.formTypeDef.hideArrayItemButtons) {
+    return false;
+  }
 
   var range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
-  var visibleCount = arrayTracker.getVisibleCount(formId, options.name);
+  var visibleCount = arrayTracker.getVisibleCount(form.id, options.name);
   return (visibleCount > range.minCount);
 });
 
@@ -57,10 +62,15 @@ regHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreTh
  */
 regHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessThanMaximum(options) {
   options = parseOptions(options, 'afArrayFieldHasLessThanMaximum');
-  var formId = AutoForm.getFormId();
+  var form = AutoForm.getCurrentDataPlusExtrasForForm();
+
+  // Registered form types can disable adding/removing array items
+  if (form.formTypeDef.hideArrayItemButtons) {
+    return false;
+  }
 
   var range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
-  var visibleCount = arrayTracker.getVisibleCount(formId, options.name);
+  var visibleCount = arrayTracker.getVisibleCount(form.id, options.name);
   return (visibleCount < range.maxCount);
 });
 

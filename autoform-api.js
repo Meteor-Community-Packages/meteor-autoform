@@ -671,6 +671,29 @@ AutoForm.getCurrentDataForForm = function (formId) {
   return {};
 };
 
+/**
+ * Returns the current data context for a form plus some extra properties.
+ * Always returns an object or throws an error.
+ * You can call this without a formId from within a helper and
+ * the data for the nearest containing form will be returned.
+ * @param   {String} [formId] The form's `id` attribute
+ * @returns {Object} Current data context for the form, or an empty object.
+ */
+AutoForm.getCurrentDataPlusExtrasForForm = function (formId) {
+  var data = AutoForm.getCurrentDataForForm(formId);
+
+  data = _.clone(data);
+
+  // add form type definition
+  var formType = data.type || 'normal';
+  data.formTypeDef = AutoForm._formTypeDefinitions[formType];
+  if (!data.formTypeDef) {
+    throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
+  }
+
+  return data;
+};
+
 AutoForm.getFormCollection = function (formId) {
   var data = AutoForm.getCurrentDataForForm(formId);
   return AutoForm.Utility.lookup(data.collection);

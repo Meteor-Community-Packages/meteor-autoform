@@ -232,14 +232,6 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
     inputAtts.required = "";
   }
 
-  // Add disabled or readonly if the form has that submit type
-  // TODO somehow make this part of the form type definition object.
-  if (formType === "disabled") {
-    inputAtts.disabled = "";
-  } else if (formType === "readonly") {
-    inputAtts.readonly = "";
-  }
-
    // Add data-schema-key to every type of element
   inputAtts['data-schema-key'] = inputAtts.name;
 
@@ -301,11 +293,11 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   }
 
   /*
-   * Return the context. This is the object that becomes `this` in the
+   * Set up the context. This is the object that becomes `this` in the
    * input type template.
    */
 
-  return {
+  var inputTypeContext = {
     name: inputAtts.name,
     schemaType: schemaType,
     min: (typeof defs.min === "function") ? defs.min() : defs.min,
@@ -315,6 +307,18 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
     atts: inputAtts,
     selectOptions: selectOptions
   };
+
+  // Before returning the context, we allow the registered form type to
+  // adjust it if necessary.
+  var ftd = AutoForm._formTypeDefinitions[formType];
+  if (!ftd) {
+    throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
+  }
+  if (typeof ftd.adjustInputContext === 'function') {
+    inputTypeContext = ftd.adjustInputContext(inputTypeContext);
+  }
+
+  return inputTypeContext;
 };
 
 updateTrackedFieldValue = function updateTrackedFieldValue(formId, key) {

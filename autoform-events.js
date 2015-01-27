@@ -1,3 +1,5 @@
+/* global AutoForm, Hooks, getFormValues, _validateForm, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues, afDestroyUpdateForm */
+
 // all form events handled here
 var lastAutoSaveElement = null;
 
@@ -278,7 +280,7 @@ Template.autoForm.events({
     var key = event.target.getAttribute("data-schema-key");
     if (!key) {
       key = $(event.target).closest('[data-schema-key]').attr("data-schema-key");
-      if (!key) return;
+      if (!key) {return;}
     }
 
     var formId = self.id;
@@ -354,7 +356,7 @@ Template.autoForm.events({
     }
 
   },
-  'keydown .autoform-array-item input': function (event, template) {
+  'keydown .autoform-array-item input': function (event) {
     // When enter is pressed in an array item field, default behavior
     // seems to be to "click" the remove item button. This doesn't make
     // sense so we stop it.

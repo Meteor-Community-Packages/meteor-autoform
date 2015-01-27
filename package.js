@@ -49,6 +49,8 @@ Package.onUse(function(api) {
     'formTypes/update.js',
     'formTypes/method.js',
     'formTypes/normal.js',
+    'formTypes/readonly.js',
+    'formTypes/disabled.js',
     // input types
     'inputTypes/boolean-checkbox/boolean-checkbox.html',
     'inputTypes/boolean-checkbox/boolean-checkbox.js',
