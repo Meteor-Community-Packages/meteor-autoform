@@ -20,7 +20,7 @@ AutoForm.addFormType('update', {
         c.result(null, 0);
       } else {
         // Perform update
-        collection.update(c.docId, modifier, c.validationOptions, c.result);
+        collection.update({_id: c.docId}, modifier, c.validationOptions, c.result);
       }
     });
   }
