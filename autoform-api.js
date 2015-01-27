@@ -77,9 +77,9 @@ AutoForm._forceResetFormValues = function autoFormForceResetFormValues(formId) {
   AutoForm._destroyForm[formId] = AutoForm._destroyForm[formId] || new ReactiveVar(false);
 
   AutoForm._destroyForm[formId].set(true);
-  Tracker.flush();
-  AutoForm._destroyForm[formId].set(false);
-  Tracker.flush();
+  setTimeout(function () {
+    AutoForm._destroyForm[formId].set(false);
+  }, 0);
 };
 
 /**
