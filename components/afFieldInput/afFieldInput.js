@@ -59,7 +59,7 @@ Template.afFieldInput.helpers({
     // will not pick up the new value when there are #if etc.
     // blocks involved.
     // See https://github.com/aldeed/meteor-autoform/issues/461
-   setTimeout(function () {
+    setTimeout(function () {
       updateTrackedFieldValue(formId, c.atts.name);
     }, 0);
     

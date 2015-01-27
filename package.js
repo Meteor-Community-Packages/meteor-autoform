@@ -150,6 +150,7 @@ Package.onUse(function(api) {
     'templates/bootstrap3/components/afFormGroup/afFormGroup.html',
     'templates/bootstrap3/components/afFormGroup/afFormGroup.js',
     'templates/bootstrap3/components/afObjectField/afObjectField.html',
+    'templates/bootstrap3/components/afObjectField/afObjectField.js',
     // bootstrap3 Template - Input Types
     'templates/bootstrap3/inputTypes/boolean-checkbox/boolean-checkbox.html',
     'templates/bootstrap3/inputTypes/boolean-radios/boolean-radios.html',
@@ -213,6 +214,7 @@ Package.onUse(function(api) {
     'templates/plain/components/afArrayField/afArrayField.html',
     'templates/plain/components/afFormGroup/afFormGroup.html',
     'templates/plain/components/afObjectField/afObjectField.html',
+    'templates/plain/components/afObjectField/afObjectField.js',
     // plain-fieldset Template
     'templates/plain-fieldset/plain-fieldset.html',
     'templates/plain-fieldset/plain-fieldset.js',

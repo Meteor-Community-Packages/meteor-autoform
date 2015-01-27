@@ -5,13 +5,23 @@ Template.afFormGroup.helpers({
     return AutoForm.getTemplateName('afFormGroup', this.template, this.name);
   },
   innerContext: function afFormGroupContext() {
-    var c = AutoForm.Utility.normalizeContext(this, "afFormGroup");
+    var c = AutoForm.Utility.normalizeContext(this, 'afFormGroup');
     var afFieldLabelAtts = formGroupLabelAtts(c.atts);
     var afFieldInputAtts = formGroupInputAtts(c.atts);
-    var id = c.atts["id-prefix"] || "";
-    id += c.atts.id || c.atts.name.replace(".", "-");
+
+    // Construct an `id` attribute for the input, optionally
+    // adding a user-provided prefix.
+    var id = c.atts.id || c.atts.name.replace('.', '-');
+    var idPrefix = c.atts['id-prefix'];
+    if (idPrefix && idPrefix.length > 0) {
+      id = idPrefix + '-' + id;
+    }
+
+    // Set the input's `id` attribute and the label's `for` attribute to
+    // the same ID.
     afFieldLabelAtts.for = afFieldInputAtts.id = id;
 
+    // Get the field's schema definition
     var fieldSchema = AutoForm.getSchemaForField(c.atts.name);
 
     return {
@@ -20,7 +30,7 @@ Template.afFormGroup.helpers({
       afFieldInputAtts: afFieldInputAtts,
       name: c.atts.name,
       required: !fieldSchema.optional,
-      labelText: (typeof c.atts.label === "string") ? c.atts.label : null
+      labelText: (typeof c.atts.label === 'string') ? c.atts.label : null
     };
   }
 });
@@ -30,10 +40,10 @@ Template.afFormGroup.helpers({
  */
 
 function formGroupLabelAtts(atts) {
-  // Separate label options from input options; label items begin with "label-"
+  // Separate label options from input options; label items begin with 'label-'
   var labelAtts = {};
   _.each(atts, function autoFormLabelAttsEach(val, key) {
-    if (key.indexOf("label-") === 0) {
+    if (key.indexOf('label-') === 0) {
       labelAtts[key.substring(6)] = val;
     }
   });
@@ -41,11 +51,11 @@ function formGroupLabelAtts(atts) {
 }
 
 function formGroupInputAtts(atts) {
-  // Separate label options from input options; label items begin with "label-"
-  // We also don't want the "label" option
+  // Separate label options from input options; label items begin with 'label-'
+  // We also don't want the 'label' option
   var inputAtts = {};
   _.each(atts, function autoFormLabelAttsEach(val, key) {
-    if (key !== "id-prefix" && key !== "id" && key !== "label" && key.indexOf("label-") !== 0) {
+    if (['id-prefix', 'id', 'label'].indexOf(key) === -1 && key.indexOf('label-') !== 0) {
       inputAtts[key] = val;
     }
   });

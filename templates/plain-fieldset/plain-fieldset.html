@@ -1,10 +1,10 @@
 <template name="quickForm_plain-fieldset">
-  {{#autoForm this.qfAutoFormContext}}
+  {{#autoForm qfAutoFormContext}}
     <fieldset>
       {{#with ../atts.legend}}
       <legend>{{this}}</legend>
       {{/with}}
-      {{> afQuickFields id-prefix=idPrefix}}
+      {{> afQuickFields quickFieldsAtts}}
     </fieldset>
     {{#if qfShouldRenderButton}}
     <div>

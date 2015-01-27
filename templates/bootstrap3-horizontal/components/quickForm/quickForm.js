@@ -5,8 +5,10 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   labelClass: function () {
     return this.atts["label-class"];
   },
-  idPrefix: function () {
-    return this.atts["id-prefix"];
+  quickFieldsAtts: function () {
+    // These are the quickForm attributes that we want to forward to
+    // the afQuickFields component.
+    return _.pick(this.atts, 'id-prefix', 'input-col-class', 'label-class');
   },
   submitButtonAtts: function () {
     var qfAtts = this.atts;

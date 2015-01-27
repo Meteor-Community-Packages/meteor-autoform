@@ -211,7 +211,6 @@ getInputValue = function getInputValue(atts, value, mDoc, defaultValue, typeDefs
  * Builds the data context that the input component will have.
  */
 getInputData = function getInputData(defs, hash, value, label, formType) {
-  var schemaType = defs.type;
 
   /*
    * Get HTML attributes
@@ -264,48 +263,19 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   });
 
   /*
-   * Get select options
-   */
-
-  var selectOptions = hash.options;
-
-  // Handle options="allowed"
-  if (selectOptions === "allowed") {
-    selectOptions = _.map(defs.allowedValues, function(v) {
-      var label = v;
-      if (hash.capitalize && v.length > 0 && schemaType === String) {
-        label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
-      }
-
-      return {label: label, value: v};
-    });
-  }
-  // If options are specified in the schema, they may be a function
-  // that has not yet been evaluated.
-  else if (typeof selectOptions === "function") {
-    selectOptions = selectOptions();
-  }
-  // Hashtable
-  if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
-    selectOptions = _.map(selectOptions, function(v, k) {
-      return {label: v, value: schemaType(k)};
-    });
-  }
-
-  /*
    * Set up the context. This is the object that becomes `this` in the
    * input type template.
    */
 
   var inputTypeContext = {
     name: inputAtts.name,
-    schemaType: schemaType,
+    schemaType: defs.type,
     min: (typeof defs.min === "function") ? defs.min() : defs.min,
     max: (typeof defs.max === "function") ? defs.max() : defs.max,
     decimal: defs.decimal,
     value: value,
     atts: inputAtts,
-    selectOptions: selectOptions
+    selectOptions: AutoForm.Utility.getSelectOptions(defs, hash)
   };
 
   // Before returning the context, we allow the registered form type to

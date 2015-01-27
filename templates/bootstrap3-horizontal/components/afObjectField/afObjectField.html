@@ -1,11 +1,10 @@
 <template name="afObjectField_bootstrap3-horizontal">
-  <div class="form-group{{#if afFieldIsInvalid name=this.name}} has-error{{/if}}">
+  <div class="form-group {{#if afFieldIsInvalid name=this.name}}has-error{{/if}}">
     <label {{afFieldLabelAtts}}>{{afFieldLabelText name=this.name}}</label>
     <div class="{{rightColumnClass}}">
       <div class="panel panel-default autoform-padding-fix">
         <div class="panel-body">
-          {{! We want to default to using bootstrap3 template below this point because we don't want horizontal within horizontal}}
-          {{> afQuickFields name=this.name template="bootstrap3"}}
+          {{> afQuickFields quickFieldsAtts}}
         </div>
       </div>
     </div>
