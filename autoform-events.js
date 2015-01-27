@@ -1,4 +1,4 @@
-/* global AutoForm, Hooks, getFormValues, _validateForm, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues, afDestroyUpdateForm */
+/* global AutoForm, Hooks, getFormValues, _validateForm, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues */
 
 // all form events handled here
 var lastAutoSaveElement = null;
@@ -329,12 +329,7 @@ Template.autoForm.events({
     if (this.doc) {
       event.preventDefault();
 
-      // Use destroy form hack since Meteor doesn't give us an easy way to
-      // invalidate changed form attributes yet.
-      afDestroyUpdateForm.set(true);
-      Tracker.flush();
-      afDestroyUpdateForm.set(false);
-      Tracker.flush();
+      AutoForm._forceResetFormValues(formId);
 
       // Focus the autofocus element
       if (template && template.view._domrange && !template.view.isDestroyed) {

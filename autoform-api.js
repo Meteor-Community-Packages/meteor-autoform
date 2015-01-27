@@ -1,4 +1,4 @@
-/* global AutoForm:true, SimpleSchema, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, getFormValues, formValues, _validateForm, validateField, arrayTracker, getInputType, formDeps */
+/* global AutoForm:true, SimpleSchema, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, getFormValues, formValues, _validateForm, validateField, arrayTracker, getInputType, ReactiveVar */
 
 // This file defines the public, exported API
 
@@ -65,6 +65,24 @@ AutoForm._hooks = Hooks.form;
 AutoForm._globalHooks = Hooks.global;
 
 /**
+ * @method AutoForm._forceResetFormValues
+ * @public
+ * @param {String} formId
+ * @returns {undefined}
+ *
+ * Forces an AutoForm's values to properly update.
+ * See https://github.com/meteor/meteor/issues/2431
+ */
+AutoForm._forceResetFormValues = function autoFormForceResetFormValues(formId) {
+  AutoForm._destroyForm[formId] = AutoForm._destroyForm[formId] || new ReactiveVar(false);
+
+  AutoForm._destroyForm[formId].set(true);
+  Tracker.flush();
+  AutoForm._destroyForm[formId].set(false);
+  Tracker.flush();
+};
+
+/**
  * @method AutoForm.resetForm
  * @public
  * @param {String} formId
@@ -76,7 +94,7 @@ AutoForm._globalHooks = Hooks.global;
 AutoForm.resetForm = function autoFormResetForm(formId, template) {
   template = template || AutoForm.templateInstanceForForm(formId);
 
-  if (template && template.view._domrange) {
+  if (template && template.view._domrange && !template.view.isDestroyed) {
     template.$("form")[0].reset();
   }
 };

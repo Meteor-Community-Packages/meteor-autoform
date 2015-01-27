@@ -1,3 +1,5 @@
+/* global AutoForm, getFormValues, ReactiveVar, arrayTracker, Hooks, MongoObject, updateAllTrackedFieldValues, formValues */
+
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
     // After removing all of the props we know about, everything else should
@@ -49,8 +51,9 @@ Template.autoForm.helpers({
 
     return innerContext;
   },
-  afDestroyUpdateForm: function () {
-    return afDestroyUpdateForm.get();
+  afDestroyUpdateForm: function (formId) {
+    AutoForm._destroyForm[formId] = AutoForm._destroyForm[formId] || new ReactiveVar(false);
+    return AutoForm._destroyForm[formId].get();
   }
 });
 

@@ -18,12 +18,8 @@ AutoForm._formTypeDefinitions = {}; //for storing submit type definitions added 
 arrayTracker = new ArrayTracker();
 componentTypeList = ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'];
 
-// backwards compatibility
-if (typeof Tracker === "undefined" && typeof Deps !== "undefined") {
-  Tracker = Deps;
-}
-
-afDestroyUpdateForm = new ReactiveVar(false);
+// Used by AutoForm._forceResetFormValues; temporary hack
+AutoForm._destroyForm = {};
 
 // reactive templates
 globalDefaultTemplate = "bootstrap3";
