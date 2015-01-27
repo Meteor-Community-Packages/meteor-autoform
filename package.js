@@ -144,7 +144,7 @@ Package.onUse(function(api) {
     'templates/bootstrap3/components/quickForm/quickForm.html',
     'templates/bootstrap3/components/quickForm/quickForm.js',
     'templates/bootstrap3/components/afArrayField/afArrayField.html',
-    'templates/bootstrap3/components/afArrayField/afArrayField.js',
+    'templates/bootstrap3/components/afArrayField/afArrayField.css',
     'templates/bootstrap3/components/afFormGroup/afFormGroup.html',
     'templates/bootstrap3/components/afFormGroup/afFormGroup.js',
     'templates/bootstrap3/components/afObjectField/afObjectField.html',
