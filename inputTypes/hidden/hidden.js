@@ -1,5 +1,6 @@
 AutoForm.addInputType("hidden", {
   template: "afInputHidden",
+  isHidden: true,
   valueOut: function () {
     return this.val();
   },

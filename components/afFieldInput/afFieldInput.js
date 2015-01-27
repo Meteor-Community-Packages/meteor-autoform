@@ -16,6 +16,8 @@ Template.afFieldInput.helpers({
     var inputTemplateName = componentDef.template;
     var styleTemplateName = this.template;
 
+    // We skip the check for existence here so that we can get the `_plain` string
+    // even though they don't exist.
     var templateName = AutoForm.getTemplateName(inputTemplateName, styleTemplateName, self.name, true);
 
     // Special case: the built-in "plain" template uses the basic input templates for
@@ -25,7 +27,11 @@ Template.afFieldInput.helpers({
     }
 
     // If no override templateName found, use the exact name from the input type definition
-    return templateName ? templateName : inputTemplateName;
+    if (!templateName || !Template[templateName]) {
+      templateName = inputTemplateName;
+    }
+
+    return templateName;
   },
   innerContext: function afFieldInputContext() {
     var c = AutoForm.Utility.normalizeContext(this, "afFieldInput");
