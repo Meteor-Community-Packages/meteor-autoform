@@ -77,7 +77,10 @@ Template.autoForm.created = function autoFormCreated() {
     // Update cached form values for hot code reload persistence
     if (data.preserveForm === false) {
       AutoForm.formPreserve.unregisterForm(formId);
-    } else if (!AutoForm.formPreserve.formIsRegistered(formId)) {
+    } else {
+      // Even if we have already registered, we reregister to ensure that the
+      // closure values of template, formId, and ss remain correct after each
+      // reaction
       AutoForm.formPreserve.registerForm(formId, function autoFormRegFormCallback() {
         return getFormValues(template, formId, ss).insertDoc;
       });
