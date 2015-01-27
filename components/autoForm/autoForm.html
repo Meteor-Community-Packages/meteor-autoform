@@ -4,7 +4,7 @@
   {{! See https://github.com/meteor/meteor/issues/2431 }}
   <form {{atts}}>
     {{#with innerContext ..}}
-    {{> UI.contentBlock this}}
+    {{> Template.contentBlock this}}
     {{/with}}
   </form>
   {{/unless}}

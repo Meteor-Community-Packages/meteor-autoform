@@ -5,7 +5,7 @@
     {{#if this.removed}}
     <input type="hidden" name="{{this.name}}" data-schema-key="{{this.name}}" data-null-value="true" value="">
     {{else}}
-    {{> UI.contentBlock this}}
+    {{> Template.contentBlock this}}
     {{/if}}
     {{/each}}
   {{/with}}
