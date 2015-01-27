@@ -206,8 +206,11 @@ Package.onUse(function(api) {
     'templates/bootstrap3-inline/bootstrap3-inline.js',
     'templates/bootstrap3-inline/bootstrap3-inline.css',
     // plain Template
-    'templates/plain/plain.html',
-    'templates/plain/plain.js',
+    'templates/plain/components/quickForm/quickForm.html',
+    'templates/plain/components/quickForm/quickForm.js',
+    'templates/plain/components/afArrayField/afArrayField.html',
+    'templates/plain/components/afFormGroup/afFormGroup.html',
+    'templates/plain/components/afObjectField/afObjectField.html',
     // plain-fieldset Template
     'templates/plain-fieldset/plain-fieldset.html',
     'templates/plain-fieldset/plain-fieldset.js',

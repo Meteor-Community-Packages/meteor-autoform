@@ -1,8 +1,4 @@
-/*
- * Template helpers for "plain" template
- */
-
-Template['quickForm_plain'].helpers({
+Template.quickForm_plain.helpers({
   idPrefix: function () {
     return this.atts["id-prefix"];
   },
