@@ -314,8 +314,7 @@ attribute to `false`.
 * `autoConvert`: Optional. Set to `false` for an insert or update form to skip autoconverting property values when cleaning the form document.
 * `removeEmptyStrings`: Optional. Set to `false` for an insert or update form to keep empty string values when cleaning the form document.
 * `trimStrings`: Optional. Set to `false` for an insert or update form to keep leading and trailing spaces for string values when cleaning the form document.
-* Any additional attributes are passed along to the `<form>` element, meaning
-that you can add classes, etc.
+* Any additional attributes are passed along to the `<form>` element, meaning that you can add classes, etc. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`.
 
 ### quickForm
 
@@ -333,8 +332,7 @@ included, and they'll appear in the order you specify.
 names to omit from the generated form. All first-level schema fields *except* the
 fields listed here (and their subfields, if any) will be included.
 
-Any other attributes you specify will be output as attributes of the `<form>`
-element, just like when using the `autoForm` component.
+Any other attributes you specify will be output as attributes of the `<form>` element, just like when using the `autoForm` component. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`.
 
 See [this demo](http://autoform.meteor.com/qfdetails) for examples of what happens when you specify various types of fields in the `fields` or `omitFields` attributes.
 
@@ -369,9 +367,7 @@ to anything to render radios or checkboxes for the `options` instead of `select`
 option for a boolean field.
 * `falseLabel`: Set to the string that should be used as the label for the `false`
 option for a boolean field.
-*  Any additional attributes are passed along to the generated DOM element,
-meaning that you can add `class`, etc. You can also use this feature to set
-default values for inputs by supplying a `value` attribute.
+*  Any additional attributes are passed along to the generated DOM element, meaning that you can add `class`, etc. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`. You can also use this feature to set default values for inputs by supplying a `value` attribute.
 * `placeholder`: As with other attributes, this will be passed along to the
 generated DOM element, but you can also optionally do
 `placeholder="schemaLabel"` to use the field label defined in the schema as
