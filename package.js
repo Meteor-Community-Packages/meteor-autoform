@@ -187,10 +187,20 @@ Package.onUse(function(api) {
     'templates/bootstrap3/inputTypes/time/time.html',
     'templates/bootstrap3/inputTypes/url/url.html',
     'templates/bootstrap3/inputTypes/week/week.html',
-    // bootstrap3-horizontal Template
-    'templates/bootstrap3-horizontal/bootstrap3-horizontal.html',
-    'templates/bootstrap3-horizontal/bootstrap3-horizontal.js',
+    // bootstrap3-horizontal Template - General
     'templates/bootstrap3-horizontal/bootstrap3-horizontal.css',
+    // bootstrap3-horizontal Template - Components
+    'templates/bootstrap3-horizontal/components/quickForm/quickForm.html',
+    'templates/bootstrap3-horizontal/components/quickForm/quickForm.js',
+    'templates/bootstrap3-horizontal/components/afArrayField/afArrayField.html',
+    'templates/bootstrap3-horizontal/components/afArrayField/afArrayField.js',
+    'templates/bootstrap3-horizontal/components/afFormGroup/afFormGroup.html',
+    'templates/bootstrap3-horizontal/components/afFormGroup/afFormGroup.js',
+    'templates/bootstrap3-horizontal/components/afObjectField/afObjectField.html',
+    'templates/bootstrap3-horizontal/components/afObjectField/afObjectField.js',
+    // bootstrap3-horizontal Template - Input Types
+    'templates/bootstrap3-horizontal/inputTypes/boolean-checkbox/boolean-checkbox.html',
+    'templates/bootstrap3-horizontal/inputTypes/boolean-checkbox/boolean-checkbox.js',
     // bootstrap3-inline Template
     'templates/bootstrap3-inline/bootstrap3-inline.html',
     'templates/bootstrap3-inline/bootstrap3-inline.js',
