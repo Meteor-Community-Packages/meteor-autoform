@@ -1,7 +1,51 @@
 AutoForm.addInputType("select", {
   template: "afSelect",
   valueOut: function () {
-    return AutoForm.Utility.stringToNumber(this.val());
+    return this.val();
+  },
+  valueConverters: {
+    "stringArray": function (val) {
+      if (typeof val === "string") {
+        val = val.split(",");
+        return _.map(val, function (item) {
+          return $.trim(item);
+        });
+      }
+      return val;
+    },
+    "number": AutoForm.Utility.stringToNumber,
+    "numberArray": function (val) {
+      if (typeof val === "string") {
+        val = val.split(",");
+        return _.map(val, function (item) {
+          item = $.trim(item);
+          return AutoForm.Utility.stringToNumber(item);
+        });
+      }
+      return val;
+    },
+    "boolean": AutoForm.Utility.stringToBool,
+    "booleanArray": function (val) {
+      if (typeof val === "string") {
+        val = val.split(",");
+        return _.map(val, function (item) {
+          item = $.trim(item);
+          return AutoForm.Utility.stringToBool(item);
+        });
+      }
+      return val;
+    },
+    "date": AutoForm.Utility.stringToDate,
+    "dateArray": function (val) {
+      if (typeof val === "string") {
+        val = val.split(",");
+        return _.map(val, function (item) {
+          item = $.trim(item);
+          return AutoForm.Utility.stringToDate(item);
+        });
+      }
+      return val;
+    }
   },
   contextAdjust: function (context) {
     //can fix issues with some browsers selecting the firstOption instead of the selected option
