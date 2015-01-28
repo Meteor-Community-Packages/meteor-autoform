@@ -12,7 +12,7 @@ function beginSubmit(formId, template, hookContext) {
   var hooks = Hooks.getHooks(formId, 'beginSubmit');
   if (hooks.length) {
     _.each(hooks, function beginSubmitHooks(hook) {
-      hook.call(hookContext, formId, template);
+      hook.call(hookContext);
     });
   } else {
     // If there are no user-defined hooks, by default we disable the submit button during submission
@@ -34,7 +34,7 @@ function endSubmit(formId, template, hookContext) {
   var hooks = Hooks.getHooks(formId, 'endSubmit');
   if (hooks.length) {
     _.each(hooks, function endSubmitHooks(hook) {
-      hook.call(hookContext, formId, template);
+      hook.call(hookContext);
     });
   } else {
     // If there are no user-defined hooks, by default we disable the submit button during submission
@@ -125,7 +125,7 @@ Template.autoForm.events({
         error = new Error('form failed validation');
       }
       _.each(onErrorHooks, function onErrorEach(hook) {
-        hook.call(hookContext, 'pre-submit validation', error, template);
+        hook.call(hookContext, 'pre-submit validation', error);
       });
       event.preventDefault();
       event.stopPropagation();
@@ -181,7 +181,7 @@ Template.autoForm.events({
       if (error) {
         if (onErrorHooks && onErrorHooks.length) {
           _.each(onErrorHooks, function onErrorEach(hook) {
-            hook.call(hookContext, formType, error, template);
+            hook.call(hookContext, formType, error);
           });
         } else if ((!afterHooks || !afterHooks.length) && ss.namedContext(formId).isValid()) {
           // if there are no onError or "after" hooks or validation errors, log the error
@@ -200,11 +200,11 @@ Template.autoForm.events({
           hookContext.docId = result;
         }
         _.each(onSuccessHooks, function onSuccessEach(hook) {
-          hook.call(hookContext, formType, result, template);
+          hook.call(hookContext, formType, result);
         });
       }
       _.each(afterHooks, function afterHooksEach(hook) {
-        hook.call(hookContext, error, result, template);
+        hook.call(hookContext, error, result);
       });
       endSubmission();
     }

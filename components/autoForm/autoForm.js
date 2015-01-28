@@ -100,7 +100,7 @@ Template.autoForm.created = function autoFormCreated() {
       var hookCtx = {formId: formId};
       // Pass doc through docToForm hooks
       _.each(Hooks.getHooks(formId, 'docToForm'), function autoFormEachDocToForm(hook) {
-        doc = hook.call(hookCtx, doc, ss, formId);
+        doc = hook.call(hookCtx, doc, ss);
         if (!doc) {
           throw new Error('Oops! Did you forget to return the modified document from your docToForm hook for the ' + formId + ' form?');
         }

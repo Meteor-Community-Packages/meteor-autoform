@@ -18,7 +18,7 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
 ## Table of Contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Installation](#installation)
   - [Community Add-On Packages](#community-add-on-packages)
@@ -29,7 +29,7 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
   - [A Custom Insert Form](#a-custom-insert-form)
   - [Another Custom Insert Form](#another-custom-insert-form)
 - [Component and Helper Reference](#component-and-helper-reference)
-  - [autoForm](#autoform-1)
+  - [autoForm](#autoform)
   - [quickForm](#quickform)
   - [afFieldInput](#affieldinput)
   - [afFieldMessage](#affieldmessage)
@@ -37,8 +37,7 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
   - [afFormGroup](#afformgroup)
   - [afQuickField](#afquickfield)
     - [afQuickField Examples](#afquickfield-examples)
-  - [afFieldValueIs](#affieldvalueis)
-  - [afFieldValueContains](#affieldvaluecontains)
+  - [afFieldValueIs and afFieldValueContains](#affieldvalueis-and-affieldvaluecontains)
   - [afFieldNames](#affieldnames)
   - [afQuickFields](#afquickfields)
 - [Objects and Arrays](#objects-and-arrays)
@@ -46,29 +45,35 @@ AutoForm 4.0 is out with support for custom input types, but also lots of compat
   - [afArrayField](#afarrayfield)
   - [afEachArrayItem](#afeacharrayitem)
   - [afArrayFieldIsFirstVisible and afArrayFieldIsLastVisible](#afarrayfieldisfirstvisible-and-afarrayfieldislastvisible)
+- [Form Types](#form-types)
+  - [insert](#insert)
+  - [update](#update)
+  - [update-pushArray](#update-pusharray)
+  - [method](#method)
+  - [method-update](#method-update)
+  - [normal](#normal)
+  - [disabled](#disabled)
+  - [readonly](#readonly)
 - [Public API](#public-api)
 - [Non-Collection Forms](#non-collection-forms)
   - [An Example Contact Form](#an-example-contact-form)
-- [Submitting to Methods](#submitting-to-methods)
 - [Fine Tuning Validation](#fine-tuning-validation)
 - [Manual Validation](#manual-validation)
 - [Resetting Validation](#resetting-validation)
 - [The Form Document](#the-form-document)
   - [Getting Current Field Values](#getting-current-field-values)
 - [Callbacks/Hooks](#callbackshooks)
-  - [onSubmit](#onsubmit)
   - [formToDoc and docToForm](#formtodoc-and-doctoform)
 - [Putting Field Attribute Defaults in the Schema](#putting-field-attribute-defaults-in-the-schema)
 - [Complex Schemas](#complex-schemas)
-- [Complex Controls](#complex-controls)
 - [Dates](#dates)
-  - [type=date](#type=date)
-  - [type=datetime](#type=datetime)
-  - [type=datetime-local](#type=datetime-local)
-- [Templates](#templates)
+  - [type=date](#typedate)
+  - [type=datetime](#typedatetime)
+  - [type=datetime-local](#typedatetime-local)
+- [Theme Templates](#theme-templates)
   - [Using a Different Template](#using-a-different-template)
   - [Creating a Custom Template](#creating-a-custom-template)
-- [Making AutoForm-Ready Components](#making-autoform-ready-components)
+- [Defining Custom Input Types](#defining-custom-input-types)
 - [Common Questions](#common-questions)
   - [Should the value of `schema` and `collection` have quotation marks around it?](#should-the-value-of-schema-and-collection-have-quotation-marks-around-it)
   - [Which components should I use?](#which-components-should-i-use)
@@ -307,7 +312,7 @@ you can also use this attribute to pass an object that has default form values
 set (the same effect as setting a `value` attribute on each field within the form).
 * `validation`: Optional. See the "Fine Tuning Validation" section.
 * `template`: Optional. See the "Templates" section.
-* `type`: Optional. One of "insert", "update", or "method". Setting the `type` to anything else or omitting it will call any `onSubmit` hooks, where you can do custom submission logic. If `onSubmit` does not return false or call `this.event.preventDefault()`, the browser will also submit the form. This means that you can use AutoForm to generate and validate a form but still have it POST normally to some non-Meteor HTTP endpoint.
+* `type`: Optional. The form type. Default if not provided is "normal". See [Form Types](#form-types).
 * `meteormethod`: Optional. When `type` is "method", indicate the name of the
 Meteor method in this attribute.
 * `resetOnSuccess`: Optional. The form is automatically reset
@@ -562,6 +567,114 @@ This is a block helper that can be used to render specific content for each item
 
 These helpers must be used within an `afEachArrayItem` block and will return `true` or `false` depending on whether the current item/field in the array is the first or last visible item, respectively.
 
+## Form Types
+
+Depending on the `type` attribute you specify on your `quickForm` or `autoForm`, your form will have different behavior when rendering, validating, and submitting. The following form types are built in to the package, but you may also define your own.
+
+### insert
+
+Generates a document and inserts it on the client. You must provide a `collection` attribute referencing the `Mongo.Collection` instance. If the collection has an attached schema, it will be used for validation. If you provide a `schema` attribute, that schema will be used for validation, but the document must validate against the collection's schema, too.
+
+### update
+
+Updates a document on the client. You must provide a `collection` attribute referencing the `Mongo.Collection` instance. If the collection has an attached schema, it will be used for validation. If you provide a `schema` attribute, that schema will be used for validation, but the document must validate against the collection's schema, too.
+
+The form will generate and validate an update modifier. You must specify a `doc` attribute referencing the current document, which must have an `_id` property. Any properties present in `doc` will be used as the default values in the form fields.
+
+### update-pushArray
+
+Updates a document on the client by adding the form document to an array within the larger document. You must provide a `collection` attribute referencing the `Mongo.Collection` instance. If the collection has an attached schema, it will be modified to be scoped appropriately and that new schema will be used for validation. If you provide a `schema` attribute, that schema will be used for validation, but the document must validate against the collection's schema, too.
+
+You can think of this as an insert form for subdocuments. It generates and validates a document instead of a modifier, pretending that the array item schema is the full schema. Then it performs an update operation that does a `$push` of that document into the array.
+
+Use the `scope` attribute on your form to define the array field into which the resulting document should be pushed. For example, `scope="employees"` or `scope="employees.0.addresses"`.
+
+### method
+
+Will call the server method with the name you specify in the `meteormethod` attribute. Passes a single argument, `doc`, which is the document resulting from the form submission.
+
+The method is not called until `doc` is valid on the client.
+
+**You must call `check()` in the method or perform your own validation since a user could bypass the client side validation.**
+
+### method-update
+
+Will call the server method with the name you specify in the `meteormethod` attribute. Passes two arguments:
+
+* `modifier`: the modifier object generated from the form values
+* `documentId`: the `_id` of the document being updated
+
+The method is not called until `modifier` is valid on the client.
+
+**You must call `check()` in the method or perform your own validation since a user could bypass the client side validation.**
+
+### normal
+
+Will call any `onSubmit` hooks you define, where you can do custom submission logic. If `onSubmit` does not return false or call `this.event.preventDefault()`, the browser will also submit the form. This means that you can use AutoForm to generate and validate a form but still have it POST normally to an HTTP endpoint.
+
+Example:
+
+```js
+AutoForm.hooks({
+  contactForm: {
+    onSubmit: function (insertDoc, updateDoc, currentDoc) {
+      if (customHandler(insertDoc)) {
+        this.done();
+      } else {
+        this.done(new Error("Submission failed"));
+      }
+      return false;
+    }
+  }
+});
+```
+
+The arguments passed to your `onSubmit` hook are as follows:
+
+* `insertDoc`: The form input values in a document, suitable for use with insert().
+This object has been cleaned and validated, but auto values and default values
+have not been added to it.
+* `updateDoc`: The form input values in a modifier, suitable for use with update().
+This object has *not* been validated.
+* `currentDoc`: The object that's currently bound to the form through the `doc` attribute
+
+In addition to the normal `this` hook context, there is a `this.done()` method, which you *must* call when you are done with your custom client submission logic. This allows you to do asynchronous tasks if necessary. You may optionally pass one argument. If you pass an `Error` object, then any `onError` hooks will be called; otherwise, any `onSuccess` hooks will be called.
+
+If you return `false`, no further submission will happen, and it is equivalent
+to calling `this.event.preventDefault()` and `this.event.stopPropagation()`. If you return anything other than `false`, the browser will submit the form.
+
+If you use `autoValue` or `defaultValue` options, be aware that `insertDoc` and
+`updateDoc` will not yet have auto or default values added to them. If you're
+passing them to `insert` or `update` on a Mongo.Collection with a schema, then
+there's nothing to worry about. But if you're doing something else with the
+object on the client, then you might want to call `clean` to add the auto and
+default values:
+
+```js
+AutoForm.hooks({
+  peopleForm: {
+    onSubmit: function (doc) {
+      PeopleSchema.clean(doc);
+      console.log("People doc with auto values", doc);
+      this.done();
+      return false;
+    }
+  }
+});
+```
+
+If you're sending the objects to the server in any way, it's always best to
+wait to call `clean` until you're on the server so that the auto values can be
+trusted.
+
+### disabled
+
+All inputs will be disabled. Nothing happens when submitting.
+
+### readonly
+
+All inputs will be read-only. Nothing happens when submitting.
+
 ## Public API
 
 Some public methods are exposed on the `AutoForm` object. Refer to the [API documentation](https://github.com/aldeed/meteor-autoform/blob/master/api.md).
@@ -680,16 +793,6 @@ own validation since a user could bypass the client side validation.** You do
 not have to do any of your own validation with collection inserts or updates,
 but you do have to call `check()` on the server when submitting to a Meteor method.
 
-## Submitting To Methods
-
-When you specify `type="method"`, Autoform will pass the result of the form to a Meteor method of that name.
-
-That method will be called with three arguments:
-
-- `document`: the document resulting from the form submission.
-- `modifier`: the modifier object.
-- `documentId`: when updating an existing document, that document's `_id` (optional).
-
 ## Fine Tuning Validation
 
 To control when and how fields should be validated, use the `validation`
@@ -792,9 +895,9 @@ AutoForm.hooks({
     // The same as the callbacks you would normally provide when calling
     // collection.insert, collection.update, or Meteor.call
     after: {
-      insert: function(error, result, template) {},
-      update: function(error, result, template) {},
-      method: function(error, result, template) {}
+      insert: function(error, result) {},
+      update: function(error, result) {},
+      method: function(error, result) {}
     },
 
     // Called when form does not have a `type` attribute
@@ -805,13 +908,11 @@ AutoForm.hooks({
       //this.done(null, "foo"); // submitted successfully, call onSuccess with `result` arg set to "foo"
     },
 
-    // Called when any submit operation succeeds, where formType will be
-    // "insert", "update", "submit", or "method".
-    onSuccess: function(formType, result, template) {},
+    // Called when any submit operation succeeds
+    onSuccess: function(formType, result) {},
 
-    // Called when any submit operation fails, where formType will be
-    // "validation", "insert", "update", "submit", or "method".
-    onError: function(formType, error, template) {},
+    // Called when any submit operation fails
+    onError: function(formType, error) {},
 
     // Called every time the form is revalidated, which can be often if keyup
     // validation is used.
@@ -819,15 +920,15 @@ AutoForm.hooks({
 
     // Called whenever `doc` attribute reactively changes, before values
     // are set in the form fields.
-    docToForm: function(doc, ss, formId) {},
+    docToForm: function(doc, ss) {},
 
     // Called at the beginning and end of submission, respectively.
     // This is the place to disable/enable buttons or the form,
     // show/hide a "Please wait" message, etc. If these hooks are
     // not defined, then by default the submit button is disabled
     // during submission.
-    beginSubmit: function(formId, template) {},
-    endSubmit: function(formId, template) {}
+    beginSubmit: function() {},
+    endSubmit: function() {}
   }
 });
 ```
@@ -857,7 +958,7 @@ If you want to add the same hook for multiple forms or for all forms, use the
 
   AutoForm.addHooks(null, {
     onSuccess: function () {
-      console.log("onSuccess on all input/update/method forms!");
+      console.log("onSuccess on all forms!");
     }
   });
 ```
@@ -882,18 +983,11 @@ before all global hooks.
 * Passing `null` as the first argument of `AutoForm.addHooks` adds global hooks, that is,
 hooks that run for every form that has been created and every form that ever will be created
 in the app.
-* The `before` hooks are called just before the insert, update, or method
-call. These hooks are passed the document or modifier as gathered from the form fields. If necessary they can modify the document or modifier. These functions can perform asynchronous tasks if necessary. If asynchronicity is not needed, simply return the document or modifier, or return `false` to cancel submission. If you don't return anything, then you must call `this.result()` eventually and pass it either the document or modifier, or `false` to cancel submission. *This is run only on the client.
+* The `before` hooks are called after the form is deemed valid but before the submission operation happens. (The submission operation depends on the form type. For example, the insert, update, method call, etc.) These hooks are passed the document or modifier as gathered from the form fields. If necessary they can modify the document or modifier. These functions can perform asynchronous tasks if necessary. If asynchronicity is not needed, simply return the document or modifier, or return `false` to cancel submission. If you don't return anything, then you must call `this.result()` eventually and pass it either the document or modifier, or `false` to cancel submission. *This is run only on the client.
 Therefore, you should not assume that this will always run since a devious user
 could skip it.*
-* The `after` hooks are the same as those you would normally specify as the last
-argument of the `insert` or `update` methods on a Mongo.Collection or the
-Meteor.call method. Notice, though, that they are passed one additional final
-argument, which is the template object. One use for the template object
-might be so that you can clean up certain form fields if the result was successful
-or show additional error-related elements if not. This should be rarely needed unless you have complex custom controls in your form.
-* Refer to the next sections for details about the `onSubmit`, `formToDoc`,
-and `docToForm` hooks.
+* The `after` hooks are similar to the callbacks for `insert` and `update` and method calls. They are passed two arguments: `error` and `result`
+* Refer to the next sections for details about the `formToDoc` and `docToForm` hooks.
 
 The following properties and functions are available in all hooks when they are called:
 
@@ -904,69 +998,6 @@ The following properties and functions are available in all hooks when they are 
 * `this.autoSaveChangedElement`: The input element that was changed to cause this form submission (if the submission was due to autosave)
 * `this.docId`: The `_id` attribute of the `doc` attached to the form, if there is one, or for an `type='insert'` form, the `_id` of the newly inserted doc, if one has been inserted.
 * `this.resetForm()`: Call this if you need to reset the form
-
-### onSubmit
-
-*Note: `onSubmit` hooks are called only when your form does not have a `type` attribute.*
-
-Submitting to a server method allows you to do anything you want with the form
-data on the server, but what if you want to do something with the form data on
-the client? For that, you can specify an `onSubmit` hook.
-
-```js
-AutoForm.hooks({
-  contactForm: {
-    onSubmit: function (insertDoc, updateDoc, currentDoc) {
-      if (customHandler(insertDoc)) {
-        this.done();
-      } else {
-        this.done(new Error("Submission failed"));
-      }
-      return false;
-    }
-  }
-});
-```
-
-The arguments passed to your function are as follows:
-
-* `insertDoc`: The form input values in a document, suitable for use with insert().
-This object has been cleaned and validated, but auto values and default values
-have not been added to it.
-* `updateDoc`: The form input values in a modifier, suitable for use with update().
-This object has *not* been validated.
-* `currentDoc`: The object that's currently bound to the form through the `doc` attribute
-
-In addition to the normal `this` context:
-
-* A `this.done()` method, which you *must* call when you are done with your custom client submission logic. This allows you to do asynchronous tasks if necessary. You may optionally pass one argument. If you pass an `Error` object, then any `onError` hooks will be called; otherwise, any `onSuccess` hooks will be called.
-
-If you return `false`, no further submission will happen, and it is equivalent
-to calling `this.event.preventDefault()` and `this.event.stopPropagation()`. If you return anything other than `false`, the browser will submit the form.
-
-If you use `autoValue` or `defaultValue` options, be aware that `insertDoc` and
-`updateDoc` will not yet have auto or default values added to them. If you're
-passing them to `insert` or `update` on a Mongo.Collection with a schema, then
-there's nothing to worry about. But if you're doing something else with the
-object on the client, then you might want to call `clean` to add the auto and
-default values:
-
-```js
-AutoForm.hooks({
-  peopleForm: {
-    onSubmit: function (doc) {
-      PeopleSchema.clean(doc);
-      console.log("People doc with auto values", doc);
-      this.done();
-      return false;
-    }
-  }
-});
-```
-
-If you're sending the objects to the server in any way, it's always best to
-wait to call `clean` until you're on the server so that the auto values can be
-trusted.
 
 ### formToDoc and docToForm
 

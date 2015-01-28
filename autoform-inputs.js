@@ -135,7 +135,7 @@ getFormValues = function getFormValues(template, formId, ss) {
   };
   var transforms = Hooks.getHooks(formId, 'formToDoc');
   _.each(transforms, function formValuesTransform(transform) {
-    doc = transform.call(hookCtx, doc, ss, formId);
+    doc = transform.call(hookCtx, doc, ss);
   });
 
   // We return doc, insertDoc, and updateDoc.
