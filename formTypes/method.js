@@ -7,7 +7,7 @@ AutoForm.addFormType('method', {
     // Prevent browser form submission
     this.event.preventDefault();
 
-    if (!this.methodName) {
+    if (!this.formAttributes.meteormethod) {
       throw new Error('When form type is "method", you must also provide a "meteormethod" attribute');
     }
 
