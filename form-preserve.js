@@ -14,19 +14,29 @@ FormPreserve = function formPreserveConstructor(migrationName) {
   self.retrievedDocuments = {};
   if (Package.reload) {
     var Reload = Package.reload.Reload;
-    self.retrievedDocuments = Reload._migrationData(migrationName) || {};
+    self.retrievedDocuments = Reload._migrationData(migrationName) || '{}';
+
+    // Currently migration does not seem to support proper storage
+    // of Date type. It comes back as a string, so we need to store
+    // EJSON instead.
+    if (typeof self.retrievedDocuments === 'string') {
+      self.retrievedDocuments = EJSON.parse(self.retrievedDocuments);
+    }
+
     Reload._onMigrate(migrationName, function () {
-      return [true, self._retrieveRegisteredDocuments()];
+      var doc = self._retrieveRegisteredDocuments();
+      return [true, EJSON.stringify(doc)];
     });
   }
 };
 
 FormPreserve.prototype.getDocument = function (formId) {
-  var self = this;
-  if (! _.has(self.retrievedDocuments, formId))
+  var self = this, doc;
+  if (! _.has(self.retrievedDocuments, formId)) {
     return false;
-  else
-    return self.retrievedDocuments[formId];
+  }
+
+  return self.retrievedDocuments[formId];
 };
 
 FormPreserve.prototype.clearDocument = function (formId) {
