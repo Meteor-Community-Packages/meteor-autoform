@@ -346,8 +346,11 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   // Get the name of the input type template used to render the input element
   inputTypeTemplate = AutoForm.getInputTypeTemplateNameForElement(element);
 
-  // Slice off the potential theme template, after the underscore.
-  inputTypeTemplate = inputTypeTemplate.split("_")[0];
+  // Slice off the potential theme template, after the last underscore.
+  var lastUnderscore = inputTypeTemplate.lastIndexOf('_');
+  if (lastUnderscore !== -1) {
+    inputTypeTemplate = inputTypeTemplate.slice(0, lastUnderscore);
+  }
 
   // Figure out what registered input type was used to render this element
   typeDef = _.where(AutoForm._inputTypeDefinitions, {template: inputTypeTemplate})[0];

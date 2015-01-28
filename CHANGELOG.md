@@ -14,6 +14,7 @@ forms with automatic insert and update events, and automatic reactive validation
 * **Compatibility break:** If you have custom templates for `afFormGroup` or `afObjectField`, change all `this.atts` references to `this`.
 * When providing options for a `select` or `select-multiple` input type, you can now add additional props to the objects in the options array and those properties will become attributes on the `option` element in the generated HTML.
 * `data-required` attribute is now present on the form group `div` element for all built-in `afFormGroup` templates if the field is required. This allows you to use css like the following to display an asterisk after required fields: `[data-required] label:after {content: '*'}`
+* There are no longer issues when your input type template name contains underscores.
 
 ### 4.2.2
 
