@@ -68,7 +68,7 @@ Template.autoForm.created = function autoFormCreated() {
     // we also want to reset the array counts for the form
     arrayTracker.resetForm(formId);
 
-    var ss = AutoForm.Utility.getSimpleSchemaFromContext(data, formId);
+    var ss = AutoForm.getFormSchema(formId, data);
 
     // Clone the doc so that docToForm and other modifications do not change
     // the original referenced object.

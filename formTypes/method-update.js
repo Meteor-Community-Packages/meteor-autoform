@@ -1,4 +1,4 @@
-/* global AutoForm, _validateForm */
+/* global AutoForm, _validateForm, validateFormDoc */
 
 AutoForm.addFormType('method-update', {
   onSubmit: function () {
@@ -25,5 +25,17 @@ AutoForm.addFormType('method-update', {
         Meteor.call(c.formAttributes.meteormethod, updateDoc, c.docId, c.result);
       }
     });
+  },
+  validateForm: function () {
+    // Get SimpleSchema
+    var ss = AutoForm.getFormSchema(this.form.id);
+
+    var collection = AutoForm.getFormCollection(this.form.id);
+    // If there is a `schema` attribute but you want to force validation against the
+    // collection's schema instead, pass useCollectionSchema=true
+    ss = (this.useCollectionSchema && collection) ? collection.simpleSchema() : ss;
+
+    // We validate the modifier. We don't want to throw errors about missing required fields, etc.
+    return validateFormDoc(this.formDocs.updateDoc, true, this.form.id, ss, this.form);
   }
 });

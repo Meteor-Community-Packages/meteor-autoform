@@ -47,6 +47,7 @@ Package.onUse(function(api) {
     // form types
     'formTypes/insert.js',
     'formTypes/update.js',
+    'formTypes/update-pushArray.js',
     'formTypes/method.js',
     'formTypes/method-update.js',
     'formTypes/normal.js',

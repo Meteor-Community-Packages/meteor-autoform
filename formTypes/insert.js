@@ -1,4 +1,4 @@
-/* global AutoForm */
+/* global AutoForm, validateFormDoc */
 
 AutoForm.addFormType('insert', {
   onSubmit: function () {
@@ -30,5 +30,11 @@ AutoForm.addFormType('insert', {
         collection.insert(doc, c.result);
       }
     });
+  },
+  validateForm: function () {
+    // Get SimpleSchema
+    var ss = AutoForm.getFormSchema(this.form.id);
+    // Validate
+    return validateFormDoc(this.formDocs.insertDoc, false, this.form.id, ss, this.form);
   }
 });

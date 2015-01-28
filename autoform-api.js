@@ -252,8 +252,7 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId) {
   }
   // Get a reference to the SimpleSchema instance that should be used for
   // determining what types we want back for each field.
-  var context = template.data;
-  var ss = AutoForm.Utility.getSimpleSchemaFromContext(context, formId);
+  var ss = AutoForm.getFormSchema(formId);
   return getFormValues(template, formId, ss);
 };
 
@@ -688,13 +687,23 @@ AutoForm.getArrayCountFromDocForField = function (formId, field) {
 AutoForm.getCurrentDataForForm = function (formId) {
   var formElement;
 
+  function setDefaults(data) {
+    if (!data) {
+      data = {};
+    }
+    if (typeof data.type !== 'string') {
+      data.type = 'normal';
+    }
+    return data;
+  }
+
   // get data for form with formId if passed
   if (formId) {
     formElement = document.getElementById(formId);
     if (!formElement) {
       throw new Error('No form with ID ' + formId + ' is currently rendered. If you are calling AutoForm.getCurrentDataForForm, or something that calls it, from within a template helper, try calling without passing a formId');
     }
-    return Blaze.getData(formElement) || {};
+    return setDefaults(Blaze.getData(formElement));
   }
 
   // otherwise get data for nearest form from within helper
@@ -709,7 +718,7 @@ AutoForm.getCurrentDataForForm = function (formId) {
   }
 
   if (view && view.name === 'Template.autoForm') {
-    return Blaze.getData(view) || {};
+    return setDefaults(Blaze.getData(view));
   }
 
   return {};
@@ -749,18 +758,38 @@ AutoForm.getFormCollection = function (formId) {
  * specified in the `collection` attribute. The form must be
  * currently rendered.
  * @param   {String}   formId The form's `id` attribute
+ * @param   {Object}   [form] Pass the form data context as an optimization or if the form is not yet rendered.
  * @returns {SimpleSchema|undefined} The SimpleSchema instance
  */
-AutoForm.getFormSchema = function (formId) {
-  var schema = AutoForm.getCurrentDataForForm(formId).schema;
+AutoForm.getFormSchema = function (formId, form) {
+  form = form || AutoForm.getCurrentDataForForm(formId);
+  var formType = form.type;
+  var schema = form.schema;
   if (schema) {
-    return AutoForm.Utility.lookup(schema);
+    schema = AutoForm.Utility.lookup(schema);
   } else {
-    var collection = AutoForm.getFormCollection(formId);
+    var collection = AutoForm.Utility.lookup(form.collection);
     if (collection && typeof collection.simpleSchema === 'function') {
-      return collection.simpleSchema();
+      schema = collection.simpleSchema();
     }
   }
+
+  // Form type definition can optionally alter the schema
+  var ftd = AutoForm._formTypeDefinitions[formType];
+  if (!ftd) {
+    throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
+  }
+
+  if (typeof ftd.adjustSchema === 'function') {
+    schema = ftd.adjustSchema.call({form: form}, schema);
+  }
+
+  // If we have no schema, throw an error
+  if (!schema) {
+    throw new Error('AutoForm: form with id "' + formId + '" needs either "schema" or "collection" attribute');
+  }
+
+  return schema;
 };
 
 /**

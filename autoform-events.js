@@ -50,7 +50,7 @@ Template.autoForm.events({
     // Gather necessary form info
     var formId = this.id;
     var form = AutoForm.getCurrentDataForForm(formId);
-    var formType = form.type || 'normal';
+    var formType = form.type;
     // ss will be the schema for the `schema` attribute if present,
     // else the schema for the collection
     var ss = AutoForm.getFormSchema(formId);
@@ -212,21 +212,19 @@ Template.autoForm.events({
     // This validation pass happens before any "before" hooks run. We
     // validate against the form schema. Then before hooks can add any missing
     // properties before we validate against the full collection schema.
-    if (form.validation !== 'none') {
+    try {
+      isValid = _validateForm(formId, formDocs);
+    } catch (e) {
       // Catch exceptions in validation functions which will bubble up here, cause a form with
       // onSubmit() to submit prematurely and prevent the error from being reported
       // (due to a page refresh).
-      try {
-        isValid = _validateForm(formId, formDocs);
-      } catch (e) {
-        console.error('Validation error', e);
-        isValid = false;
-      }
-      // If we failed pre-submit validation, we stop submission.
-      if (isValid === false) {
-        failedValidation();
-        return;
-      }
+      console.error('Validation error', e);
+      isValid = false;
+    }
+    // If we failed pre-submit validation, we stop submission.
+    if (isValid === false) {
+      failedValidation();
+      return;
     }
 
     // Run beginSubmit hooks (disable submit button or form, etc.)
@@ -290,32 +288,30 @@ Template.autoForm.events({
       validateField(key, formId, false, onlyIfAlreadyInvalid);
     }
   },
-  'change form': function autoFormChangeHandler(event, template) {
-    var self = this;
-
+  'change form': function autoFormChangeHandler(event) {
     var key = event.target.getAttribute("data-schema-key");
     if (!key) {
       key = $(event.target).closest('[data-schema-key]').attr("data-schema-key");
       if (!key) {return;}
     }
 
-    var formId = self.id;
+    var formId = this.id;
 
     // Mark field value as changed for reactive updates
     updateTrackedFieldValue(formId, key);
 
     // Get current form data context
-    var data = AutoForm.getCurrentDataForForm(formId);
+    var form = AutoForm.getCurrentDataForForm(formId);
 
     // If the form should be auto-saved whenever updated, we do that on field
     // changes instead of validating the field
-    if (data.autosave === true) {
+    if (form.autosave === true) {
       lastAutoSaveElement = event.target;
       $(event.currentTarget).submit();
       return;
     }
 
-    var validationType = data.validation || 'submitThenKeyup';
+    var validationType = form.validation || 'submitThenKeyup';
     var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' ||
                                 validationType === 'submitThenBlur');
 

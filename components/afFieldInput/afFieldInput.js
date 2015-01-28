@@ -70,7 +70,7 @@ Template.afFieldInput.helpers({
     }, 0);
     
     // Build input data context
-    var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), form.type || 'normal');
+    var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), form.type);
 
     // Adjust and return context
     return (typeof componentDef.contextAdjust === "function") ? componentDef.contextAdjust(iData) : iData;

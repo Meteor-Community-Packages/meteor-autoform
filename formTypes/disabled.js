@@ -6,6 +6,10 @@ AutoForm.addFormType('disabled', {
     this.event.preventDefault();
     // Nothing else
   },
+  validateForm: function () {
+    // Always valid
+    return true;
+  },
   adjustInputContext: function (ctx) {
     ctx.atts.disabled = "";
     return ctx;

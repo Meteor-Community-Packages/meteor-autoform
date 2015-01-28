@@ -5,36 +5,24 @@
  */
 
 _validateForm = function _validateForm(formId, formDocs, useCollectionSchema) {
-  var ss, isValid, collection;
   var form = AutoForm.getCurrentDataForForm(formId);
+  var formType = form.type;
 
   if (form.validation === 'none') {
     return true;
   }
 
-  ss = AutoForm.getFormSchema(formId);
-  collection = AutoForm.getFormCollection(formId);
-  // We use the schema for the `schema` attribute if present,
-  // else the schema for the collection. If there is a `schema`
-  // attribute but you want to force validation against the
-  // collection's schema instead, pass useCollectionSchema=true
-  ss = (useCollectionSchema && collection) ? collection.simpleSchema() : ss;
-
-  // Perform validation
-  if (form.type === "update" || form.type === "method-update") {
-    // For a type="update" form, we validate the modifier. We don't want to throw
-    // errors about missing required fields, etc.
-    isValid = validateFormDoc(formDocs.updateDoc, true, formId, ss, form);
-  } else {
-    // For any other type of form, we validate the document.
-    isValid = validateFormDoc(formDocs.insertDoc, false, formId, ss, form);
+  // Call onSubmit from the requested form type definition
+  var ftd = AutoForm._formTypeDefinitions[formType];
+  if (!ftd) {
+    throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
   }
 
-  if (!isValid) {
-    selectFirstInvalidField(formId, ss);
-  }
-
-  return isValid;
+  return ftd.validateForm.call({
+    form: form,
+    formDocs: formDocs,
+    useCollectionSchema: useCollectionSchema
+  });
 };
 
 function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
@@ -85,12 +73,8 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
 // with leading and trailing calls.
 validateField = _.throttle(_validateField, 300);
 
-
-/*
- * PRIVATE
- */
-
-function validateFormDoc(doc, isModifier, formId, ss, form, key) {
+validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, form, key) {
+  var isValid;
   var ec = {
     userId: (Meteor.userId && Meteor.userId()) || null,
     isInsert: !isModifier,
@@ -115,17 +99,27 @@ function validateFormDoc(doc, isModifier, formId, ss, form, key) {
   // Validate
   // If `key` is provided, we validate that key/field only
   if (key) {
-    return ss.namedContext(formId).validateOne(docForValidation, key, {
+    isValid = ss.namedContext(formId).validateOne(docForValidation, key, {
       modifier: isModifier,
       extendedCustomContext: ec
     });
   } else {
-    return ss.namedContext(formId).validate(docForValidation, {
+    isValid = ss.namedContext(formId).validate(docForValidation, {
       modifier: isModifier,
       extendedCustomContext: ec
     });
+
+    if (!isValid) {
+      selectFirstInvalidField(formId, ss);
+    }
   }
-}
+
+  return isValid;
+};
+
+/*
+ * PRIVATE
+ */
 
 // Selects the focus the first field with an error
 function selectFirstInvalidField(formId, ss) {
