@@ -1,42 +1,8 @@
+/* global _validateForm:true, AutoForm, getFormValues, validateField:true, getAllFieldsInForm */
+
 /*
  * all form validation logic is here
  */
-
-validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, docId, key) {
-  var ec = {
-    userId: (Meteor.userId && Meteor.userId()) || null,
-    isInsert: !isModifier,
-    isUpdate: !!isModifier,
-    isUpsert: false,
-    isFromTrustedCode: false,
-    docId: docId
-  };
-
-  // Get a version of the doc that has auto values to validate here. We
-  // don't want to actually send any auto values to the server because
-  // we ultimately want them generated on the server
-  var docForValidation = ss.clean(_.clone(doc), {
-    isModifier: isModifier,
-    filter: false,
-    autoConvert: false,
-    trimStrings: false,
-    extendAutoValueContext: ec
-  });
-
-  // Validate
-  // If `key` is provided, we validate that key/field only
-  if (key) {
-    return ss.namedContext(formId).validateOne(docForValidation, key, {
-      modifier: isModifier,
-      extendedCustomContext: ec
-    });
-  } else {
-    return ss.namedContext(formId).validate(docForValidation, {
-      modifier: isModifier,
-      extendedCustomContext: ec
-    });
-  }
-};
 
 _validateForm = function _validateForm(formId, formDocs, useCollectionSchema) {
   var ss, docId, isValid, collection;
@@ -57,7 +23,7 @@ _validateForm = function _validateForm(formId, formDocs, useCollectionSchema) {
   docId = (form.doc && form.doc._id) || null;
 
   // Perform validation
-  if (form.type === "update") {
+  if (form.type === "update" || form.type === "method-update") {
     // For a type="update" form, we validate the modifier. We don't want to throw
     // errors about missing required fields, etc.
     isValid = validateFormDoc(formDocs.updateDoc, true, formId, ss, docId);
@@ -87,6 +53,8 @@ function _validateField(key, template, ss, skipEmpty, onlyIfAlreadyInvalid) {
   var form = AutoForm.getCurrentDataForForm(formId);
   var docId = (form.doc && form.doc._id) || null;
 
+  // Skip validation if onlyIfAlreadyInvalid is true and the form is
+  // currently valid.
   if (onlyIfAlreadyInvalid && ss.namedContext(formId).isValid()) {
     return; //skip validation
   }
@@ -95,7 +63,7 @@ function _validateField(key, template, ss, skipEmpty, onlyIfAlreadyInvalid) {
   var formDocs = getFormValues(template, formId, ss);
 
   // Clean and validate doc
-  if (form.type === "update") {
+  if (form.type === "update" || form.type === "method-update") {
     docToValidate = formDocs.updateDoc;
     isModifier = true;
   } else {
@@ -116,8 +84,50 @@ function _validateField(key, template, ss, skipEmpty, onlyIfAlreadyInvalid) {
 // with leading and trailing calls.
 validateField = _.throttle(_validateField, 300);
 
+
+/*
+ * PRIVATE
+ */
+
+function validateFormDoc(doc, isModifier, formId, ss, docId, key) {
+  var ec = {
+    userId: (Meteor.userId && Meteor.userId()) || null,
+    isInsert: !isModifier,
+    isUpdate: !!isModifier,
+    isUpsert: false,
+    isFromTrustedCode: false,
+    docId: docId
+  };
+
+  // Get a version of the doc that has auto values to validate here. We
+  // don't want to actually send any auto values to the server because
+  // we ultimately want them generated on the server
+  var docForValidation = _.clone(doc);
+  ss.clean(docForValidation, {
+    isModifier: isModifier,
+    filter: false,
+    autoConvert: false,
+    trimStrings: false,
+    extendAutoValueContext: ec
+  });
+
+  // Validate
+  // If `key` is provided, we validate that key/field only
+  if (key) {
+    return ss.namedContext(formId).validateOne(docForValidation, key, {
+      modifier: isModifier,
+      extendedCustomContext: ec
+    });
+  } else {
+    return ss.namedContext(formId).validate(docForValidation, {
+      modifier: isModifier,
+      extendedCustomContext: ec
+    });
+  }
+}
+
 // Selects the focus the first field with an error
-selectFirstInvalidField = function selectFirstInvalidField(formId, ss) {
+function selectFirstInvalidField(formId, ss) {
   var ctx = ss.namedContext(formId), template, fields;
   if (!ctx.isValid()) {
     template = AutoForm.templateInstanceForForm(formId);
@@ -130,4 +140,4 @@ selectFirstInvalidField = function selectFirstInvalidField(formId, ss) {
       }
     });
   }
-};
+}

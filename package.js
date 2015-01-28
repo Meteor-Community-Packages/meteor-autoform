@@ -48,6 +48,7 @@ Package.onUse(function(api) {
     'formTypes/insert.js',
     'formTypes/update.js',
     'formTypes/method.js',
+    'formTypes/method-update.js',
     'formTypes/normal.js',
     'formTypes/readonly.js',
     'formTypes/disabled.js',

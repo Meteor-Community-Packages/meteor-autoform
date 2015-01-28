@@ -255,23 +255,37 @@ Template.autoForm.events({
     var validationType = template.data.validation || 'submitThenKeyup';
     var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup');
     var skipEmpty = !(event.keyCode === 8 || event.keyCode === 46); //if deleting or backspacing, don't skip empty
+
     if ((validationType === 'keyup' || validationType === 'submitThenKeyup')) {
+      var key = event.currentTarget.getAttribute("data-schema-key");
+      if (!key) {
+        key = $(event.currentTarget).closest('[data-schema-key]').attr("data-schema-key");
+        if (!key) {return;}
+      }
+
       // validateField is throttled, so we need to get form schema here
       var ss = AutoForm.getFormSchema();
-      validateField(event.currentTarget.getAttribute("data-schema-key"), template, ss, skipEmpty, onlyIfAlreadyInvalid);
+      validateField(key, template, ss, skipEmpty, onlyIfAlreadyInvalid);
     }
   },
   'blur [data-schema-key]': function autoFormBlurHandler(event, template) {
     var validationType = template.data.validation || 'submitThenKeyup';
     var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' ||
                                 validationType === 'submitThenBlur');
+
     if (validationType === 'keyup' ||
         validationType === 'blur' ||
         validationType === 'submitThenKeyup' ||
         validationType === 'submitThenBlur') {
+      var key = event.currentTarget.getAttribute("data-schema-key");
+      if (!key) {
+        key = $(event.currentTarget).closest('[data-schema-key]').attr("data-schema-key");
+        if (!key) {return;}
+      }
+
       // validateField is throttled, so we need to get form schema here
       var ss = AutoForm.getFormSchema();
-      validateField(event.currentTarget.getAttribute("data-schema-key"), template, ss, false, onlyIfAlreadyInvalid);
+      validateField(key, template, ss, false, onlyIfAlreadyInvalid);
     }
   },
   'change form': function autoFormChangeHandler(event, template) {
@@ -302,6 +316,7 @@ Template.autoForm.events({
     var validationType = data.validation || 'submitThenKeyup';
     var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' ||
                                 validationType === 'submitThenBlur');
+
     if (validationType === 'keyup' ||
         validationType === 'blur' ||
         validationType === 'submitThenKeyup' ||
