@@ -5,7 +5,7 @@
  */
 
 _validateForm = function _validateForm(formId, formDocs, useCollectionSchema) {
-  var ss, docId, isValid, collection;
+  var ss, isValid, collection;
   var form = AutoForm.getCurrentDataForForm(formId);
 
   if (form.validation === 'none') {
@@ -20,16 +20,14 @@ _validateForm = function _validateForm(formId, formDocs, useCollectionSchema) {
   // collection's schema instead, pass useCollectionSchema=true
   ss = (useCollectionSchema && collection) ? collection.simpleSchema() : ss;
 
-  docId = (form.doc && form.doc._id) || null;
-
   // Perform validation
   if (form.type === "update" || form.type === "method-update") {
     // For a type="update" form, we validate the modifier. We don't want to throw
     // errors about missing required fields, etc.
-    isValid = validateFormDoc(formDocs.updateDoc, true, formId, ss, docId);
+    isValid = validateFormDoc(formDocs.updateDoc, true, formId, ss, form);
   } else {
     // For any other type of form, we validate the document.
-    isValid = validateFormDoc(formDocs.insertDoc, false, formId, ss, docId);
+    isValid = validateFormDoc(formDocs.insertDoc, false, formId, ss, form);
   }
 
   if (!isValid) {
@@ -39,19 +37,22 @@ _validateForm = function _validateForm(formId, formDocs, useCollectionSchema) {
   return isValid;
 };
 
-function _validateField(key, template, ss, skipEmpty, onlyIfAlreadyInvalid) {
+function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
   var docToValidate, isModifier;
 
   // Due to throttling, this can be called after the autoForm template is destroyed.
   // If that happens, we exit without error.
+  var template = AutoForm.templateInstanceForForm(formId);
   if (!template || !template.view._domrange || template.view.isDestroyed) {
     return;
   }
 
-  var context = template.data;
-  var formId = context.id;
   var form = AutoForm.getCurrentDataForForm(formId);
-  var docId = (form.doc && form.doc._id) || null;
+  var ss = AutoForm.getFormSchema(formId);
+
+  if (!ss) {
+    return;
+  }
 
   // Skip validation if onlyIfAlreadyInvalid is true and the form is
   // currently valid.
@@ -77,7 +78,7 @@ function _validateField(key, template, ss, skipEmpty, onlyIfAlreadyInvalid) {
     return true; //skip validation
   }
 
-  return validateFormDoc(docToValidate, isModifier, formId, ss, docId, key);
+  return validateFormDoc(docToValidate, isModifier, formId, ss, form, key);
 }
 
 // Throttle field validation to occur at most every 300ms,
@@ -89,14 +90,14 @@ validateField = _.throttle(_validateField, 300);
  * PRIVATE
  */
 
-function validateFormDoc(doc, isModifier, formId, ss, docId, key) {
+function validateFormDoc(doc, isModifier, formId, ss, form, key) {
   var ec = {
     userId: (Meteor.userId && Meteor.userId()) || null,
     isInsert: !isModifier,
     isUpdate: !!isModifier,
     isUpsert: false,
     isFromTrustedCode: false,
-    docId: docId
+    docId: (form.doc && form.doc._id) || null
   };
 
   // Get a version of the doc that has auto values to validate here. We

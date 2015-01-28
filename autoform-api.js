@@ -446,8 +446,7 @@ AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipE
     throw new Error("validateField: There is currently no autoForm template rendered for the form with id " + formId);
   }
 
-  var ss = AutoForm.getFormSchema(formId);
-  return validateField(fieldName, template, ss, skipEmpty, false);
+  return validateField(fieldName, formId, skipEmpty, false);
 };
 
 /**

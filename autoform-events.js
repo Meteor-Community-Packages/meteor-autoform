@@ -263,9 +263,10 @@ Template.autoForm.events({
         if (!key) {return;}
       }
 
-      // validateField is throttled, so we need to get form schema here
-      var ss = AutoForm.getFormSchema();
-      validateField(key, template, ss, skipEmpty, onlyIfAlreadyInvalid);
+      // validateField is throttled, so we need to get the nearest form's
+      // ID here, while we're still in the correct context
+      var formId = AutoForm.getFormId();
+      validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid);
     }
   },
   'blur [data-schema-key]': function autoFormBlurHandler(event, template) {
@@ -283,9 +284,10 @@ Template.autoForm.events({
         if (!key) {return;}
       }
 
-      // validateField is throttled, so we need to get form schema here
-      var ss = AutoForm.getFormSchema();
-      validateField(key, template, ss, false, onlyIfAlreadyInvalid);
+      // validateField is throttled, so we need to get the nearest form's
+      // ID here, while we're still in the correct context
+      var formId = AutoForm.getFormId();
+      validateField(key, formId, false, onlyIfAlreadyInvalid);
     }
   },
   'change form': function autoFormChangeHandler(event, template) {
@@ -321,9 +323,7 @@ Template.autoForm.events({
         validationType === 'blur' ||
         validationType === 'submitThenKeyup' ||
         validationType === 'submitThenBlur') {
-      // validateField is throttled, so we need to get form schema here
-      var ss = AutoForm.getFormSchema();
-      validateField(key, template, ss, false, onlyIfAlreadyInvalid);
+      validateField(key, formId, false, onlyIfAlreadyInvalid);
     }
   },
   'reset form': function autoFormResetHandler(event, template) {
