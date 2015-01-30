@@ -687,16 +687,6 @@ AutoForm.getArrayCountFromDocForField = function (formId, field) {
 AutoForm.getCurrentDataForForm = function (formId) {
   var formElement;
 
-  function setDefaults(data) {
-    if (!data) {
-      data = {};
-    }
-    if (typeof data.type !== 'string') {
-      data.type = 'normal';
-    }
-    return data;
-  }
-
   // get data for form with formId if passed
   if (formId) {
     formElement = document.getElementById(formId);
@@ -762,7 +752,7 @@ AutoForm.getFormCollection = function (formId) {
  * @returns {SimpleSchema|undefined} The SimpleSchema instance
  */
 AutoForm.getFormSchema = function (formId, form) {
-  form = form || AutoForm.getCurrentDataForForm(formId);
+  form = form ? setDefaults(form) : AutoForm.getCurrentDataForForm(formId);
   var formType = form.type;
   var schema = form.schema;
   if (schema) {
@@ -799,3 +789,17 @@ AutoForm.getFormSchema = function (formId, form) {
 AutoForm.getFormId = function () {
   return AutoForm.getCurrentDataForForm().id;
 };
+
+/**
+ * Sets defaults for the form data context
+ * @returns {String} The data context with property defaults added.
+ */
+function setDefaults(data) {
+  if (!data) {
+    data = {};
+  }
+  if (typeof data.type !== 'string') {
+    data.type = 'normal';
+  }
+  return data;
+}
