@@ -36,5 +36,9 @@ AutoForm.addFormType('insert', {
     var ss = AutoForm.getFormSchema(this.form.id);
     // Validate
     return validateFormDoc(this.formDocs.insertDoc, false, this.form.id, ss, this.form);
+  },
+  shouldPrevalidate: function () {
+    // Prevalidate only if there is both a `schema` attribute and a `collection` attribute
+    return !!this.formAttributes.collection && !!this.formAttributes.schema;
   }
 });

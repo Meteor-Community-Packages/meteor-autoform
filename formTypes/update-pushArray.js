@@ -42,5 +42,9 @@ AutoForm.addFormType('update-pushArray', {
     var scope = this.form.scope;
     // TODO create new SS instance with only the fields that begin with `scope`
     return ss;
+  },
+  shouldPrevalidate: function () {
+    // Prevalidate only if there is both a `schema` attribute and a `collection` attribute
+    return !!this.formAttributes.collection && !!this.formAttributes.schema;
   }
 });

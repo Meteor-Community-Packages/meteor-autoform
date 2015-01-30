@@ -209,22 +209,33 @@ Template.autoForm.events({
       endSubmission();
     }
 
-    // This validation pass happens before any "before" hooks run. We
-    // validate against the form schema. Then before hooks can add any missing
-    // properties before we validate against the full collection schema.
-    try {
-      isValid = _validateForm(formId, formDocs);
-    } catch (e) {
-      // Catch exceptions in validation functions which will bubble up here, cause a form with
-      // onSubmit() to submit prematurely and prevent the error from being reported
-      // (due to a page refresh).
-      console.error('Validation error', e);
-      isValid = false;
+    // Get the form type definition
+    var ftd = AutoForm._formTypeDefinitions[formType];
+    if (!ftd) {
+      throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
     }
-    // If we failed pre-submit validation, we stop submission.
-    if (isValid === false) {
-      failedValidation();
-      return;
+
+    // Ask form type definition whether we should prevalidate. By default we do.
+    var shouldPrevalidate = ftd.shouldPrevalidate ? ftd.shouldPrevalidate.call(hookContext) : true;
+
+    if (shouldPrevalidate) {
+      // This validation pass happens before any "before" hooks run. We
+      // validate against the form schema. Then before hooks can add any missing
+      // properties before we validate against the full collection schema.
+      try {
+        isValid = _validateForm(formId, formDocs);
+      } catch (e) {
+        // Catch exceptions in validation functions which will bubble up here, cause a form with
+        // onSubmit() to submit prematurely and prevent the error from being reported
+        // (due to a page refresh).
+        console.error('Validation error', e);
+        isValid = false;
+      }
+      // If we failed pre-submit validation, we stop submission.
+      if (isValid === false) {
+        failedValidation();
+        return;
+      }
     }
 
     // Run beginSubmit hooks (disable submit button or form, etc.)
@@ -234,12 +245,7 @@ Template.autoForm.events({
     // then we actually do want the values.
     beginSubmit(formId, template, hookContext);
 
-    // Call onSubmit from the requested form type definition
-    var ftd = AutoForm._formTypeDefinitions[formType];
-    if (!ftd) {
-      throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
-    }
-
+    // Call onSubmit from the form type definition
     ftd.onSubmit.call(_.extend({
       runBeforeHooks: runBeforeHooks,
       result: resultCallback,

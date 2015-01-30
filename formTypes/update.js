@@ -29,5 +29,9 @@ AutoForm.addFormType('update', {
     var ss = AutoForm.getFormSchema(this.form.id);
     // We validate the modifier. We don't want to throw errors about missing required fields, etc.
     return validateFormDoc(this.formDocs.updateDoc, true, this.form.id, ss, this.form);
+  },
+  shouldPrevalidate: function () {
+    // Prevalidate only if there is both a `schema` attribute and a `collection` attribute
+    return !!this.formAttributes.collection && !!this.formAttributes.schema;
   }
 });
