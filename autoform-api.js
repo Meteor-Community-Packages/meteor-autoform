@@ -552,7 +552,8 @@ AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(pr
     } else {
       searchObj = viewData;
     }
-    if (_.isObject(searchObj)) {
+    // We need an isArray check, too because _.isObject([{}]) comes back true
+    if (_.isObject(searchObj) && !_.isArray(searchObj)) {
       _.each(searchObj, function (v, k) {
         if (k.indexOf(prefix) === 0) {
           result[k.slice(prefix.length)] = v;
