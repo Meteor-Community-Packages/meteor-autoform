@@ -1,10 +1,5 @@
 /* global arrayTracker, SimpleSchema, AutoForm */
 
-var regHelper = Template.registerHelper;
-if (typeof regHelper !== "function") {
-  regHelper = UI.registerHelper;
-}
-
 function parseOptions(options) {
   var hash = (options || {}).hash || {};
   // Find the form's schema
@@ -23,7 +18,7 @@ function parseOptions(options) {
 /*
  * afFieldMessage
  */
-regHelper('afFieldMessage', function autoFormFieldMessage(options) {
+Template.registerHelper('afFieldMessage', function autoFormFieldMessage(options) {
   options = parseOptions(options, 'afFieldMessage');
   var formId = AutoForm.getFormId();
 
@@ -33,7 +28,7 @@ regHelper('afFieldMessage', function autoFormFieldMessage(options) {
 /*
  * afFieldIsInvalid
  */
-regHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
+Template.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
   options = parseOptions(options, 'afFieldIsInvalid');
   var formId = AutoForm.getFormId();
 
@@ -43,7 +38,7 @@ regHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
 /*
  * afArrayFieldHasMoreThanMinimum
  */
-regHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreThanMinimum(options) {
+Template.registerHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreThanMinimum(options) {
   options = parseOptions(options, 'afArrayFieldHasMoreThanMinimum');
   var form = AutoForm.getCurrentDataPlusExtrasForForm();
 
@@ -60,7 +55,7 @@ regHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreTh
 /*
  * afArrayFieldHasLessThanMaximum
  */
-regHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessThanMaximum(options) {
+Template.registerHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessThanMaximum(options) {
   options = parseOptions(options, 'afArrayFieldHasLessThanMaximum');
   var form = AutoForm.getCurrentDataPlusExtrasForForm();
 
@@ -77,7 +72,7 @@ regHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessTh
 /*
  * afFieldValueIs
  */
-regHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
+Template.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
   options = parseOptions(options, 'afFieldValueIs');
   var formId = AutoForm.getFormId();
 
@@ -88,7 +83,7 @@ regHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
 /*
  * afArrayFieldIsFirstVisible
  */
-regHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFirstVisible() {
+Template.registerHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFirstVisible() {
   var context = this;
   return arrayTracker.isFirstFieldlVisible(context.formId, context.arrayFieldName, context.index);
 });
@@ -96,7 +91,7 @@ regHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFirstVisibl
 /*
  * afArrayFieldIsLastVisible
  */
-regHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLastVisible() {
+Template.registerHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLastVisible() {
   var context = this;
   return arrayTracker.isLastFieldlVisible(context.formId, context.arrayFieldName, context.index);
 });
@@ -104,7 +99,7 @@ regHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLastVisible(
 /*
  * afFieldValueContains
  */
-regHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
+Template.registerHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
   options = parseOptions(options, 'afFieldValueContains');
   var formId = AutoForm.getFormId();
 
@@ -115,7 +110,7 @@ regHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
 /*
  * afFieldLabelText
  */
-regHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
+Template.registerHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
   options = parseOptions(options, 'afFieldLabelText');
   return AutoForm.getLabelForField(options.name);
 });
@@ -123,7 +118,7 @@ regHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
 /*
  * afFieldNames
  */
-regHelper("afFieldNames", function autoFormFieldNames(options) {
+Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
   options = parseOptions(options, 'afFieldNames');
   var ss = options.ss, name = options.name, namePlusDot, genericName, genericNamePlusDot;
   var form = AutoForm.getCurrentDataForForm();
@@ -241,7 +236,11 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
   return fieldList;
 });
 
-regHelper('afSelectOptionAtts', function afSelectOptionAtts() {
+
+/*
+ * afSelectOptionAtts
+ */
+Template.registerHelper('afSelectOptionAtts', function afSelectOptionAtts() {
   var atts = _.pick(this, 'value');
   if (this.selected) {
     atts.selected = "";
@@ -256,7 +255,7 @@ regHelper('afSelectOptionAtts', function afSelectOptionAtts() {
  * afTemplateName
  * Deprecated. Don't use this. Eventually remove it.
  */
-regHelper('afTemplateName', function afTemplateNameHelper(templateType, templateName) {
+Template.registerHelper('afTemplateName', function afTemplateNameHelper(templateType, templateName) {
   var self = this;
   console.log('The afTemplateName template helper is deprecated. Use AutoForm.getTemplateName method in your own helper.');
   return AutoForm.getTemplateName(templateType, templateName, self.atts && self.atts.name);
