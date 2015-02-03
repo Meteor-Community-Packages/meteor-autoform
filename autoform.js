@@ -16,7 +16,6 @@ AutoForm._inputTypeDefinitions = {}; //for storing input type definitions added 
 AutoForm._formTypeDefinitions = {}; //for storing submit type definitions added by AutoForm.addFormType
 
 arrayTracker = new ArrayTracker();
-componentTypeList = ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'];
 
 // Used by AutoForm._forceResetFormValues; temporary hack
 AutoForm._destroyForm = {};

@@ -30,7 +30,7 @@ function getFieldsValues(fields, ss) {
 
 // Determines based on different options what type of input/control should be used
 getInputType = function getInputType(atts) {
-	var expectsArray = false, defs, schemaType;
+  var expectsArray = false, defs, schemaType;
 
   atts = AutoForm.Utility.normalizeContext(atts, 'afFieldInput').atts;
 
@@ -39,8 +39,8 @@ getInputType = function getInputType(atts) {
     return atts.type;
   }
 
-	// Get schema definition, using the item definition for array fields
-	defs = AutoForm.getSchemaForField(atts.name);
+  // Get schema definition, using the item definition for array fields
+  defs = AutoForm.getSchemaForField(atts.name);
   schemaType = defs.type;
   if (schemaType === Array) {
     expectsArray = true;

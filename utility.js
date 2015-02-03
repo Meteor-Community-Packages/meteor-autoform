@@ -441,7 +441,7 @@ Utility = {
    * @param {String} name The name of the helper or component we're calling from.
    * @return {Object} Normalized context object
    *
-   * Returns an object with `afc`, `af`, and `atts` properties, normalized from whatever object is passed in.
+   * Returns an object with `atts` and `defs` properties, normalized from whatever object is passed in.
    * This helps deal with the fact that we have to pass the ancestor autoform's context to different
    * helpers and components in different ways, but in all cases we want to get access to it and throw
    * an error if we can't find an autoform context.
@@ -449,6 +449,7 @@ Utility = {
   normalizeContext: function autoFormNormalizeContext(context, name) {
     var atts, defs, itemDefs, allowedValues, formComponentAttributes,
       fieldAttributes, fieldAttributesForComponentType, ss;
+    var componentTypeList = ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'];
 
     context = context || {};
     atts = context.atts ? _.clone(context.atts) : _.clone(context);
@@ -465,7 +466,7 @@ Utility = {
 
     // Look up the tree if we're in a helper, checking to see if any ancestor components
     // had a <componentType>-attribute specified.
-    //formComponentAttributes = AutoForm.findAttributesWithPrefix(name + "-");
+    formComponentAttributes = AutoForm.findAttributesWithPrefix(name + "-");
 
     // Get any field-specific attributes defined in the schema.
     // They can be in autoform.attrName or autoform.componentType.attrName, with
@@ -477,8 +478,9 @@ Utility = {
 
     // If options="auto", we want to use defs.autoform.options
     // if specified and otherwise fall back to "allowed"
-    if (fieldAttributes.options && atts.options === "auto")
+    if (fieldAttributes.options && atts.options === "auto") {
       delete atts.options;
+    }
 
     // "autoform" option in the schema provides default atts
     atts = _.extend({}, formComponentAttributes, fieldAttributes, atts);

@@ -534,33 +534,46 @@ AutoForm.findAttribute = function autoFormFindAttribute(attrName) {
  * @return {Object} An object containing all of the found attributes and their values, with the prefix removed from the keys.
  *
  * Call this method from a UI helper. Searches for attributes that start with the given prefix, looking up the parent context tree until the closest autoform is reached.
- *
- * TODO change this to use logic like AutoForm.findAttribute
  */
 AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(prefix) {
-  var n = 0, af, searchObj, stopAt = -1, obj = {};
-  // we go one level past _af so that we get the original autoForm or quickForm attributes, too
-  do {
-    af = Template.parentData(n++);
-    if (af) {
-      if (af.atts) {
-        searchObj = af.atts;
-      } else {
-        searchObj = af;
-      }
-      if (_.isObject(searchObj)) {
-        _.each(searchObj, function (v, k) {
-          if (k.indexOf(prefix) === 0) {
-            obj[k.slice(prefix.length)] = v;
-          }
-        });
-      }
-      if (af._af) {
-        stopAt = n + 1;
-      }
+  var result = {}, view, viewData, searchObj;
+
+  var instance = Template.instance();
+  if (!instance) {
+    return result;
+  }
+
+  function checkView() {
+    // Is the attribute we're looking for on here?
+    // If so, add to result object.
+    viewData = Blaze.getData(view);
+    if (viewData && viewData.atts) {
+      searchObj = viewData.atts;
+    } else {
+      searchObj = viewData;
     }
-  } while (af && stopAt < n);
-  return obj;
+    if (_.isObject(searchObj)) {
+      _.each(searchObj, function (v, k) {
+        if (k.indexOf(prefix) === 0) {
+          result[k.slice(prefix.length)] = v;
+        }
+      });
+    }
+  }
+
+  // Loop
+  view = instance.view;
+  while (view && view.name !== 'Template.autoForm') {
+    checkView();
+    view = view.originalParentView || view.parentView;
+  }
+
+  // If we've reached the form, check there, too
+  if (view && view.name === 'Template.autoForm') {
+    checkView();
+  }
+
+  return result;
 };
 
 /**

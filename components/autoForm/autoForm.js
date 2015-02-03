@@ -40,17 +40,6 @@ Template.autoForm.helpers({
 
     return htmlAttributes;
   },
-  innerContext: function autoFormTplContext(outerContext) {
-    // Set up the context to be used for everything within the autoform.
-    // TODO we don't need this anymore if we redo the AutoForm.findAttributesWithPrefix
-    // function, which still searches for `_af` in the data context.
-    var innerContext = {_af: {}};
-
-    // Preserve outer context, allowing access within autoForm block without needing ..
-    _.extend(innerContext, outerContext);
-
-    return innerContext;
-  },
   afDestroyUpdateForm: function (formId) {
     AutoForm._destroyForm[formId] = AutoForm._destroyForm[formId] || new ReactiveVar(false);
     return AutoForm._destroyForm[formId].get();
