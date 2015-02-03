@@ -8,6 +8,7 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ### vNext
 
+* **Compatibility break:** The `afFieldNames` helper now returns an array of objects with `name` property instead of returning the array of names directly.
 * **Compatibility break:** The `method` form type now calls the server method with only one argument, the submitted form document. If your server method needs the update modifier and document _id instead of the document, change your form's type to `method-update`. The `before` hooks for a `method-update` form are passed (and should return) the modifier object instead of the document.
 * **Compatibility break:** The arguments passed to "before" hooks have changed. `docId` and `template` are no longer passed as arguments but are available as `this.docId` and `this.template`. Only a single object, `doc` is passed to every "before" hook.
 * **Compatibility break:** When defining "before" and "after" hooks for methods, use the word "method" instead of the method name. If you need different logic based on method name, you can examine `this.formAttributes.meteormethod` in your hook function.

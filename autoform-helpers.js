@@ -233,6 +233,12 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
   // Ensure fields are not added more than once
   fieldList = _.unique(fieldList);
 
+  // We return it as an array of objects because that
+  // works better with Blaze contexts
+  fieldList = _.map(fieldList, function (name) {
+    return {name: name};
+  });
+
   return fieldList;
 });
 
