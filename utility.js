@@ -132,7 +132,9 @@ Utility = {
     // If options are specified in the schema, they may be a function
     // that has not yet been evaluated.
     else if (typeof selectOptions === "function") {
-      selectOptions = selectOptions();
+      // Call with same context as Blaze would call it if it
+      // were a helper function
+      selectOptions = selectOptions.call(Template.parentData());
     }
 
     // Hashtable
