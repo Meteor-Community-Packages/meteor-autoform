@@ -1,4 +1,7 @@
+/* global Utility:true, MongoObject, AutoForm, moment */
+
 Utility = {
+  componentTypeList: ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'],
   /**
    * @method Utility.cleanNulls
    * @private
@@ -179,8 +182,9 @@ Utility = {
     }
 
     var defs = ss.schema(name);
-    if (!defs)
+    if (!defs) {
       throw new Error("Invalid field name: " + name);
+    }
     return defs;
   },
   /**
@@ -316,8 +320,9 @@ Utility = {
    * Returns `true` if timeString is a "valid time string"
    */
   isValidTimeString: function isValidTimeString(timeString) {
-    if (typeof timeString !== "string")
+    if (typeof timeString !== "string") {
       return false;
+    }
 
     //this reg ex actually allows a few invalid hours/minutes/seconds, but
     //we can catch that when parsing
@@ -387,8 +392,9 @@ Utility = {
    * Returns true if dateString is a "valid normalized forced-UTC global date and time string"
    */
   isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString(dateString) {
-    if (typeof dateString !== "string")
+    if (typeof dateString !== "string") {
       return false;
+    }
 
     var datePart = dateString.substring(0, 10);
     var tPart = dateString.substring(10, 11);
@@ -426,8 +432,9 @@ Utility = {
    * Returns true if dtString is a "valid normalized local date and time string"
    */
   isValidNormalizedLocalDateAndTimeString: function isValidNormalizedLocalDateAndTimeString(dtString) {
-    if (typeof dtString !== "string")
+    if (typeof dtString !== "string") {
       return false;
+    }
 
     var datePart = dtString.substring(0, 10);
     var tPart = dtString.substring(10, 11);
@@ -449,7 +456,6 @@ Utility = {
   normalizeContext: function autoFormNormalizeContext(context, name) {
     var atts, defs, itemDefs, allowedValues, formComponentAttributes,
       fieldAttributes, fieldAttributesForComponentType, ss;
-    var componentTypeList = ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'];
 
     context = context || {};
     atts = context.atts ? _.clone(context.atts) : _.clone(context);
@@ -473,7 +479,7 @@ Utility = {
     // the latter overriding the former.
     fieldAttributes = _.clone(defs.autoform) || {};
     fieldAttributesForComponentType = fieldAttributes[name] || {};
-    fieldAttributes = _.omit(fieldAttributes, componentTypeList);
+    fieldAttributes = _.omit(fieldAttributes, Utility.componentTypeList);
     fieldAttributes = _.extend({}, fieldAttributes, fieldAttributesForComponentType);
 
     // If options="auto", we want to use defs.autoform.options

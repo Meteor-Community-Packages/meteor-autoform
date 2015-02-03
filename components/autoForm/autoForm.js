@@ -1,4 +1,4 @@
-/* global AutoForm, getFormValues, ReactiveVar, arrayTracker, Hooks, MongoObject, updateAllTrackedFieldValues, formValues */
+/* global AutoForm, getFormValues, ReactiveVar, arrayTracker, Hooks, MongoObject, updateAllTrackedFieldValues, formValues, Utility */
 
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
@@ -21,10 +21,19 @@ Template.autoForm.helpers({
       "trimStrings"
     ];
 
+    // Filter out any attributes that have a component prefix
+    function hasComponentPrefix(prop) {
+      return _.any(Utility.componentTypeList, function (componentType) {
+        return prop.indexOf(componentType + '-') === 0;
+      });
+    }
+
     // Filter out arrays and objects, which are obviously not meant to be
     // HTML attributes.
     for (var prop in context) {
-      if (context.hasOwnProperty(prop) && !_.contains(removeProps, prop)) {
+      if (context.hasOwnProperty(prop) &&
+          !_.contains(removeProps, prop) &&
+          !hasComponentPrefix(prop)) {
         val = context[prop];
         if (!_.isArray(val) && !_.isObject(val)) {
           htmlAttributes[prop] = val;
