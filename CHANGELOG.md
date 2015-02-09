@@ -17,6 +17,7 @@ forms with automatic insert and update events, and automatic reactive validation
 * When providing options for a `select` or `select-multiple` input type, you can now add additional props to the objects in the options array and those properties will become attributes on the `option` element in the generated HTML.
 * `data-required` attribute is now present on the form group `div` element for all built-in `afFormGroup` templates if the field is required. This allows you to use css like the following to display an asterisk after required fields: `[data-required] label:after {content: '*'}`
 * There are no longer issues when your input type template name contains underscores.
+* A new `update-pushArray` form type allows you to create insert-like forms that push the resulting document into an array field in an existing collection document. See the README and http://autoform.meteor.com/updatepush
 
 ### 4.2.2
 
