@@ -767,33 +767,7 @@ AutoForm.getFormCollection = function (formId) {
  */
 AutoForm.getFormSchema = function (formId, form) {
   form = form ? setDefaults(form) : AutoForm.getCurrentDataForForm(formId);
-  var formType = form.type;
-  var schema = form.schema;
-  if (schema) {
-    schema = AutoForm.Utility.lookup(schema);
-  } else {
-    var collection = AutoForm.Utility.lookup(form.collection);
-    if (collection && typeof collection.simpleSchema === 'function') {
-      schema = collection.simpleSchema();
-    }
-  }
-
-  // Form type definition can optionally alter the schema
-  var ftd = AutoForm._formTypeDefinitions[formType];
-  if (!ftd) {
-    throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
-  }
-
-  if (typeof ftd.adjustSchema === 'function') {
-    schema = ftd.adjustSchema.call({form: form}, schema);
-  }
-
-  // If we have no schema, throw an error
-  if (!schema) {
-    throw new Error('AutoForm: form with id "' + formId + '" needs either "schema" or "collection" attribute');
-  }
-
-  return schema;
+  return form._resolvedSchema;
 };
 
 /**
@@ -808,12 +782,47 @@ AutoForm.getFormId = function () {
  * Sets defaults for the form data context
  * @returns {String} The data context with property defaults added.
  */
-function setDefaults(data) {
+setDefaults = function setDefaults(data) {
   if (!data) {
     data = {};
   }
+
+  // default form type is "normal"
   if (typeof data.type !== 'string') {
     data.type = 'normal';
   }
+
+  // Resolve form schema
+  if (!data._resolvedSchema) {
+    var formType = data.type;
+    var schema = data.schema;
+    if (schema) {
+      schema = AutoForm.Utility.lookup(schema);
+    } else {
+      var collection = AutoForm.Utility.lookup(data.collection);
+      if (collection && typeof collection.simpleSchema === 'function') {
+        schema = collection.simpleSchema();
+      }
+    }
+
+    // Form type definition can optionally alter the schema
+    var ftd = AutoForm._formTypeDefinitions[formType];
+    if (!ftd) {
+      throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
+    }
+
+    if (typeof ftd.adjustSchema === 'function') {
+      schema = ftd.adjustSchema.call({form: data}, schema);
+    }
+
+    // If we have no schema, throw an error
+    if (!schema) {
+      throw new Error('AutoForm: form with id "' + data.id + '" needs either "schema" or "collection" attribute');
+    }
+
+    // cache it
+    data._resolvedSchema = schema;
+  }
+
   return data;
-}
+};

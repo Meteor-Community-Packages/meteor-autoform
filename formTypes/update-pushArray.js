@@ -1,4 +1,4 @@
-/* global AutoForm, validateFormDoc */
+/* global AutoForm, validateFormDoc, SimpleSchema */
 
 AutoForm.addFormType('update-pushArray', {
   onSubmit: function () {
@@ -39,12 +39,21 @@ AutoForm.addFormType('update-pushArray', {
     return validateFormDoc(this.formDocs.insertDoc, false, this.form.id, ss, this.form);
   },
   adjustSchema: function (ss) {
-    var scope = this.form.scope;
-    // TODO create new SS instance with only the fields that begin with `scope`
-    return ss;
+    var scope = this.form.scope, newSchemaDef = {};
+    var searchString = scope+'.$.';
+
+    // create new SS instance with only the fields that begin with `scope`
+    _.each(ss.schema(), function (val, key) {
+      if (key.indexOf(searchString) === 0) {
+        newSchemaDef[key.slice(searchString.length)] = val;
+      }
+    });
+
+    return new SimpleSchema(newSchemaDef);
   },
   shouldPrevalidate: function () {
-    // Prevalidate only if there is both a `schema` attribute and a `collection` attribute
-    return !!this.formAttributes.collection && !!this.formAttributes.schema;
+    // Prevalidate because the form is generated with a schema
+    // that has keys different from the collection schema
+    return true;
   }
 });

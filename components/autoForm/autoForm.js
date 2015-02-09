@@ -66,7 +66,7 @@ Template.autoForm.created = function autoFormCreated() {
     // we also want to reset the array counts for the form
     arrayTracker.resetForm(formId);
 
-    var ss = AutoForm.getFormSchema(formId, data);
+    data = setDefaults(data);
 
     // Clone the doc so that docToForm and other modifications do not change
     // the original referenced object.
@@ -80,7 +80,7 @@ Template.autoForm.created = function autoFormCreated() {
       // closure values of template, formId, and ss remain correct after each
       // reaction
       AutoForm.formPreserve.registerForm(formId, function autoFormRegFormCallback() {
-        return getFormValues(template, formId, ss).insertDoc;
+        return getFormValues(template, formId, data._resolvedSchema).insertDoc;
       });
     }
 
@@ -98,7 +98,7 @@ Template.autoForm.created = function autoFormCreated() {
       var hookCtx = {formId: formId};
       // Pass doc through docToForm hooks
       _.each(Hooks.getHooks(formId, 'docToForm'), function autoFormEachDocToForm(hook) {
-        doc = hook.call(hookCtx, doc, ss);
+        doc = hook.call(hookCtx, doc, data._resolvedSchema);
         if (!doc) {
           throw new Error('Oops! Did you forget to return the modified document from your docToForm hook for the ' + formId + ' form?');
         }
