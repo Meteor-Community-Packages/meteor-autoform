@@ -14,6 +14,7 @@ Template.autoForm.helpers({
       "type",
       "template",
       "autosave",
+      "autosaveOnKeyup",
       "meteormethod",
       "filter",
       "autoConvert",
