@@ -45,6 +45,12 @@ function endSubmit(formId, template, hookContext) {
   }
 }
 
+//throttle autosave, at most autosave every 500ms
+throttleAutosave = _.throttle(function(event) {
+  lastAutoSaveElement = event.target;
+  $(event.currentTarget).submit();
+}, 500, {leading: false});
+
 Template.autoForm.events({
   'submit form': function autoFormSubmitHandler(event, template) {
     // Gather necessary form info
@@ -271,6 +277,14 @@ Template.autoForm.events({
       // ID here, while we're still in the correct context
       var formId = AutoForm.getFormId();
       validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid);
+
+      // Get current form data context
+      var form = AutoForm.getCurrentDataForForm(formId);
+      // If the form should be auto-saved whenever updated, we do that on field
+      // changes instead of validating the field
+      if (form.autosaveOnKeyup === true) {
+        throttleAutosave(event);
+      }
     }
   },
   'blur [data-schema-key]': function autoFormBlurHandler(event, template) {
@@ -311,7 +325,7 @@ Template.autoForm.events({
 
     // If the form should be auto-saved whenever updated, we do that on field
     // changes instead of validating the field
-    if (form.autosave === true) {
+    if (form.autosave === true || form.autosaveOnKeyup === true) {
       lastAutoSaveElement = event.target;
       $(event.currentTarget).submit();
       return;
