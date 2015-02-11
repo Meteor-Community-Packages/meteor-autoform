@@ -130,9 +130,23 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
   }
 
   // Get the list of fields we want included
-  var fieldList = options.fields || AutoForm.findAttribute("fields");
+  var fieldList = options.fields;
   if (fieldList) {
     fieldList = AutoForm.Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
+  }
+
+  var ancestorFieldList = AutoForm.findAttribute("fields");
+  if (ancestorFieldList) {
+    ancestorFieldList = AutoForm.Utility.stringToArray(ancestorFieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
+
+    // Use the ancestor field list as backup, unless there is
+    // a name and that name is listed in the ancestor field list
+    if (!fieldList && (!name || !_.contains(ancestorFieldList, name))) {
+      fieldList = ancestorFieldList;
+    }
+  }
+
+  if (fieldList) {
 
     // Take only those fields in the fieldList that are descendants of the `name` field
     if (name) {
