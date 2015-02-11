@@ -319,7 +319,7 @@ Meteor method in this attribute.
 for you after a successful submission action. You can skip this by setting this
 attribute to `false`.
 * `autosave`: Optional. Set to `true` to enable automatic form submission for a `type="update"` form. Whenever the `form change` event is emitted, the change will be automatically saved to the database.
-* `autosaveOnKeyup`: Optional. Set to `true` to enable automatic form submission for a `type="update` form on `keyup` event. Whenever a `keyup` event is emitted on a form field, the change will be automatically saved to the database (throttled to 500ms).
+* `autosaveOnKeyup`: Optional. Set to `true` to enable automatic form submission for a `type="update` form on `keyup` event. Whenever a `keyup` event is emitted on a form field, the change will be automatically saved to the database (throttled to 500ms). **It's best to set `trimStrings=false` when using this option. If you don't, spaces may be deleted while typing.**
 * `filter`: Optional. Set to `false` for an insert or update form to skip filtering out unknown properties when cleaning the form document.
 * `autoConvert`: Optional. Set to `false` for an insert or update form to skip autoconverting property values when cleaning the form document.
 * `removeEmptyStrings`: Optional. Set to `false` for an insert or update form to keep empty string values when cleaning the form document.
