@@ -1,15 +1,9 @@
+[![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
+
 AutoForm
 =========================
 
-[![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
-
-AutoForm is a Meteor package that adds UI components and helpers to easily
-create basic forms with automatic insert and update events, and automatic
-reactive validation. This package requires and automatically installs the
-[simple-schema](https://github.com/aldeed/meteor-simple-schema) package.
-You can optionally use it with the
-[collection2](https://github.com/aldeed/meteor-collection2) package, which you
-have to add to your app yourself.
+AutoForm is a Meteor package that adds UI components and helpers to easily create basic forms with automatic insert and update events, and automatic reactive validation. This package requires and automatically installs the [simple-schema](https://github.com/aldeed/meteor-simple-schema) package. You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you have to add to your app yourself.
 
 ## UPDATING TO 4.0
 
@@ -116,14 +110,20 @@ The following community packages provide additional custom input types that you 
 * [comerc:autoform-placecomplete](https://atmospherejs.com/comerc/autoform-placecomplete)
 * [comerc:autoform-bs-more](https://atmospherejs.com/comerc/autoform-bs-more)
 * [comerc:autoform-selectize](https://atmospherejs.com/comerc/autoform-selectize)
+* [miguelalarcos:afwrap-xautocomplete](https://atmospherejs.com/miguelalarcos/afwrap-xautocomplete)
+* [miguelalarcos:afwrap-xdatetime](https://atmospherejs.com/miguelalarcos/afwrap-xdatetime)
+* [comerc:autoform-typeahead](https://atmospherejs.com/comerc/autoform-typeahead)
+* [comerc:autoform-contenteditable2](https://atmospherejs.com/comerc/autoform-contenteditable2)
+* [meteoric:autoform-ionic](https://github.com/meteoric/autoform-ionic)
 
-[yogiben:admin](https://atmospherejs.com/yogiben/admin) provides CRUD admin pages using autoforms.
+The following community packages provide other add-on features related to autoform:
 
-[forwarder:autoform-wizard](https://atmospherejs.com/forwarder/autoform-wizard) and [planifica:wizard](https://atmospherejs.com/planifica/wizard) provide wizard components for autoform.
-
-[yogiben:autoform-modals](https://atmospherejs.com/yogiben/autoform-modals) provides autoform bootstrap modals to insert, update, remove docs from collections.
-
-[jameslefrere:autoform-semantic-ui](https://atmospherejs.com/jameslefrere/autoform-semantic-ui) provides a Semantic UI theme for autoform.
+* [yogiben:admin](https://atmospherejs.com/yogiben/admin) provides CRUD admin pages using autoforms.
+* [forwarder:autoform-wizard](https://atmospherejs.com/forwarder/autoform-wizard) and [planifica:wizard](https://atmospherejs.com/planifica/wizard) provide wizard components for autoform.
+* [yogiben:autoform-modals](https://atmospherejs.com/yogiben/autoform-modals) provides autoform bootstrap modals to insert, update, remove docs from collections.
+* [jameslefrere:autoform-semantic-ui](https://atmospherejs.com/jameslefrere/autoform-semantic-ui) provides a Semantic UI theme for autoform.
+* [comerc:autoform-fixtures](https://github.com/comerc/meteor-autoform-fixtures/) provides fixtures data for Collection2.
+* [kaoskeya:admin](https://atmospherejs.com/kaoskeya/admin) provides autoform based admin panel that integrates with your existing bootstrap design.
 
 ## Demo
 
@@ -324,8 +324,7 @@ attribute to `false`.
 * `autoConvert`: Optional. Set to `false` for an insert or update form to skip autoconverting property values when cleaning the form document.
 * `removeEmptyStrings`: Optional. Set to `false` for an insert or update form to keep empty string values when cleaning the form document.
 * `trimStrings`: Optional. Set to `false` for an insert or update form to keep leading and trailing spaces for string values when cleaning the form document.
-* Any additional attributes are passed along to the `<form>` element, meaning
-that you can add classes, etc.
+* Any additional attributes are passed along to the `<form>` element, meaning that you can add classes, etc. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`.
 
 ### quickForm
 
@@ -343,8 +342,7 @@ included, and they'll appear in the order you specify.
 names to omit from the generated form. All first-level schema fields *except* the
 fields listed here (and their subfields, if any) will be included.
 
-Any other attributes you specify will be output as attributes of the `<form>`
-element, just like when using the `autoForm` component.
+Any other attributes you specify will be output as attributes of the `<form>` element, just like when using the `autoForm` component. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`.
 
 See [this demo](http://autoform.meteor.com/qfdetails) for examples of what happens when you specify various types of fields in the `fields` or `omitFields` attributes.
 
@@ -379,9 +377,7 @@ to anything to render radios or checkboxes for the `options` instead of `select`
 option for a boolean field.
 * `falseLabel`: Set to the string that should be used as the label for the `false`
 option for a boolean field.
-*  Any additional attributes are passed along to the generated DOM element,
-meaning that you can add `class`, etc. You can also use this feature to set
-default values for inputs by supplying a `value` attribute.
+*  Any additional attributes are passed along to the generated DOM element, meaning that you can add `class`, etc. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`. You can also use this feature to set default values for inputs by supplying a `value` attribute.
 * `placeholder`: As with other attributes, this will be passed along to the
 generated DOM element, but you can also optionally do
 `placeholder="schemaLabel"` to use the field label defined in the schema as
