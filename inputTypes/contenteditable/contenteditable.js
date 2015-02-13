@@ -16,3 +16,11 @@ Template.afContenteditable.events({
     template.$(event.target).change();
   }
 });
+
+Template.afContenteditable.helpers({
+  getValue: function (value) {
+    if(Template.instance().view.isRendered){
+      Template.instance().$('[contenteditable]').html(value)
+    }
+  }
+});
