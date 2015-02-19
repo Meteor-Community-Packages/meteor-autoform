@@ -502,8 +502,14 @@ Utility = {
       }
     }
 
+    // eval any attribute that is provided as a function
+    var evaluatedAtts = {};
+    _.each(atts, function (v, k) {
+      evaluatedAtts[k] = typeof v === 'function' ? v() : v;
+    });
+
     return {
-      atts: atts,
+      atts: evaluatedAtts,
       defs: defs
     };
   },
