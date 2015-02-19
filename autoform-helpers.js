@@ -74,9 +74,8 @@ Template.registerHelper('afArrayFieldHasLessThanMaximum', function autoFormArray
  */
 Template.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
   options = parseOptions(options, 'afFieldValueIs');
-  var formId = AutoForm.getFormId();
 
-  var currentValue = AutoForm.getFieldValue(formId, options.name);
+  var currentValue = AutoForm.getFieldValue(options.name, options.formId);
   return currentValue === options.value;
 });
 
@@ -101,9 +100,8 @@ Template.registerHelper('afArrayFieldIsLastVisible', function autoFormArrayField
  */
 Template.registerHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
   options = parseOptions(options, 'afFieldValueContains');
-  var formId = AutoForm.getFormId();
 
-  var currentValue = AutoForm.getFieldValue(formId, options.name);
+  var currentValue = AutoForm.getFieldValue(options.name, options.formId);
   return _.isArray(currentValue) && (_.contains(currentValue, options.value) || options.values && _.intersection(currentValue, options.values.split(",")));
 });
 

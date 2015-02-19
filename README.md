@@ -854,10 +854,8 @@ You can get the current values of all fields on a form at any time by passing th
 to [AutoForm.getFormValues](https://github.com/aldeed/meteor-autoform/blob/master/api.md#autoformgetformvaluesformidclient). This method is *not* reactive. The form must be
 currently rendered for this to work.
 
-You can get the current value of a specific field on a specific form by passing the form
-`id` and field name to [AutoForm.getFieldValue](https://github.com/aldeed/meteor-autoform/blob/master/api.md#autoformgetformvaluesformidclient). This method *is* reactive so it can be used in
-place of the built-in `afFieldValueIs` helper to show pieces of a form based on
-custom criteria about the values of other fields on the form.
+You can get the current value of a specific field on a specific form by passing the field name to [AutoForm.getFieldValue](https://github.com/aldeed/meteor-autoform/blob/master/api.md#autoformgetformvaluesformidclient). This method *is* reactive so it can be used in place of the built-in `afFieldValueIs` helper to show pieces of a form based on
+custom criteria about the values of other fields on the form. If using outside of the autoForm, pass the `formId` as the second argument.
 
 ## Callbacks/Hooks
 

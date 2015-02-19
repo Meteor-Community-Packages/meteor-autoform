@@ -308,7 +308,7 @@ Template.autoForm.events({
       validateField(key, formId, false, onlyIfAlreadyInvalid);
     }
   },
-  'change form': function autoFormChangeHandler(event) {
+  'change form': function autoFormChangeHandler(event, template) {
     var key = event.target.getAttribute("data-schema-key");
     if (!key) {
       key = $(event.target).closest('[data-schema-key]').attr("data-schema-key");
@@ -318,7 +318,7 @@ Template.autoForm.events({
     var formId = this.id;
 
     // Mark field value as changed for reactive updates
-    updateTrackedFieldValue(formId, key);
+    updateTrackedFieldValue(template, key);
 
     // Get current form data context
     var form = AutoForm.getCurrentDataForForm(formId);
@@ -371,11 +371,10 @@ Template.autoForm.events({
       // because we have to let the browser reset all fields before we
       // update their values for deps.
       setTimeout(function () {
-        // Mark all fields as changed
-        updateAllTrackedFieldValues(formId);
-
-        // Focus the autofocus element
         if (template && template.view._domrange && !template.view.isDestroyed) {
+          // Mark all fields as changed
+          updateAllTrackedFieldValues(template);
+          // Focus the autofocus element
           template.$("[autofocus]").focus();
         }
       }, 0);

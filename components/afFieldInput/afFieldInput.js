@@ -66,7 +66,7 @@ Template.afFieldInput.helpers({
     // blocks involved.
     // See https://github.com/aldeed/meteor-autoform/issues/461
     setTimeout(function () {
-      updateTrackedFieldValue(formId, c.atts.name);
+      updateTrackedFieldValue(AutoForm.templateInstanceForForm(formId), c.atts.name);
     }, 0);
     
     // Build input data context

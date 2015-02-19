@@ -1,6 +1,5 @@
 /* global AutoForm */
 /* global getInputType:true */
-/* global getFieldValue:true */
 /* global getFormValues:true */
 /* global getInputValue:true */
 /* global getFieldsValues:true */
@@ -9,9 +8,8 @@
 /* global getInputData:true */
 /* global updateTrackedFieldValue:true */
 /* global updateAllTrackedFieldValues:true */
-/* global formValues */
 
-function getFieldsValues(fields, ss) {
+getFieldsValues = function getFieldsValues(fields, ss) {
   var doc = {};
   fields.each(function formValuesEach() {
     var fieldName, val = AutoForm.getInputValue(this, ss);
@@ -21,8 +19,17 @@ function getFieldsValues(fields, ss) {
       doc[fieldName] = val;
     }
   });
+
+  // Expand the object
+  doc = AutoForm.Utility.expandObj(doc);
+
+  // As array items are removed, gaps can appear in the numbering,
+  // which results in arrays that have undefined items. Here we
+  // remove any array items that are undefined.
+  AutoForm.Utility.compactArrays(doc);
+
   return doc;
-}
+};
 
 /*
  * package scope functions
@@ -81,12 +88,6 @@ getInputType = function getInputType(atts) {
   return type;
 };
 
-getFieldValue = function getFieldValue(template, key) {
-  var ss = AutoForm.getFormSchema(template.data.id);
-  var doc = getFieldsValues(getAllFieldsInForm(template).filter('[data-schema-key="' + key + '"], [data-schema-key^="' + key + '."]'), ss);
-  return doc && doc[key];
-};
-
 getFormValues = function getFormValues(template, formId, ss) {
   var form = AutoForm.getCurrentDataForForm(formId);
   // By default, we do not keep empty strings
@@ -112,14 +113,6 @@ getFormValues = function getFormValues(template, formId, ss) {
 
   // Build doc from field values
   var doc = getFieldsValues(getAllFieldsInForm(template), ss);
-
-  // Expand the object
-  doc = AutoForm.Utility.expandObj(doc);
-
-  // As array items are removed, gaps can appear in the numbering,
-  // which results in arrays that have undefined items. Here we
-  // remove any array items that are undefined.
-  AutoForm.Utility.compactArrays(doc);
 
   // When all fields that comprise a sub-object are empty, we should unset
   // the whole subobject and not complain about required fields in it. For example,
@@ -291,15 +284,32 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   return inputTypeContext;
 };
 
-updateTrackedFieldValue = function updateTrackedFieldValue(formId, key) {
-  formValues[formId] = formValues[formId] || {};
-  formValues[formId][key] = formValues[formId][key] || new Tracker.Dependency();
-  formValues[formId][key].changed();
+updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) {
+
+  function markChanged() {
+    if (!template.formValues[fieldName]) {
+      template.formValues[fieldName] = new Tracker.Dependency();
+    }
+
+    console.log(fieldName + 'changed');
+    template.formValues[fieldName].changed();
+  }
+
+  markChanged();
+
+  // To properly handle array fields, we'll mark the ancestors as changed, too
+  // XXX Might be a more elegant way to handle this
+  var dotPos = fieldName.lastIndexOf('.');
+  while (dotPos !== -1) {
+    fieldName = fieldName.slice(0, dotPos);
+    markChanged();
+    dotPos = fieldName.lastIndexOf('.');
+  }
 };
 
-updateAllTrackedFieldValues = function updateAllTrackedFieldValues(formId) {
-  _.each(formValues[formId], function (o, key) {
-    updateTrackedFieldValue(formId, key);
+updateAllTrackedFieldValues = function updateAllTrackedFieldValues(template) {
+  _.each(template.formValues, function (o, fieldName) {
+    updateTrackedFieldValue(template, fieldName);
   });
 };
 

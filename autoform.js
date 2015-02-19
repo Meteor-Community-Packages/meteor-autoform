@@ -11,7 +11,6 @@ AutoForm.formPreserve = new FormPreserve("autoforms");
 // code pushes.
 AutoForm.reactiveFormData = new FormData();
 
-formValues = {}; //for reactive show/hide based on current value of a field
 AutoForm._inputTypeDefinitions = {}; //for storing input type definitions added by AutoForm.addInputType
 AutoForm._formTypeDefinitions = {}; //for storing submit type definitions added by AutoForm.addFormType
 

@@ -1,4 +1,4 @@
-/* global AutoForm:true, SimpleSchema, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, getFormValues, formValues, _validateForm, validateField, arrayTracker, getInputType, ReactiveVar */
+/* global AutoForm:true, SimpleSchema, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, getFormValues, _validateForm, validateField, arrayTracker, getInputType, ReactiveVar, getFieldsValues, getAllFieldsInForm, setDefaults:true */
 
 // This file defines the public, exported API
 
@@ -259,32 +259,31 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId) {
 /**
  * @method AutoForm.getFieldValue
  * @public
- * @param {String} formId The `id` attribute of the `autoForm` you want current values for.
  * @param {String} fieldName The name of the field for which you want the current value.
+ * @param {String} [formId] The `id` attribute of the `autoForm` you want current values for. Default is the closest form from the current context.
  * @return {Any}
  *
  * Returns the value of the field (the value that would be used if the form were submitted right now).
  * This is a reactive method that will rerun whenever the current value of the requested field changes.
  */
-AutoForm.getFieldValue = function autoFormGetFieldValue(formId, fieldName) {
-  // reactive dependency
-  formValues[formId] = formValues[formId] || {};
-  formValues[formId][fieldName] = formValues[formId][fieldName] || new Tracker.Dependency();
-  formValues[formId][fieldName].depend();
-
+AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
   // find AutoForm template
   var template = AutoForm.templateInstanceForForm(formId);
-  if (!template || !template.view._domrange || template.view.isDestroyed) {
+  if (!template || !template.fieldValuesReady.get() || !template.view._domrange || template.view.isDestroyed) {
     return;
   }
+
+  // reactive dependency
+  if (!template.formValues[fieldName]) {
+    template.formValues[fieldName] = new Tracker.Dependency();
+  }
+  template.formValues[fieldName].depend();
 
   // find AutoForm schema
   var ss = AutoForm.getFormSchema(formId);
 
-  // get element reference
-  var element = template.$('[data-schema-key="' + fieldName + '"]')[0];
-
-  return AutoForm.getInputValue(element, ss);
+  var doc = getFieldsValues(getAllFieldsInForm(template).filter('[data-schema-key="' + fieldName + '"], [data-schema-key^="' + fieldName + '."]'), ss);
+  return doc && doc[fieldName];
 };
 
 /**
@@ -302,7 +301,7 @@ AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTempl
   // the template contains a block helper like if, with, each,
   // then look up the view chain until we arrive at a template
   while (view && view.name.slice(0, 9) !== "Template.") {
-    view = view.parentView;
+    view = view.originalParentView || view.parentView;
   }
 
   if (!view) {
@@ -644,15 +643,18 @@ AutoForm.getLabelForField = function autoFormGetSchemaForField(name) {
 };
 
 /**
- * Gets the template instance for the form. The form
- * must be currently rendered. If not, returns `undefined`.
- * @param   {String}                     formId The form's `id` attribute
+ * Gets the template instance for the form with formId or the closest form to the current context.
+ * @param   {String}                     [formId] The form's `id` attribute
  * @returns {TemplateInstance|undefined} The template instance.
  */
 AutoForm.templateInstanceForForm = function (formId) {
-  var formElement = document.getElementById(formId);
-  if (!formElement) {
-    return;
+  var formElement;
+
+  if (formId) {
+    formElement = document.getElementById(formId);
+    if (!formElement) {
+      return;
+    }
   }
 
   var view = Blaze.getView(formElement);
@@ -660,11 +662,12 @@ AutoForm.templateInstanceForForm = function (formId) {
     return;
   }
 
-  // Currently we have an #unless wrapping the form,
-  // so we need to go up a level. This should continue to
-  // work even if we remove that #unless or add other wrappers.
-  while (typeof view.templateInstance !== 'function' && view.parentView) {
-    view = view.parentView;
+  while (view.name !== 'Template.autoForm' && (view.originalParentView || view.parentView)) {
+    view = view.originalParentView || view.parentView;
+  }
+
+  if (view.name !== 'Template.autoForm') {
+    return;
   }
 
   return view.templateInstance();

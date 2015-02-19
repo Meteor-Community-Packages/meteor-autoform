@@ -1,4 +1,4 @@
-/* global AutoForm, getFormValues, ReactiveVar, arrayTracker, Hooks, MongoObject, updateAllTrackedFieldValues, formValues, Utility */
+/* global AutoForm, getFormValues, ReactiveVar, arrayTracker, Hooks, MongoObject, updateAllTrackedFieldValues, Utility, setDefaults */
 
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
@@ -59,6 +59,12 @@ Template.autoForm.helpers({
 Template.autoForm.created = function autoFormCreated() {
   var template = this;
 
+  // We'll add tracker dependencies for reactive field values
+  // to this object as necessary
+  template.formValues = {};
+
+  template.fieldValuesReady = new ReactiveVar(false);
+
   template.autorun(function (c) {
     var data = Template.currentData(); // rerun when current data changes
     var formId = data.id;
@@ -117,9 +123,13 @@ Template.autoForm.created = function autoFormCreated() {
     // computations dependent on AutoForm.getFieldValue will rerun properly
     // when the form is initially rendered using values from `doc`.
     setTimeout(function () {
-      updateAllTrackedFieldValues(formId);
+      updateAllTrackedFieldValues(template);
     }, 0);
   });
+};
+
+Template.autoForm.rendered = function autoFormRendered() {
+  this.fieldValuesReady.set(true);
 };
 
 Template.autoForm.destroyed = function autoFormDestroyed() {
@@ -131,11 +141,6 @@ Template.autoForm.destroyed = function autoFormDestroyed() {
 
   // Remove from array fields list
   arrayTracker.untrackForm(formId);
-
-  // Remove from field values
-  if (formValues[formId]) {
-    delete formValues[formId];
-  }
 
   // Unregister form preservation
   AutoForm.formPreserve.unregisterForm(formId);
