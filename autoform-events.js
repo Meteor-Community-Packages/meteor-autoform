@@ -48,7 +48,32 @@ var getFormState = function (formId) {
   var formState = formStates[formId];
   return formState;
 };
+
+var updateFormState = function (formId, data) {
+  var clean;
+  var formValues = AutoForm.getFormValues(formId);
+  var formState = getFormState(formId);
+  if (data.doc) {//update
+
+    //clone since clean may change values
+    var clonedOrgData = EJSON.clone(data.doc);
+    if (data.ss) {
+      data.ss.clean(clonedOrgData);
+    }
+    clean = EJSON.equals(clonedOrgData, formValues.insertDoc);
+
+  } else {//insert
+
+    clean = EJSON.equals({}, formValues.insertDoc);
+  }
+  formState.set(clean ? "clean" : "dirty");
+};
 Template.autoForm.events({
+  'input form' : function autoFormInputHandler(){
+    var formId = this.id || defaultFormId;
+    var data = formData[formId];
+    updateFormState(formId, data);
+  },
   'submit form': function autoFormSubmitHandler(event, template) {
     // Gather necessary form info
     var formId = this.id || defaultFormId;
@@ -429,24 +454,7 @@ Template.autoForm.events({
     // Mark field value as changed for reactive updates
     updateTrackedFieldValue(formId, key);
 
-    var clean;
-    var formValues = AutoForm.getFormValues(formId);
-    var formState = getFormState(formId);
-    if (data.doc) {//update
-
-      //clone since clean may change values
-      var clonedOrgData = EJSON.clone(data.doc);
-      if (data.ss) {
-        data.ss.clean(clonedOrgData);
-      }
-      clean = EJSON.equals(clonedOrgData, formValues.insertDoc);
-
-    } else {//insert
-
-      clean = EJSON.equals({}, formValues.insertDoc);
-    }
-    formState.set(clean? "clean":"dirty");
-
+    updateFormState(formId, data);
     // If the form should be auto-saved whenever updated, we do that on field
     // changes instead of validating the field
     if (data.autosave) {

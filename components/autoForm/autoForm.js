@@ -119,8 +119,7 @@ Template.autoForm.created = function autoFormCreated() {
       removeEmptyStrings: data.removeEmptyStrings,
       trimStrings: data.trimStrings
     };
-    formStates[formId] = formStates[formId] || new ReactiveVar("pristine");
-    formStates[formId].set("pristine");
+
 
     // This ensures that anything dependent on field values will properly
     // react to field values set from the database document. That is,
@@ -132,6 +131,11 @@ Template.autoForm.created = function autoFormCreated() {
 
     contextDependency.changed();
   });
+
+  var stateFormId = this.data.id || defaultFormId;
+  formStates[stateFormId] = formStates[stateFormId] || new ReactiveVar("pristine");
+  formStates[stateFormId].set("pristine");
+
 };
 
 Template.autoForm.destroyed = function autoFormDestroyed() {
