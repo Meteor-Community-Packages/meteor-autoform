@@ -317,7 +317,7 @@ getInputData = function getInputData(defs, hash, value, label, submitType) {
   };
 };
 
-updateTrackedFieldValue = function  updateTrackedFieldValue(formId, key) {
+updateTrackedFieldValue = function updateTrackedFieldValue(formId, key) {
   formValues[formId] = formValues[formId] || {};
   formValues[formId][key] = formValues[formId][key] || new Tracker.Dependency();
   formValues[formId][key].changed();

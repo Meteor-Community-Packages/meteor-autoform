@@ -317,7 +317,7 @@ regHelper('afHasFormState', function autoFormHasFormState(state, options) {
 regHelper('afFormState', function autoFormFormState(options) {
 
   //options = parseOptions(options, 'afHasFormState');
-  
+
   var context = this;
   var formId = (options && options.hash && options.hash.formId) || context._af.formId;
   return AutoForm.getFormState(formId);
