@@ -527,3 +527,19 @@ AutoForm.invalidateFormContext = function autoFormInvalidateFormContext(formId) 
   formDeps[formId] = formDeps[formId] || new Tracker.Dependency();
   formDeps[formId].changed();
 };
+
+
+
+AutoForm.getFormState = function autoFormGetFormState(formId) {
+  formStates[formId] = formStates[formId] || new ReactiveVar("pristine");
+  return formStates[formId].get();
+};
+AutoForm.isFormClean = function autoFormGetFormStateClean(formId) {
+  return AutoForm.getFormState(formId) === "clean";
+};
+AutoForm.isFormDirty = function autoFormGetFormStateDirty(formId) {
+  return AutoForm.getFormState(formId) === "dirty";
+};
+AutoForm.isFormPristine = function autoFormGetFormStatePristine(formId) {
+  return AutoForm.getFormState(formId) === "pristine";
+};

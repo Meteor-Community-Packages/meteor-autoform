@@ -39,6 +39,11 @@ function endSubmit(formId, template) {
   }
 }
 
+var getFormState = function (formId) {
+  formStates[formId] = formStates[formId] || new ReactiveVar("pristine");
+  var formState = formStates[formId];
+  return formState;
+};
 Template.autoForm.events({
   'submit form': function autoFormSubmitHandler(event, template) {
     // Gather necessary form info
@@ -142,6 +147,7 @@ Template.autoForm.events({
           if (name === "insert") {
             cbCtx.docId = result;
           }
+          getFormState(formId).set("pristine");
           _.each(onSuccess, function onSuccessEach(hook) {
             hook.call(cbCtx, name, result, template);
           });
@@ -419,6 +425,18 @@ Template.autoForm.events({
     // Mark field value as changed for reactive updates
     updateTrackedFieldValue(formId, key);
 
+    var clonedOrgData = EJSON.clone(data.doc);
+    if(data.ss){
+      data.ss.clean(clonedOrgData);
+    }
+    var formState = getFormState(formId);
+    var formValues = AutoForm.getFormValues(formId);
+    var clean = EJSON.equals(clonedOrgData, formValues.insertDoc);
+    formState.set(clean?"clean":"dirty");
+
+
+
+
     // If the form should be auto-saved whenever updated, we do that on field
     // changes instead of validating the field
     if (data.autosave) {
@@ -451,7 +469,7 @@ Template.autoForm.events({
       // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
       // there is no need to reset validation for it. No error need be thrown.
     }
-
+    getFormState(formId).set("pristine");
     if (this.doc) {
       event.preventDefault();
 

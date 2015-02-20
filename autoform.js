@@ -3,6 +3,7 @@ formPreserve = new FormPreserve("autoforms");
 formData = {}; //for looking up autoform data by form ID
 templatesById = {}; //keep a reference of autoForm templates by form `id` for AutoForm.getFormValues
 formValues = {}; //for reactive show/hide based on current value of a field
+formStates = {}; //for reactive form state changes
 formDeps = {}; //for invalidating the form inner context and causing rerender
 inputTypeDefinitions = {}; //for storing input type definitions added by AutoForm.addInputType
 fd = new FormData();
