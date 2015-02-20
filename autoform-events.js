@@ -38,7 +38,11 @@ function endSubmit(formId, template) {
     }
   }
 }
-
+/**
+ *
+ * @param {string} formId
+ * @returns {ReactiveVar} the reactive var, if it does not exist it is inited with pristine
+ */
 var getFormState = function (formId) {
   formStates[formId] = formStates[formId] || new ReactiveVar("pristine");
   var formState = formStates[formId];

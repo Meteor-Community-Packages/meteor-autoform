@@ -306,8 +306,7 @@ function parseOptions(options, helperName) {
  * afFieldMessage
  */
 regHelper('afHasFormState', function autoFormHasFormState(state, options) {
-
-  //options = parseOptions(options, 'afHasFormState');
+  
   var context = this;
 
   var formId = options.hash && options.hash.formId || context._af.formId;
@@ -315,8 +314,6 @@ regHelper('afHasFormState', function autoFormHasFormState(state, options) {
   return state && AutoForm.getFormState(formId) === state
 });
 regHelper('afFormState', function autoFormFormState(options) {
-
-  //options = parseOptions(options, 'afHasFormState');
 
   var context = this;
   var formId = (options && options.hash && options.hash.formId) || context._af.formId;
