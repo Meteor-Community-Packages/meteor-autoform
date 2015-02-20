@@ -190,7 +190,7 @@ Template.autoForm.events({
             if (!_.isObject(d)) {
               throw new Error(name + " must return an object");
             }
-            runHook(i+1, d);
+            runHook(i + 1, d);
           }
         };
         var ctx = {
@@ -429,17 +429,23 @@ Template.autoForm.events({
     // Mark field value as changed for reactive updates
     updateTrackedFieldValue(formId, key);
 
-    var clonedOrgData = EJSON.clone(data.doc);
-    if(data.ss){
-      data.ss.clean(clonedOrgData);
-    }
-    var formState = getFormState(formId);
+    var clean;
     var formValues = AutoForm.getFormValues(formId);
-    var clean = EJSON.equals(clonedOrgData, formValues.insertDoc);
-    formState.set(clean?"clean":"dirty");
+    var formState = getFormState(formId);
+    if (data.doc) {//update
 
+      //clone since clean may change values
+      var clonedOrgData = EJSON.clone(data.doc);
+      if (data.ss) {
+        data.ss.clean(clonedOrgData);
+      }
+      clean = EJSON.equals(clonedOrgData, formValues.insertDoc);
 
+    } else {//insert
 
+      clean = EJSON.equals({}, formValues.insertDoc);
+    }
+    formState.set(clean? "clean":"dirty");
 
     // If the form should be auto-saved whenever updated, we do that on field
     // changes instead of validating the field
