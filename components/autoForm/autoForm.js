@@ -119,7 +119,8 @@ Template.autoForm.created = function autoFormCreated() {
       removeEmptyStrings: data.removeEmptyStrings,
       trimStrings: data.trimStrings
     };
-    formStates[formId] = new ReactiveVar("pristine");
+    formStates[formId] = formStates[formId]  || new ReactiveVar("pristine");
+    formStates[formId].set("pristine");
 
     // This ensures that anything dependent on field values will properly
     // react to field values set from the database document. That is,
