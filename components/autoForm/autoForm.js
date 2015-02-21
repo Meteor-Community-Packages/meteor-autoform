@@ -133,9 +133,6 @@ Template.autoForm.created = function autoFormCreated() {
 
     contextDependency.changed();
   });
-
-
-
 };
 
 Template.autoForm.destroyed = function autoFormDestroyed() {
