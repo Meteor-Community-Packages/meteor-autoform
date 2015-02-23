@@ -60,12 +60,49 @@ var updateFormState = function (formId, data) {
     if (data.ss) {
       data.ss.clean(clonedOrgData);
     }
+
+    function removeKeys(doc, doc2){
+      _.chain(doc).keys().filter(function(key){
+        return !doc2.hasOwnProperty(key);
+      }).each(function(key){
+        console.log("deleting", key);
+        delete doc[key];
+      });
+
+      _.chain(doc).keys().filter(function(key){
+        return _.isObject(doc) && _.isObject(doc2);
+      }).each(function(key){
+        removeKeys(doc[key], doc2[key]);
+      });
+
+    }
+    removeKeys(clonedOrgData, formValues.insertDoc);
+    //_.chain(clonedOrgData).keys().filter(function(key){
+    //  return !formValues.insertDoc.hasOwnProperty(key);
+    //}).each(function(key){
+    //  console.log("deleting", key);
+    //  delete clonedOrgData[key];
+    //});
+    //_.chain(clonedOrgData).keys().filter(function(key){
+    //  return !formValues.insertDoc.hasOwnProperty(key);
+    //}).each(function(key){
+    //  console.log("deleting", key);
+    //  delete clonedOrgData[key];
+    //});
+
+    console.log("comparing");
+    console.log("ORG");
+    console.log(EJSON.stringify(clonedOrgData, {indent:true, canonical :true}));
+    console.log("FORM");
+    console.log(EJSON.stringify(formValues.insertDoc, {indent:true, canonical :true}));
     clean = EJSON.equals(clonedOrgData, formValues.insertDoc);
+    console.log(clean ? "clean" : "dirty");
 
   } else {//insert
 
     clean = EJSON.equals({}, formValues.insertDoc);
   }
+
   formState.set(clean ? "clean" : "dirty");
 };
 Template.autoForm.events({
