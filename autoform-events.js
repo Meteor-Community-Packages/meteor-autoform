@@ -48,38 +48,27 @@ var getFormState = function (formId) {
   var formState = formStates[formId];
   return formState;
 };
-
+/**
+ *
+ * @param {string} formId
+ * @param {FormData} data
+ */
 var updateFormState = function (formId, data) {
   var clean;
   var formValues = AutoForm.getFormValues(formId);
   var formState = getFormState(formId);
   if (data.doc) {//update
 
-    //clone since clean may change values
-    var clonedOrgData = EJSON.clone(data.doc);
-    if (data.ss) {
-      data.ss.clean(clonedOrgData);
-    }
 
-    function removeKeys(doc, doc2){
-      _.chain(doc).keys().filter(function(key){
-        return !doc2.hasOwnProperty(key);
-      }).each(function(key){
+    var orgDocAsModif = AutoForm.Utility.docToModifier(data.doc, false);
 
-        delete doc[key];
-      });
-
-      _.chain(doc).keys().filter(function(key){
-        return _.isObject(doc) && _.isObject(doc2);
-      }).each(function(key){
-        removeKeys(doc[key], doc2[key]);
-      });
-
-    }
-    removeKeys(clonedOrgData, formValues.insertDoc);
-    
-    clean = EJSON.equals(clonedOrgData, formValues.insertDoc);
-
+    clean = _.every(formValues.updateDoc.$set, function(v,k){
+      var b = EJSON.equals(orgDocAsModif.$set[k], v);
+      return b;
+    }) && _.every(formValues.updateDoc.$unset, function(v,k){
+      var b = !orgDocAsModif.$set.hasOwnProperty(k);
+      return b;
+    });
 
   } else {//insert
 
