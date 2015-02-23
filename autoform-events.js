@@ -65,7 +65,7 @@ var updateFormState = function (formId, data) {
       _.chain(doc).keys().filter(function(key){
         return !doc2.hasOwnProperty(key);
       }).each(function(key){
-        console.log("deleting", key);
+
         delete doc[key];
       });
 
@@ -77,26 +77,9 @@ var updateFormState = function (formId, data) {
 
     }
     removeKeys(clonedOrgData, formValues.insertDoc);
-    //_.chain(clonedOrgData).keys().filter(function(key){
-    //  return !formValues.insertDoc.hasOwnProperty(key);
-    //}).each(function(key){
-    //  console.log("deleting", key);
-    //  delete clonedOrgData[key];
-    //});
-    //_.chain(clonedOrgData).keys().filter(function(key){
-    //  return !formValues.insertDoc.hasOwnProperty(key);
-    //}).each(function(key){
-    //  console.log("deleting", key);
-    //  delete clonedOrgData[key];
-    //});
-
-    console.log("comparing");
-    console.log("ORG");
-    console.log(EJSON.stringify(clonedOrgData, {indent:true, canonical :true}));
-    console.log("FORM");
-    console.log(EJSON.stringify(formValues.insertDoc, {indent:true, canonical :true}));
+    
     clean = EJSON.equals(clonedOrgData, formValues.insertDoc);
-    console.log(clean ? "clean" : "dirty");
+
 
   } else {//insert
 
