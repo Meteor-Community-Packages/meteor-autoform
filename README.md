@@ -108,6 +108,8 @@ The following community packages provide additional custom input types that you 
 * [comerc:autoform-typeahead](https://atmospherejs.com/comerc/autoform-typeahead)
 * [comerc:autoform-contenteditable2](https://atmospherejs.com/comerc/autoform-contenteditable2)
 * [meteoric:autoform-ionic](https://github.com/meteoric/autoform-ionic)
+* [lukemadera:autoform-googleplace](https://atmospherejs.com/lukemadera/autoform-googleplace)
+* [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
 
 The following community packages provide other add-on features related to autoform:
 
