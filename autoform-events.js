@@ -63,10 +63,10 @@ var updateFormState = function (formId, data) {
     var orgDocAsModif = AutoForm.Utility.docToModifier(data.doc, false);
 
     clean = _.every(formValues.updateDoc.$set, function(v,k){
-      var b = orgDocAsModif.$set.hasOwnProperty(k) && EJSON.equals(orgDocAsModif.$set[k], v);
+      var b = orgDocAsModif.$set && orgDocAsModif.$set.hasOwnProperty(k) && EJSON.equals(orgDocAsModif.$set[k], v);
       return b;
     }) && _.every(formValues.updateDoc.$unset, function(v,k){
-      var b = !orgDocAsModif.$set.hasOwnProperty(k);
+      var b = !orgDocAsModif.$set || !orgDocAsModif.$set.hasOwnProperty(k);
       return b;
     });
 
