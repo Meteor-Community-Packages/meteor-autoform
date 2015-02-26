@@ -291,7 +291,6 @@ updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) 
       template.formValues[fieldName] = new Tracker.Dependency();
     }
 
-    console.log(fieldName + 'changed');
     template.formValues[fieldName].changed();
   }
 
