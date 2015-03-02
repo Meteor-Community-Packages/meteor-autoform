@@ -5,7 +5,7 @@ Template.afFormGroup.helpers({
     var afFieldInputAtts = formGroupInputAtts(c.atts);
     var id = c.atts["id-prefix"] || "";
     id += c.atts.id || c.atts.name.replace(".", "-");
-    afFieldLabelAtts.for = afFieldInputAtts.id = id;
+    afFieldLabelAtts["for"] = afFieldInputAtts.id = id;
     return {
       skipLabel: (c.atts.label === false),
       afFieldLabelAtts: afFieldLabelAtts,
