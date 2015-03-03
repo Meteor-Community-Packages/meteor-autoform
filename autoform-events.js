@@ -38,8 +38,51 @@ function endSubmit(formId, template) {
     }
   }
 }
+/**
+ *
+ * @param {string} formId
+ * @returns {ReactiveVar} the reactive var, if it does not exist it is inited with pristine
+ */
+var getFormState = function (formId) {
+  formStates[formId] = formStates[formId] || new ReactiveVar("pristine");
+  var formState = formStates[formId];
+  return formState;
+};
+/**
+ *
+ * @param {string} formId
+ * @param {FormData} data
+ */
+var updateFormState = function (formId, data) {
+  var clean;
+  var formValues = AutoForm.getFormValues(formId);
+  var formState = getFormState(formId);
+  if (data.doc) {//update
 
+
+    var orgDocAsModif = AutoForm.Utility.docToModifier(data.doc, false);
+
+    clean = _.every(formValues.updateDoc.$set, function(v,k){
+      var b = orgDocAsModif.$set && orgDocAsModif.$set.hasOwnProperty(k) && EJSON.equals(orgDocAsModif.$set[k], v);
+      return b;
+    }) && _.every(formValues.updateDoc.$unset, function(v,k){
+      var b = !orgDocAsModif.$set || !orgDocAsModif.$set.hasOwnProperty(k);
+      return b;
+    });
+
+  } else {//insert
+
+    clean = EJSON.equals({}, formValues.insertDoc);
+  }
+
+  formState.set(clean ? "clean" : "dirty");
+};
 Template.autoForm.events({
+  'input form' : function autoFormInputHandler(){
+    var formId = this.id || defaultFormId;
+    var data = formData[formId];
+    updateFormState(formId, data);
+  },
   'submit form': function autoFormSubmitHandler(event, template) {
     // Gather necessary form info
     var formId = this.id || defaultFormId;
@@ -142,6 +185,7 @@ Template.autoForm.events({
           if (name === "insert") {
             cbCtx.docId = result;
           }
+          getFormState(formId).set("pristine");
           _.each(onSuccess, function onSuccessEach(hook) {
             hook.call(cbCtx, name, result, template);
           });
@@ -180,7 +224,7 @@ Template.autoForm.events({
             if (!_.isObject(d)) {
               throw new Error(name + " must return an object");
             }
-            runHook(i+1, d);
+            runHook(i + 1, d);
           }
         };
         var ctx = {
@@ -419,6 +463,7 @@ Template.autoForm.events({
     // Mark field value as changed for reactive updates
     updateTrackedFieldValue(formId, key);
 
+    updateFormState(formId, data);
     // If the form should be auto-saved whenever updated, we do that on field
     // changes instead of validating the field
     if (data.autosave) {
@@ -451,7 +496,7 @@ Template.autoForm.events({
       // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
       // there is no need to reset validation for it. No error need be thrown.
     }
-
+    getFormState(formId).set("pristine");
     if (this.doc) {
       event.preventDefault();
 
