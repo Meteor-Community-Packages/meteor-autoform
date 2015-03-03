@@ -1,4 +1,4 @@
-/* global AutoForm, Hooks, getFormValues, _validateForm, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues */
+/* global AutoForm, Hooks, getFormValues, _validateForm, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues, SimpleSchema */
 
 // all form events handled here
 var lastAutoSaveElement = null;
@@ -45,8 +45,42 @@ function endSubmit(formId, template, hookContext) {
   }
 }
 
+function adjustKeyForArrays(key) {
+  var gKey = SimpleSchema._makeGeneric(key);
+  if (gKey.slice(-2) === '.$' || gKey.indexOf('.$.') !== -1) {
+    key = gKey.slice(0, gKey.indexOf('.$'));
+  }
+  return key;
+}
+
+/**
+ * Returns `true` if the specified validation type should
+ * be revalidated only when the form is already invalid.
+ * @param {String} validationType The validation type string.
+ */
+function onlyIfAlreadyInvalid(validationType) {
+  return validationType === 'submitThenKeyup' ||
+    validationType === 'submitThenBlur';
+}
+
+/**
+ * Given an element, returns the schema key for it, using the
+ * `data-schema-key` attribute on the element or on the closest
+ * element that has one.
+ *
+ * @param   {Element}          element The DOM element
+ * @returns {String|undefined} The schema key
+ */
+function getKeyForElement(element) {
+  var key = element.getAttribute("data-schema-key");
+  if (!key) {
+    key = $(element).closest('[data-schema-key]').attr("data-schema-key");
+  }
+  return key;
+}
+
 //throttle autosave, at most autosave every 500ms
-throttleAutosave = _.throttle(function(event) {
+var throttleAutosave = _.throttle(function(event) {
   lastAutoSaveElement = event.target;
   $(event.currentTarget).submit();
 }, 500, {leading: false});
@@ -261,25 +295,27 @@ Template.autoForm.events({
       hookContext: hookContext
     }, hookContext));
   },
-  'keyup [data-schema-key]': function autoFormKeyUpHandler(event, template) {
-    var validationType = template.data.validation || 'submitThenKeyup';
-    var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup');
+  'keyup [data-schema-key]': function autoFormKeyUpHandler(event) {
+    // validateField is throttled, so we need to get the nearest form's
+    // ID here, while we're still in the correct context
+    var formId = AutoForm.getFormId();
+
+    // Get current form data context
+    var form = AutoForm.getCurrentDataForForm(formId);
+
+    var validationType = form.validation;
     var skipEmpty = !(event.keyCode === 8 || event.keyCode === 46); //if deleting or backspacing, don't skip empty
 
     if ((validationType === 'keyup' || validationType === 'submitThenKeyup')) {
-      var key = event.currentTarget.getAttribute("data-schema-key");
-      if (!key) {
-        key = $(event.currentTarget).closest('[data-schema-key]').attr("data-schema-key");
-        if (!key) {return;}
-      }
+      var key = getKeyForElement(event.currentTarget);
+      if (!key) {return;}
 
-      // validateField is throttled, so we need to get the nearest form's
-      // ID here, while we're still in the correct context
-      var formId = AutoForm.getFormId();
-      validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid);
+      // If it's an array field, we want to validate the entire topmost array
+      // in case there are minCount/maxCount errors, etc.
+      key = adjustKeyForArrays(key);
 
-      // Get current form data context
-      var form = AutoForm.getCurrentDataForForm(formId);
+      validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid(validationType));
+
       // If the form should be auto-saved whenever updated, we do that on field
       // changes instead of validating the field
       if (form.autosaveOnKeyup === true) {
@@ -287,33 +323,33 @@ Template.autoForm.events({
       }
     }
   },
-  'blur [data-schema-key]': function autoFormBlurHandler(event, template) {
-    var validationType = template.data.validation || 'submitThenKeyup';
-    var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' ||
-                                validationType === 'submitThenBlur');
+  'blur [data-schema-key]': function autoFormBlurHandler(event) {
+    // validateField is throttled, so we need to get the nearest form's
+    // ID here, while we're still in the correct context
+    var formId = AutoForm.getFormId();
+
+    // Get current form data context
+    var form = AutoForm.getCurrentDataForForm(formId);
+    var validationType = form.validation;
 
     if (validationType === 'keyup' ||
         validationType === 'blur' ||
         validationType === 'submitThenKeyup' ||
         validationType === 'submitThenBlur') {
-      var key = event.currentTarget.getAttribute("data-schema-key");
-      if (!key) {
-        key = $(event.currentTarget).closest('[data-schema-key]').attr("data-schema-key");
-        if (!key) {return;}
-      }
+      var key = getKeyForElement(event.currentTarget);
+      if (!key) {return;}
 
-      // validateField is throttled, so we need to get the nearest form's
-      // ID here, while we're still in the correct context
-      var formId = AutoForm.getFormId();
-      validateField(key, formId, false, onlyIfAlreadyInvalid);
+      // If it's an array field, we want to validate the entire topmost array
+      // in case there are minCount/maxCount errors, etc.
+      key = adjustKeyForArrays(key);
+
+
+      validateField(key, formId, false, onlyIfAlreadyInvalid(validationType));
     }
   },
   'change form': function autoFormChangeHandler(event, template) {
-    var key = event.target.getAttribute("data-schema-key");
-    if (!key) {
-      key = $(event.target).closest('[data-schema-key]').attr("data-schema-key");
-      if (!key) {return;}
-    }
+    var key = getKeyForElement(event.target);
+    if (!key) {return;}
 
     var formId = this.id;
 
@@ -331,15 +367,17 @@ Template.autoForm.events({
       return;
     }
 
-    var validationType = form.validation || 'submitThenKeyup';
-    var onlyIfAlreadyInvalid = (validationType === 'submitThenKeyup' ||
-                                validationType === 'submitThenBlur');
+    var validationType = form.validation;
 
     if (validationType === 'keyup' ||
         validationType === 'blur' ||
         validationType === 'submitThenKeyup' ||
         validationType === 'submitThenBlur') {
-      validateField(key, formId, false, onlyIfAlreadyInvalid);
+      // If it's an array field, we want to validate the entire topmost array
+      // in case there are minCount/maxCount errors, etc.
+      key = adjustKeyForArrays(key);
+
+      validateField(key, formId, false, onlyIfAlreadyInvalid(validationType));
     }
   },
   'reset form': function autoFormResetHandler(event, template) {

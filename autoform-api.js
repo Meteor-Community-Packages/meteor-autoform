@@ -795,6 +795,11 @@ setDefaults = function setDefaults(data) {
     data.type = 'normal';
   }
 
+  // default form validation is "submitThenKeyup"
+  if (typeof data.validation !== 'string') {
+    data.validation = 'submitThenKeyup';
+  }
+
   // Resolve form schema
   if (!data._resolvedSchema) {
     var formType = data.type;
