@@ -128,7 +128,6 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   // We don't want to alter the original hash, so we clone it and
   // remove some stuff that should not be HTML attributes.
   var inputAtts = _.omit(hash,
-          "autoform",
           "type",
           "value",
           "noselect",
