@@ -74,7 +74,15 @@ Utility = {
 
     // Flatten doc
     var mDoc = new MongoObject(doc);
-    var flatDoc = mDoc.getFlatObject({keepArrays: true});
+    // XXX keep an eye on this. We need keepArrays: false
+    // in order to have update fields like "foo.2.bar" update
+    // the proper index. But there might be other cases where
+    // keeping arrays is more appropriate. In general, I think
+    // we were doing it only as a precaution due to the mongo
+    // bug that creates objects rather than arrays if the array
+    // does not already exist.
+    //var flatDoc = mDoc.getFlatObject({keepArrays: true});
+    var flatDoc = mDoc.getFlatObject();
     mDoc = null;
     // Get a list of null, undefined, and empty string values so we can unset them instead
     var nulls = Utility.reportNulls(flatDoc, keepEmptyStrings);

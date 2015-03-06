@@ -1,4 +1,4 @@
-/* global AutoForm, Hooks, getFormValues, _validateForm, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues, SimpleSchema */
+/* global AutoForm, Hooks, _validateForm, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues, SimpleSchema */
 
 // all form events handled here
 var lastAutoSaveElement = null;
@@ -110,7 +110,7 @@ Template.autoForm.events({
     };
 
     // Gather all form values
-    var formDocs = getFormValues(template, formId, ss);
+    var formDocs = AutoForm.getFormValues(formId, template, ss);
 
     // Gather hooks
     var onSuccessHooks = Hooks.getHooks(formId, 'onSuccess');

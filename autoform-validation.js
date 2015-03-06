@@ -1,4 +1,4 @@
-/* global _validateForm:true, AutoForm, getFormValues, validateField:true, getAllFieldsInForm */
+/* global _validateForm:true, AutoForm, validateField:true, getAllFieldsInForm */
 
 /*
  * all form validation logic is here
@@ -49,7 +49,7 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
   }
 
   // Create a document based on all the values of all the inputs on the form
-  var formDocs = getFormValues(template, formId, ss);
+  var formDocs = AutoForm.getFormValues(formId, template, ss);
 
   // Clean and validate doc
   if (form.type === "update" || form.type === "method-update") {

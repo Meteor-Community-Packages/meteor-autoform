@@ -1,4 +1,4 @@
-/* global AutoForm, getFormValues, ReactiveVar, arrayTracker, Hooks, MongoObject, updateAllTrackedFieldValues, Utility, setDefaults */
+/* global AutoForm, ReactiveVar, arrayTracker, Hooks, MongoObject, updateAllTrackedFieldValues, Utility, setDefaults */
 
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
@@ -87,7 +87,7 @@ Template.autoForm.created = function autoFormCreated() {
       // closure values of template, formId, and ss remain correct after each
       // reaction
       AutoForm.formPreserve.registerForm(formId, function autoFormRegFormCallback() {
-        return getFormValues(template, formId, data._resolvedSchema).insertDoc;
+        return AutoForm.getFormValues(formId, template, data._resolvedSchema).insertDoc;
       });
     }
 

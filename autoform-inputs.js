@@ -1,17 +1,8 @@
-/* global AutoForm */
-/* global getInputType:true */
-/* global getFormValues:true */
-/* global getInputValue:true */
-/* global getFieldsValues:true */
-/* global getAllFieldsInForm:true */
-/* global Hooks */
-/* global getInputData:true */
-/* global updateTrackedFieldValue:true */
-/* global updateAllTrackedFieldValues:true */
+/* global AutoForm, getInputType:true, getInputValue:true, getAllFieldsInForm:true, getInputData:true, updateTrackedFieldValue:true, updateAllTrackedFieldValues:true, getFlatDocOfFieldValues:true */
 
-getFieldsValues = function getFieldsValues(fields, ss) {
+getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
   var doc = {};
-  fields.each(function formValuesEach() {
+  fields.each(function () {
     var fieldName, val = AutoForm.getInputValue(this, ss);
     if (val !== void 0) {
       // Get the field/schema key name
@@ -19,15 +10,6 @@ getFieldsValues = function getFieldsValues(fields, ss) {
       doc[fieldName] = val;
     }
   });
-
-  // Expand the object
-  doc = AutoForm.Utility.expandObj(doc);
-
-  // As array items are removed, gaps can appear in the numbering,
-  // which results in arrays that have undefined items. Here we
-  // remove any array items that are undefined.
-  AutoForm.Utility.compactArrays(doc);
-
   return doc;
 };
 
@@ -86,72 +68,6 @@ getInputType = function getInputType(atts) {
     type = "boolean-checkbox";
   }
   return type;
-};
-
-getFormValues = function getFormValues(template, formId, ss) {
-  var form = AutoForm.getCurrentDataForForm(formId);
-  // By default, we do not keep empty strings
-  var keepEmptyStrings = false;
-  if (form.removeEmptyStrings === false) {
-    keepEmptyStrings = true;
-  }
-  // By default, we do filter
-  var filter = true;
-  if (form.filter === false) {
-    filter = false;
-  }
-  // By default, we do autoConvert
-  var autoConvert = true;
-  if (form.autoConvert === false) {
-    autoConvert = false;
-  }
-  // By default, we do trimStrings
-  var trimStrings = true;
-  if (form.trimStrings === false) {
-    trimStrings = false;
-  }
-
-  // Build doc from field values
-  var doc = getFieldsValues(getAllFieldsInForm(template), ss);
-
-  // When all fields that comprise a sub-object are empty, we should unset
-  // the whole subobject and not complain about required fields in it. For example,
-  // if `profile.address` has several properties but they are all null or undefined,
-  // we will set `profile.address=null`. This ensures that we don't get incorrect validation
-  // errors about required fields that are children of optional objects.
-  AutoForm.Utility.bubbleEmpty(doc, keepEmptyStrings);
-
-  // Pass expanded doc through formToDoc hooks
-  var hookCtx = {
-    template: template,
-    formId: formId
-  };
-  var transforms = Hooks.getHooks(formId, 'formToDoc');
-  _.each(transforms, function formValuesTransform(transform) {
-    doc = transform.call(hookCtx, doc, ss);
-  });
-
-  // We return doc, insertDoc, and updateDoc.
-  // For insertDoc, delete any properties that are null, undefined, or empty strings.
-  // For updateDoc, convert to modifier object with $set and $unset.
-  // Do not add auto values to either.
-  var result = {
-    insertDoc: ss.clean(AutoForm.Utility.cleanNulls(doc, false, keepEmptyStrings), {
-      isModifier: false,
-      getAutoValues: false,
-      filter: filter,
-      autoConvert: autoConvert,
-      trimStrings: trimStrings
-    }),
-    updateDoc: ss.clean(AutoForm.Utility.docToModifier(doc, keepEmptyStrings), {
-      isModifier: true,
-      getAutoValues: false,
-      filter: filter,
-      autoConvert: autoConvert,
-      trimStrings: trimStrings
-    })
-  };
-  return result;
 };
 
 /*
