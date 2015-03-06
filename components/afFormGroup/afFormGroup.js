@@ -10,8 +10,11 @@ Template.afFormGroup.helpers({
     var afFieldInputAtts = formGroupInputAtts(c.atts);
 
     // Construct an `id` attribute for the input, optionally
-    // adding a user-provided prefix.
-    var id = c.atts.id || c.atts.name.replace('.', '-');
+    // adding a user-provided prefix. Since id attribute is
+    // supposed to be unique in the DOM and templates can be
+    // included multiple times, it's best not to provide an `id`
+    // and generate a random one here for accessibility reasons.
+    var id = c.atts.id || Random.id();
     var idPrefix = c.atts['id-prefix'];
     if (idPrefix && idPrefix.length > 0) {
       id = idPrefix + '-' + id;
