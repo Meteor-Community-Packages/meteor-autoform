@@ -1,6 +1,8 @@
+/* global AutoForm, arrayTracker */
+
 Template.afEachArrayItem.helpers({
-  innerContext: function afEachArrayItemContext(options) {
-    var c = AutoForm.Utility.normalizeContext(options.hash, "afEachArrayItem");
+  innerContext: function afEachArrayItemContext() {
+    var c = AutoForm.Utility.getComponentContext(this, "afEachArrayItem");
     var formId = AutoForm.getFormId();
     var ss = AutoForm.getFormSchema();
     var name = c.atts.name;

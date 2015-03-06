@@ -1,4 +1,4 @@
-/* global Utility:true, MongoObject, AutoForm, moment */
+/* global Utility:true, MongoObject, AutoForm, moment, SimpleSchema */
 
 Utility = {
   componentTypeList: ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'],
@@ -137,16 +137,8 @@ Utility = {
       });
     }
 
-    // If options are specified in the schema, they may be a function
-    // that has not yet been evaluated.
-    else if (typeof selectOptions === "function") {
-      // Call with same context as Blaze would call it if it
-      // were a helper function
-      selectOptions = selectOptions.call(Template.parentData());
-    }
-
     // Hashtable
-    if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
+    else if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
       selectOptions = _.map(selectOptions, function(v, k) {
         return {label: v, value: schemaType(k)};
       });
@@ -452,9 +444,9 @@ Utility = {
     return Utility.isValidDateString(datePart) && tPart === "T" && Utility.isValidTimeString(timePart);
   },
   /**
-   * @method Utility.normalizeContext
+   * @method Utility.getComponentContext
    * @private
-   * @param  {Object} context A context object, potentially with an `atts` property.
+   * @param  {Object} context A context (`this`) object
    * @param {String} name The name of the helper or component we're calling from.
    * @return {Object} Normalized context object
    *
@@ -463,22 +455,12 @@ Utility = {
    * helpers and components in different ways, but in all cases we want to get access to it and throw
    * an error if we can't find an autoform context.
    */
-  normalizeContext: function autoFormNormalizeContext(context, name) {
-    var atts, defs, itemDefs, allowedValues, formComponentAttributes,
-      fieldAttributes, fieldAttributesForComponentType, ss;
+  getComponentContext: function autoFormGetComponentContext(context, name) {
+    var atts, defs, formComponentAttributes, fieldAttributes, fieldAttributesForComponentType, ss;
 
-    context = context || {};
-    atts = context.atts ? _.clone(context.atts) : _.clone(context);
+    atts = _.clone(context || {});
     ss = AutoForm.getFormSchema();
     defs = Utility.getDefs(ss, atts.name); //defs will not be undefined
-
-    // For array fields, `allowedValues` is on the array item definition
-    if (defs.type === Array) {
-      itemDefs = Utility.getDefs(ss, atts.name + ".$");
-      allowedValues = itemDefs.allowedValues;
-    } else {
-      allowedValues = defs.allowedValues;
-    }
 
     // Look up the tree if we're in a helper, checking to see if any ancestor components
     // had a <componentType>-attribute specified.
@@ -492,32 +474,24 @@ Utility = {
     fieldAttributes = _.omit(fieldAttributes, Utility.componentTypeList);
     fieldAttributes = _.extend({}, fieldAttributes, fieldAttributesForComponentType);
 
-    // If options="auto", we want to use defs.autoform.options
-    // if specified and otherwise fall back to "allowed"
-    if (fieldAttributes.options && atts.options === "auto") {
-      delete atts.options;
-    }
-
     // "autoform" option in the schema provides default atts
     atts = _.extend({}, formComponentAttributes, fieldAttributes, atts);
-
-    // If still set to "auto", then there were no options in defs, so we use "allowed"
-    if (atts.options === "auto") {
-      if (allowedValues) {
-        atts.options = "allowed";
-      } else {
-        delete atts.options;
-      }
-    }
 
     // eval any attribute that is provided as a function
     var evaluatedAtts = {};
     _.each(atts, function (v, k) {
-      evaluatedAtts[k] = typeof v === 'function' ? v() : v;
+      if (typeof v === 'function') {
+        //console.log('norm evaluating', k);
+        evaluatedAtts[k] = v.call({
+          name: atts.name
+        });
+      } else {
+        evaluatedAtts[k] = v;
+      }
     });
 
     return {
-      atts: evaluatedAtts,
+      atts: atts,
       defs: defs
     };
   },
@@ -628,3 +602,19 @@ if (typeof Object.getPrototypeOf !== "function") {
 var isBasicObject = function(obj) {
   return _.isObject(obj) && Object.getPrototypeOf(obj) === Object.prototype;
 };
+
+/*
+ * Extend SS for now; TODO put this in SS package
+ */
+if (typeof SimpleSchema.prototype.getAllowedValuesForKey !== 'function') {
+  SimpleSchema.prototype.getAllowedValuesForKey = function (key) {
+    var defs = this.getDefinition(key, ['type', 'allowedValues']);
+
+    // For array fields, `allowedValues` is on the array item definition
+    if (defs.type === Array) {
+      defs = this.getDefinition(key+".$", ['allowedValues']);
+    }
+
+    return defs.allowedValues;
+  };
+}

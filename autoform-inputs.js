@@ -17,59 +17,6 @@ getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
  * package scope functions
  */
 
-// Determines based on different options what type of input/control should be used
-getInputType = function getInputType(atts) {
-  var expectsArray = false, defs, schemaType;
-
-  atts = AutoForm.Utility.normalizeContext(atts, 'afFieldInput').atts;
-
-  // If a `type` attribute is specified, we just use that
-  if (atts.type) {
-    return atts.type;
-  }
-
-  // Get schema definition, using the item definition for array fields
-  defs = AutoForm.getSchemaForField(atts.name);
-  schemaType = defs.type;
-  if (schemaType === Array) {
-    expectsArray = true;
-    defs = AutoForm.getSchemaForField(atts.name + ".$");
-    schemaType = defs.type;
-  }
-
-  // Based on the `type` attribute, the `type` from the schema, and/or
-  // other characteristics such as regEx and whether an array is expected,
-  // choose which type string to return.
-  // TODO allow outside packages to extend/override this logic.
-  var type = "text";
-  if (atts.options) {
-    if (atts.noselect) {
-      // Does the schema expect the value of the field to be an array?
-      // If so, use a check box group, which will return an array value.
-      if (expectsArray) {
-        type = "select-checkbox";
-      } else {
-        type = "select-radio";
-      }
-    } else {
-      if (expectsArray) {
-        type = "select-multiple";
-      } else {
-        type = "select";
-      }
-    }
-  } else if (schemaType === String && atts.rows) {
-    type = "textarea";
-  } else if (schemaType === Number) {
-    type = "number";
-  } else if (schemaType === Date) {
-    type = "date";
-  } else if (schemaType === Boolean) {
-    type = "boolean-checkbox";
-  }
-  return type;
-};
-
 /*
  * Gets the value that should be shown/selected in the input. Returns
  * a string, a boolean, or an array of strings. The value used,

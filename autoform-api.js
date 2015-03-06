@@ -695,7 +695,83 @@ AutoForm.arrayTracker = arrayTracker;
  *
  * Call this method from a UI helper to get the type string for the input control.
  */
-AutoForm.getInputType = getInputType;
+AutoForm.getInputType = function getInputType(atts) {
+  var expectsArray = false, defs, schemaType, type;
+
+  atts = AutoForm.Utility.getComponentContext(atts, 'afFieldInput').atts;
+
+  // If a `type` attribute is specified, we just use that
+  if (atts.type) {
+    return atts.type;
+  }
+
+  // Get schema definition, using the item definition for array fields
+  defs = AutoForm.getSchemaForField(atts.name);
+  schemaType = defs.type;
+  if (schemaType === Array) {
+    expectsArray = true;
+    schemaType = AutoForm.getSchemaForField(atts.name + ".$").type;
+  }
+
+  // Based on the `type` attribute, the `type` from the schema, and/or
+  // other characteristics such as regEx and whether an array is expected,
+  // choose which type string to return.
+
+  // If options were provided, noselect is `true`, and the schema
+  // expects the value of the field to be an array, use "select-checkbox".
+  if (atts.options && atts.noselect === true && expectsArray) {
+    type = 'select-checkbox';
+  }
+
+  // If options were provided, noselect is `true`, and the schema
+  // does not expect the value of the field to be an array, use "select-radio".
+  else if (atts.options && atts.noselect === true && !expectsArray) {
+    type = 'select-radio';
+  }
+
+  // If options were provided, noselect is not `true`, and the schema
+  // expects the value of the field to be an array, use "select-multiple".
+  else if (atts.options && atts.noselect !== true && expectsArray) {
+    type = 'select-multiple';
+  }
+
+  // If options were provided, noselect is not `true`, and the schema
+  // does not expect the value of the field to be an array, use "select".
+  else if (atts.options && atts.noselect !== true && !expectsArray) {
+    type = 'select';
+  }
+
+  // If the schema expects the value of the field to be a string and
+  // the `rows` attribute is provided, use "textarea"
+  else if (schemaType === String && atts.rows === +atts.rows) {
+    type = 'textarea';
+  }
+
+  // If the schema expects the value of the field to be a number,
+  // use "number"
+  else if (schemaType === Number) {
+    type = 'number';
+  }
+
+  // If the schema expects the value of the field to be a Date instance,
+  // use "date"
+  else if (schemaType === Date) {
+    type = 'date';
+  }
+
+  // If the schema expects the value of the field to be a boolean,
+  // use "boolean-checkbox"
+  else if (schemaType === Boolean) {
+    type = 'boolean-checkbox';
+  }
+
+  // Default is "text"
+  else {
+    type = 'text';
+  }
+
+  return type;
+};
 
 /**
  * @method AutoForm.getSchemaForField
@@ -709,6 +785,38 @@ AutoForm.getInputType = getInputType;
 AutoForm.getSchemaForField = function autoFormGetSchemaForField(name) {
   var ss = AutoForm.getFormSchema();
   return AutoForm.Utility.getDefs(ss, name);
+};
+
+AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) {
+  var ss, def, saf, allowedValues;
+
+  ss = AutoForm.getFormSchema();
+  if (!ss) {
+    return;
+  }
+
+  def = ss.getDefinition(name);
+  if (!def) {
+    return;
+  }
+
+  // If options in schema, use those
+  saf = def.autoform;
+  if (saf) {
+    if (saf.afFieldInput && saf.afFieldInput.options) {
+      return saf.afQuickField.options;
+    } else if (saf.afQuickField && saf.afQuickField.options) {
+      return saf.afQuickField.options;
+    } else if (saf.options) {
+      return saf.options;
+    }
+  }
+
+  // If schema has allowedValues, use those
+  allowedValues = ss.getAllowedValuesForKey(name);
+  if (allowedValues) {
+    return 'allowed';
+  }
 };
 
 /**

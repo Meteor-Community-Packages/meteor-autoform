@@ -5,7 +5,7 @@ Template.afFormGroup.helpers({
     return AutoForm.getTemplateName('afFormGroup', this.template, this.name);
   },
   innerContext: function afFormGroupContext() {
-    var c = AutoForm.Utility.normalizeContext(this, 'afFormGroup');
+    var c = AutoForm.Utility.getComponentContext(this, 'afFormGroup');
     var afFieldLabelAtts = formGroupLabelAtts(c.atts);
     var afFieldInputAtts = formGroupInputAtts(c.atts);
 

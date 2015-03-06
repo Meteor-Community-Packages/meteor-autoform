@@ -464,10 +464,10 @@ Returns true if dtString is a "valid normalized local date and time string"
 
 -
 
-### <a name="Utility.normalizeContext"></a>*utility*.normalizeContext({Object}, name)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+### <a name="Utility.getComponentContext"></a>*utility*.getComponentContext({Object}, name)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
 
 *This method is private*
-*This method __normalizeContext__ is defined in `Utility`*
+*This method __getComponentContext__ is defined in `Utility`*
 
 __Arguments__
 
@@ -489,7 +489,7 @@ This helps deal with the fact that we have to pass the ancestor autoform's conte
 helpers and components in different ways, but in all cases we want to get access to it and throw
 an error if we can't find an autoform context.
 
-> ```normalizeContext: function autoFormNormalizeContext(context, name) { ...``` [utility.js:446](utility.js#L446)
+> ```getComponentContext: function autoFormGetComponentContext(context, name) { ...``` [utility.js:446](utility.js#L446)
 
 
 -

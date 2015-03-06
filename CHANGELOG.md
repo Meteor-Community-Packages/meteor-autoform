@@ -7,7 +7,7 @@ forms with automatic insert and update events, and automatic reactive validation
 ## Change Log
 
 ### vNext
-
+* **Compatibility break:** You can no longer do `options="auto"`, but you can do `options=afOptionsFromSchema` for essentially the same effect. The `afOptionsFromSchema` helper requires that you have a property named `name` in the current context, which is set to the field name.
 * **Compatibility break:** The function signature for `AutoForm.getFieldValue` is reversed from `(formId, fieldName)` to `(fieldName, [formId])` with `formId` optional. You should not pass the `formId` argument when using it in a helper that is run within the context of the form.
 * **Compatibility break:** The `afFieldNames` helper now returns an array of objects with `name` property instead of returning the array of names directly.
 * **Compatibility break:** The `method` form type now calls the server method with only one argument, the submitted form document. If your server method needs the update modifier and document _id instead of the document, change your form's type to `method-update`. The `before` hooks for a `method-update` form are passed (and should return) the modifier object instead of the document.
@@ -20,7 +20,8 @@ forms with automatic insert and update events, and automatic reactive validation
 * `data-required` attribute is now present on the form group `div` element for all built-in `afFormGroup` templates if the field is required. This allows you to use css like the following to display an asterisk after required fields: `[data-required] label:after {content: '*'}`
 * There are no longer issues when your input type template name contains underscores.
 * A new `update-pushArray` form type allows you to create insert-like forms that push the resulting document into an array field in an existing collection document. See the README and http://autoform.meteor.com/updatepush
-* Added `autosaveOnKeyup` form option. See readme
+* Added `autosaveOnKeyup` form option. See README.
+* If you specify default attributes within an `autoform` object in your schema, any of the attributes may be functions that return their value, and when the function is called `this.name` will be set to the current field name, which is helpful for fields that are nested in one or more arrays.
 
 ### 4.2.2
 

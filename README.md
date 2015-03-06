@@ -483,7 +483,7 @@ The following is roughly equivalent to a `quickForm`:
 ```html
 {{#autoForm}}
   {{#each afFieldNames}}
-    {{> afQuickField name=this options="auto"}}
+    {{> afQuickField name=this.name options=afOptionsFromSchema}}
   {{/each}}
 {{/autoForm}}
 ```
@@ -493,7 +493,7 @@ Or you can provide a `name` attribute for an object field:
 ```html
 {{#autoForm}}
   {{#each afFieldNames name="profile"}}
-    {{> afQuickField name=this options="auto"}}
+    {{> afQuickField name=this.name options=afOptionsFromSchema}}
   {{/each}}
 {{/autoForm}}
 ```
@@ -508,7 +508,7 @@ Render an `afQuickField` for each field in the form schema or an object field.
 {{#autoForm}}
   {{! These do the same thing}}
   {{#each afFieldNames name="profile"}}
-    {{> afQuickField name=this options="auto"}}
+    {{> afQuickField name=this.name options=afOptionsFromSchema}}
   {{/each}}
   {{> afQuickFields name="profile"}}
 {{/autoForm}}
@@ -556,7 +556,7 @@ At the moment, the add and remove buttons disappear when you can't use them. Thi
 
 ### afEachArrayItem
 
-This is a block helper that can be used to render specific content for each item in an array. It tracks the addition and removal of array item fields (or groups of fields) reactively for you. This allows you to customize the repeated array fields, remove buttons, etc. It's generally most useful within a custom `afArrayField` template. See the built-in `afArrayField` templates for example usage.
+This is a block helper that can be used to render specific content for each item in an array. It tracks the addition and removal of array item fields (or groups of fields) reactively for you. This allows you to customize the repeated array fields, removal buttons, etc. It's generally most useful within a custom `afArrayField` template. See the built-in `afArrayField` templates for example usage.
 
 `afEachArrayItem` supports the same attributes as `afArrayField`.
 

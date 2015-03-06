@@ -269,6 +269,11 @@ Template.registerHelper('afSelectOptionAtts', function afSelectOptionAtts() {
   return atts;
 });
 
+// Expects to be called with this.name available
+Template.registerHelper('afOptionsFromSchema', function afOptionsFromSchema() {
+  AutoForm._getOptionsForField(this.name);
+});
+
 /*
  * afTemplateName
  * Deprecated. Don't use this. Eventually remove it.

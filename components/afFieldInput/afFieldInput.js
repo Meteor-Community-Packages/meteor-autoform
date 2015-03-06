@@ -34,7 +34,7 @@ Template.afFieldInput.helpers({
     return templateName;
   },
   innerContext: function afFieldInputContext() {
-    var c = AutoForm.Utility.normalizeContext(this, "afFieldInput");
+    var c = AutoForm.Utility.getComponentContext(this, "afFieldInput");
     var form = AutoForm.getCurrentDataForForm();
     var formId = form.id;
     var ss = AutoForm.getFormSchema();
