@@ -310,11 +310,14 @@ Template.autoForm.events({
       var key = getKeyForElement(event.currentTarget);
       if (!key) {return;}
 
-      // If it's an array field, we want to validate the entire topmost array
-      // in case there are minCount/maxCount errors, etc.
-      key = adjustKeyForArrays(key);
-
       validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid(validationType));
+
+      // If it's an array field, we also want to validate the entire topmost array
+      // in case there are minCount/maxCount errors, etc.
+      var arrayKey = adjustKeyForArrays(key);
+      if (arrayKey !== key) {
+        validateField(arrayKey, formId, skipEmpty, onlyIfAlreadyInvalid(validationType));
+      }
 
       // If the form should be auto-saved whenever updated, we do that on field
       // changes instead of validating the field
@@ -339,12 +342,14 @@ Template.autoForm.events({
       var key = getKeyForElement(event.currentTarget);
       if (!key) {return;}
 
-      // If it's an array field, we want to validate the entire topmost array
-      // in case there are minCount/maxCount errors, etc.
-      key = adjustKeyForArrays(key);
-
-
       validateField(key, formId, false, onlyIfAlreadyInvalid(validationType));
+
+      // If it's an array field, we also want to validate the entire topmost array
+      // in case there are minCount/maxCount errors, etc.
+      var arrayKey = adjustKeyForArrays(key);
+      if (arrayKey !== key) {
+        validateField(arrayKey, formId, false, onlyIfAlreadyInvalid(validationType));
+      }
     }
   },
   'change form': function autoFormChangeHandler(event, template) {
@@ -373,11 +378,15 @@ Template.autoForm.events({
         validationType === 'blur' ||
         validationType === 'submitThenKeyup' ||
         validationType === 'submitThenBlur') {
-      // If it's an array field, we want to validate the entire topmost array
-      // in case there are minCount/maxCount errors, etc.
-      key = adjustKeyForArrays(key);
 
       validateField(key, formId, false, onlyIfAlreadyInvalid(validationType));
+
+      // If it's an array field, we also want to validate the entire topmost array
+      // in case there are minCount/maxCount errors, etc.
+      var arrayKey = adjustKeyForArrays(key);
+      if (arrayKey !== key) {
+        validateField(arrayKey, formId, false, onlyIfAlreadyInvalid(validationType));
+      }
     }
   },
   'reset form': function autoFormResetHandler(event, template) {
