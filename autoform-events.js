@@ -2,6 +2,7 @@
 
 // all form events handled here
 var lastAutoSaveElement = null;
+var lastKeyVal = null;
 
 function beginSubmit(formId, template, hookContext) {
   if (!template || !template.view._domrange || template.view.isDestroyed) {
@@ -355,6 +356,16 @@ Template.autoForm.events({
   'change form': function autoFormChangeHandler(event, template) {
     var key = getKeyForElement(event.target);
     if (!key) {return;}
+
+    // Some plugins, like jquery.inputmask, can cause infinite
+    // loops by continually saying the field changed when it did not,
+    // especially in an autosave situation. This is an attempt to
+    // prevent that from happening.
+    var keyVal = key + '___' + event.target.value;
+    if (keyVal === lastKeyVal) {
+      return;
+    }
+    lastKeyVal = keyVal;
 
     var formId = this.id;
 
