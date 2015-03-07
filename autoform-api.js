@@ -329,7 +329,18 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss) {
   // Create and clean update modifier.
   // Converts to modifier object with $set and $unset.
   // Do not add autoValues at this stage.
-  var updateDoc = AutoForm.Utility.docToModifier(doc, keepEmptyStrings);
+  var updateDoc = AutoForm.Utility.docToModifier(doc, {
+    keepEmptyStrings: keepEmptyStrings,
+    // XXX keep an eye on this. We need keepArrays: false
+    // in order to have update fields like "foo.2.bar" update
+    // the proper index. But there might be other cases where
+    // keeping arrays is more appropriate. In general, I think
+    // we were doing it only as a precaution due to the mongo
+    // bug that creates objects rather than arrays if the array
+    // does not already exist. If this causes problems, we could
+    // make it possible to set this option on the form.
+    keepArrays: false
+  });
 
   ss.clean(updateDoc, {
     isModifier: true,

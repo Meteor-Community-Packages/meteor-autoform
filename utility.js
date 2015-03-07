@@ -63,30 +63,25 @@ Utility = {
    * @method Utility.docToModifier
    * @private
    * @param {Object} doc - An object to be converted into a MongoDB modifier
+   * @param {Object} [options] - Options
+   * @param {Boolean} [options.keepEmptyStrings] - Pass `true` to keep empty strings in the $set. Otherwise $unset them.
+   * @param {Boolean} [options.keepArrays] - Pass `true` to $set entire arrays. Otherwise the modifier will $set individual array items.
    * @returns {Object} A MongoDB modifier.
    *
    * Converts an object into a modifier by flattening it, putting keys with
    * null, undefined, and empty string values into `modifier.$unset`, and
    * putting the rest of the keys into `modifier.$set`.
    */
-  docToModifier: function docToModifier(doc, keepEmptyStrings) {
-    var modifier = {};
+  docToModifier: function docToModifier(doc, options) {
+    var modifier = {}, mDoc, flatDoc, nulls;
+    options = options || {};
 
     // Flatten doc
-    var mDoc = new MongoObject(doc);
-    // XXX keep an eye on this. We need keepArrays: false
-    // in order to have update fields like "foo.2.bar" update
-    // the proper index. But there might be other cases where
-    // keeping arrays is more appropriate. In general, I think
-    // we were doing it only as a precaution due to the mongo
-    // bug that creates objects rather than arrays if the array
-    // does not already exist.
-    //var flatDoc = mDoc.getFlatObject({keepArrays: true});
-    var flatDoc = mDoc.getFlatObject();
-    mDoc = null;
+    mDoc = new MongoObject(doc);
+    flatDoc = mDoc.getFlatObject({keepArrays: !!options.keepArrays});
     // Get a list of null, undefined, and empty string values so we can unset them instead
-    var nulls = Utility.reportNulls(flatDoc, keepEmptyStrings);
-    flatDoc = Utility.cleanNulls(flatDoc, false, keepEmptyStrings);
+    nulls = Utility.reportNulls(flatDoc, !!options.keepEmptyStrings);
+    flatDoc = Utility.cleanNulls(flatDoc, false, !!options.keepEmptyStrings);
 
     if (!_.isEmpty(flatDoc)) {
       modifier.$set = flatDoc;
