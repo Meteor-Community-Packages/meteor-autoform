@@ -12,7 +12,7 @@ _validateForm = function _validateForm(formId, formDocs, useCollectionSchema) {
     return true;
   }
 
-  // Call onSubmit from the requested form type definition
+  // Call validateForm from the requested form type definition
   var ftd = AutoForm._formTypeDefinitions[formType];
   if (!ftd) {
     throw new Error('AutoForm: Form type "' + formType + '" has not been defined');

@@ -519,10 +519,15 @@ AutoForm.addInputType = function afAddInputType(name, definition) {
  * @public
  * @param {String} name The type string that this definition is for.
  * @param {Object} definition Defines how the submit type should work
- * @param {String} definition.componentName The component name. A template with the name <componentName>_bootstrap3, and potentially others, must be defined.
+ * @param {Function} [definition.adjustInputContext] A function that accepts a single argument, which is the context with which an input template in the form will be called, potentially changes the context object, and then returns it. For example, the "readonly" and "disabled" form types use this function to add the "readonly" or "disabled" attribute, respectively, to every input within the form.
+ * @param {Function} [definition.adjustSchema] A function that accepts a single argument, which is the form schema, and potentially uses that to return a different schema to use instead. For example, the "update-pushArray" form type uses this function to build and return a schema that is limited by the `scope` attribute on the form. When this function is called, `this` contains useful information about the form.
+ * @param {Boolean} [definition.hideArrayItemButtons] Set to `true` if this form type should not show buttons for adding and removing items in an array field. The "disabled" and "readonly" form types do this.
+ * @param {Function} definition.onSubmit A function that does whatever should happen upon submission of this form type. When this function is called, `this` contains useful information about the form. At a minimum, you probably want to call `this.event.preventDefault()` to prevent the browser from submitting the form. Your submission logic may want to rely on additional custom form attributes, which will be available in `this.formAttributes`. If you do any additional validation and it fails, you should call `this.failedValidation()`. When your logic is done, you should call `this.result(error, result)`. If you want to end the submission process without providing a result, call `this.endSubmission()`. If you don't call `this.result()` or `this.endSubmission()`, `endSubmit` hooks won't be called, so for example the submit button might remain disabled. `onError` hooks will be called only if you pass an error to `this.result()`. `onSuccess` hooks will be called only if you do not pass an error to `this.result()`.
+ * @param {Function} [definition.shouldPrevalidate] A function that returns `true` if validation against the form schema should happen before the `onSubmit` function is called, or `false` if not. When this function is called, `this` contains useful information about the form. If this function is not provided for a form type, the default is `true`.
+ * @param {Function} definition.validateForm A function that validates the form and returns `true` if valid or `false` if not. This can happen during submission but also at other times. When this function is called, `this` contains useful information about the form and the validation options.
  * @return {undefined}
  *
- * Use this method to add custom input components.
+ * Use this method to add custom form types.
  */
 AutoForm.addFormType = function afAddFormType(name, definition) {
   var obj = {};

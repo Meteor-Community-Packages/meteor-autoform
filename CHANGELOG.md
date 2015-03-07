@@ -22,6 +22,7 @@ forms with automatic insert and update events, and automatic reactive validation
 * A new `update-pushArray` form type allows you to create insert-like forms that push the resulting document into an array field in an existing collection document. See the README and http://autoform.meteor.com/updatepush
 * Added `autosaveOnKeyup` form option. See README.
 * If you specify default attributes within an `autoform` object in your schema, any of the attributes may be functions that return their value, and when the function is called `this.name` will be set to the current field name, which is helpful for fields that are nested in one or more arrays.
+* You can now add custom form types using `AutoForm.addFormType`. See the API documentation. The built-in form types are defined this way, too. This allows for a lot of flexibility in what happens upon validation and submission of a form.
 
 ### 4.2.2
 
