@@ -66,73 +66,9 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
     return true; //skip validation
   }
 
-  return validateFormDoc(docToValidate, isModifier, formId, ss, form, key);
+  return AutoForm._validateFormDoc(docToValidate, isModifier, formId, ss, form, key);
 }
 
 // Throttle field validation to occur at most every 300ms,
 // with leading and trailing calls.
 validateField = _.throttle(_validateField, 300);
-
-validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, form, key) {
-  var isValid;
-  var ec = {
-    userId: (Meteor.userId && Meteor.userId()) || null,
-    isInsert: !isModifier,
-    isUpdate: !!isModifier,
-    isUpsert: false,
-    isFromTrustedCode: false,
-    docId: (form.doc && form.doc._id) || null
-  };
-
-  // Get a version of the doc that has auto values to validate here. We
-  // don't want to actually send any auto values to the server because
-  // we ultimately want them generated on the server
-  var docForValidation = _.clone(doc);
-  ss.clean(docForValidation, {
-    isModifier: isModifier,
-    filter: false,
-    autoConvert: false,
-    trimStrings: false,
-    extendAutoValueContext: ec
-  });
-
-  // Validate
-  // If `key` is provided, we validate that key/field only
-  if (key) {
-    isValid = ss.namedContext(formId).validateOne(docForValidation, key, {
-      modifier: isModifier,
-      extendedCustomContext: ec
-    });
-  } else {
-    isValid = ss.namedContext(formId).validate(docForValidation, {
-      modifier: isModifier,
-      extendedCustomContext: ec
-    });
-
-    if (!isValid) {
-      selectFirstInvalidField(formId, ss);
-    }
-  }
-
-  return isValid;
-};
-
-/*
- * PRIVATE
- */
-
-// Selects the focus the first field with an error
-function selectFirstInvalidField(formId, ss) {
-  var ctx = ss.namedContext(formId), template, fields;
-  if (!ctx.isValid()) {
-    template = AutoForm.templateInstanceForForm(formId);
-    fields = getAllFieldsInForm(template);
-    fields.each(function () {
-      var f = $(this);
-      if (ctx.keyIsInvalid(f.attr('data-schema-key'))) {
-        f.focus();
-        return false;
-      }
-    });
-  }
-}

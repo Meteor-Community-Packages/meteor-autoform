@@ -1,4 +1,4 @@
-/* global AutoForm, _validateForm, validateFormDoc */
+/* global AutoForm, _validateForm */
 
 AutoForm.addFormType('method-update', {
   onSubmit: function () {
@@ -36,6 +36,6 @@ AutoForm.addFormType('method-update', {
     ss = (this.useCollectionSchema && collection) ? collection.simpleSchema() : ss;
 
     // We validate the modifier. We don't want to throw errors about missing required fields, etc.
-    return validateFormDoc(this.formDocs.updateDoc, true, this.form.id, ss, this.form);
+    return AutoForm._validateFormDoc(this.formDocs.updateDoc, true, this.form.id, ss, this.form);
   }
 });

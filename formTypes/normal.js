@@ -1,4 +1,4 @@
-/* global AutoForm, Hooks, validateFormDoc */
+/* global AutoForm, Hooks */
 
 AutoForm.addFormType('normal', {
   onSubmit: function () {
@@ -58,6 +58,6 @@ AutoForm.addFormType('normal', {
     // Get SimpleSchema
     var ss = AutoForm.getFormSchema(this.form.id);
     // Validate
-    return validateFormDoc(this.formDocs.insertDoc, false, this.form.id, ss, this.form);
+    return AutoForm._validateFormDoc(this.formDocs.insertDoc, false, this.form.id, ss, this.form);
   }
 });

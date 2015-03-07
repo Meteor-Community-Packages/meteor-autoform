@@ -994,6 +994,83 @@ AutoForm.getFormId = function () {
   return AutoForm.getCurrentDataForForm().id;
 };
 
+//
+
+/**
+ * Selects the focus the first field (in DOM order) with an error.
+ * @param   {String}       formId The `id` attribute of the form
+ * @param   {SimpleSchema} ss     The SimpleSchema instance that was used to create the form's validation context.
+ * @returns {undefined}
+ */
+AutoForm.selectFirstInvalidField = function selectFirstInvalidField(formId, ss) {
+  var ctx = ss.namedContext(formId), template, fields;
+  if (!ctx.isValid()) {
+    template = AutoForm.templateInstanceForForm(formId);
+    fields = getAllFieldsInForm(template);
+    fields.each(function () {
+      var f = $(this);
+      if (ctx.keyIsInvalid(f.attr('data-schema-key'))) {
+        f.focus();
+        return false;
+      }
+    });
+  }
+};
+
+/**
+ * If creating a form type, you will often want to call this from the `validateForm` function. It provides the generic form validation logic that does not typically change between form types.
+ * @param   {Object}       doc        The document with the gathered form values to validate.
+ * @param   {Boolean}      isModifier Is `doc` actually a mongo modifier object?
+ * @param   {String}       formId     The form `id` attribute
+ * @param   {SimpleSchema} ss         The SimpleSchema instance against which to validate.
+ * @param   {Object}       form       The form context object
+ * @param   {String}       [key]      Optionally, a specific schema key to validate.
+ * @returns {Boolean}      Is the form valid?
+ */
+AutoForm._validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, form, key) {
+  var isValid;
+  var ec = {
+    userId: (Meteor.userId && Meteor.userId()) || null,
+    isInsert: !isModifier,
+    isUpdate: !!isModifier,
+    isUpsert: false,
+    isFromTrustedCode: false,
+    docId: (form.doc && form.doc._id) || null
+  };
+
+  // Get a version of the doc that has auto values to validate here. We
+  // don't want to actually send any auto values to the server because
+  // we ultimately want them generated on the server
+  var docForValidation = _.clone(doc);
+  ss.clean(docForValidation, {
+    isModifier: isModifier,
+    filter: false,
+    autoConvert: false,
+    trimStrings: false,
+    extendAutoValueContext: ec
+  });
+
+  // Validate
+  // If `key` is provided, we validate that key/field only
+  if (key) {
+    isValid = ss.namedContext(formId).validateOne(docForValidation, key, {
+      modifier: isModifier,
+      extendedCustomContext: ec
+    });
+  } else {
+    isValid = ss.namedContext(formId).validate(docForValidation, {
+      modifier: isModifier,
+      extendedCustomContext: ec
+    });
+
+    if (!isValid) {
+      AutoForm.selectFirstInvalidField(formId, ss);
+    }
+  }
+
+  return isValid;
+};
+
 /**
  * Sets defaults for the form data context
  * @returns {String} The data context with property defaults added.

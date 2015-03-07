@@ -1,4 +1,4 @@
-/* global AutoForm, _validateForm, validateFormDoc */
+/* global AutoForm, _validateForm */
 
 AutoForm.addFormType('method', {
   onSubmit: function () {
@@ -36,6 +36,6 @@ AutoForm.addFormType('method', {
     ss = (this.useCollectionSchema && collection) ? collection.simpleSchema() : ss;
 
     // Validate
-    return validateFormDoc(this.formDocs.insertDoc, false, this.form.id, ss, this.form);
+    return AutoForm._validateFormDoc(this.formDocs.insertDoc, false, this.form.id, ss, this.form);
   }
 });

@@ -1,4 +1,4 @@
-/* global AutoForm, validateFormDoc */
+/* global AutoForm */
 
 AutoForm.addFormType('insert', {
   onSubmit: function () {
@@ -35,7 +35,7 @@ AutoForm.addFormType('insert', {
     // Get SimpleSchema
     var ss = AutoForm.getFormSchema(this.form.id);
     // Validate
-    return validateFormDoc(this.formDocs.insertDoc, false, this.form.id, ss, this.form);
+    return AutoForm._validateFormDoc(this.formDocs.insertDoc, false, this.form.id, ss, this.form);
   },
   shouldPrevalidate: function () {
     // Prevalidate only if there is both a `schema` attribute and a `collection` attribute
