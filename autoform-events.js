@@ -121,22 +121,22 @@ Template.autoForm.events({
 
     // Prep context with which hooks are called
     var hookContext = {
-      event: event,
-      template: template,
-      formId: formId,
-      formAttributes: form,
+      autoSaveChangedElement: lastAutoSaveElement,
+      collection: collection,
       currentDoc: currentDoc,
       docId: docId,
-      autoSaveChangedElement: lastAutoSaveElement,
+      event: event,
+      formAttributes: form,
+      formId: formId,
+      insertDoc: formDocs.insertDoc,
       resetForm: function () {
         AutoForm.resetForm(formId, template);
       },
-      validationContext: AutoForm.getValidationContext(formId),
       ss: ss,
-      collection: collection,
       ssIsOverride: ssIsOverride,
-      insertDoc: formDocs.insertDoc,
-      updateDoc: formDocs.updateDoc
+      template: template,
+      updateDoc: formDocs.updateDoc,
+      validationContext: AutoForm.getValidationContext(formId)
     };
 
     function endSubmission() {
