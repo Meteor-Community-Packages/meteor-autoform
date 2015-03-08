@@ -486,7 +486,7 @@ Utility = {
     });
 
     return {
-      atts: atts,
+      atts: evaluatedAtts,
       defs: defs
     };
   },
