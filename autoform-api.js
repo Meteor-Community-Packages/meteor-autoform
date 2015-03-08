@@ -1,9 +1,13 @@
-/* global AutoForm:true, SimpleSchema, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, _validateForm, validateField, arrayTracker, getInputType, ReactiveVar, getAllFieldsInForm, setDefaults:true, getFlatDocOfFieldValues, MongoObject */
+/* global AutoForm:true, SimpleSchema, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, _validateForm, validateField, arrayTracker, ReactiveVar, getAllFieldsInForm, setDefaults:true, getFlatDocOfFieldValues, MongoObject */
 
 // This file defines the public, exported API
 
 AutoForm = AutoForm || {}; //exported
 
+/**
+ * @property AutoForm.Utility
+ * @public
+ */
 AutoForm.Utility = Utility;
 
 /**
@@ -60,8 +64,20 @@ AutoForm.hooks = function autoFormHooks(hooks, replace) {
   });
 };
 
-// Expose the hooks references to aid with automated testing
+/**
+ * @property AutoForm._hooks
+ * @public
+ *
+ * Hooks list to aid automated testing
+ */
 AutoForm._hooks = Hooks.form;
+
+/**
+ * @property AutoForm._globalHooks
+ * @public
+ *
+ * Global hooks list to aid automated testing
+ */
 AutoForm._globalHooks = Hooks.global;
 
 /**
@@ -238,7 +254,7 @@ AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templa
 /**
  * @method AutoForm.getFormValues
  * @public
- * @param {String}   formId     The `id` attribute of the `autoForm` you want current values for.
+ * @param {String} formId The `id` attribute of the `autoForm` you want current values for.
  * @param {Template} [template] The template instance, if already known, as a performance optimization.
  * @param {SimpleSchema} [ss] The SimpleSchema instance, if already known, as a performance optimization.
  * @return {Object}
@@ -587,8 +603,8 @@ AutoForm.getValidationContext = function autoFormGetValidationContext(formId) {
 
 /**
  * @method AutoForm.findAttribute
- * @param {String} attrName Attribute name
  * @public
+ * @param {String} attrName Attribute name
  * @return {Any|undefined} Searches for the given attribute, looking up the parent context tree until the closest autoform is reached.
  *
  * Call this method from a UI helper. Might return undefined.
@@ -633,8 +649,8 @@ AutoForm.findAttribute = function autoFormFindAttribute(attrName) {
 
 /**
  * @method AutoForm.findAttributesWithPrefix
- * @param {String} prefix Attribute prefix
  * @public
+ * @param {String} prefix Attribute prefix
  * @return {Object} An object containing all of the found attributes and their values, with the prefix removed from the keys.
  *
  * Call this method from a UI helper. Searches for attributes that start with the given prefix, looking up the parent context tree until the closest autoform is reached.
@@ -686,6 +702,7 @@ AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(pr
  * @public
  *
  * Call this method in client code while developing to turn on extra logging.
+ * You need to call it just one time, usually in top level client code.
  */
 AutoForm.debug = function autoFormDebug() {
   SimpleSchema.debug = true;
@@ -803,6 +820,14 @@ AutoForm.getSchemaForField = function autoFormGetSchemaForField(name) {
   return AutoForm.Utility.getDefs(ss, name);
 };
 
+/**
+ * @method AutoForm._getOptionsForField
+ * @public
+ * @param {String} name The field name attribute / schema key.
+ * @return {Array(Object)|String|undefined}
+ *
+ * Call this method from a UI helper to get the select options for the field. Might return the string "allowed".
+ */
 AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) {
   var ss, def, saf, allowedValues;
 
@@ -856,9 +881,12 @@ AutoForm.getLabelForField = function autoFormGetSchemaForField(name) {
 };
 
 /**
- * Gets the template instance for the form with formId or the closest form to the current context.
- * @param   {String}                     [formId] The form's `id` attribute
+ * @method AutoForm.templateInstanceForForm
+ * @public
+ * @param {String} [formId] The form's `id` attribute
  * @returns {TemplateInstance|undefined} The template instance.
+ *
+ * Gets the template instance for the form with formId or the closest form to the current context.
  */
 AutoForm.templateInstanceForForm = function (formId) {
   var formElement;
@@ -887,12 +915,15 @@ AutoForm.templateInstanceForForm = function (formId) {
 };
 
 /**
+ * @method AutoForm.getArrayCountFromDocForField
+ * @public
+ * @param {String} formId The form's `id` attribute
+ * @param {String} field  The field name (schema key)
+ * @returns {Number|undefined} Array count in the attached document.
+ *
  * Looks in the document attached to the form to see if the
  * requested field exists and is an array. If so, returns the
  * length (count) of the array. Otherwise returns undefined.
- * @param   {String}           formId The form's `id` attribute
- * @param   {String}           field  The field name (schema key)
- * @returns {Number|undefined} Array count in the attached document.
  */
 AutoForm.getArrayCountFromDocForField = function (formId, field) {
   var mDoc = AutoForm.reactiveFormData.sourceDoc(formId);
@@ -907,12 +938,15 @@ AutoForm.getArrayCountFromDocForField = function (formId, field) {
 };
 
 /**
+ * @method AutoForm.getCurrentDataForForm
+ * @public
+ * @param {String} formId The form's `id` attribute
+ * @returns {Object} Current data context for the form, or an empty object.
+ *
  * Returns the current data context for a form. Always returns an object
  * or throws an error.
  * You can call this without a formId from within a helper and
  * the data for the nearest containing form will be returned.
- * @param   {String} formId The form's `id` attribute
- * @returns {Object} Current data context for the form, or an empty object.
  */
 AutoForm.getCurrentDataForForm = function (formId) {
   var formElement;
@@ -945,12 +979,15 @@ AutoForm.getCurrentDataForForm = function (formId) {
 };
 
 /**
+ * @method AutoForm.getCurrentDataPlusExtrasForForm
+ * @public
+ * @param   {String} [formId] The form's `id` attribute
+ * @returns {Object} Current data context for the form, or an empty object.
+ *
  * Returns the current data context for a form plus some extra properties.
  * Always returns an object or throws an error.
  * You can call this without a formId from within a helper and
  * the data for the nearest containing form will be returned.
- * @param   {String} [formId] The form's `id` attribute
- * @returns {Object} Current data context for the form, or an empty object.
  */
 AutoForm.getCurrentDataPlusExtrasForForm = function (formId) {
   var data = AutoForm.getCurrentDataForForm(formId);
@@ -967,19 +1004,30 @@ AutoForm.getCurrentDataPlusExtrasForForm = function (formId) {
   return data;
 };
 
+/**
+ * @method AutoForm.getFormCollection
+ * @public
+ * @param {String} formId The form's `id` attribute
+ * @returns {Mongo.Collection|undefined} The Collection instance
+ *
+ * Gets the collection for a form from the `collection` attribute
+ */
 AutoForm.getFormCollection = function (formId) {
   var data = AutoForm.getCurrentDataForForm(formId);
   return AutoForm.Utility.lookup(data.collection);
 };
 
 /**
+ * @method AutoForm.getFormSchema
+ * @public
+ * @param {String} formId The form's `id` attribute
+ * @param {Object} [form] Pass the form data context as an optimization or if the form is not yet rendered.
+ * @returns {SimpleSchema|undefined} The SimpleSchema instance
+ *
  * Gets the schema for a form, from the `schema` attribute if
  * provided, or from the schema attached to the `Mongo.Collection`
  * specified in the `collection` attribute. The form must be
  * currently rendered.
- * @param   {String}   formId The form's `id` attribute
- * @param   {Object}   [form] Pass the form data context as an optimization or if the form is not yet rendered.
- * @returns {SimpleSchema|undefined} The SimpleSchema instance
  */
 AutoForm.getFormSchema = function (formId, form) {
   form = form ? setDefaults(form) : AutoForm.getCurrentDataForForm(formId);
@@ -987,20 +1035,24 @@ AutoForm.getFormSchema = function (formId, form) {
 };
 
 /**
- * Call in a helper to get the containing form's `id` attribute. Reactive.
+ * @method AutoForm.getFormId
+ * @public
  * @returns {String} The containing form's `id` attribute value
+ *
+ * Call in a helper to get the containing form's `id` attribute. Reactive.
  */
 AutoForm.getFormId = function () {
   return AutoForm.getCurrentDataForForm().id;
 };
 
-//
-
 /**
- * Selects the focus the first field (in DOM order) with an error.
- * @param   {String}       formId The `id` attribute of the form
- * @param   {SimpleSchema} ss     The SimpleSchema instance that was used to create the form's validation context.
+ * @method AutoForm.selectFirstInvalidField
+ * @public
+ * @param {String} formId The `id` attribute of the form
+ * @param {SimpleSchema} ss The SimpleSchema instance that was used to create the form's validation context.
  * @returns {undefined}
+ *
+ * Selects the focus the first field (in DOM order) with an error.
  */
 AutoForm.selectFirstInvalidField = function selectFirstInvalidField(formId, ss) {
   var ctx = ss.namedContext(formId), template, fields;
@@ -1018,14 +1070,18 @@ AutoForm.selectFirstInvalidField = function selectFirstInvalidField(formId, ss) 
 };
 
 /**
+ * @method AutoForm._validateFormDoc
+ * @public
+ *
  * If creating a form type, you will often want to call this from the `validateForm` function. It provides the generic form validation logic that does not typically change between form types.
- * @param   {Object}       doc        The document with the gathered form values to validate.
- * @param   {Boolean}      isModifier Is `doc` actually a mongo modifier object?
- * @param   {String}       formId     The form `id` attribute
- * @param   {SimpleSchema} ss         The SimpleSchema instance against which to validate.
- * @param   {Object}       form       The form context object
- * @param   {String}       [key]      Optionally, a specific schema key to validate.
- * @returns {Boolean}      Is the form valid?
+ *
+ * @param {Object} doc The document with the gathered form values to validate.
+ * @param {Boolean} isModifier Is `doc` actually a mongo modifier object?
+ * @param {String} formId The form `id` attribute
+ * @param {SimpleSchema} ss The SimpleSchema instance against which to validate.
+ * @param {Object} form The form context object
+ * @param {String} [key] Optionally, a specific schema key to validate.
+ * @returns {Boolean} Is the form valid?
  */
 AutoForm._validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, form, key) {
   var isValid;
@@ -1095,6 +1151,7 @@ AutoForm._validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss
 
 /**
  * Sets defaults for the form data context
+ * @private
  * @returns {String} The data context with property defaults added.
  */
 setDefaults = function setDefaults(data) {
