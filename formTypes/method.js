@@ -19,7 +19,7 @@ AutoForm.addFormType('method', {
       if (_validateForm(c.formId,
                        {insertDoc: doc},
                        c.ssIsOverride) === false) {
-        this.failedValidation();
+        c.failedValidation();
       } else {
         // Call the method
         Meteor.call(c.formAttributes.meteormethod, doc, c.result);

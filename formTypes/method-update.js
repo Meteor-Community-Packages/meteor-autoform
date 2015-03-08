@@ -19,7 +19,7 @@ AutoForm.addFormType('method-update', {
       if (_validateForm(c.formId,
                        {updateDoc: updateDoc},
                        c.ssIsOverride) === false) {
-        this.failedValidation();
+        c.failedValidation();
       } else {
         // Call the method
         Meteor.call(c.formAttributes.meteormethod, updateDoc, c.docId, c.result);
