@@ -679,7 +679,7 @@ All inputs will be read-only. Nothing happens when submitting.
 
 ## Public API
 
-Some public methods are exposed on the `AutoForm` object. Refer to the [API documentation](https://github.com/aldeed/meteor-autoform/blob/master/api.md).
+For the full public API available on the `AutoForm` object, refer to the [API documentation](https://github.com/aldeed/meteor-autoform/blob/master/api.md).
 
 ## Non-Collection Forms
 
