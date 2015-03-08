@@ -1050,18 +1050,40 @@ AutoForm._validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss
     extendAutoValueContext: ec
   });
 
+  // Get form's validation context
+  var vc = ss.namedContext(formId);
+
   // Validate
   // If `key` is provided, we validate that key/field only
   if (key) {
-    isValid = ss.namedContext(formId).validateOne(docForValidation, key, {
+    isValid = vc.validateOne(docForValidation, key, {
       modifier: isModifier,
       extendedCustomContext: ec
     });
+
+    // Add sticky error for this key if there is one
+    var stickyError = AutoForm.templateInstanceForForm(formId)._stickyErrors[key];
+    if (stickyError) {
+      isValid = false;
+      vc.addInvalidKeys([
+        {name: key, type: stickyError.type, value: stickyError.value}
+      ]);
+    }
   } else {
-    isValid = ss.namedContext(formId).validate(docForValidation, {
+    isValid = vc.validate(docForValidation, {
       modifier: isModifier,
       extendedCustomContext: ec
     });
+
+    // Add sticky errors for all keys if any
+    var stickyErrors = AutoForm.templateInstanceForForm(formId)._stickyErrors;
+    if (!_.isEmpty(stickyErrors)) {
+      isValid = false;
+      stickyErrors = _.map(stickyErrors, function (obj, k) {
+        return {name: k, type: obj.type, value: obj.value};
+      });
+      vc.addInvalidKeys(stickyErrors);
+    }
 
     if (!isValid) {
       AutoForm.selectFirstInvalidField(formId, ss);

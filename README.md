@@ -989,13 +989,22 @@ could skip it.*
 
 The following properties and functions are available in all hooks when they are called:
 
-* `this.event`: The browser submit event
-* `this.template`: The `autoForm` template instance
-* `this.formId`: The form's `id` attribute (useful in a global hook)
-* `this.validationContext`: The validation context used for the form. You can use this to check or add invalid keys.
+* `this.addStickyValidationError(key, type, [value])`: Call this to add a custom validation error that will not be overridden by subsequent revalidations on the client. This can be useful if you need to show a form error based on errors coming back from the server, and you don't want it to disappear when fields are revalidated on the client on blur, keyup, etc. The sticky error will go away when the form is reset (such as after a successful submission), when the form instance is destroyed, or when you call `this.removeStickyValidationError(key)` in any hook.
 * `this.autoSaveChangedElement`: The input element that was changed to cause this form submission (if the submission was due to autosave)
+* `this.collection`: The collection attached to the form (from `collection` attribute)
+* `this.currentDoc`: The current document attached to the form (from `doc` attribute)
 * `this.docId`: The `_id` attribute of the `doc` attached to the form, if there is one, or for an `type='insert'` form, the `_id` of the newly inserted doc, if one has been inserted.
+* `this.event`: The browser submit event
+* `this.formAttributes`: The object containing all the form attributes from the `autoForm` or `quickForm`
+* `this.formId`: The form's `id` attribute (useful in a global hook)
+* `this.insertDoc`: The gathered current form values, as a normal object
+* `this.removeStickyValidationError(key)`: Call this to remove a sticky validation error you previously added to the current form instance.
 * `this.resetForm()`: Call this if you need to reset the form
+* `this.ss`: The SimpleSchema instance used for validating the form
+* `this.ssIsOverride`: This is `true` if `this.ss` is an override schema, meaning it's coming from a `schema` attribute on the `autoForm` or `quickForm`, but there is also a `collection` attribute pointing to a collection that has its own schema attached.
+* `this.template`: The `autoForm` template instance
+* `this.updateDoc`: The gathered current form values, as a mongo modifier object suitable for passing to a collection `update` call
+* `this.validationContext`: The validation context used for the form. You can use this to check or add (non-sticky) invalid keys.
 
 ### formToDoc and docToForm
 

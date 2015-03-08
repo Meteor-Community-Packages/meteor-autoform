@@ -121,6 +121,9 @@ Template.autoForm.events({
 
     // Prep context with which hooks are called
     var hookContext = {
+      addStickyValidationError: function (key, type, value) {
+        AutoForm.templateInstanceForForm(formId)._stickyErrors[key] = {type: type, value: value};
+      },
       autoSaveChangedElement: lastAutoSaveElement,
       collection: collection,
       currentDoc: currentDoc,
@@ -129,6 +132,11 @@ Template.autoForm.events({
       formAttributes: form,
       formId: formId,
       insertDoc: formDocs.insertDoc,
+      removeStickyValidationError: function (key) {
+        delete AutoForm.templateInstanceForForm(formId)._stickyErrors[key];
+        // revalidate that field
+        validateField(key, formId, false, false);
+      },
       resetForm: function () {
         AutoForm.resetForm(formId, template);
       },

@@ -63,6 +63,11 @@ Template.autoForm.created = function autoFormCreated() {
   // to this object as necessary
   template.formValues = {};
 
+  // We'll store "sticky" errors here. These are errors added
+  // manually based on server validation, which we don't want to
+  // be wiped out by further client validation.
+  template._stickyErrors = {};
+
   template.fieldValuesReady = new ReactiveVar(false);
 
   template.autorun(function (c) {

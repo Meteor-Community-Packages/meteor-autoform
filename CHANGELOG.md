@@ -23,6 +23,7 @@ forms with automatic insert and update events, and automatic reactive validation
 * Added `autosaveOnKeyup` form option. See README.
 * If you specify default attributes within an `autoform` object in your schema, any of the attributes may be functions that return their value, and when the function is called `this.name` will be set to the current field name, which is helpful for fields that are nested in one or more arrays.
 * You can now add custom form types using `AutoForm.addFormType`. See the API documentation. The built-in form types are defined this way, too. This allows for a lot of flexibility in what happens upon validation and submission of a form.
+* In any form hook, you can now call `this.addStickyValidationError(key, type, [value])` to add a custom validation error that will not be overridden by subsequent revalidations on the client. This can be useful if you need to show a form error based on errors coming back from the server, and you don't want it to disappear when fields are revalidated on the client on blur, keyup, etc. The sticky error will go away when the form is reset (such as after a successful submission), when the form instance is destroyed, or when you call `this.removeStickyValidationError(key)` in any hook.
 
 ### 4.2.2
 
