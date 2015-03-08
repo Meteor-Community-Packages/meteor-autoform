@@ -22,7 +22,8 @@ Template.afFormGroup.helpers({
 
     // Set the input's `id` attribute and the label's `for` attribute to
     // the same ID.
-    afFieldLabelAtts.for = afFieldInputAtts.id = id;
+    // NOTE: `afFieldLabelAtts.for` causes exception in IE8
+    afFieldLabelAtts['for'] = afFieldInputAtts.id = id;
 
     // Get the field's schema definition
     var fieldSchema = AutoForm.getSchemaForField(c.atts.name);
