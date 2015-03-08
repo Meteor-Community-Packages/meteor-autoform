@@ -40,8 +40,11 @@ Template.afFieldInput.helpers({
     var ss = AutoForm.getFormSchema();
     var defs = c.defs;
 
+    // Get schema default value.
+    // We must do this before adjusting defs for arrays.
+    var schemaDefaultValue = defs.defaultValue;
+
     // Adjust for array fields if necessary
-    var defaultValue = defs.defaultValue; //make sure to use pre-adjustment defaultValue for arrays
     if (defs.type === Array) {
       defs = ss.schema(c.atts.name + ".$");
     }
@@ -57,7 +60,7 @@ Template.afFieldInput.helpers({
     var mDoc = AutoForm.reactiveFormData.sourceDoc(formId);
 
     // Get input value
-    var value = getInputValue(c.atts, c.atts.value, mDoc, defaultValue, componentDef);
+    var value = getInputValue(c.atts, c.atts.value, mDoc, schemaDefaultValue, c.atts.defaultValue, componentDef);
 
     // Mark field value as changed for reactive updates
     // We need to defer this until the element will be

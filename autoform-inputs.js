@@ -1,4 +1,4 @@
-/* global AutoForm, getInputType:true, getInputValue:true, getAllFieldsInForm:true, getInputData:true, updateTrackedFieldValue:true, updateAllTrackedFieldValues:true, getFlatDocOfFieldValues:true */
+/* global AutoForm, getInputValue:true, getAllFieldsInForm:true, getInputData:true, updateTrackedFieldValue:true, updateAllTrackedFieldValues:true, getFlatDocOfFieldValues:true */
 
 getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
   var doc = {};
@@ -25,19 +25,28 @@ getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
  * * The value that is set in the `doc` provided on the containing autoForm
  * * The `defaultValue` from the schema
  */
-getInputValue = function getInputValue(atts, value, mDoc, defaultValue, typeDefs) {
+getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fieldDefaultValue, typeDefs) {
   if (typeof value === "undefined") {
     // Get the value for this key in the current document
     if (mDoc) {
       var valueInfo = mDoc.getInfoForKey(atts.name);
       if (valueInfo) {
         value = valueInfo.value;
+      } else {
+        value = fieldDefaultValue;
       }
     }
 
     // Only if there is no current document, use the schema defaultValue
     else {
-      value = defaultValue;
+      // Use the field default value if provided
+      if (typeof fieldDefaultValue !== 'undefined') {
+        value = fieldDefaultValue;
+      }
+      // Or use the defaultValue in the schema
+      else {
+        value = schemaDefaultValue;
+      }
     }
   }
 
@@ -79,7 +88,8 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
           "value",
           "noselect",
           "options",
-          "template");
+          "template",
+          "defaultValue");
 
   // Add required if required
   if (typeof inputAtts.required === "undefined" && !defs.optional) {
