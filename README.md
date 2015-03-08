@@ -380,7 +380,9 @@ to anything to render radios or checkboxes for the `options` instead of `select`
 option for a boolean field.
 * `falseLabel`: Set to the string that should be used as the label for the `false`
 option for a boolean field.
-*  Any additional attributes are passed along to the generated DOM element, meaning that you can add `class`, etc. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`. You can also use this feature to set default values for inputs by supplying a `value` attribute.
+* `value`: Set a specific, potentially reactive, value for the input. If you have also provided a `doc` attribute on the `autoForm` or `quickForm`, this value will override the value from the `doc` object.
+* `defaultValue`: Set a reactive default value for the input. If you have also provided a `doc` attribute on the `autoForm` or `quickForm`, this value will be used only when the `doc` object has no value for this field. This takes precedence over the `defaultValue` property of the field's schema. (Also, `defaultValue` from the schema is slightly different in that it is never used if you provide a `doc` attribute.)
+*  Any additional attributes are passed along to the generated DOM element, meaning that you can add `class`, etc. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`.
 * `placeholder`: As with other attributes, this will be passed along to the
 generated DOM element, but you can also optionally do
 `placeholder="schemaLabel"` to use the field label defined in the schema as
