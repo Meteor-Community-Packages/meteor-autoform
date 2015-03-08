@@ -128,7 +128,7 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
   }
 
   // Get the list of fields we want included
-  var fieldList = options.fields;
+  var fieldList = options.fields, usedAncestorFieldList = false;
   if (fieldList) {
     fieldList = AutoForm.Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
   }
@@ -139,8 +139,9 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
 
     // Use the ancestor field list as backup, unless there is
     // a name and that name is listed in the ancestor field list
-    if (!fieldList && (!name || !_.contains(ancestorFieldList, name))) {
+    if (!fieldList) {
       fieldList = ancestorFieldList;
+      usedAncestorFieldList = true;
     }
   }
 
@@ -149,7 +150,7 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
     // Take only those fields in the fieldList that are descendants of the `name` field
     if (name) {
       // Replace generic name with real name. We assume that field names
-      // with $ apply to all array items. Field list will not have the
+      // with $ apply to all array items. Field list will now have the
       // correct array field item number instead of $.
       if (genericName !== name) {
         fieldList = _.map(fieldList, function (field) {
@@ -194,7 +195,7 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
     });
   }
 
-  if (!fieldList) {
+  if (!fieldList || (fieldList.length === 0 && usedAncestorFieldList)) {
     // Get list of field names that are descendants of this field's name.
     // If name/genericName is undefined, this will return top-level
     // schema keys.
