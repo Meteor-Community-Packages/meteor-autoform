@@ -5,9 +5,11 @@ AutoForm
 
 AutoForm is a Meteor package that adds UI components and helpers to easily create basic forms with automatic insert and update events, and automatic reactive validation. This package requires and automatically installs the [simple-schema](https://github.com/aldeed/meteor-simple-schema) package. You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you have to add to your app yourself.
 
-## UPDATING TO 4.0
+## NOTE: AutoForm 5.0
 
-AutoForm 4.0 is out with support for custom input types, but also lots of compatibility breaks. Be sure to check out the [change log](https://github.com/aldeed/meteor-autoform/blob/master/CHANGELOG.md) when updating your app!
+AutoForm 5.0 is now available and has many compatibility breaks, but also many fixes and improvements. This release includes a lot of internal refactoring, so it's a good idea to thoroughly test all your forms after updating to 5.0+. Be sure to check out the [change log](https://github.com/aldeed/meteor-autoform/blob/master/CHANGELOG.md) for full details.
+
+**Add-on Package Authors**: Please test your package against AutoForm 5.0, and then release an update in which you change your `api.use` to `api.use('aldeed:autoform@4.0.0 || 5.0.0');`
 
 ## Table of Contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->

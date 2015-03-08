@@ -1,4 +1,4 @@
-aldeed:autoform@5.0.0-pre.1
+aldeed:autoform@5.0.0
 aldeed:simple-schema@1.1.0
 application-configuration@1.0.4
 base64@1.0.2
@@ -18,7 +18,7 @@ id-map@1.0.2
 jquery@1.11.3
 json@1.0.2
 livedata@1.0.12
-local-test:aldeed:autoform@5.0.0-pre.1
+local-test:aldeed:autoform@5.0.0
 logging@1.0.6
 meteor@1.1.4
 minifiers@1.1.3
