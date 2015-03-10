@@ -8,7 +8,7 @@ Template.afQuickFields.helpers({
     afQuickFieldsComponentAtts = Template.parentData(1);
     // It's possible to call {{> afQuickFields}} with no attributes, in which case we
     // don't want the "attributes" because they're really just the parent context.
-    if (afQuickFieldsComponentAtts.atts) {
+    if (!afQuickFieldsComponentAtts || afQuickFieldsComponentAtts.atts) {
       afQuickFieldsComponentAtts = {};
     }
 
