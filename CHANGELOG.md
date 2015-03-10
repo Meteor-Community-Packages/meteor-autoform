@@ -6,9 +6,9 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
-### 5.0.1
+### 5.0.1, 5.0.2
 
-Minor fix
+Minor fixes
 
 ### 5.0.0
 * **Compatibility break:** You can no longer do `options="auto"`, but you can do `options=afOptionsFromSchema` for essentially the same effect. The `afOptionsFromSchema` helper requires that you have a property named `name` in the current context, which is set to the field name.
