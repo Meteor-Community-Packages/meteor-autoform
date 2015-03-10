@@ -845,7 +845,7 @@ AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) {
   saf = def.autoform;
   if (saf) {
     if (saf.afFieldInput && saf.afFieldInput.options) {
-      return saf.afQuickField.options;
+      return saf.afFieldInput.options;
     } else if (saf.afQuickField && saf.afQuickField.options) {
       return saf.afQuickField.options;
     } else if (saf.options) {
