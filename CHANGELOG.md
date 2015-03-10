@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.0.1
+
+Minor fix
+
 ### 5.0.0
 * **Compatibility break:** You can no longer do `options="auto"`, but you can do `options=afOptionsFromSchema` for essentially the same effect. The `afOptionsFromSchema` helper requires that you have a property named `name` in the current context, which is set to the field name.
 * **Compatibility break:** The function signature for `AutoForm.getFieldValue` is reversed from `(formId, fieldName)` to `(fieldName, [formId])` with `formId` optional. You should not pass the `formId` argument when using it in a helper that is run within the context of the form.
