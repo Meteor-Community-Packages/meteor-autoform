@@ -866,72 +866,11 @@ custom criteria about the values of other fields on the form. If using outside o
 
 ## Callbacks/Hooks
 
-To add client-side hooks and callbacks for a form, use the `AutoForm.hooks`
-or `AutoForm.addHooks` method. Here's an example of `AutoForm.hooks` that shows
-all the supported hooks:
+To add client-side hooks and callbacks for a form, use the `AutoForm.hooks` or `AutoForm.addHooks` method. The syntax for `AutoForm.hooks` is
 
 ```js
 AutoForm.hooks({
-  myFormId: {
-    before: {
-      insert: function(doc) {
-        //return doc; (synchronous)
-        //return false; (synchronous, cancel)
-        //this.result(doc); (asynchronous)
-        //this.result(false); (asynchronous, cancel)
-      },
-      update: function(modifier) {
-        //return modifier; (synchronous)
-        //return false; (synchronous, cancel)
-        //this.result(modifier); (asynchronous)
-        //this.result(false); (asynchronous, cancel)
-      },
-      method: function(doc) {
-        //return doc; (synchronous)
-        //return false; (synchronous, cancel)
-        //this.result(doc); (asynchronous)
-        //this.result(false); (asynchronous, cancel)
-      }
-    },
-
-    // The same as the callbacks you would normally provide when calling
-    // collection.insert, collection.update, or Meteor.call
-    after: {
-      insert: function(error, result) {},
-      update: function(error, result) {},
-      method: function(error, result) {}
-    },
-
-    // Called when form does not have a `type` attribute
-    onSubmit: function(insertDoc, updateDoc, currentDoc) {
-      // You must call this.done()!
-      //this.done(); // submitted successfully, call onSuccess
-      //this.done(new Error('foo')); // failed to submit, call onError with the provided error
-      //this.done(null, "foo"); // submitted successfully, call onSuccess with `result` arg set to "foo"
-    },
-
-    // Called when any submit operation succeeds
-    onSuccess: function(formType, result) {},
-
-    // Called when any submit operation fails
-    onError: function(formType, error) {},
-
-    // Called every time the form is revalidated, which can be often if keyup
-    // validation is used.
-    formToDoc: function(doc, ss, formId) {},
-
-    // Called whenever `doc` attribute reactively changes, before values
-    // are set in the form fields.
-    docToForm: function(doc, ss) {},
-
-    // Called at the beginning and end of submission, respectively.
-    // This is the place to disable/enable buttons or the form,
-    // show/hide a "Please wait" message, etc. If these hooks are
-    // not defined, then by default the submit button is disabled
-    // during submission.
-    beginSubmit: function() {},
-    endSubmit: function() {}
-  }
+  myFormId: hooksObject
 });
 ```
 
@@ -939,57 +878,74 @@ If you want to add the same hook for multiple forms or for all forms, use the
 `AutoForm.addHooks` method instead:
 
 ```js
-  AutoForm.addHooks(['form1', 'form2', 'form3', 'form4'], {
-    after: {
-      insert: function(error, result) {
-        if (error) {
-          console.log("Insert Error:", error);
-        } else {
-          console.log("Insert Result:", result);
-        }
-      },
-      update: function(error) {
-        if (error) {
-          console.log("Update Error:", error);
-        } else {
-          console.log("Updated!");
-        }
-      }
-    }
-  });
+// Pass an array of form IDs for multiple forms
+AutoForm.addHooks(['form1', 'form2', 'form3', 'form4'], hooksObject);
 
-  AutoForm.addHooks(null, {
-    onSuccess: function () {
-      console.log("onSuccess on all forms!");
-    }
-  });
+// Or pass `null` to run the hook for all forms in the app (global hook)
+AutoForm.addHooks(null, hooksObject);
+
+// Pass `true` as optional third argument to replace all existing hooks of the same type
+AutoForm.addHooks('form1', hooksObject, true);
 ```
 
-Pass `true` as an optional third argument to `AutoForm.hooks` or `AutoForm.addHooks` to replace existing hooks.
+These calls should be anywhere in top-level client code and do not need to be within `Meteor.startup`. You should not put them in an autorun, template rendered function, or anywhere else where they will be called multiple times since that will cause the hooks to run multiple times for a single submission.
+
+In all of the above examples, the hooks object should look like the following. This shows all possible hooks, but your object would have only the hooks that you need:
 
 ```js
-  AutoForm.addHooks('form1', {
-    onSubmit: function () {
-      console.log("Only this onSubmit");
+var hooksObject = {
+  before: {
+    // Replace `formType` with the form `type` attribute to which this hook applies
+    formType: function(doc) {
+      // Potentially alter the doc
+      doc.foo = 'bar';
+    
+      // Then return it or pass it to this.result()
+      //return doc; (synchronous)
+      //return false; (synchronous, cancel)
+      //this.result(doc); (asynchronous)
+      //this.result(false); (asynchronous, cancel)
     }
-  }, true);
+  },
+
+  // The same as the callbacks you would normally provide when calling
+  // collection.insert, collection.update, or Meteor.call
+  after: {
+    // Replace `formType` with the form `type` attribute to which this hook applies
+    formType: function(error, result) {}
+  },
+
+  // Called when form does not have a `type` attribute
+  onSubmit: function(insertDoc, updateDoc, currentDoc) {
+    // You must call this.done()!
+    //this.done(); // submitted successfully, call onSuccess
+    //this.done(new Error('foo')); // failed to submit, call onError with the provided error
+    //this.done(null, "foo"); // submitted successfully, call onSuccess with `result` arg set to "foo"
+  },
+
+  // Called when any submit operation succeeds
+  onSuccess: function(formType, result) {},
+
+  // Called when any submit operation fails
+  onError: function(formType, error) {},
+
+  // Called every time the form is revalidated, which can be often if keyup
+  // validation is used.
+  formToDoc: function(doc, ss, formId) {},
+
+  // Called whenever `doc` attribute reactively changes, before values
+  // are set in the form fields.
+  docToForm: function(doc, ss) {},
+
+  // Called at the beginning and end of submission, respectively.
+  // This is the place to disable/enable buttons or the form,
+  // show/hide a "Please wait" message, etc. If these hooks are
+  // not defined, then by default the submit button is disabled
+  // during submission.
+  beginSubmit: function() {},
+  endSubmit: function() {}
+};
 ```
-
-Notes:
-
-* It's safe to call the hooks methods multiple times and even to call them for the same
-form multiple times. The list of hooks is extended each time you call it, which
-means that multiple hooks of the same type can run for the same form. Hooks
-will run in the order in which they are added, but all form-specific hooks run
-before all global hooks.
-* Passing `null` as the first argument of `AutoForm.addHooks` adds global hooks, that is,
-hooks that run for every form that has been created and every form that ever will be created
-in the app.
-* The `before` hooks are called after the form is deemed valid but before the submission operation happens. (The submission operation depends on the form type. For example, the insert, update, method call, etc.) These hooks are passed the document or modifier as gathered from the form fields. If necessary they can modify the document or modifier. These functions can perform asynchronous tasks if necessary. If asynchronicity is not needed, simply return the document or modifier, or return `false` to cancel submission. If you don't return anything, then you must call `this.result()` eventually and pass it either the document or modifier, or `false` to cancel submission. *This is run only on the client.
-Therefore, you should not assume that this will always run since a devious user
-could skip it.*
-* The `after` hooks are similar to the callbacks for `insert` and `update` and method calls. They are passed two arguments: `error` and `result`
-* Refer to the next sections for details about the `formToDoc` and `docToForm` hooks.
 
 The following properties and functions are available in all hooks when they are called:
 
@@ -1009,6 +965,14 @@ The following properties and functions are available in all hooks when they are 
 * `this.template`: The `autoForm` template instance
 * `this.updateDoc`: The gathered current form values, as a mongo modifier object suitable for passing to a collection `update` call
 * `this.validationContext`: The validation context used for the form. You can use this to check or add (non-sticky) invalid keys.
+
+Notes:
+
+* You can call `hooks` or `addHooks` multiple times. The list of hooks is extended each time you call it, which means that multiple hooks of the same type can run for the same form.
+* Hooks will run in the order in which they are added, but all form-specific hooks run before all global hooks.
+* The `before` hooks are called after the form is deemed valid but before the submission operation happens. (The submission operation depends on the form type.) These hooks are passed the document or modifier as gathered from the form fields. If necessary they can modify the document or modifier. These functions can perform asynchronous tasks if necessary. If asynchronicity is not needed, simply return the document or modifier, or return `false` to cancel submission. If you don't return anything, then you must call `this.result()` eventually and pass it either the document or modifier, or `false` to cancel submission. *This is run only on the client. Therefore, you should not assume that this will always run since a devious user could skip it.*
+* The `after` hooks are similar to the callbacks for `insert` and `update` and method calls. They are passed two arguments: `error` and `result`
+* Refer to the next sections for details about the `formToDoc` and `docToForm` hooks.
 
 ### formToDoc and docToForm
 
