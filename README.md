@@ -940,6 +940,20 @@ If you want to add the same hook for multiple forms or for all forms, use the
 
 ```js
   AutoForm.addHooks(['form1', 'form2', 'form3', 'form4'], {
+    before: {
+        insert: function (doc) {
+            if(doc.saleType == 1){
+                doc.auctionBeginTimestamp = moment(doc.auctionBegin).unix();    
+            }
+            return doc;
+        },
+        update: function (err, doc) {
+            if(doc['$set'].saleType == 1){
+                doc.auctionBeginTimestamp = moment(doc.auctionBegin).unix();    
+            }
+            return doc;
+        }   
+    },
     after: {
       insert: function(error, result) {
         if (error) {
