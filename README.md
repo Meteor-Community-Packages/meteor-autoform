@@ -74,6 +74,7 @@ AutoForm 5.0 is now available and has many compatibility breaks, but also many f
   - [Should the value of `schema` and `collection` have quotation marks around it?](#should-the-value-of-schema-and-collection-have-quotation-marks-around-it)
   - [Which components should I use?](#which-components-should-i-use)
   - [Can I reuse the same `quickForm` or `autoForm` for both inserts and updates?](#can-i-reuse-the-same-quickform-or-autoform-for-both-inserts-and-updates)
+  - [How can I show an asterisk after the label for required fields?](#how-can-i-show-an-asterisk-after-the-label-for-required-fields)
   - [What are the various ways I can specify options for a select, radio group, or checkbox group?](#what-are-the-various-ways-i-can-specify-options-for-a-select-radio-group-or-checkbox-group)
     - [Use allowed values array from the schema as both the label and the value](#use-allowed-values-array-from-the-schema-as-both-the-label-and-the-value)
     - [Set options in the schema](#set-options-in-the-schema)
@@ -1330,6 +1331,10 @@ to `null` (or a document containing default values) for an insert, probably by
 updating a reactive variable.
 3. Call `AutoForm.resetForm(formId)`. This will clear any existing validation
 errors for the form.
+
+### How can I show an asterisk after the label for required fields?
+
+Beginning with AutoForm 5.0, a `data-required` attribute is now present on the form group `div` element for all built-in `afFormGroup` templates if the field is required. This allows you to use css like the following to display an asterisk after required fields: `[data-required] label:after {content: '*'}`
 
 ### What are the various ways I can specify options for a select, radio group, or checkbox group?
 
