@@ -159,6 +159,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
 updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) {
 
   function markChanged() {
+    template.formValues = template.formValues || {};
     if (!template.formValues[fieldName]) {
       template.formValues[fieldName] = new Tracker.Dependency();
     }
@@ -179,9 +180,11 @@ updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) 
 };
 
 updateAllTrackedFieldValues = function updateAllTrackedFieldValues(template) {
-  _.each(template.formValues, function (o, fieldName) {
-    updateTrackedFieldValue(template, fieldName);
-  });
+  if (template && template.formValues) {
+    _.each(template.formValues, function (o, fieldName) {
+      updateTrackedFieldValue(template, fieldName);
+    });
+  }
 };
 
 getAllFieldsInForm = function getAllFieldsInForm(template) {

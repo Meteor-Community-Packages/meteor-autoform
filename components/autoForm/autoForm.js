@@ -61,7 +61,7 @@ Template.autoForm.created = function autoFormCreated() {
 
   // We'll add tracker dependencies for reactive field values
   // to this object as necessary
-  template.formValues = {};
+  template.formValues = template.formValues || {};
 
   // We'll store "sticky" errors here. These are errors added
   // manually based on server validation, which we don't want to

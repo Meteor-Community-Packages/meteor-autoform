@@ -391,6 +391,7 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
   }
 
   // reactive dependency
+  template.formValues = template.formValues || {};
   if (!template.formValues[fieldName]) {
     template.formValues[fieldName] = new Tracker.Dependency();
   }
