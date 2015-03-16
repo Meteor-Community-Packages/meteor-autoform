@@ -335,15 +335,7 @@ Utility = {
    * Returns a "valid date string" representing the local date.
    */
   dateToDateString: function dateToDateString(date) {
-    var m = (date.getMonth() + 1);
-    if (m < 10) {
-      m = "0" + m;
-    }
-    var d = date.getDate();
-    if (d < 10) {
-      d = "0" + d;
-    }
-    return date.getFullYear() + '-' + m + '-' + d;
+    return moment(date).format("YYYY-MM-DD");
   },
   /**
    * @method  Utility.dateToDateStringUTC
@@ -354,15 +346,7 @@ Utility = {
    * Returns a "valid date string" representing the date converted to the UTC time zone.
    */
   dateToDateStringUTC: function dateToDateStringUTC(date) {
-    var m = (date.getUTCMonth() + 1);
-    if (m < 10) {
-      m = "0" + m;
-    }
-    var d = date.getUTCDate();
-    if (d < 10) {
-      d = "0" + d;
-    }
-    return date.getUTCFullYear() + '-' + m + '-' + d;
+    return moment.utc(date).format("YYYY-MM-DD");
   },
   /**
    * @method  Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString

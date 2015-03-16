@@ -224,5 +224,6 @@ Package.onUse(function(api) {
 
 Package.onTest(function (api) {
   api.use(['aldeed:autoform', 'tinytest', 'underscore']);
+  api.use('momentjs:moment', 'client');
   api.addFiles(['tests/utility-tests.js', 'tests/autoform-tests.js']);
 });
