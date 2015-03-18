@@ -121,6 +121,7 @@ The following community packages provide additional custom input types that you 
 * [notorii:autoform-datetimepicker](https://atmospherejs.com/notorii/autoform-datetimepicker)
 * [lukemadera:autoform-googleplace](https://atmospherejs.com/lukemadera/autoform-googleplace)
 * [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
+* [vazco:universe-autoform-select](https://atmospherejs.com/vazco/universe-autoform-select)
 
 The following community packages provide other add-on features related to autoform:
 
