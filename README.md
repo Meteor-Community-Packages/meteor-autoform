@@ -122,6 +122,7 @@ The following community packages provide additional custom input types that you 
 * [lukemadera:autoform-googleplace](https://atmospherejs.com/lukemadera/autoform-googleplace)
 * [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
 * [vazco:universe-autoform-select](https://atmospherejs.com/vazco/universe-autoform-select)
+* [antalakas:autoform-bs-daterangepicker](https://atmospherejs.com/antalakas/autoform-bs-daterangepicker)
 
 The following community packages provide other add-on features related to autoform:
 
@@ -901,7 +902,7 @@ var hooksObject = {
     formType: function(doc) {
       // Potentially alter the doc
       doc.foo = 'bar';
-    
+
       // Then return it or pass it to this.result()
       //return doc; (synchronous)
       //return false; (synchronous, cancel)
