@@ -613,11 +613,6 @@ AutoForm.getValidationContext = function autoFormGetValidationContext(formId) {
 AutoForm.findAttribute = function autoFormFindAttribute(attrName) {
   var val, view, viewData;
 
-  var instance = Template.instance();
-  if (!instance) {
-    return val;
-  }
-
   function checkView() {
     // Is the attribute we're looking for on here?
     // If so, stop searching
@@ -634,7 +629,7 @@ AutoForm.findAttribute = function autoFormFindAttribute(attrName) {
   }
 
   // Loop
-  view = instance.view;
+  view = Blaze.currentView;
   while (val === undefined && view && view.name !== 'Template.autoForm') {
     checkView();
     view = view.originalParentView || view.parentView;
@@ -659,11 +654,6 @@ AutoForm.findAttribute = function autoFormFindAttribute(attrName) {
 AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(prefix) {
   var result = {}, view, viewData, searchObj;
 
-  var instance = Template.instance();
-  if (!instance) {
-    return result;
-  }
-
   function checkView() {
     // Is the attribute we're looking for on here?
     // If so, add to result object.
@@ -684,7 +674,7 @@ AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(pr
   }
 
   // Loop
-  view = instance.view;
+  view = Blaze.currentView;
   while (view && view.name !== 'Template.autoForm') {
     checkView();
     view = view.originalParentView || view.parentView;
@@ -890,29 +880,43 @@ AutoForm.getLabelForField = function autoFormGetSchemaForField(name) {
  * Gets the template instance for the form with formId or the closest form to the current context.
  */
 AutoForm.templateInstanceForForm = function (formId) {
+  return AutoForm.viewForForm(formId).templateInstance();
+};
+
+/**
+ * @method AutoForm.viewForForm
+ * @public
+ * @param {String} [formId] The form's `id` attribute. Do not pass this if calling from within a form context.
+ * @returns {Blaze.View} The `Blaze.View` instance for the autoForm. Always returns the view or throws an error.
+ *
+ * Gets the `Blaze.View` instance for the form with formId or the closest form to the current context.
+ */
+AutoForm.viewForForm = function (formId) {
   var formElement;
 
   if (formId) {
     formElement = document.getElementById(formId);
     if (!formElement) {
-      return;
+      throw new Error('No form with ID ' + formId + ' is currently rendered. If this call originated from within a template event or helper, you should call without passing a formId to avoid seeing this error');
     }
   }
 
+  // If formElement is undefined, Blaze.getView returns the current view.
+  // It will throw an error if there is no current view.
   var view = Blaze.getView(formElement);
   if (!view) {
-    return;
+    throw new Error('AutoForm.viewForForm: Unable to find current view');
   }
 
-  while (view.name !== 'Template.autoForm' && (view.originalParentView || view.parentView)) {
+  while (view && view.name !== 'Template.autoForm') {
     view = view.originalParentView || view.parentView;
   }
 
-  if (view.name !== 'Template.autoForm') {
-    return;
+  if (!view || view.name !== 'Template.autoForm') {
+    throw new Error('AutoForm.viewForForm: Unable to find autoForm view');
   }
 
-  return view.templateInstance();
+  return view;
 };
 
 /**
@@ -950,33 +954,7 @@ AutoForm.getArrayCountFromDocForField = function (formId, field) {
  * the data for the nearest containing form will be returned.
  */
 AutoForm.getCurrentDataForForm = function (formId) {
-  var formElement;
-
-  // get data for form with formId if passed
-  if (formId) {
-    formElement = document.getElementById(formId);
-    if (!formElement) {
-      throw new Error('No form with ID ' + formId + ' is currently rendered. If you are calling AutoForm.getCurrentDataForForm, or something that calls it, from within a template helper, try calling without passing a formId to avoid seeing this error');
-    }
-    return setDefaults(Blaze.getData(formElement));
-  }
-
-  // otherwise get data for nearest form from within helper
-  var instance = Template.instance();
-  if (!instance) {
-    return {};
-  }
-
-  var view = instance.view;
-  while (view && view.name !== 'Template.autoForm') {
-    view = view.originalParentView || view.parentView;
-  }
-
-  if (view && view.name === 'Template.autoForm') {
-    return setDefaults(Blaze.getData(view));
-  }
-
-  return {};
+  return setDefaults(Blaze.getData(AutoForm.viewForForm(formId)));
 };
 
 /**
