@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### vNext Patch
+
+Fix date handling when dealing with very low year numbers. (Thanks @jfly)
+
 ### 5.0.3
 
 Compatible with Meteor v1.0.4+
