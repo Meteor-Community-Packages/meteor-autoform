@@ -956,7 +956,7 @@ AutoForm.getCurrentDataForForm = function (formId) {
   if (formId) {
     formElement = document.getElementById(formId);
     if (!formElement) {
-      throw new Error('No form with ID ' + formId + ' is currently rendered. If you are calling AutoForm.getCurrentDataForForm, or something that calls it, from within a template helper, try calling without passing a formId');
+      throw new Error('No form with ID ' + formId + ' is currently rendered. If you are calling AutoForm.getCurrentDataForForm, or something that calls it, from within a template helper, try calling without passing a formId to avoid seeing this error');
     }
     return setDefaults(Blaze.getData(formElement));
   }
