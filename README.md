@@ -380,7 +380,7 @@ option selected, set `firstOption="(My Select One Label)"`.
 * `capitalize`: Used only when you've set `options="allowed"`. Set this to `true`
 to capitalize the labels generated from `allowedValues`.
 * `noselect`: Use in conjunction with `options` attribute. Set this attribute
-to anything to render radios or checkboxes for the `options` instead of `select`.
+to `true` to render radios or checkboxes for the `options` instead of `select`.
 * `trueLabel`: Set to the string that should be used as the label for the `true`
 option for a boolean field.
 * `falseLabel`: Set to the string that should be used as the label for the `false`
@@ -1427,7 +1427,7 @@ Since `autoform.options` is in the schema, that will be used instead of `allowed
 {{> afQuickField name="favoriteColor"}}
 ```
 
-`autoform.options` can be a function, but it is not recalculated reactively.
+`autoform.options` can be an array or a function that returns an array.
 
 #### Use a helper
 
