@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.0.3
+
+Compatible with Meteor v1.0.4+
+
 ### 5.0.1, 5.0.2
 
 Minor fixes
