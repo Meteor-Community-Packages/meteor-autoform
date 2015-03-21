@@ -272,7 +272,7 @@ Template.registerHelper('afSelectOptionAtts', function afSelectOptionAtts() {
 
 // Expects to be called with this.name available
 Template.registerHelper('afOptionsFromSchema', function afOptionsFromSchema() {
-  AutoForm._getOptionsForField(this.name);
+  return AutoForm._getOptionsForField(this.name);
 });
 
 /*
