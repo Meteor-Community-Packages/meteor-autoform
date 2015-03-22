@@ -30,7 +30,10 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
 
   // Due to throttling, this can be called after the autoForm template is destroyed.
   // If that happens, we exit without error.
-  var template = AutoForm.templateInstanceForForm(formId);
+  var template;
+  try{
+    template = AutoForm.templateInstanceForForm(formId);
+  }catch(e){}
   if (!template || !template.view._domrange || template.view.isDestroyed) {
     return;
   }
