@@ -132,6 +132,7 @@ The following community packages provide other add-on features related to autofo
 * [jameslefrere:autoform-semantic-ui](https://atmospherejs.com/jameslefrere/autoform-semantic-ui) provides a Semantic UI theme for autoform.
 * [comerc:autoform-fixtures](https://github.com/comerc/meteor-autoform-fixtures/) provides fixtures data for Collection2.
 * [kaoskeya:admin](https://atmospherejs.com/kaoskeya/admin) provides autoform based admin panel that integrates with your existing bootstrap design.
+* [orionjs:core](https://atmospherejs.com/orionjs) provides a autoform based CMS.
 
 ## Demo
 
