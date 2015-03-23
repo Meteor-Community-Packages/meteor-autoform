@@ -442,10 +442,14 @@ AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTempl
 AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   var field, fieldName, fieldType, arrayItemFieldType, val, typeDef, inputTypeTemplate, dataContext, autoConvert;
 
-  dataContext = Blaze.getData(element);
-  if (dataContext && dataContext.atts) {
-    autoConvert = dataContext.atts.autoConvert;
-  }
+  Tracker.nonreactive(function() { 
+    //don't rerun when data context of element changes, can cause infinite loops
+    
+    dataContext = Blaze.getData(element);
+    if (dataContext && dataContext.atts) {
+      autoConvert = dataContext.atts.autoConvert;
+    }
+  });
 
   // Get jQuery field reference
   field = $(element);
