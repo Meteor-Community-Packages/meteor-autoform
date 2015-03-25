@@ -92,7 +92,7 @@ Template.autoForm.created = function autoFormCreated() {
       // closure values of template, formId, and ss remain correct after each
       // reaction
       AutoForm.formPreserve.registerForm(formId, function autoFormRegFormCallback() {
-        return AutoForm.getFormValues(formId, template, data._resolvedSchema).insertDoc;
+        return AutoForm.getFormValues(formId, template, data._resolvedSchema, false);
       });
     }
 

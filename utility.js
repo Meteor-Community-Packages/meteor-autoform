@@ -460,7 +460,6 @@ Utility = {
     var evaluatedAtts = {};
     _.each(atts, function (v, k) {
       if (typeof v === 'function') {
-        //console.log('norm evaluating', k);
         evaluatedAtts[k] = v.call({
           name: atts.name
         });

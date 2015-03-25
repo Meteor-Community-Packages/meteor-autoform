@@ -1,10 +1,10 @@
-/* global _validateForm:true, AutoForm, validateField:true, getAllFieldsInForm */
+/* global _validateForm:true, AutoForm, validateField:true */
 
 /*
  * all form validation logic is here
  */
 
-_validateForm = function _validateForm(formId, formDocs, useCollectionSchema) {
+_validateForm = function _validateForm(formId, formDoc, useCollectionSchema) {
   var form = AutoForm.getCurrentDataForForm(formId);
   var formType = form.type;
 
@@ -20,13 +20,13 @@ _validateForm = function _validateForm(formId, formDocs, useCollectionSchema) {
 
   return ftd.validateForm.call({
     form: form,
-    formDocs: formDocs,
+    formDoc: formDoc,
     useCollectionSchema: useCollectionSchema
   });
 };
 
 function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
-  var docToValidate, isModifier;
+  var docToValidate;
 
   // Due to throttling, this can be called after the autoForm template is destroyed.
   // If that happens, we exit without error.
@@ -34,6 +34,7 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
   try{
     template = AutoForm.templateInstanceForForm(formId);
   }catch(e){}
+
   if (!template || !template.view._domrange || template.view.isDestroyed) {
     return;
   }
@@ -52,16 +53,14 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
   }
 
   // Create a document based on all the values of all the inputs on the form
-  var formDocs = AutoForm.getFormValues(formId, template, ss);
+  // Get the form type definition
+  var ftd = AutoForm._formTypeDefinitions[form.type];
+  if (!ftd) {
+    throw new Error('AutoForm: Form type "' + form.type + '" has not been defined');
+  }
 
   // Clean and validate doc
-  if (form.type === "update" || form.type === "method-update") {
-    docToValidate = formDocs.updateDoc;
-    isModifier = true;
-  } else {
-    docToValidate = formDocs.insertDoc;
-    isModifier = false;
-  }
+  docToValidate = AutoForm.getFormValues(formId, template, ss, !!ftd.usesModifier);
 
   // Skip validation if skipEmpty is true and the field we're validating
   // has no value.
@@ -69,7 +68,7 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
     return true; //skip validation
   }
 
-  return AutoForm._validateFormDoc(docToValidate, isModifier, formId, ss, form, key);
+  return AutoForm._validateFormDoc(docToValidate, !!ftd.usesModifier, formId, ss, form, key);
 }
 
 // Throttle field validation to occur at most every 300ms,

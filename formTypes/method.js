@@ -17,7 +17,7 @@ AutoForm.addFormType('method', {
       // against the collection schema here. Otherwise we validate against whichever
       // one was passed.
       if (_validateForm(c.formId,
-                       {insertDoc: doc},
+                       doc,
                        c.ssIsOverride) === false) {
         c.failedValidation();
       } else {
@@ -36,6 +36,6 @@ AutoForm.addFormType('method', {
     ss = (this.useCollectionSchema && collection) ? collection.simpleSchema() : ss;
 
     // Validate
-    return AutoForm._validateFormDoc(this.formDocs.insertDoc, false, this.form.id, ss, this.form);
+    return AutoForm._validateFormDoc(this.formDoc, false, this.form.id, ss, this.form);
   }
 });

@@ -257,13 +257,15 @@ AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templa
  * @param {String} formId The `id` attribute of the `autoForm` you want current values for.
  * @param {Template} [template] The template instance, if already known, as a performance optimization.
  * @param {SimpleSchema} [ss] The SimpleSchema instance, if already known, as a performance optimization.
+ * @param {Boolean} [getModifier] Set to `true` to return a modifier object or `false` to return a normal object. For backwards compatibility, and object containing both is returned if this is undefined.
  * @return {Object}
  *
  * Returns an object representing the current values of all schema-based fields in the form.
- * The returned object contains two properties, "insertDoc" and "updateDoc", which represent
- * the field values as a normal object and as a MongoDB modifier, respectively.
+ * The returned object is either a normal object or a MongoDB modifier, based on the `getModifier` argument.
  */
-AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss) {
+AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, getModifier) {
+  var insertDoc, updateDoc, transforms;
+
   template = template || AutoForm.templateInstanceForForm(formId);
   if (!template || !template.view._domrange || template.view.isDestroyed) {
     throw new Error("getFormValues: There is currently no autoForm template rendered for the form with id " + formId);
@@ -296,6 +298,12 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss) {
     trimStrings = false;
   }
 
+  var hookCtx = {
+    template: template,
+    formId: formId,
+    schema: ss
+  };
+
   // Build a flat document from field values
   var doc = getFlatDocOfFieldValues(getAllFieldsInForm(template), ss);
 
@@ -309,68 +317,81 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss) {
   // errors about required fields that are children of optional objects.
   AutoForm.Utility.bubbleEmpty(doc, keepEmptyStrings);
 
-  // Pass expanded doc through formToDoc hooks
-  var hookCtx = {
-    template: template,
-    formId: formId
-  };
-  var transforms = Hooks.getHooks(formId, 'formToDoc');
-  _.each(transforms, function formValuesTransform(transform) {
-    doc = transform.call(hookCtx, doc, ss);
-  });
-
   // Create and clean insert doc.
-  // Delete any properties that are null, undefined, or empty strings,
-  // unless the form has requested to keep empty string.
-  // Do not add autoValues at this stage.
-  var insertDoc = AutoForm.Utility.cleanNulls(doc, false, keepEmptyStrings);
+  if (getModifier !== true) {
+    // Delete any properties that are null, undefined, or empty strings,
+    // unless the form has requested to keep empty string.
+    // Do not add autoValues at this stage.
+    insertDoc = AutoForm.Utility.cleanNulls(doc, false, keepEmptyStrings);
 
-  // As array items are removed, gaps can appear in the numbering,
-  // which results in arrays that have undefined items. Here we
-  // remove any array items that are undefined.
-  //
-  // We do this to the insertDoc, but we don't want to do it earlier to the
-  // doc, because that would cause the update modifier to have $sets for
-  // the wrong array indexes.
-  AutoForm.Utility.compactArrays(insertDoc);
+    // As array items are removed, gaps can appear in the numbering,
+    // which results in arrays that have undefined items. Here we
+    // remove any array items that are undefined.
+    //
+    // We do this to the insertDoc, but we don't want to do it earlier to the
+    // doc, because that would cause the update modifier to have $sets for
+    // the wrong array indexes.
+    AutoForm.Utility.compactArrays(insertDoc);
 
-  ss.clean(insertDoc, {
-    isModifier: false,
-    getAutoValues: false,
-    filter: filter,
-    autoConvert: autoConvert,
-    trimStrings: trimStrings
-  });
+    ss.clean(insertDoc, {
+      isModifier: false,
+      getAutoValues: false,
+      filter: filter,
+      autoConvert: autoConvert,
+      trimStrings: trimStrings
+    });
+
+    // Pass expanded doc through formToDoc hooks
+    transforms = Hooks.getHooks(formId, 'formToDoc');
+    _.each(transforms, function formValuesTransform(transform) {
+      insertDoc = transform.call(hookCtx, insertDoc, ss);
+    });
+  }
 
   // Create and clean update modifier.
-  // Converts to modifier object with $set and $unset.
-  // Do not add autoValues at this stage.
-  var updateDoc = AutoForm.Utility.docToModifier(doc, {
-    keepEmptyStrings: keepEmptyStrings,
-    // XXX keep an eye on this. We need keepArrays: false
-    // in order to have update fields like "foo.2.bar" update
-    // the proper index. But there might be other cases where
-    // keeping arrays is more appropriate. In general, I think
-    // we were doing it only as a precaution due to the mongo
-    // bug that creates objects rather than arrays if the array
-    // does not already exist. If this causes problems, we could
-    // make it possible to set this option on the form.
-    keepArrays: false
-  });
+  if (getModifier !== false) {
+    // Converts to modifier object with $set and $unset.
+    // Do not add autoValues at this stage.
+    updateDoc = AutoForm.Utility.docToModifier(doc, {
+      keepEmptyStrings: keepEmptyStrings,
+      // XXX keep an eye on this. We need keepArrays: false
+      // in order to have update fields like "foo.2.bar" update
+      // the proper index. But there might be other cases where
+      // keeping arrays is more appropriate. In general, I think
+      // we were doing it only as a precaution due to the mongo
+      // bug that creates objects rather than arrays if the array
+      // does not already exist. If this causes problems, we could
+      // make it possible to set this option on the form.
+      keepArrays: false
+    });
 
-  ss.clean(updateDoc, {
-    isModifier: true,
-    getAutoValues: false,
-    filter: filter,
-    autoConvert: autoConvert,
-    trimStrings: trimStrings
-  });
+    ss.clean(updateDoc, {
+      isModifier: true,
+      getAutoValues: false,
+      filter: filter,
+      autoConvert: autoConvert,
+      trimStrings: trimStrings
+    });
 
-  // We return insertDoc and updateDoc
-  return {
-    insertDoc: insertDoc,
-    updateDoc: updateDoc
-  };
+    // Pass modifier through formToModifier hooks
+    transforms = Hooks.getHooks(formId, 'formToModifier');
+    _.each(transforms, function formValuesTransform(transform) {
+      updateDoc = transform.call(hookCtx, updateDoc);
+    });
+  }
+
+  if (getModifier === true) {
+    return updateDoc;
+  } else if (getModifier === false) {
+    return insertDoc;
+  } else {
+    // We return insertDoc and updateDoc when getModifier
+    // is undefined for backwards compatibility
+    return {
+      insertDoc: insertDoc,
+      updateDoc: updateDoc
+    };
+  }
 };
 
 /**
@@ -397,9 +418,9 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
   }
   template.formValues[fieldName].depend();
 
-  var doc = AutoForm.getFormValues(formId, template);
+  var doc = AutoForm.getFormValues(formId, template, null, false);
 
-  var mDoc = new MongoObject(doc.insertDoc);
+  var mDoc = new MongoObject(doc);
   return mDoc.getValueForKey(fieldName);
 };
 
@@ -587,9 +608,7 @@ AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipE
  */
 AutoForm.validateForm = function autoFormValidateForm(formId) {
   // Gather all form values
-  var formDocs = AutoForm.getFormValues(formId);
-
-  return _validateForm(formId, formDocs);
+  return _validateForm(formId, AutoForm.getFormValues(formId, null, null, false));
 };
 
 /**

@@ -857,7 +857,7 @@ update, this is a mongo modifier with `$set` and potentially `$unset` objects.
 In most cases, the object will be perfect for your needs. However, you might
 find that you want to modify the object in some way. For example, you might
 want to add the current user's ID to a document before it is inserted. You can
-use "before" hooks or a `formToDoc` hook to do this.
+use "before", "formToDoc", or "formToModifier" hooks to do this.
 
 ### Getting Current Field Values
 
@@ -933,9 +933,21 @@ var hooksObject = {
   // Called when any submit operation fails
   onError: function(formType, error) {},
 
-  // Called every time the form is revalidated, which can be often if keyup
+  // Called every time an insert or typeless form
+  // is revalidated, which can be often if keyup
   // validation is used.
-  formToDoc: function(doc, ss, formId) {},
+  formToDoc: function(doc) {
+    // alter doc
+    // return doc;
+  },
+  
+  // Called every time an update or typeless form
+  // is revalidated, which can be often if keyup
+  // validation is used.
+  formToModifier: function(modifier) {
+    // alter modifier
+    // return modifier;
+  },
 
   // Called whenever `doc` attribute reactively changes, before values
   // are set in the form fields.
@@ -951,7 +963,7 @@ var hooksObject = {
 };
 ```
 
-The following properties and functions are available in all hooks when they are called:
+The following properties and functions are available in all submission hooks when they are called. This does not include formToDoc, formToModifier, or docToForm.
 
 * `this.addStickyValidationError(key, type, [value])`: Call this to add a custom validation error that will not be overridden by subsequent revalidations on the client. This can be useful if you need to show a form error based on errors coming back from the server, and you don't want it to disappear when fields are revalidated on the client on blur, keyup, etc. The sticky error will go away when the form is reset (such as after a successful submission), when the form instance is destroyed, or when you call `this.removeStickyValidationError(key)` in any hook.
 * `this.autoSaveChangedElement`: The input element that was changed to cause this form submission (if the submission was due to autosave)
@@ -976,13 +988,11 @@ Notes:
 * Hooks will run in the order in which they are added, but all form-specific hooks run before all global hooks.
 * The `before` hooks are called after the form is deemed valid but before the submission operation happens. (The submission operation depends on the form type.) These hooks are passed the document or modifier as gathered from the form fields. If necessary they can modify the document or modifier. These functions can perform asynchronous tasks if necessary. If asynchronicity is not needed, simply return the document or modifier, or return `false` to cancel submission. If you don't return anything, then you must call `this.result()` eventually and pass it either the document or modifier, or `false` to cancel submission. *This is run only on the client. Therefore, you should not assume that this will always run since a devious user could skip it.*
 * The `after` hooks are similar to the callbacks for `insert` and `update` and method calls. They are passed two arguments: `error` and `result`
-* Refer to the next sections for details about the `formToDoc` and `docToForm` hooks.
+* Refer to the next sections for details about the `formToDoc`, `formToModifier`, and `docToForm` hooks.
 
-### formToDoc and docToForm
+### formToDoc, formToModifier, and docToForm
 
-Specify `formToDoc` and `docToForm` hooks if you need form values in a different
-format in your form versus in the mongo document. They are mainly useful if you
-decide to override an input type.
+Specify `formToDoc`/`formToModifier` and `docToForm` hooks if you need form values in a different format in your form versus in the mongo document. They are mainly useful if you decide to override an input type.
 
 *Unlike document modifications made in "before hooks", modifications made in the
 `formToDoc` hooks are made every time the form is validated, which could
@@ -996,14 +1006,11 @@ a text field but store (and validate) the values as an array:
 First specify `type: [String]` in the schema. The schema should reflect what you
 are actually storing.
 
-*For the `afFieldInput` helper, don't supply the `options` attribute:*
+*Add a `type` attribute to your `afFieldInput` component:*
 
 ```html
-{{> afFieldInput name="tags"}}
+{{> afFieldInput name="tags" type="text"}}
 ```
-
-When there are no options, a `<select>` element will not be generated
-even though we're expecting an array.
 
 Then in client code, add the hooks:
 
@@ -1025,6 +1032,8 @@ AutoForm.hooks({
   }
 });
 ```
+
+Note that the `update` and `method-update` forms call `formToModifier` instead of `formToDoc`, and forms without a `type` attribute call both `formToModifier` and `formToDoc`. `formToModifier` is passed a Mongo modifier instead of a document.
 
 ## Putting Field Attribute Defaults in the Schema
 

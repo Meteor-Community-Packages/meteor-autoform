@@ -36,7 +36,7 @@ AutoForm.addFormType('update-pushArray', {
     // Get SimpleSchema
     var ss = AutoForm.getFormSchema(this.form.id);
     // We validate as if it's an insert form
-    return AutoForm._validateFormDoc(this.formDocs.insertDoc, false, this.form.id, ss, this.form);
+    return AutoForm._validateFormDoc(this.formDoc, false, this.form.id, ss, this.form);
   },
   adjustSchema: function (ss) {
     var scope = this.form.scope, newSchemaDef = {};

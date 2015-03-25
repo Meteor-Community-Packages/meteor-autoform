@@ -88,6 +88,7 @@ var throttleAutosave = _.throttle(function(event) {
 
 Template.autoForm.events({
   'submit form': function autoFormSubmitHandler(event, template) {
+    var formDoc;
     // Gather necessary form info
     var formId = this.id;
     var form = AutoForm.getCurrentDataForForm(formId);
@@ -110,8 +111,11 @@ Template.autoForm.events({
       trimStrings: form.trimStrings
     };
 
-    // Gather all form values
-    var formDocs = AutoForm.getFormValues(formId, template, ss);
+    // Get the form type definition
+    var ftd = AutoForm._formTypeDefinitions[formType];
+    if (!ftd) {
+      throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
+    }
 
     // Gather hooks
     var onSuccessHooks = Hooks.getHooks(formId, 'onSuccess');
@@ -131,7 +135,6 @@ Template.autoForm.events({
       event: event,
       formAttributes: form,
       formId: formId,
-      insertDoc: formDocs.insertDoc,
       removeStickyValidationError: function (key) {
         delete AutoForm.templateInstanceForForm(formId)._stickyErrors[key];
         // revalidate that field
@@ -143,9 +146,21 @@ Template.autoForm.events({
       ss: ss,
       ssIsOverride: ssIsOverride,
       template: template,
-      updateDoc: formDocs.updateDoc,
       validationContext: AutoForm.getValidationContext(formId)
     };
+
+    // Gather all form values
+    if (ftd.needsModifierAndDoc) {
+      formDoc = AutoForm.getFormValues(formId, template, ss);
+      hookContext.updateDoc = formDoc.updateDoc;
+      hookContext.insertDoc = formDoc.insertDoc;
+    } else if (ftd.usesModifier) {
+      formDoc = AutoForm.getFormValues(formId, template, ss, true);
+      hookContext.updateDoc = formDoc;
+    } else {
+      formDoc = AutoForm.getFormValues(formId, template, ss, false);
+      hookContext.insertDoc = formDoc;
+    }
 
     function endSubmission() {
       // Run endSubmit hooks (re-enabled submit button or form, etc.)
@@ -258,12 +273,6 @@ Template.autoForm.events({
       endSubmission();
     }
 
-    // Get the form type definition
-    var ftd = AutoForm._formTypeDefinitions[formType];
-    if (!ftd) {
-      throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
-    }
-
     // Ask form type definition whether we should prevalidate. By default we do.
     var shouldPrevalidate = ftd.shouldPrevalidate ? ftd.shouldPrevalidate.call(hookContext) : true;
 
@@ -272,7 +281,7 @@ Template.autoForm.events({
       // validate against the form schema. Then before hooks can add any missing
       // properties before we validate against the full collection schema.
       try {
-        isValid = _validateForm(formId, formDocs);
+        isValid = _validateForm(formId, formDoc);
       } catch (e) {
         // Catch exceptions in validation functions which will bubble up here, cause a form with
         // onSubmit() to submit prematurely and prevent the error from being reported

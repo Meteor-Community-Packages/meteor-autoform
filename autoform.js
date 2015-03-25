@@ -6,9 +6,6 @@ AutoForm = AutoForm || {};
 // reloads for any forms that are currently rendered
 AutoForm.formPreserve = new FormPreserve("autoforms");
 
-// In formDocs, we store the MongoObject version of the document that was attached
-// to a form, keyed by form `id`. This is reactive, but is not persisted across hot
-// code pushes.
 AutoForm.reactiveFormData = new FormData();
 
 AutoForm._inputTypeDefinitions = {}; //for storing input type definitions added by AutoForm.addInputType

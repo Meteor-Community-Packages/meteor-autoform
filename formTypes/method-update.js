@@ -17,7 +17,7 @@ AutoForm.addFormType('method-update', {
       // against the collection schema here. Otherwise we validate against whichever
       // one was passed.
       if (_validateForm(c.formId,
-                       {updateDoc: updateDoc},
+                       updateDoc,
                        c.ssIsOverride) === false) {
         c.failedValidation();
       } else {
@@ -26,6 +26,7 @@ AutoForm.addFormType('method-update', {
       }
     });
   },
+  usesModifier: true,
   validateForm: function () {
     // Get SimpleSchema
     var ss = AutoForm.getFormSchema(this.form.id);
@@ -36,6 +37,6 @@ AutoForm.addFormType('method-update', {
     ss = (this.useCollectionSchema && collection) ? collection.simpleSchema() : ss;
 
     // We validate the modifier. We don't want to throw errors about missing required fields, etc.
-    return AutoForm._validateFormDoc(this.formDocs.updateDoc, true, this.form.id, ss, this.form);
+    return AutoForm._validateFormDoc(this.formDoc, true, this.form.id, ss, this.form);
   }
 });

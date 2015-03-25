@@ -6,9 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
-### vNext Patch
+### vNext
 
-Fix date handling when dealing with very low year numbers. (Thanks @jfly)
+* Fix date handling when dealing with very low year numbers. (Thanks @jfly)
+* For `type="update"` and `type="method-update"` forms, a `formToModifier` hook is called instead of `formToDoc`, and it's passed a Mongo modifier. For forms with no `type` attribute, both `formToDoc` and `formToModifier` are called. (You should provide one or both based on whether you use the doc, the modifier, or both in your `onSubmit` hook.)
 
 ### 5.0.3
 
