@@ -273,6 +273,16 @@ Template.autoForm.events({
       endSubmission();
     }
 
+    // Run beginSubmit hooks (disable submit button or form, etc.)
+    // NOTE: This needs to stay after getFormValues in case a
+    // beginSubmit hook disables inputs. We don't get values for
+    // disabled inputs, but if they are just disabling during submission,
+    // then we actually do want the values.
+    //
+    // Also keep this before prevalidation so that sticky errors can be
+    // removed in this hook.
+    beginSubmit(formId, template, hookContext);
+
     // Ask form type definition whether we should prevalidate. By default we do.
     var shouldPrevalidate = ftd.shouldPrevalidate ? ftd.shouldPrevalidate.call(hookContext) : true;
 
@@ -295,13 +305,6 @@ Template.autoForm.events({
         return;
       }
     }
-
-    // Run beginSubmit hooks (disable submit button or form, etc.)
-    // NOTE: This needs to stay after getFormValues in case a
-    // beginSubmit hook disables inputs. We don't get values for
-    // disabled inputs, but if they are just disabling during submission,
-    // then we actually do want the values.
-    beginSubmit(formId, template, hookContext);
 
     // Call onSubmit from the form type definition
     ftd.onSubmit.call(_.extend({
