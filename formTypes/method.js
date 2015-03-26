@@ -37,5 +37,9 @@ AutoForm.addFormType('method', {
 
     // Validate
     return AutoForm._validateFormDoc(this.formDoc, false, this.form.id, ss, this.form);
+  },
+  shouldPrevalidate: function () {
+    // Prevalidate only if there is both a `schema` attribute and a `collection` attribute
+    return !!this.formAttributes.collection && !!this.formAttributes.schema;
   }
 });
