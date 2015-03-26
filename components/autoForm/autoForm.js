@@ -74,6 +74,10 @@ Template.autoForm.created = function autoFormCreated() {
     var data = Template.currentData(); // rerun when current data changes
     var formId = data.id;
 
+    if (!formId) {
+      throw new Error('Every autoForm and quickForm must have an "id" attribute set to a unique string.');
+    }
+
     // When we change the form, loading a different doc, reloading the current doc, etc.,
     // we also want to reset the array counts for the form
     arrayTracker.resetForm(formId);
