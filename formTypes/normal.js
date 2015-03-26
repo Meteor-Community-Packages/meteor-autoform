@@ -59,6 +59,6 @@ AutoForm.addFormType('normal', {
     // Get SimpleSchema
     var ss = AutoForm.getFormSchema(this.form.id);
     // Validate
-    return AutoForm._validateFormDoc(this.formDoc, false, this.form.id, ss, this.form);
+    return AutoForm._validateFormDoc(this.formDoc.insertDoc, false, this.form.id, ss, this.form);
   }
 });
