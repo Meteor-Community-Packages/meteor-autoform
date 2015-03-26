@@ -333,6 +333,7 @@ attribute to `false`.
 * `autoConvert`: Optional. Set to `false` for an insert or update form to skip autoconverting property values when cleaning the form document.
 * `removeEmptyStrings`: Optional. Set to `false` for an insert or update form to keep empty string values when cleaning the form document.
 * `trimStrings`: Optional. Set to `false` for an insert or update form to keep leading and trailing spaces for string values when cleaning the form document.
+* `setArrayItems`: Optional. Set to `true` for an update form that is updating specific array items. Note that there is a quirk of MongoDB that will create objects instead of arrays when this is set to `true`, if there is not already an array in the database. So if you set this to `true`, be sure that the corresponding array property is never `null` or missing in the database. It must always be an array with 0 or more items.
 * Any additional attributes are passed along to the `<form>` element, meaning that you can add classes, etc. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`.
 
 ### quickForm

@@ -297,6 +297,16 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
   if (form.trimStrings === false) {
     trimStrings = false;
   }
+  // By default, we do keepArrays
+  // We need keepArrays: false when we need update fields
+  // like "foo.2.bar" to update the proper index. But in
+  // most cases, we need to keep arrays together due to the mongo
+  // bug that creates objects rather than arrays if the array
+  // does not already exist in the db.
+  var keepArrays = true;
+  if (form.setArrayItems === true) {
+    keepArrays = false;
+  }
 
   var hookCtx = {
     template: template,
@@ -354,15 +364,7 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
     // Do not add autoValues at this stage.
     updateDoc = AutoForm.Utility.docToModifier(doc, {
       keepEmptyStrings: keepEmptyStrings,
-      // XXX keep an eye on this. We need keepArrays: false
-      // in order to have update fields like "foo.2.bar" update
-      // the proper index. But there might be other cases where
-      // keeping arrays is more appropriate. In general, I think
-      // we were doing it only as a precaution due to the mongo
-      // bug that creates objects rather than arrays if the array
-      // does not already exist. If this causes problems, we could
-      // make it possible to set this option on the form.
-      keepArrays: false
+      keepArrays: keepArrays
     });
 
     ss.clean(updateDoc, {

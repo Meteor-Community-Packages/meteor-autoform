@@ -10,6 +10,7 @@ forms with automatic insert and update events, and automatic reactive validation
 
 * Fix date handling when dealing with very low year numbers. (Thanks @jfly)
 * For `type="update"` and `type="method-update"` forms, a `formToModifier` hook is called instead of `formToDoc`, and it's passed a Mongo modifier. For forms with no `type` attribute, both `formToDoc` and `formToModifier` are called. (You should provide one or both based on whether you use the doc, the modifier, or both in your `onSubmit` hook.)
+* Array handling was changed in 5.0 to support additional use cases. However, this change also resulted in a MongoDB array handling quirk no longer being masked by AutoForm. Since this caused confusion for many people, array handling is now reverted back to pre-5.0 behavior. If your form needs to update specific array items as opposed to entire arrays, you can opt in to the proper array handling by putting `setArrayItems=true` on your `autoForm` or `quickForm`.
 
 ### 5.0.3
 
