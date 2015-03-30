@@ -1,4 +1,4 @@
-/* global AutoForm, Hooks, _validateForm, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues, SimpleSchema */
+/* global AutoForm, Hooks, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues, SimpleSchema */
 
 // all form events handled here
 var lastAutoSaveElement = null;
@@ -135,6 +135,7 @@ Template.autoForm.events({
       event: event,
       formAttributes: form,
       formId: formId,
+      formTypeDefinition: ftd,
       removeStickyValidationError: function (key) {
         delete AutoForm.templateInstanceForForm(formId)._stickyErrors[key];
         // revalidate that field
@@ -291,7 +292,12 @@ Template.autoForm.events({
       // validate against the form schema. Then before hooks can add any missing
       // properties before we validate against the full collection schema.
       try {
-        isValid = _validateForm(formId, formDoc);
+        isValid = (form.validation === 'none') ||
+          ftd.validateForm.call({
+            form: form,
+            formDoc: formDoc,
+            useCollectionSchema: false
+          });
       } catch (e) {
         // Catch exceptions in validation functions which will bubble up here, cause a form with
         // onSubmit() to submit prematurely and prevent the error from being reported

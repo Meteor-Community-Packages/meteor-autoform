@@ -1,4 +1,4 @@
-/* global AutoForm, _validateForm */
+/* global AutoForm */
 
 AutoForm.addFormType('method', {
   onSubmit: function () {
@@ -16,9 +16,14 @@ AutoForm.addFormType('method', {
       // Validate. If both schema and collection were provided, then we validate
       // against the collection schema here. Otherwise we validate against whichever
       // one was passed.
-      if (_validateForm(c.formId,
-                       doc,
-                       c.ssIsOverride) === false) {
+      var valid = (c.formAttributes.validation === 'none') ||
+          c.formTypeDefinition.validateForm.call({
+            form: c.formAttributes,
+            formDoc: doc,
+            useCollectionSchema: c.ssIsOverride
+          });
+
+      if (valid === false) {
         c.failedValidation();
       } else {
         // Call the method

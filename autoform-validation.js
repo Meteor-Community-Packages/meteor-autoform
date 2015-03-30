@@ -1,29 +1,4 @@
-/* global _validateForm:true, AutoForm, validateField:true */
-
-/*
- * all form validation logic is here
- */
-
-_validateForm = function _validateForm(formId, formDoc, useCollectionSchema) {
-  var form = AutoForm.getCurrentDataForForm(formId);
-  var formType = form.type;
-
-  if (form.validation === 'none') {
-    return true;
-  }
-
-  // Call validateForm from the requested form type definition
-  var ftd = AutoForm._formTypeDefinitions[formType];
-  if (!ftd) {
-    throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
-  }
-
-  return ftd.validateForm.call({
-    form: form,
-    formDoc: formDoc,
-    useCollectionSchema: useCollectionSchema
-  });
-};
+/* global AutoForm, validateField:true */
 
 function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
   var docToValidate;

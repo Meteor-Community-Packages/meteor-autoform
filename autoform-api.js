@@ -1,4 +1,4 @@
-/* global AutoForm:true, SimpleSchema, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, _validateForm, validateField, arrayTracker, ReactiveVar, getAllFieldsInForm, setDefaults:true, getFlatDocOfFieldValues, MongoObject */
+/* global AutoForm:true, SimpleSchema, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, validateField, arrayTracker, ReactiveVar, getAllFieldsInForm, setDefaults:true, getFlatDocOfFieldValues, MongoObject */
 
 // This file defines the public, exported API
 
@@ -609,8 +609,28 @@ AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipE
  * this method causes the reactive validation messages to appear.
  */
 AutoForm.validateForm = function autoFormValidateForm(formId) {
+  var form = AutoForm.getCurrentDataForForm(formId);
+  var formDoc, formType = form.type;
+
+  var ftd = AutoForm._formTypeDefinitions[formType];
+  if (!ftd) {
+    throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
+  }
+
   // Gather all form values
-  return _validateForm(formId, AutoForm.getFormValues(formId, null, null, false));
+  if (ftd.needsModifierAndDoc) {
+    formDoc = AutoForm.getFormValues(formId, null, null);
+  } else if (ftd.usesModifier) {
+    formDoc = AutoForm.getFormValues(formId, null, null, true);
+  } else {
+    formDoc = AutoForm.getFormValues(formId, null, null, false);
+  }
+
+  return (form.validation === 'none') || ftd.validateForm.call({
+    form: form,
+    formDoc: formDoc,
+    useCollectionSchema: false
+  });
 };
 
 /**
