@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.1.2
+
+Fix validation of typeless forms when done with `AutoForm.validateForm()`
+
 ### 5.1.1
 
 Fix validation of typeless forms broken in 5.1.0 (Thanks @abecks)
