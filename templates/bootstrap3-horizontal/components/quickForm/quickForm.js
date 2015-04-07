@@ -5,10 +5,22 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   labelClass: function () {
     return this.atts["label-class"];
   },
+  fieldGroupLabel: function () {
+    return this.name; // TODO: use SimpleSchema.defaultLabel() here
+  },
   quickFieldsAtts: function () {
     // These are the quickForm attributes that we want to forward to
     // the afQuickFields component.
-    return _.pick(this.atts, 'id-prefix', 'input-col-class', 'label-class');
+
+    // get fields for current field group
+    var fieldsForCurrentGroup = this.fields;
+
+    // clone the object to make sure we don't modify the original data context
+    var atts = _.extend({}, Template.parentData(1).atts);
+    
+    atts.fields = fieldsForCurrentGroup
+
+    return _.pick(atts, 'id-prefix', 'input-col-class', 'label-class');
   },
   submitButtonAtts: function () {
     var qfAtts = this.atts;
