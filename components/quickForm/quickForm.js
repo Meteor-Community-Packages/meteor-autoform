@@ -4,47 +4,45 @@ Template.quickForm.helpers({
   getTemplateName: function () {
     return AutoForm.getTemplateName('quickForm', this.template);
   },
-  fieldsets: function () {
+  innerContext: function quickFormContext() {
+    var atts = this;
 
     // get schema
     var schema = eval(this.collection).simpleSchema()._schema;
 
+    // if atts.fields exists, restrict the schema to specified fields
+    if (atts.fields) {
+      // note: haven't found a clean way to do this all in one go yet, so doing it later. 
+    }
+
     // get list of unique field groups with any falsy values removed
-    var fieldsets = _.compact(_.unique(_.map(schema, function (property, key) {
-      return property.autoform && property.autoform.group;
+    // note: if atts.fields is specified, only consider fields contained in it
+    var fieldGroups = _.compact(_.unique(_.map(schema, function (property, key) {
+      return (!atts.fields || _.contains(atts.fields, key)) && property.autoform && property.autoform.group ;
     })));
 
-    // build fieldsets array
-    var fieldsets = _.map(fieldsets, function (property, key) {
+    // build fieldGroups array
+    var fieldGroups = _.map(fieldGroups, function (property, key) {
 
-      var fieldsetName = property;
+      var fieldGroupName = property;
 
       // for each fieldset, get list of field names
-      var fieldsForFieldset = _.compact(_.map(schema, function (property, key) {
-        return property.autoform && property.autoform.group && property.autoform.group === fieldsetName && key;
+      var fieldsForGroup = _.compact(_.map(schema, function (property, key) {
+        return property.autoform && property.autoform.group && property.autoform.group === fieldGroupName && key;
       }));
 
       return {
-        name: fieldsetName,
-        fields: fieldsForFieldset
+        name: fieldGroupName,
+        fields: fieldsForGroup
       };
     });
-    
-    return fieldsets;
-  },
-  fieldsWithNoFieldsets: function () {
-    // get schema
-    var schema = eval(this.collection).simpleSchema()._schema;
-    var fieldsWithNoFieldset = _.compact(_.map(schema, function (property, key) {
-      return (!property.autoform || !property.autoform.group) && key;
-    }));
-    return {fields: fieldsWithNoFieldset};
-  },
-  innerContext: function quickFormContext() {
-    var atts = Template.parentData(1);
 
-    // get "fields" list from current fieldset
-    atts.fields = this.fields;
+    // get all fields with no field group specified
+    // note: if atts.fields is specified, only consider fields contained in it
+    var fieldWithNoGroups = _.compact(_.map(schema, function (property, key) {
+      return (!atts.fields || _.contains(atts.fields, key)) && (!property.autoform || !property.autoform.group) && key;
+    }));
+    var fieldWithNoGroups = {fields: fieldWithNoGroups};
 
     // Pass along quickForm context to autoForm context, minus a few
     // properties that are specific to quickForms.
@@ -56,7 +54,9 @@ Template.quickForm.helpers({
     var context = {
       qfAutoFormContext: qfAutoFormContext,
       atts: atts,
-      qfShouldRenderButton: qfShouldRenderButton
+      qfShouldRenderButton: qfShouldRenderButton,
+      fieldsWithNoGroups: fieldWithNoGroups,
+      fieldGroups: fieldGroups
     };
     return context;
   }
