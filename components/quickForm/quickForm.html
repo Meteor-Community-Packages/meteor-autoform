@@ -1,3 +1,16 @@
 <template name="quickForm">
-  {{> Template.dynamic template=getTemplateName data=innerContext}}
+
+  {{#with fieldsWithNoFieldsets}}
+    <div class="af-no-fieldset">
+      {{> Template.dynamic template=getTemplateName data=innerContext}}
+    </div>
+  {{/with}}
+
+  {{#each fieldsets}}
+    <fieldset class="af-fieldset">
+      <h3 class="af-fieldset-heading">{{name}}</h3>
+      {{> Template.dynamic template=getTemplateName data=innerContext}}
+    </fieldset>
+  {{/each}}
+
 </template>
