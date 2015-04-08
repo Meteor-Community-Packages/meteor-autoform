@@ -6,7 +6,14 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
     return this.atts["label-class"];
   },
   fieldGroupLabel: function () {
-    return this.name; // TODO: use SimpleSchema.defaultLabel() here
+    var name = this.name;
+
+    // if field group name is of the form XY_abcde where "XY" is a number, remove prefix
+    if (typeof parseInt(name.substr(0,2)) === "number" && name.charAt(2) === "_") {
+      var name = name.substr(3);
+    }
+
+    return name; // TODO: use SimpleSchema.defaultLabel() here
   },
   getFieldsWithNoGroups: function () {
     // if there are no fields with no groups, don't call afQuickFields at all
@@ -15,7 +22,7 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   quickFieldsAtts: function () {
     // These are the quickForm attributes that we want to forward to
     // the afQuickFields component.
-    
+
     // get fields for current field group
     var fieldsForCurrentGroup = this.fields;
 
