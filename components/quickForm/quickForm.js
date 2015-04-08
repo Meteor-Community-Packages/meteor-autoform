@@ -39,8 +39,9 @@ Template.quickForm.helpers({
 
     // get all fields with no field group specified
     // note: if atts.fields is specified, only consider fields contained in it
+    // always omit fields with "$" in their name
     var fieldWithNoGroups = _.compact(_.map(schema, function (property, key) {
-      return (!atts.fields || _.contains(atts.fields, key)) && (!property.autoform || !property.autoform.group) && key;
+      return key.indexOf("$") == "-1" && (!atts.fields || _.contains(atts.fields, key)) && (!property.autoform || !property.autoform.group) && key;
     }));
     var fieldWithNoGroups = {fields: fieldWithNoGroups};
 
