@@ -13,7 +13,13 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
       var name = name.substr(3);
     }
 
-    return name; // TODO: use SimpleSchema.defaultLabel() here
+    // if SimpleSchema.defaultLabel is defined, use it
+    if (typeof SimpleSchema.defaultLabel === "function") {
+      return SimpleSchema.defaultLabel(name);
+    } else {
+      // else, just capitalise name
+      return name.charAt(0).toUpperCase() + name.slice(1)
+    }
   },
   getFieldsWithNoGroups: function () {
     // if there are no fields with no groups, don't call afQuickFields at all
