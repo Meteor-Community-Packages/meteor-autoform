@@ -19,7 +19,7 @@ Template.quickForm.helpers({
     // note: if atts.fields is specified, only consider fields contained in it
     var fieldGroups = _.compact(_.unique(_.map(schema, function (property, key) {
       return (!atts.fields || _.contains(atts.fields, key)) && property.autoform && property.autoform.group ;
-    })));
+    }))).sort();
 
     // build fieldGroups array
     var fieldGroups = _.map(fieldGroups, function (property, key) {
