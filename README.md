@@ -123,6 +123,7 @@ The following community packages provide additional custom input types that you 
 * [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
 * [vazco:universe-autoform-select](https://atmospherejs.com/vazco/universe-autoform-select)
 * [antalakas:autoform-bs-daterangepicker](https://atmospherejs.com/antalakas/autoform-bs-daterangepicker)
+* [elevatedevdesign:autoform-nouislider](https://github.com/ElevateDevelopmentAndDesign/meteor-autoform-nouislider)
 
 The following community packages provide other add-on features related to autoform:
 
