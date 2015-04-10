@@ -99,41 +99,78 @@ $ meteor add aldeed:autoform
 
 *Submit a pull request to add your package to this list!*
 
-The following community packages provide additional custom input types that you can use in your autoforms:
+#### Custom Input Types
 
-* [aldeed:autoform-select2](https://atmospherejs.com/aldeed/autoform-select2)
+Dates and times:
+
 * [aldeed:autoform-bs-datepicker](https://atmospherejs.com/aldeed/autoform-bs-datepicker)
 * [aldeed:autoform-bs-datetimepicker](https://atmospherejs.com/aldeed/autoform-bs-datetimepicker)
+* [miguelalarcos:afwrap-xdatetime](https://atmospherejs.com/miguelalarcos/afwrap-xdatetime)
+* [notorii:autoform-datetimepicker](https://atmospherejs.com/notorii/autoform-datetimepicker)
+* [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
+* [antalakas:autoform-bs-daterangepicker](https://atmospherejs.com/antalakas/autoform-bs-daterangepicker)
+
+Selects:
+
+* [aldeed:autoform-select2](https://atmospherejs.com/aldeed/autoform-select2)
+* [aldeed:autoform-bs-button-group-input](https://atmospherejs.com/aldeed/autoform-bs-button-group-input)
+* [comerc:autoform-selectize](https://atmospherejs.com/comerc/autoform-selectize)
+* [vazco:universe-autoform-select](https://atmospherejs.com/vazco/universe-autoform-select)
+
+WYSIWYGs:
+
+* [mpowaga:autoform-summernote](https://atmospherejs.com/mpowaga/autoform-summernote)
+* [donchess:autoform-froala](https://atmospherejs.com/donchess/autoform-froala)
+
+Autocompletes:
+
+* [comerc:autoform-placecomplete](https://atmospherejs.com/comerc/autoform-placecomplete)
+* [miguelalarcos:afwrap-xautocomplete](https://atmospherejs.com/miguelalarcos/afwrap-xautocomplete)
+* [comerc:autoform-typeahead](https://atmospherejs.com/comerc/autoform-typeahead)
+* [lukemadera:autoform-googleplace](https://atmospherejs.com/lukemadera/autoform-googleplace)
+
+Files:
+
 * [cfs:autoform](https://atmospherejs.com/cfs/autoform)
 * [yogiben:autoform-file](https://atmospherejs.com/yogiben/autoform-file)
 * [naxio:autoform-file](https://atmospherejs.com/naxio/autoform-file)
-* [mpowaga:autoform-summernote](https://atmospherejs.com/mpowaga/autoform-summernote)
-* [aldeed:autoform-bs-button-group-input](https://atmospherejs.com/aldeed/autoform-bs-button-group-input)
+
+Maps:
+
 * [yogiben:autoform-map](https://atmospherejs.com/yogiben/autoform-map)
-* [comerc:autoform-placecomplete](https://atmospherejs.com/comerc/autoform-placecomplete)
-* [comerc:autoform-bs-more](https://atmospherejs.com/comerc/autoform-bs-more)
-* [comerc:autoform-selectize](https://atmospherejs.com/comerc/autoform-selectize)
-* [miguelalarcos:afwrap-xautocomplete](https://atmospherejs.com/miguelalarcos/afwrap-xautocomplete)
-* [miguelalarcos:afwrap-xdatetime](https://atmospherejs.com/miguelalarcos/afwrap-xdatetime)
-* [comerc:autoform-typeahead](https://atmospherejs.com/comerc/autoform-typeahead)
-* [comerc:autoform-contenteditable2](https://atmospherejs.com/comerc/autoform-contenteditable2)
-* [meteoric:autoform-ionic](https://github.com/meteoric/autoform-ionic)
-* [notorii:autoform-datetimepicker](https://atmospherejs.com/notorii/autoform-datetimepicker)
-* [lukemadera:autoform-googleplace](https://atmospherejs.com/lukemadera/autoform-googleplace)
-* [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
-* [vazco:universe-autoform-select](https://atmospherejs.com/vazco/universe-autoform-select)
-* [antalakas:autoform-bs-daterangepicker](https://atmospherejs.com/antalakas/autoform-bs-daterangepicker)
+
+Ranges/Sliders:
+
 * [elevatedevdesign:autoform-nouislider](https://github.com/ElevateDevelopmentAndDesign/meteor-autoform-nouislider)
 
-The following community packages provide other add-on features related to autoform:
+Other:
 
-* [yogiben:admin](https://atmospherejs.com/yogiben/admin) provides CRUD admin pages using autoforms.
-* [forwarder:autoform-wizard](https://atmospherejs.com/forwarder/autoform-wizard) and [planifica:wizard](https://atmospherejs.com/planifica/wizard) provide wizard components for autoform.
-* [yogiben:autoform-modals](https://atmospherejs.com/yogiben/autoform-modals) provides autoform bootstrap modals to insert, update, remove docs from collections.
-* [jameslefrere:autoform-semantic-ui](https://atmospherejs.com/jameslefrere/autoform-semantic-ui) provides a Semantic UI theme for autoform.
-* [comerc:autoform-fixtures](https://github.com/comerc/meteor-autoform-fixtures/) provides fixtures data for Collection2.
-* [kaoskeya:admin](https://atmospherejs.com/kaoskeya/admin) provides autoform based admin panel that integrates with your existing bootstrap design.
-* [orionjs:core](https://atmospherejs.com/orionjs) provides a autoform based CMS.
+* [comerc:autoform-contenteditable2](https://atmospherejs.com/comerc/autoform-contenteditable2)
+
+#### Themes
+
+* [meteoric:autoform-ionic](https://github.com/meteoric/autoform-ionic)
+* [jameslefrere:autoform-semantic-ui](https://atmospherejs.com/jameslefrere/autoform-semantic-ui)
+
+#### Admin Panels
+
+* [yogiben:admin](https://atmospherejs.com/yogiben/admin)
+* [kaoskeya:admin](https://atmospherejs.com/kaoskeya/admin)
+
+#### Content Management Systems
+
+* [orionjs:core](https://atmospherejs.com/orionjs)
+
+#### Components
+
+* [comerc:autoform-bs-more](https://atmospherejs.com/comerc/autoform-bs-more)
+* [forwarder:autoform-wizard](https://atmospherejs.com/forwarder/autoform-wizard)
+* [planifica:wizard](https://atmospherejs.com/planifica/wizard)
+* [yogiben:autoform-modals](https://atmospherejs.com/yogiben/autoform-modals)
+
+#### Other
+
+* [comerc:autoform-fixtures](https://github.com/comerc/meteor-autoform-fixtures/)
 
 ## Demo
 
