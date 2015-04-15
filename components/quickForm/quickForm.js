@@ -22,7 +22,7 @@ Template.quickForm.helpers({
     }))).sort();
 
     // build fieldGroups array
-    var fieldGroups = _.map(fieldGroups, function (property, key) {
+    fieldGroups = _.map(fieldGroups, function (property, key) {
 
       var fieldGroupName = property;
 
@@ -41,9 +41,10 @@ Template.quickForm.helpers({
     // note: if atts.fields is specified, only consider fields contained in it
     // always omit fields with "$" in their name
     var fieldWithNoGroups = _.compact(_.map(schema, function (property, key) {
+      key = SimpleSchema._makeGeneric(key);
       return key.indexOf("$") == "-1" && (!atts.fields || _.contains(atts.fields, key)) && (!property.autoform || !property.autoform.group) && key;
     }));
-    var fieldWithNoGroups = {fields: fieldWithNoGroups};
+    fieldWithNoGroups = {fields: fieldWithNoGroups};
 
     // Pass along quickForm context to autoForm context, minus a few
     // properties that are specific to quickForms.

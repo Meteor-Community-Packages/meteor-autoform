@@ -9,8 +9,8 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
     var name = this.name;
 
     // if field group name is of the form XY_abcde where "XY" is a number, remove prefix
-    if (typeof parseInt(name.substr(0,2)) === "number" && name.charAt(2) === "_") {
-      var name = name.substr(3);
+    if (!isNaN(parseInt(name.substr(0,2), 10)) && name.charAt(2) === "_") {
+      name = name.substr(3);
     }
 
     // if SimpleSchema.defaultLabel is defined, use it
@@ -36,7 +36,7 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
     var atts = _.extend({}, Template.parentData(1).atts);
     
     atts.fields = fieldsForCurrentGroup
-    return _.pick(atts, 'id-prefix', 'input-col-class', 'label-class');
+    return _.pick(atts, 'fields', 'id-prefix', 'input-col-class', 'label-class');
   },
   submitButtonAtts: function () {
     var qfAtts = this.atts;
