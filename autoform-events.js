@@ -388,8 +388,10 @@ Template.autoForm.events({
         keyVal = $(event.target).prop('checked');
         break;
       default:
-        keyVal = key + '___' + event.target.value;
+        keyVal = event.target.value;
     }
+
+    keyVal = key + '___' + keyVal;
 
     if (keyVal === lastKeyVal) {
       return;
