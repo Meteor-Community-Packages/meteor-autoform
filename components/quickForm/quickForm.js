@@ -8,7 +8,7 @@ Template.quickForm.helpers({
     var atts = this;
 
     // get schema
-    var schema = eval(this.collection).simpleSchema()._schema;
+    var schema = this.schema || eval(this.collection).simpleSchema()._schema;
 
     // if atts.fields exists, restrict the schema to specified fields
     if (atts.fields) {
