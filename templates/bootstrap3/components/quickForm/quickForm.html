@@ -1,16 +1,30 @@
 <template name="quickForm_bootstrap3">
   {{#autoForm qfAutoFormContext}}
-  {{> afQuickFields quickFieldsAtts}}
-  {{#if qfShouldRenderButton}}
-  <div class="form-group">
-    <button type="submit" {{submitButtonAtts}}>
-      {{#with ../atts.buttonContent}}
-      {{this}}
-      {{else}}
-      Submit
-      {{/with}}
-    </button>
-  </div>
-  {{/if}}
+
+    {{#with getFieldsWithNoGroups}}
+      <div class="af-no-group">
+        {{> afQuickFields quickFieldsAtts}}
+      </div>
+    {{/with}}
+
+    {{#each fieldGroups}}
+      <fieldset class="af-fieldgroup">
+        <h3 class="af-fieldgroup-heading">{{fieldGroupLabel}}</h3>
+        {{> afQuickFields quickFieldsAtts}}
+      </fieldset>
+    {{/each}}
+
+    {{#if qfShouldRenderButton}}
+    <div class="form-group">
+      <button type="submit" {{submitButtonAtts}}>
+        {{#with ../atts.buttonContent}}
+        {{this}}
+        {{else}}
+        Submit
+        {{/with}}
+      </button>
+    </div>
+    {{/if}}
+
   {{/autoForm}}
 </template>

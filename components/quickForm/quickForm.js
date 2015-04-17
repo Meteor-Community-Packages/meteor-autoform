@@ -7,13 +7,21 @@ Template.quickForm.helpers({
   innerContext: function quickFormContext() {
     var atts = this;
 
-    // get schema
-    var schema = this.schema || eval(this.collection).simpleSchema()._schema;
+    // --------------- A. Schema --------------- //
 
-    // if atts.fields exists, restrict the schema to specified fields
+    // get schema
+    var schema = this.schema._schema || eval(this.collection).simpleSchema()._schema;
+
+    // if atts.fields exists, transform it into an array
     if (atts.fields) {
-      // note: haven't found a clean way to do this all in one go yet, so doing it later. 
+      // note: is there a standard function we can use here instead of replace and split?
+      atts.fields = atts.fields.replace(" ", "").split(",");
+
+      // restrict the schema to specified fields
+      // note: haven't found a clean way to do this all in one go yet, so doing it later in B & C. 
     }
+
+    // --------------- B. Field With Groups --------------- //
 
     // get list of unique field groups with any falsy values removed
     // note: if atts.fields is specified, only consider fields contained in it
@@ -31,20 +39,30 @@ Template.quickForm.helpers({
         return property.autoform && property.autoform.group && property.autoform.group === fieldGroupName && key;
       }));
 
-      return {
+      // copy parent atts over to field group context, while adding "name" and overwriting "fields"
+      var fieldGroup = {
         name: fieldGroupName,
-        fields: fieldsForGroup
+        atts: _.clone(atts) // note: clone atts to make sure we don't modify the original
       };
+      fieldGroup.atts.fields = fieldsForGroup;
+
+      return fieldGroup;
     });
+
+    // --------------- C. Field With No Groups --------------- //
 
     // get all fields with no field group specified
     // note: if atts.fields is specified, only consider fields contained in it
     // always omit fields with "$" in their name
-    var fieldWithNoGroups = _.compact(_.map(schema, function (property, key) {
+    var fieldsWithNoGroupsArray = _.compact(_.map(schema, function (property, key) {
       key = SimpleSchema._makeGeneric(key);
       return key.indexOf("$") == "-1" && (!atts.fields || _.contains(atts.fields, key)) && (!property.autoform || !property.autoform.group) && key;
     }));
-    fieldWithNoGroups = {fields: fieldWithNoGroups};
+    // copy parent atts, and then overwrite "fields" property
+    fieldsWithNoGroups = {atts: _.clone(atts)};
+    fieldsWithNoGroups.atts.fields = fieldsWithNoGroupsArray;
+
+    // --------------- D. Context --------------- //
 
     // Pass along quickForm context to autoForm context, minus a few
     // properties that are specific to quickForms.
@@ -57,9 +75,10 @@ Template.quickForm.helpers({
       qfAutoFormContext: qfAutoFormContext,
       atts: atts,
       qfShouldRenderButton: qfShouldRenderButton,
-      fieldsWithNoGroups: fieldWithNoGroups,
+      fieldsWithNoGroups: fieldsWithNoGroups,
       fieldGroups: fieldGroups
     };
+    console.log('context', context)
     return context;
   }
 });
