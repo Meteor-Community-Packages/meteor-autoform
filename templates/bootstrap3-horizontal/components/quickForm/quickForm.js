@@ -23,20 +23,13 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   },
   getFieldsWithNoGroups: function () {
     // if there are no fields with no groups, don't call afQuickFields at all
-    return this.fieldsWithNoGroups.fields.length ? this.fieldsWithNoGroups : null;
+    return this.fieldsWithNoGroups.atts.fields.length ? this.fieldsWithNoGroups : null;
   },
   quickFieldsAtts: function () {
     // These are the quickForm attributes that we want to forward to
     // the afQuickFields component.
-
-    // get fields for current field group
-    var fieldsForCurrentGroup = this.fields;
-
-    // clone the object to make sure we don't modify the original data context
-    var atts = _.extend({}, Template.parentData(1).atts);
-    
-    atts.fields = fieldsForCurrentGroup
-    return _.pick(atts, 'fields', 'id-prefix', 'input-col-class', 'label-class');
+    atts = _.pick(this.atts, 'fields', 'id-prefix');
+    return atts;
   },
   submitButtonAtts: function () {
     var qfAtts = this.atts;
