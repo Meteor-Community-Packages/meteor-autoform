@@ -5,8 +5,16 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   labelClass: function () {
     return this.atts["label-class"];
   },
+  fieldGroupClass: function () {
+    return this.name === '_defaultGroup' ? 'af-defaultFieldGroup' : 'af-fieldGroup';
+  },
   fieldGroupLabel: function () {
     var name = this.name;
+
+    // if this is the default field group, don't show the label
+    if (name === '_defaultGroup') {
+      return false;
+    }
 
     // if field group name is of the form XY_abcde where "XY" is a number, remove prefix
     if (!isNaN(parseInt(name.substr(0,2), 10)) && name.charAt(2) === "_") {
@@ -20,10 +28,6 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
       // else, just capitalise name
       return name.charAt(0).toUpperCase() + name.slice(1)
     }
-  },
-  getFieldsWithNoGroups: function () {
-    // if there are no fields with no groups, don't call afQuickFields at all
-    return this.fieldsWithNoGroups.atts.fields.length ? this.fieldsWithNoGroups : null;
   },
   quickFieldsAtts: function () {
     // These are the quickForm attributes that we want to forward to

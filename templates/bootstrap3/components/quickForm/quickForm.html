@@ -1,18 +1,14 @@
 <template name="quickForm_bootstrap3">
   {{#autoForm qfAutoFormContext}}
 
-    {{#with getFieldsWithNoGroups}}
-      <div class="af-no-group">
-        {{> afQuickFields quickFieldsAtts}}
-      </div>
-    {{/with}}
-
-    {{#each fieldGroups}}
-      <fieldset class="af-fieldgroup">
+  {{#each fieldGroups}}
+    <fieldset class="{{fieldGroupClass}}">
+      {{#if fieldGroupLabel}}
         <h3 class="af-fieldgroup-heading">{{fieldGroupLabel}}</h3>
-        {{> afQuickFields quickFieldsAtts}}
-      </fieldset>
-    {{/each}}
+      {{/if}}
+      {{> afQuickFields quickFieldsAtts}}
+    </fieldset>
+  {{/each}}
 
     {{#if qfShouldRenderButton}}
     <div class="form-group">
