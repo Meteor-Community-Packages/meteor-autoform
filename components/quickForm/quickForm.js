@@ -6,12 +6,22 @@ Template.quickForm.helpers({
   },
   innerContext: function quickFormContext() {
     var atts = this;
+    var schema = {};
 
     // --------------- A. Schema --------------- //
 
     // get schema
-    var schema = this.schema._schema || eval(this.collection).simpleSchema()._schema;
-
+    // note: replace this by a standard function?
+    if (atts.schema && atts.schema._schema) {
+      schema = atts.schema._schema;
+    } else if (atts.collection) {
+      if (typeof atts.collection == "String") {
+        schema = eval(atts.collection).simpleSchema()._schema;
+      } else {
+        schema = atts.collection.simpleSchema()._schema;
+      }
+    }
+    
     // if atts.fields exists, transform it into an array
     if (atts.fields) {
       // note: is there a standard function we can use here instead of replace and split?
