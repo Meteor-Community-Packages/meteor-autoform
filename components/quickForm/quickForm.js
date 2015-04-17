@@ -78,7 +78,6 @@ Template.quickForm.helpers({
       fieldsWithNoGroups: fieldsWithNoGroups,
       fieldGroups: fieldGroups
     };
-    console.log('context', context)
     return context;
   }
 });
