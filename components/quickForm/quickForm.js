@@ -10,13 +10,12 @@ Template.quickForm.helpers({
     var fieldGroups = []; 
 
     // --------------- A. Schema --------------- //
-
     // get schema
     // note: replace this by a standard function?
     if (atts.schema && atts.schema._schema) {
       schema = atts.schema._schema;
     } else if (atts.collection) {
-      if (typeof atts.collection == "String") {
+      if (typeof atts.collection == "string") {
         schema = eval(atts.collection).simpleSchema()._schema;
       } else {
         schema = atts.collection.simpleSchema()._schema;
