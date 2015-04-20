@@ -1,6 +1,5 @@
 Template.quickForm_bootstrap3.helpers({
   fieldGroupClass: function () {
-    console.log(this)
     return this.name === '_defaultGroup' ? 'af-defaultFieldGroup' : 'af-fieldGroup';
   },
   fieldGroupLabel: function () {
