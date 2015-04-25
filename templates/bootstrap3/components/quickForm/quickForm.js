@@ -26,7 +26,7 @@ Template.quickForm_bootstrap3.helpers({
   quickFieldsAtts: function () {
     // These are the quickForm attributes that we want to forward to
     // the afQuickFields component.
-    atts = _.pick(this.atts, 'fields', 'id-prefix');
+    atts = _.pick(this.atts, 'fields', 'id-prefix', 'input-col-class', 'label-class');
     return atts;
   },
   submitButtonAtts: function bsQuickFormSubmitButtonAtts() {
