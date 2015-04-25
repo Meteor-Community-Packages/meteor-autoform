@@ -44,11 +44,15 @@ Template.quickForm.helpers({
     var defaultGroup = {name: '_defaultGroup', atts: _.clone(atts)};
 
     // get all fields with no field group specified
+    // but exclude fields whose name end with a "$"
     defaultGroup.atts.fields = _.compact(_.map(schema, function (field, fieldName) {
-      return (!field.autoform || !field.autoform.group) && fieldName;
+      return (fieldName.slice(-1) !== "$") && (!field.autoform || !field.autoform.group) && fieldName;
     }));;
 
-    fieldGroups.push(defaultGroup);
+    // do not push empty groups
+    if (!!defaultGroup.atts.fields.length) {
+      fieldGroups.push(defaultGroup);
+    }
 
     // --------------- C. Field With Groups --------------- //
 
@@ -58,20 +62,25 @@ Template.quickForm.helpers({
     }))).sort();
 
     // loop over field group names, and push relevant field to fieldGroups array
+    // but exclude fields whose name end with a "$"
     _.each(fieldGroupNames, function (fieldGroupName) {
       // for each field group, get list of field names
       var fieldsForGroup = _.compact(_.map(schema, function (field, fieldName) {
-        return field.autoform && field.autoform.group && field.autoform.group === fieldGroupName && fieldName;
+        return (fieldName.slice(-1) !== "$") && field.autoform && field.autoform.group && field.autoform.group === fieldGroupName && fieldName;
       }));
 
-      // copy parent atts over to field group context, while adding "name" and overwriting "fields"
-      var group = {
-        name: fieldGroupName,
-        atts: _.clone(atts) // note: clone atts to make sure we don't modify the original
-      };
-      group.atts.fields = fieldsForGroup;
+      // make sure the group is not empty
+      if (!!fieldsForGroup.length) {
 
-      fieldGroups.push(group);
+        // copy parent atts over to field group context, while adding "name" and overwriting "fields"
+        var group = {
+          name: fieldGroupName,
+          atts: _.clone(atts) // note: clone atts to make sure we don't modify the original
+        };
+        group.atts.fields = fieldsForGroup;
+        fieldGroups.push(group);
+      }
+
     });
 
   
@@ -90,7 +99,6 @@ Template.quickForm.helpers({
       qfShouldRenderButton: qfShouldRenderButton,
       fieldGroups: fieldGroups
     };
-
     return context;
   }
 });
