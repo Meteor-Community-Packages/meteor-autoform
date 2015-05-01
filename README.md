@@ -146,6 +146,7 @@ Ranges/Sliders:
 Other:
 
 * [comerc:autoform-contenteditable2](https://atmospherejs.com/comerc/autoform-contenteditable2)
+* [hausor:autoform-bs-minicolors](https://atmospherejs.com/hausor/autoform-bs-minicolors)
 
 #### Themes
 
