@@ -150,7 +150,7 @@ Other:
 #### Themes
 
 * [meteoric:autoform-ionic](https://github.com/meteoric/autoform-ionic)
-* [jameslefrere:autoform-semantic-ui](https://atmospherejs.com/jameslefrere/autoform-semantic-ui)
+* [fabienb4:autoform-semantic-ui](https://atmospherejs.com/fabienb4/autoform-semantic-ui)
 
 #### Admin Panels
 
