@@ -2,8 +2,8 @@
   <div class="form-group {{#if afFieldIsInvalid name=this.name}}has-error{{/if}}">
     <label {{afFieldLabelAtts}}>{{afFieldLabelText name=this.name}}</label>
     <div class="{{rightColumnClass}}">
-      <div class="panel panel-default autoform-padding-fix">
-        <div class="panel-body">
+      <div class="panel panel-default autoform-padding-fix {{panelClass}}">
+        <div class="panel-body {{bodyClass}}">
           {{> afQuickFields quickFieldsAtts}}
         </div>
       </div>
