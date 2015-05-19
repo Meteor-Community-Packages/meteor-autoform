@@ -109,6 +109,7 @@ Dates and times:
 * [notorii:autoform-datetimepicker](https://atmospherejs.com/notorii/autoform-datetimepicker)
 * [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
 * [antalakas:autoform-bs-daterangepicker](https://atmospherejs.com/antalakas/autoform-bs-daterangepicker)
+* [drewy:autoform-datetimepicker](https://atmospherejs.com/drewy/autoform-datetimepicker)
 
 Selects:
 
