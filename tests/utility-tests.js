@@ -1,7 +1,9 @@
+/* global Utility */
+
 if (Meteor.isClient) {
 
   Tinytest.add('AutoForm - Utility - cleanNulls', function(test) {
-    var date = new Date, oid = new Mongo.Collection.ObjectID;
+    var date = new Date(), oid = new Mongo.Collection.ObjectID();
 
     var cleaned = Utility.cleanNulls({
       a: void 0,
@@ -44,8 +46,9 @@ if (Meteor.isClient) {
   });
 
   Tinytest.add('AutoForm - Utility - docToModifier', function(test) {
-    var date = new Date;
-    var mod = Utility.docToModifier({
+    var date = new Date(), testObj, mod;
+
+    testObj = {
       a: 1,
       b: "foo",
       c: date,
@@ -71,7 +74,41 @@ if (Meteor.isClient) {
       e: null,
       f: "",
       g: void 0 //undefined props are removed
+    };
+
+    // Test 1 w/ keepArrays, w/ keepEmptyStrings
+    mod = Utility.docToModifier(testObj, {keepArrays: true, keepEmptyStrings: true});
+    test.equal(mod, {
+      $set: {
+        a: 1,
+        b: "foo",
+        c: date,
+        'd.a': 1,
+        'd.b': "foo",
+        'd.c': date,
+        'd.d': [ //array of objects should remain array
+          {
+            a: 1,
+            b: "foo",
+            c: date,
+            d: {
+              a: 1,
+              b: "foo",
+              c: date
+              // null should have been removed, too
+            }
+          }
+        ],
+        'd.e': [1, 2], //array of non-objects should remain array
+        f: "" // empty string should be set rather than unset
+      },
+      $unset: {
+        e: ""
+      }
     });
+
+    // Test 2 w/ keepArrays, w/o keepEmptyStrings
+    mod = Utility.docToModifier(testObj, {keepArrays: true, keepEmptyStrings: false});
     test.equal(mod, {
       $set: {
         a: 1,
@@ -100,6 +137,58 @@ if (Meteor.isClient) {
         f: ""
       }
     });
+
+    // Test 3 w/o keepArrays, w/ keepEmptyStrings
+    mod = Utility.docToModifier(testObj, {keepArrays: false, keepEmptyStrings: true});
+    test.equal(mod, {
+      $set: {
+        a: 1,
+        b: "foo",
+        c: date,
+        'd.a': 1,
+        'd.b': "foo",
+        'd.c': date,
+        'd.d.0.a': 1,
+        'd.d.0.b': "foo",
+        'd.d.0.c': date,
+        'd.d.0.d.a': 1,
+        'd.d.0.d.b': "foo",
+        'd.d.0.d.c': date,
+        'd.e.0': 1,
+        'd.e.1': 2,
+        f: ""
+      },
+      $unset: {
+        'd.d.0.d.d': "",
+        e: ""
+      }
+    });
+
+    // Test 4 w/o keepArrays, w/o keepEmptyStrings
+    mod = Utility.docToModifier(testObj, {keepArrays: false, keepEmptyStrings: false});
+    test.equal(mod, {
+      $set: {
+        a: 1,
+        b: "foo",
+        c: date,
+        'd.a': 1,
+        'd.b': "foo",
+        'd.c': date,
+        'd.d.0.a': 1,
+        'd.d.0.b': "foo",
+        'd.d.0.c': date,
+        'd.d.0.d.a': 1,
+        'd.d.0.d.b': "foo",
+        'd.d.0.d.c': date,
+        'd.e.0': 1,
+        'd.e.1': 2
+      },
+      $unset: {
+        'd.d.0.d.d': "",
+        e: "",
+        f: ""
+      }
+    });
   });
 
   Tinytest.add('AutoForm - Utility - stringToNumber', function(test) {
@@ -113,7 +202,7 @@ if (Meteor.isClient) {
     testMaybeNum("1", 1);
     testMaybeNum("1.1", 1.1);
     testMaybeNum("foo", "foo");
-    var d = new Date;
+    var d = new Date();
     testMaybeNum(d, d);
     testMaybeNum(true, true);
     testMaybeNum(false, false);
@@ -199,6 +288,26 @@ if (Meteor.isClient) {
       foo: [null, {bar: null}],
       baz: 1
     });
+  });
+
+  var startOfDayUTC = moment.utc("0001-3-14", "YYYY-MM-DD").toDate();
+  var endOfDayUTC = moment.utc("0001-3-14 23:59:59", "YYYY-MM-DD HH:mm:ss").toDate();
+  Tinytest.add('AutoForm - Utility - dateToDateString', function(test) {
+    // There's no way to set the timezone for Javascript's Date object, so
+    // we check what the current timezone is.
+    var tzOffset = new Date().getTimezoneOffset();
+    if(tzOffset > 0) {
+      test.equal(AutoForm.Utility.dateToDateString(startOfDayUTC), "0001-03-13");
+    } else if(tzOffset < 0) {
+      test.equal(AutoForm.Utility.dateToDateString(endOfDayUTC), "0001-03-15");
+    } else {
+      test.equal(AutoForm.Utility.dateToDateString(startOfDayUTC), "0001-03-14");
+      test.equal(AutoForm.Utility.dateToDateString(endOfDayUTC), "0001-03-14");
+    }
+  });
+  Tinytest.add('AutoForm - Utility - dateToDateStringUTC', function(test) {
+    test.equal(AutoForm.Utility.dateToDateStringUTC(startOfDayUTC), "0001-03-14");
+    test.equal(AutoForm.Utility.dateToDateStringUTC(endOfDayUTC), "0001-03-14");
   });
 
 }

@@ -1,76 +1,87 @@
+/* global AutoForm, getInputValue, getInputData, updateTrackedFieldValue */
+
 Template.afFieldInput.helpers({
-  getComponentDef: function getComponentDef() {
+  // similar to AutoForm.getTemplateName, but we have fewer layers of fallback, and we fall back
+  // lastly to a template without an _ piece at the end
+  getTemplateName: function getTemplateName() {
+    var self = this;
+
     // Determine what `type` attribute should be if not set
     var inputType = AutoForm.getInputType(this);
-    var componentDef = inputTypeDefinitions[inputType];
+    var componentDef = AutoForm._inputTypeDefinitions[inputType];
     if (!componentDef) {
       throw new Error('AutoForm: No component found for rendering input with type "' + inputType + '"');
     }
-    return componentDef;
+
+    var inputTemplateName = componentDef.template;
+    var styleTemplateName = this.template;
+
+    // We skip the check for existence here so that we can get the `_plain` string
+    // even though they don't exist.
+    var templateName = AutoForm.getTemplateName(inputTemplateName, styleTemplateName, self.name, true);
+
+    // Special case: the built-in "plain" template uses the basic input templates for
+    // everything, so if we found _plain, we use inputTemplateName instead
+    if (templateName.indexOf('_plain') !== -1) {
+      templateName = null;
+    }
+
+    // If no override templateName found, use the exact name from the input type definition
+    if (!templateName || !Template[templateName]) {
+      templateName = inputTemplateName;
+    }
+
+    return templateName;
   },
-  // similar to afTemplateName helper, but we have fewer layers of fallback, and we fall back
-  // lastly to a template without an _ piece at the end
-  getTemplateName: function getTemplateName(inputTemplateName, styleTemplateName) {
-    var self = this, schemaAutoFormDefs, templateFromAncestor, defaultTemplate;
-
-    // In simplest case, just try to combine the two given strings.
-    if (styleTemplateName && Template[inputTemplateName + '_' + styleTemplateName]) {
-      return inputTemplateName + '_' + styleTemplateName;
-    }
-
-    // If the attributes provided a styleTemplateName but that template didn't exist, show a warning
-    if (styleTemplateName && AutoForm._debug) {
-      console.warn(inputTemplateName + '_' + styleTemplateName + ' is not a valid template name. Falling back to a different template.');
-    }
-
-    // Get `autoform` object from the schema, if present.
-    if (self.atts && self.atts.name) {
-      schemaAutoFormDefs = AutoForm.getSchemaForField(self.atts.name).autoform;
-    }
-
-    // Fallback #1: autoform.template from the schema
-    if (schemaAutoFormDefs && schemaAutoFormDefs.template && Template[inputTemplateName + '_' + schemaAutoFormDefs.template]) {
-      return inputTemplateName + '_' + schemaAutoFormDefs.template;
-    }
-
-    // Fallback #2: template attribute on an ancestor component within the same form
-    templateFromAncestor = AutoForm.findAttribute("template");
-    if (templateFromAncestor && Template[inputTemplateName + '_' + templateFromAncestor]) {
-      return inputTemplateName + '_' + templateFromAncestor;
-    }
-
-    // Fallback #3: Default template, as set by AutoForm.setDefaultTemplate
-    defaultTemplate = AutoForm.getDefaultTemplate();
-    if (defaultTemplate && Template[inputTemplateName + '_' + defaultTemplate]) {
-      return inputTemplateName + '_' + defaultTemplate;
-    }
-
-    // Fallback #4: Just the inputTemplateName with no custom styled piece
-    return inputTemplateName;
-  },
-  innerContext: function afFieldInputContext(options) {
-    var c = AutoForm.Utility.normalizeContext(options.hash, "afFieldInput");
-
-    var ss = c.af.ss;
+  innerContext: function afFieldInputContext() {
+    var c = AutoForm.Utility.getComponentContext(this, "afFieldInput");
+    var form = AutoForm.getCurrentDataForForm();
+    var formId = form.id;
+    var ss = AutoForm.getFormSchema();
     var defs = c.defs;
 
+    // Get schema default value.
+    // We must do this before adjusting defs for arrays.
+    var schemaDefaultValue = defs.defaultValue;
+
     // Adjust for array fields if necessary
-    var defaultValue = defs.defaultValue; //make sure to use pre-adjustment defaultValue for arrays
     if (defs.type === Array) {
       defs = ss.schema(c.atts.name + ".$");
     }
 
-    // Get inputTypeDefinition based on `type` attribute
-    var componentDef = options.hash.componentDef;
+    // Determine what `type` attribute should be if not set
+    var inputType = AutoForm.getInputType(this);
+    var componentDef = AutoForm._inputTypeDefinitions[inputType];
+    if (!componentDef) {
+      throw new Error('AutoForm: No component found for rendering input with type "' + inputType + '"');
+    }
+
+    // Get reactive mDoc
+    var mDoc = AutoForm.reactiveFormData.sourceDoc(formId);
 
     // Get input value
-    var value = getInputValue(c.atts, c.atts.value, c.af.mDoc, defaultValue, componentDef);
+    var value = getInputValue(c.atts, c.atts.value, mDoc, schemaDefaultValue, c.atts.defaultValue, componentDef);
 
     // Mark field value as changed for reactive updates
-    updateTrackedFieldValue(c.af.formId, c.atts.name);
+    // We need to defer this until the element will be
+    // added to the DOM. Otherwise, AutoForm.getFieldValue
+    // will not pick up the new value when there are #if etc.
+    // blocks involved.
+    // See https://github.com/aldeed/meteor-autoform/issues/461
+    Tracker.afterFlush(function () {
+      var template;
+      // Can error due to timing issues if form is removed, but
+      // this should never matter.
+      try {
+        template = AutoForm.templateInstanceForForm();
+      } catch (error) {}
+      if (template) {
+        updateTrackedFieldValue(template, c.atts.name);
+      }
+    });
     
     // Build input data context
-    var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), c.af.submitType);
+    var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), form.type);
 
     // Adjust and return context
     return (typeof componentDef.contextAdjust === "function") ? componentDef.contextAdjust(iData) : iData;

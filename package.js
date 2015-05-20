@@ -2,18 +2,18 @@ Package.describe({
   name: "aldeed:autoform",
   summary: "Easily create forms with automatic insert and update, and automatic reactive validation.",
   git: "https://github.com/aldeed/meteor-autoform.git",
-  version: "4.2.0"
+  version: "5.1.2"
 });
 
-Package.on_use(function(api) {
+Package.onUse(function(api) {
   // Dependencies
   api.versionsFrom(['METEOR@0.9.3', 'METEOR@0.9.4', 'METEOR@1.0']);
   // common
   api.use('aldeed:simple-schema@1.1.0');
   api.use('check');
   // client
-  api.use(['livedata', 'underscore', 'deps', 'templating', 'ui', 'blaze', 'ejson', 'reactive-var'], 'client');
-  api.use('mrt:moment@2.6.0', 'client');
+  api.use(['livedata', 'underscore', 'deps', 'templating', 'ui', 'blaze', 'ejson', 'reactive-var', 'reactive-dict', 'random'], 'client');
+  api.use('momentjs:moment@2.8.4', 'client');
   api.use('mrt:moment-timezone@0.2.1', 'client', {weak: true});
   api.use(['aldeed:collection2@2.0.0', 'reload'], 'client', {weak: true});
 
@@ -25,10 +25,10 @@ Package.on_use(function(api) {
   api.export('Utility', 'client', {testOnly: true});
 
   // Common Files
-  api.add_files(['autoform-common.js']);
+  api.addFiles(['autoform-common.js']);
 
   // Client Files
-  api.add_files([
+  api.addFiles([
     // utilities and general init
     'utility.js',
     'form-preserve.js',
@@ -44,6 +44,15 @@ Package.on_use(function(api) {
     'autoform-inputs.js',
     // public API
     'autoform-api.js',
+    // form types
+    'formTypes/insert.js',
+    'formTypes/update.js',
+    'formTypes/update-pushArray.js',
+    'formTypes/method.js',
+    'formTypes/method-update.js',
+    'formTypes/normal.js',
+    'formTypes/readonly.js',
+    'formTypes/disabled.js',
     // input types
     'inputTypes/boolean-checkbox/boolean-checkbox.html',
     'inputTypes/boolean-checkbox/boolean-checkbox.js',
@@ -119,7 +128,6 @@ Package.on_use(function(api) {
     // components that render controls within a form
     'components/afArrayField/afArrayField.html',
     'components/afArrayField/afArrayField.js',
-    'components/afArrayField/afArrayField.css',
     'components/afEachArrayItem/afEachArrayItem.html',
     'components/afEachArrayItem/afEachArrayItem.js',
     'components/afFieldInput/afFieldInput.html',
@@ -127,33 +135,95 @@ Package.on_use(function(api) {
     'components/afFormGroup/afFormGroup.html',
     'components/afFormGroup/afFormGroup.js',
     'components/afObjectField/afObjectField.html',
+    'components/afObjectField/afObjectField.js',
     'components/afQuickField/afQuickField.html',
     'components/afQuickField/afQuickField.js',
     'components/afQuickFields/afQuickFields.html',
     'components/afQuickFields/afQuickFields.js',
     // event handling
     'autoform-events.js',
-    // bootstrap3 Template
-    'templates/bootstrap3/bootstrap3.html',
+    // bootstrap3 Template - General
     'templates/bootstrap3/bootstrap3.js',
-    // bootstrap3-horizontal Template
-    'templates/bootstrap3-horizontal/bootstrap3-horizontal.html',
-    'templates/bootstrap3-horizontal/bootstrap3-horizontal.js',
+    // bootstrap3 Template - Components
+    'templates/bootstrap3/components/quickForm/quickForm.html',
+    'templates/bootstrap3/components/quickForm/quickForm.js',
+    'templates/bootstrap3/components/afArrayField/afArrayField.html',
+    'templates/bootstrap3/components/afArrayField/afArrayField.css',
+    'templates/bootstrap3/components/afFormGroup/afFormGroup.html',
+    'templates/bootstrap3/components/afFormGroup/afFormGroup.js',
+    'templates/bootstrap3/components/afObjectField/afObjectField.html',
+    'templates/bootstrap3/components/afObjectField/afObjectField.js',
+    // bootstrap3 Template - Input Types
+    'templates/bootstrap3/inputTypes/boolean-checkbox/boolean-checkbox.html',
+    'templates/bootstrap3/inputTypes/boolean-radios/boolean-radios.html',
+    'templates/bootstrap3/inputTypes/boolean-radios/boolean-radios.js',
+    'templates/bootstrap3/inputTypes/boolean-select/boolean-select.html',
+    'templates/bootstrap3/inputTypes/button/button.html',
+    'templates/bootstrap3/inputTypes/color/color.html',
+    'templates/bootstrap3/inputTypes/date/date.html',
+    'templates/bootstrap3/inputTypes/datetime/datetime.html',
+    'templates/bootstrap3/inputTypes/datetime-local/datetime-local.html',
+    'templates/bootstrap3/inputTypes/email/email.html',
+    'templates/bootstrap3/inputTypes/month/month.html',
+    'templates/bootstrap3/inputTypes/number/number.html',
+    'templates/bootstrap3/inputTypes/password/password.html',
+    'templates/bootstrap3/inputTypes/radio/radio.html',
+    'templates/bootstrap3/inputTypes/radio/radio.js',
+    'templates/bootstrap3/inputTypes/range/range.html',
+    'templates/bootstrap3/inputTypes/reset/reset.html',
+    'templates/bootstrap3/inputTypes/search/search.html',
+    'templates/bootstrap3/inputTypes/select/select.html',
+    'templates/bootstrap3/inputTypes/select-checkbox/select-checkbox.html',
+    'templates/bootstrap3/inputTypes/select-checkbox/select-checkbox.js',
+    'templates/bootstrap3/inputTypes/select-checkbox-inline/select-checkbox-inline.html',
+    'templates/bootstrap3/inputTypes/select-checkbox-inline/select-checkbox-inline.js',
+    'templates/bootstrap3/inputTypes/select-checkbox-inline/select-checkbox-inline.css',
+    'templates/bootstrap3/inputTypes/select-multiple/select-multiple.html',
+    'templates/bootstrap3/inputTypes/select-radio/select-radio.html',
+    'templates/bootstrap3/inputTypes/select-radio/select-radio.js',
+    'templates/bootstrap3/inputTypes/select-radio-inline/select-radio-inline.html',
+    'templates/bootstrap3/inputTypes/select-radio-inline/select-radio-inline.js',
+    'templates/bootstrap3/inputTypes/select-radio-inline/select-radio-inline.css',
+    'templates/bootstrap3/inputTypes/submit/submit.html',
+    'templates/bootstrap3/inputTypes/tel/tel.html',
+    'templates/bootstrap3/inputTypes/text/text.html',
+    'templates/bootstrap3/inputTypes/textarea/textarea.html',
+    'templates/bootstrap3/inputTypes/time/time.html',
+    'templates/bootstrap3/inputTypes/url/url.html',
+    'templates/bootstrap3/inputTypes/week/week.html',
+    // bootstrap3-horizontal Template - General
     'templates/bootstrap3-horizontal/bootstrap3-horizontal.css',
+    // bootstrap3-horizontal Template - Components
+    'templates/bootstrap3-horizontal/components/quickForm/quickForm.html',
+    'templates/bootstrap3-horizontal/components/quickForm/quickForm.js',
+    'templates/bootstrap3-horizontal/components/afArrayField/afArrayField.html',
+    'templates/bootstrap3-horizontal/components/afArrayField/afArrayField.js',
+    'templates/bootstrap3-horizontal/components/afFormGroup/afFormGroup.html',
+    'templates/bootstrap3-horizontal/components/afFormGroup/afFormGroup.js',
+    'templates/bootstrap3-horizontal/components/afObjectField/afObjectField.html',
+    'templates/bootstrap3-horizontal/components/afObjectField/afObjectField.js',
+    // bootstrap3-horizontal Template - Input Types
+    'templates/bootstrap3-horizontal/inputTypes/boolean-checkbox/boolean-checkbox.html',
+    'templates/bootstrap3-horizontal/inputTypes/boolean-checkbox/boolean-checkbox.js',
     // bootstrap3-inline Template
     'templates/bootstrap3-inline/bootstrap3-inline.html',
     'templates/bootstrap3-inline/bootstrap3-inline.js',
     'templates/bootstrap3-inline/bootstrap3-inline.css',
     // plain Template
-    'templates/plain/plain.html',
-    'templates/plain/plain.js',
+    'templates/plain/components/quickForm/quickForm.html',
+    'templates/plain/components/quickForm/quickForm.js',
+    'templates/plain/components/afArrayField/afArrayField.html',
+    'templates/plain/components/afFormGroup/afFormGroup.html',
+    'templates/plain/components/afObjectField/afObjectField.html',
+    'templates/plain/components/afObjectField/afObjectField.js',
     // plain-fieldset Template
     'templates/plain-fieldset/plain-fieldset.html',
     'templates/plain-fieldset/plain-fieldset.js',
   ], 'client');
 });
 
-Package.on_test(function (api) {
+Package.onTest(function (api) {
   api.use(['aldeed:autoform', 'tinytest', 'underscore']);
-  api.add_files(['tests/utility-tests.js', 'tests/autoform-tests.js']);
+  api.use('momentjs:moment', 'client');
+  api.addFiles(['tests/utility-tests.js', 'tests/autoform-tests.js']);
 });

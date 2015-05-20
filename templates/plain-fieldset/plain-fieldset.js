@@ -1,4 +1,9 @@
 Template['quickForm_plain-fieldset'].helpers({
+  quickFieldsAtts: function () {
+    // These are the quickForm attributes that we want to forward to
+    // the afQuickFields component.
+    return _.pick(this.atts, 'id-prefix');
+  },
   submitButtonAtts: function plfsQuickFormSubmitButtonAtts() {
     var qfAtts = this.atts;
     var atts = {};
@@ -6,5 +11,10 @@ Template['quickForm_plain-fieldset'].helpers({
       atts['class'] = qfAtts.buttonClasses;
     }
     return atts;
+  },
+  qfAutoFormContext: function () {
+    var ctx = _.clone(this.qfAutoFormContext);
+    delete ctx['id-prefix'];
+    return ctx;
   }
 });

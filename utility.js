@@ -1,4 +1,7 @@
+/* global Utility:true, MongoObject, AutoForm, moment, SimpleSchema */
+
 Utility = {
+  componentTypeList: ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'],
   /**
    * @method Utility.cleanNulls
    * @private
@@ -60,22 +63,25 @@ Utility = {
    * @method Utility.docToModifier
    * @private
    * @param {Object} doc - An object to be converted into a MongoDB modifier
+   * @param {Object} [options] - Options
+   * @param {Boolean} [options.keepEmptyStrings] - Pass `true` to keep empty strings in the $set. Otherwise $unset them.
+   * @param {Boolean} [options.keepArrays] - Pass `true` to $set entire arrays. Otherwise the modifier will $set individual array items.
    * @returns {Object} A MongoDB modifier.
    *
    * Converts an object into a modifier by flattening it, putting keys with
    * null, undefined, and empty string values into `modifier.$unset`, and
    * putting the rest of the keys into `modifier.$set`.
    */
-  docToModifier: function docToModifier(doc, keepEmptyStrings) {
-    var modifier = {};
+  docToModifier: function docToModifier(doc, options) {
+    var modifier = {}, mDoc, flatDoc, nulls;
+    options = options || {};
 
     // Flatten doc
-    var mDoc = new MongoObject(doc);
-    var flatDoc = mDoc.getFlatObject({keepArrays: true});
-    mDoc = null;
+    mDoc = new MongoObject(doc);
+    flatDoc = mDoc.getFlatObject({keepArrays: !!options.keepArrays});
     // Get a list of null, undefined, and empty string values so we can unset them instead
-    var nulls = Utility.reportNulls(flatDoc, keepEmptyStrings);
-    flatDoc = Utility.cleanNulls(flatDoc, false, keepEmptyStrings);
+    nulls = Utility.reportNulls(flatDoc, !!options.keepEmptyStrings);
+    flatDoc = Utility.cleanNulls(flatDoc, false, !!options.keepEmptyStrings);
 
     if (!_.isEmpty(flatDoc)) {
       modifier.$set = flatDoc;
@@ -106,6 +112,34 @@ Utility = {
       }
     }
     return result;
+  },
+  /*
+   * Get select options
+   */
+  getSelectOptions: function getSelectOptions(defs, hash) {
+    var schemaType = defs.type;
+    var selectOptions = hash.options;
+
+    // Handle options="allowed"
+    if (selectOptions === "allowed") {
+      selectOptions = _.map(defs.allowedValues, function(v) {
+        var label = v;
+        if (hash.capitalize && v.length > 0 && schemaType === String) {
+          label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+        }
+
+        return {label: label, value: v};
+      });
+    }
+
+    // Hashtable
+    else if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
+      selectOptions = _.map(selectOptions, function(v, k) {
+        return {label: v, value: schemaType(k)};
+      });
+    }
+
+    return selectOptions;
   },
   /**
    * @method Utility.lookup
@@ -145,8 +179,9 @@ Utility = {
     }
 
     var defs = ss.schema(name);
-    if (!defs)
+    if (!defs) {
       throw new Error("Invalid field name: " + name);
+    }
     return defs;
   },
   /**
@@ -251,37 +286,6 @@ Utility = {
     }
   },
   /**
-   * @method Utility.getSimpleSchemaFromContext
-   * @private
-   * @param  {Object} context
-   * @return {SimpleSchema}
-   *
-   * Given a context object that may or may not have schema and collection properties,
-   * returns a SimpleSchema instance or throws an error if one cannot be obtained.
-   */
-  getSimpleSchemaFromContext: function getSimpleSchemaFromContext(context, formId) {
-    // If schema attribute, use that
-    var ss = Utility.lookup(context.schema);
-    if (ss) {
-      if (ss instanceof SimpleSchema) {
-        return ss;
-      } else {
-        throw new Error('AutoForm: schema attribute for form with id "' + formId + '" is not a SimpleSchema instance');
-      }
-    }
-    // If no schema attribute, use the schema attached to the collection
-    var collection = Utility.lookup(context.collection);
-    if (collection) {
-      if (typeof collection.simpleSchema === 'function') {
-        return collection.simpleSchema();
-      } else {
-        throw new Error('AutoForm: collection attribute for form with id "' + formId + '" refers to a collection that does not have a schema, or is not a collection. You might have forgotten to attach a schema to the collection or you might need to add the collection2 package to your app.');
-      }
-    }
-    // If we got this far, we have no schema so throw an error
-    throw new Error('AutoForm: form with id "' + formId + '" needs either "schema" or "collection" attribute');
-  },
-  /**
    * @method Utility.isNullUndefinedOrEmptyString
    * @private
    * @param  {Any} val
@@ -313,8 +317,9 @@ Utility = {
    * Returns `true` if timeString is a "valid time string"
    */
   isValidTimeString: function isValidTimeString(timeString) {
-    if (typeof timeString !== "string")
+    if (typeof timeString !== "string") {
       return false;
+    }
 
     //this reg ex actually allows a few invalid hours/minutes/seconds, but
     //we can catch that when parsing
@@ -330,15 +335,7 @@ Utility = {
    * Returns a "valid date string" representing the local date.
    */
   dateToDateString: function dateToDateString(date) {
-    var m = (date.getMonth() + 1);
-    if (m < 10) {
-      m = "0" + m;
-    }
-    var d = date.getDate();
-    if (d < 10) {
-      d = "0" + d;
-    }
-    return date.getFullYear() + '-' + m + '-' + d;
+    return moment(date).format("YYYY-MM-DD");
   },
   /**
    * @method  Utility.dateToDateStringUTC
@@ -349,15 +346,7 @@ Utility = {
    * Returns a "valid date string" representing the date converted to the UTC time zone.
    */
   dateToDateStringUTC: function dateToDateStringUTC(date) {
-    var m = (date.getUTCMonth() + 1);
-    if (m < 10) {
-      m = "0" + m;
-    }
-    var d = date.getUTCDate();
-    if (d < 10) {
-      d = "0" + d;
-    }
-    return date.getUTCFullYear() + '-' + m + '-' + d;
+    return moment.utc(date).format("YYYY-MM-DD");
   },
   /**
    * @method  Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString
@@ -384,8 +373,9 @@ Utility = {
    * Returns true if dateString is a "valid normalized forced-UTC global date and time string"
    */
   isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString(dateString) {
-    if (typeof dateString !== "string")
+    if (typeof dateString !== "string") {
       return false;
+    }
 
     var datePart = dateString.substring(0, 10);
     var tPart = dateString.substring(10, 11);
@@ -423,8 +413,9 @@ Utility = {
    * Returns true if dtString is a "valid normalized local date and time string"
    */
   isValidNormalizedLocalDateAndTimeString: function isValidNormalizedLocalDateAndTimeString(dtString) {
-    if (typeof dtString !== "string")
+    if (typeof dtString !== "string") {
       return false;
+    }
 
     var datePart = dtString.substring(0, 10);
     var tPart = dtString.substring(10, 11);
@@ -432,33 +423,23 @@ Utility = {
     return Utility.isValidDateString(datePart) && tPart === "T" && Utility.isValidTimeString(timePart);
   },
   /**
-   * @method Utility.normalizeContext
+   * @method Utility.getComponentContext
    * @private
-   * @param  {Object} context A context object, potentially with an `atts` property.
+   * @param  {Object} context A context (`this`) object
    * @param {String} name The name of the helper or component we're calling from.
    * @return {Object} Normalized context object
    *
-   * Returns an object with `afc`, `af`, and `atts` properties, normalized from whatever object is passed in.
+   * Returns an object with `atts` and `defs` properties, normalized from whatever object is passed in.
    * This helps deal with the fact that we have to pass the ancestor autoform's context to different
    * helpers and components in different ways, but in all cases we want to get access to it and throw
    * an error if we can't find an autoform context.
    */
-  normalizeContext: function autoFormNormalizeContext(context, name) {
-    var atts, autoform, defs, itemDefs, allowedValues, formComponentAttributes,
-      fieldAttributes, fieldAttributesForComponentType;
+  getComponentContext: function autoFormGetComponentContext(context, name) {
+    var atts, defs, formComponentAttributes, fieldAttributes, fieldAttributesForComponentType, ss;
 
-    context = context || {};
-    atts = context.atts ? _.clone(context.atts) : _.clone(context);
-    autoform = AutoForm.find(name);
-    defs = Utility.getDefs(autoform.ss, atts.name); //defs will not be undefined
-
-    // For array fields, `allowedValues` is on the array item definition
-    if (defs.type === Array) {
-      itemDefs = Utility.getDefs(autoform.ss, atts.name + ".$");
-      allowedValues = itemDefs.allowedValues;
-    } else {
-      allowedValues = defs.allowedValues;
-    }
+    atts = _.clone(context || {});
+    ss = AutoForm.getFormSchema();
+    defs = Utility.getDefs(ss, atts.name); //defs will not be undefined
 
     // Look up the tree if we're in a helper, checking to see if any ancestor components
     // had a <componentType>-attribute specified.
@@ -469,29 +450,26 @@ Utility = {
     // the latter overriding the former.
     fieldAttributes = _.clone(defs.autoform) || {};
     fieldAttributesForComponentType = fieldAttributes[name] || {};
-    fieldAttributes = _.omit(fieldAttributes, componentTypeList);
+    fieldAttributes = _.omit(fieldAttributes, Utility.componentTypeList);
     fieldAttributes = _.extend({}, fieldAttributes, fieldAttributesForComponentType);
-
-    // If options="auto", we want to use defs.autoform.options
-    // if specified and otherwise fall back to "allowed"
-    if (fieldAttributes.options && atts.options === "auto")
-      delete atts.options;
 
     // "autoform" option in the schema provides default atts
     atts = _.extend({}, formComponentAttributes, fieldAttributes, atts);
 
-    // If still set to "auto", then there were no options in defs, so we use "allowed"
-    if (atts.options === "auto") {
-      if (allowedValues) {
-        atts.options = "allowed";
+    // eval any attribute that is provided as a function
+    var evaluatedAtts = {};
+    _.each(atts, function (v, k) {
+      if (typeof v === 'function') {
+        evaluatedAtts[k] = v.call({
+          name: atts.name
+        });
       } else {
-        delete atts.options;
+        evaluatedAtts[k] = v;
       }
-    }
+    });
 
     return {
-      af: autoform,
-      atts: atts,
+      atts: evaluatedAtts,
       defs: defs
     };
   },
@@ -602,3 +580,19 @@ if (typeof Object.getPrototypeOf !== "function") {
 var isBasicObject = function(obj) {
   return _.isObject(obj) && Object.getPrototypeOf(obj) === Object.prototype;
 };
+
+/*
+ * Extend SS for now; TODO put this in SS package
+ */
+if (typeof SimpleSchema.prototype.getAllowedValuesForKey !== 'function') {
+  SimpleSchema.prototype.getAllowedValuesForKey = function (key) {
+    var defs = this.getDefinition(key, ['type', 'allowedValues']);
+
+    // For array fields, `allowedValues` is on the array item definition
+    if (defs.type === Array) {
+      defs = this.getDefinition(key+".$", ['allowedValues']);
+    }
+
+    return defs.allowedValues;
+  };
+}

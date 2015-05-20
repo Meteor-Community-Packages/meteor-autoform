@@ -1,69 +1,88 @@
-var contextDependency = new Tracker.Dependency();
+/* global AutoForm, ReactiveVar, arrayTracker, Hooks, MongoObject, updateAllTrackedFieldValues, Utility, setDefaults */
 
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
-    var context = _.clone(this);
+    // After removing all of the props we know about, everything else should
+    // become a form attribute unless it's an array or object.
+    var val, htmlAttributes = {}, context = this;
+    var removeProps = [
+      "schema",
+      "collection",
+      "validation",
+      "doc",
+      "resetOnSuccess",
+      "type",
+      "template",
+      "autosave",
+      "autosaveOnKeyup",
+      "meteormethod",
+      "filter",
+      "autoConvert",
+      "removeEmptyStrings",
+      "trimStrings"
+    ];
+
+    // Filter out any attributes that have a component prefix
+    function hasComponentPrefix(prop) {
+      return _.any(Utility.componentTypeList, function (componentType) {
+        return prop.indexOf(componentType + '-') === 0;
+      });
+    }
+
+    // Filter out arrays and objects, which are obviously not meant to be
+    // HTML attributes.
+    for (var prop in context) {
+      if (context.hasOwnProperty(prop) &&
+          !_.contains(removeProps, prop) &&
+          !hasComponentPrefix(prop)) {
+        val = context[prop];
+        if (!_.isArray(val) && !_.isObject(val)) {
+          htmlAttributes[prop] = val;
+        }
+      }
+    }
 
     // By default, we add the `novalidate="novalidate"` attribute to our form,
     // unless the user passes `validation="browser"`.
-    if (context.validation !== "browser" && !context.novalidate) {
-      context.novalidate = "novalidate";
+    if (this.validation !== "browser" && !htmlAttributes.novalidate) {
+      htmlAttributes.novalidate = "novalidate";
     }
-    // After removing all of the props we know about, everything else should
-    // become a form attribute.
-    // XXX Would be better to use a whitelist of HTML attributes allowed on form elements
-    return _.omit(context, "schema", "collection", "validation", "doc", "resetOnSuccess",
-        "type", "template", "autosave", "meteormethod", "filter", "autoConvert", "removeEmptyStrings", "trimStrings");
-  },
-  innerContext: function autoFormTplContext(outerContext) {
-    var formId = this.id || defaultFormId;
 
-    contextDependency.depend();
-
-    var data = formData[formId];
-    // Set up the context to be used for everything within the autoform.
-    var innerContext = {_af: data};
-    if (data) {
-      // Prevent the change to the innerContext from triggering the autorun block, since the
-      // innerContent should react to changes in the data and not vice-versa. This prevents infinite
-      // loops with subforms.
-      data.ignoreNextDataChange = true;
-    }
-    // Preserve outer context, allowing access within autoForm block without needing ..
-    _.extend(innerContext, outerContext);
-    return innerContext;
+    return htmlAttributes;
   },
-  afDestroyUpdateForm: function () {
-    return afDestroyUpdateForm.get();
+  afDestroyUpdateForm: function (formId) {
+    AutoForm._destroyForm[formId] = AutoForm._destroyForm[formId] || new ReactiveVar(false);
+    return AutoForm._destroyForm[formId].get();
   }
 });
 
 Template.autoForm.created = function autoFormCreated() {
   var template = this;
 
-  template.autorun(function () {
+  // We'll add tracker dependencies for reactive field values
+  // to this object as necessary
+  template.formValues = template.formValues || {};
+
+  // We'll store "sticky" errors here. These are errors added
+  // manually based on server validation, which we don't want to
+  // be wiped out by further client validation.
+  template._stickyErrors = {};
+
+  template.fieldValuesReady = new ReactiveVar(false);
+
+  template.autorun(function (c) {
     var data = Template.currentData(); // rerun when current data changes
-    var formId = data.id || defaultFormId;
-    if (formData[formId] && formData[formId].ignoreNextDataChange) {
-      formData[formId].ignoreNextDataChange = false;
-      return;
-    }
+    var formId = data.id;
 
-    // rerun when manually invalidated
-    if (!formDeps[formId]) {
-      formDeps[formId] = new Tracker.Dependency();
+    if (!formId) {
+      throw new Error('Every autoForm and quickForm must have an "id" attribute set to a unique string.');
     }
-    formDeps[formId].depend();
-
-    // cache template instance for lookup by formId
-    templatesById[formId] = template;
 
     // When we change the form, loading a different doc, reloading the current doc, etc.,
     // we also want to reset the array counts for the form
     arrayTracker.resetForm(formId);
 
-    var collection = AutoForm.Utility.lookup(data.collection);
-    var ss = AutoForm.Utility.getSimpleSchemaFromContext(data, formId);
+    data = setDefaults(data);
 
     // Clone the doc so that docToForm and other modifications do not change
     // the original referenced object.
@@ -71,18 +90,23 @@ Template.autoForm.created = function autoFormCreated() {
 
     // Update cached form values for hot code reload persistence
     if (data.preserveForm === false) {
-      formPreserve.unregisterForm(formId);
-    } else if (!formPreserve.formIsRegistered(formId)) {
-      formPreserve.registerForm(formId, function autoFormRegFormCallback() {
-        return getFormValues(template, formId, ss).insertDoc;
+      AutoForm.formPreserve.unregisterForm(formId);
+    } else {
+      // Even if we have already registered, we reregister to ensure that the
+      // closure values of template, formId, and ss remain correct after each
+      // reaction
+      AutoForm.formPreserve.registerForm(formId, function autoFormRegFormCallback() {
+        return AutoForm.getFormValues(formId, template, data._resolvedSchema, false);
       });
     }
 
     // Retain doc values after a "hot code push", if possible
-    var retrievedDoc = formPreserve.getDocument(formId);
-    if (retrievedDoc !== false) {
-      // Ensure we keep the _id property which may not be present in retrievedDoc.
-      doc = _.extend(doc || {}, retrievedDoc);
+    if (c.firstRun) {
+      var retrievedDoc = AutoForm.formPreserve.getDocument(formId);
+      if (retrievedDoc !== false) {
+        // Ensure we keep the _id property which may not be present in retrievedDoc.
+        doc = _.extend(doc || {}, retrievedDoc);
+      }
     }
 
     var mDoc;
@@ -90,84 +114,43 @@ Template.autoForm.created = function autoFormCreated() {
       var hookCtx = {formId: formId};
       // Pass doc through docToForm hooks
       _.each(Hooks.getHooks(formId, 'docToForm'), function autoFormEachDocToForm(hook) {
-        doc = hook.call(hookCtx, doc, ss, formId);
+        doc = hook.call(hookCtx, doc, data._resolvedSchema);
+        if (!doc) {
+          throw new Error('Oops! Did you forget to return the modified document from your docToForm hook for the ' + formId + ' form?');
+        }
       });
       // Create a "flat doc" that can be used to easily get values for corresponding
       // form fields.
       mDoc = new MongoObject(doc);
-      fd.sourceDoc(formId, mDoc);
+      AutoForm.reactiveFormData.sourceDoc(formId, mDoc);
     } else {
-      fd.sourceDoc(formId, null);
+      AutoForm.reactiveFormData.sourceDoc(formId, null);
     }
-
-    // Check autosave
-    var autosave, resetOnSuccess;
-    if (data.autosave === true && data.type === "update") {
-      // Autosave and never reset on success
-      autosave = true;
-      resetOnSuccess = false;
-    } else {
-      autosave = false;
-      resetOnSuccess = data.resetOnSuccess;
-    }
-
-    // Cache form data for lookup by form ID
-    formData[formId] = {
-      formId: formId,
-      collection: collection,
-      ss: ss,
-      ssIsOverride: !!collection && !!data.schema,
-      doc: doc,
-      mDoc: mDoc,
-      validationType: (data.validation == null ? "submitThenKeyup" : data.validation),
-      submitType: data.type,
-      submitMethod: data.meteormethod,
-      resetOnSuccess: resetOnSuccess,
-      autosave: autosave,
-      filter: data.filter,
-      autoConvert: data.autoConvert,
-      removeEmptyStrings: data.removeEmptyStrings,
-      trimStrings: data.trimStrings,
-      ignoreNextDataChange: false
-    };
 
     // This ensures that anything dependent on field values will properly
     // react to field values set from the database document. That is,
     // computations dependent on AutoForm.getFieldValue will rerun properly
     // when the form is initially rendered using values from `doc`.
-    Meteor.defer(function () {
-      updateAllTrackedFieldValues(formId);
-    });
-
-    contextDependency.changed();
+    setTimeout(function () {
+      updateAllTrackedFieldValues(template);
+    }, 0);
   });
+};
+
+Template.autoForm.rendered = function autoFormRendered() {
+  this.fieldValuesReady.set(true);
 };
 
 Template.autoForm.destroyed = function autoFormDestroyed() {
   var self = this;
-  var formId = self.data.id || defaultFormId;
+  var formId = self.data.id;
 
   // TODO if formId was changing reactively during life of instance,
   // some data won't be removed by the calls below.
 
-  // Remove from templatesById list
-  if (templatesById[formId]) {
-    delete templatesById[formId];
-  }
-
-  // Remove from data list
-  if (formData[formId]) {
-    delete formData[formId];
-  }
-
   // Remove from array fields list
   arrayTracker.untrackForm(formId);
 
-  // Remove from field values
-  if (formValues[formId]) {
-    delete formValues[formId];
-  }
-
   // Unregister form preservation
-  formPreserve.unregisterForm(formId);
+  AutoForm.formPreserve.unregisterForm(formId);
 };

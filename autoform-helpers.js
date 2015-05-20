@@ -1,64 +1,88 @@
-// Global template helpers (exported)
+/* global arrayTracker, SimpleSchema, AutoForm */
 
-var regHelper = Template.registerHelper;
-if (typeof regHelper !== "function") {
-  regHelper = UI.registerHelper;
+function parseOptions(options) {
+  var hash = (options || {}).hash || {};
+  // Find the form's schema
+  var ss = AutoForm.getFormSchema();
+  // Call getDefs for side effect of throwing errors when name is not in schema
+  if (hash.name) {
+    AutoForm.Utility.getDefs(ss, hash.name);
+  }
+  return _.extend({}, hash, {ss: ss});
 }
+
+/*
+ * Global template helpers (exported to app)
+ */
 
 /*
  * afFieldMessage
  */
-regHelper('afFieldMessage', function autoFormFieldMessage(options) {
+Template.registerHelper('afFieldMessage', function autoFormFieldMessage(options) {
   options = parseOptions(options, 'afFieldMessage');
+  var formId = AutoForm.getFormId();
 
-  return options.ss.namedContext(options.formId).keyErrorMessage(options.name);
+  return options.ss.namedContext(formId).keyErrorMessage(options.name);
 });
 
 /*
  * afFieldIsInvalid
  */
-regHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
+Template.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
   options = parseOptions(options, 'afFieldIsInvalid');
+  var formId = AutoForm.getFormId();
 
-  return options.ss.namedContext(options.formId).keyIsInvalid(options.name);
+  return options.ss.namedContext(formId).keyIsInvalid(options.name);
 });
 
 /*
  * afArrayFieldHasMoreThanMinimum
  */
-regHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreThanMinimum(options) {
+Template.registerHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreThanMinimum(options) {
   options = parseOptions(options, 'afArrayFieldHasMoreThanMinimum');
+  var form = AutoForm.getCurrentDataPlusExtrasForForm();
+
+  // Registered form types can disable adding/removing array items
+  if (form.formTypeDef.hideArrayItemButtons) {
+    return false;
+  }
 
   var range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
-  var visibleCount = arrayTracker.getVisibleCount(options.formId, options.name);
+  var visibleCount = arrayTracker.getVisibleCount(form.id, options.name);
   return (visibleCount > range.minCount);
 });
 
 /*
  * afArrayFieldHasLessThanMaximum
  */
-regHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessThanMaximum(options) {
+Template.registerHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessThanMaximum(options) {
   options = parseOptions(options, 'afArrayFieldHasLessThanMaximum');
+  var form = AutoForm.getCurrentDataPlusExtrasForForm();
+
+  // Registered form types can disable adding/removing array items
+  if (form.formTypeDef.hideArrayItemButtons) {
+    return false;
+  }
 
   var range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
-  var visibleCount = arrayTracker.getVisibleCount(options.formId, options.name);
+  var visibleCount = arrayTracker.getVisibleCount(form.id, options.name);
   return (visibleCount < range.maxCount);
 });
 
 /*
  * afFieldValueIs
  */
-regHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
+Template.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
   options = parseOptions(options, 'afFieldValueIs');
 
-  var currentValue = AutoForm.getFieldValue(options.formId, options.name);
+  var currentValue = AutoForm.getFieldValue(options.name, options.formId);
   return currentValue === options.value;
 });
 
 /*
  * afArrayFieldIsFirstVisible
  */
-regHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFirstVisible() {
+Template.registerHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFirstVisible() {
   var context = this;
   return arrayTracker.isFirstFieldlVisible(context.formId, context.arrayFieldName, context.index);
 });
@@ -66,7 +90,7 @@ regHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFirstVisibl
 /*
  * afArrayFieldIsLastVisible
  */
-regHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLastVisible() {
+Template.registerHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLastVisible() {
   var context = this;
   return arrayTracker.isLastFieldlVisible(context.formId, context.arrayFieldName, context.index);
 });
@@ -74,39 +98,28 @@ regHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLastVisible(
 /*
  * afFieldValueContains
  */
-regHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
+Template.registerHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
   options = parseOptions(options, 'afFieldValueContains');
 
-  var currentValue = AutoForm.getFieldValue(options.formId, options.name);
+  var currentValue = AutoForm.getFieldValue(options.name, options.formId);
   return _.isArray(currentValue) && (_.contains(currentValue, options.value) || options.values && _.intersection(currentValue, options.values.split(",")));
 });
 
 /*
  * afFieldLabelText
  */
-regHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
+Template.registerHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
   options = parseOptions(options, 'afFieldLabelText');
-
-  if (SimpleSchema._makeGeneric(options.name).slice(-1) === "$") {
-    // for array items we don't want to inflect the label because
-    // we will end up with a number
-    var label = options.ss.label(options.name);
-    if (!isNaN(parseInt(label, 10))) {
-      return null;
-    } else {
-      return label;
-    }
-  } else {
-    return options.ss.label(options.name);
-  }
+  return AutoForm.getLabelForField(options.name);
 });
 
 /*
  * afFieldNames
  */
-regHelper("afFieldNames", function autoFormFieldNames(options) {
+Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
   options = parseOptions(options, 'afFieldNames');
   var ss = options.ss, name = options.name, namePlusDot, genericName, genericNamePlusDot;
+  var form = AutoForm.getCurrentDataForForm();
 
   if (name) {
     namePlusDot = name + ".";
@@ -115,14 +128,29 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
   }
 
   // Get the list of fields we want included
-  var fieldList = options.fields || AutoForm.findAttribute("fields");
+  var fieldList = options.fields, usedAncestorFieldList = false;
   if (fieldList) {
     fieldList = AutoForm.Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
+  }
+
+  var ancestorFieldList = AutoForm.findAttribute("fields");
+  if (ancestorFieldList) {
+    ancestorFieldList = AutoForm.Utility.stringToArray(ancestorFieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
+
+    // Use the ancestor field list as backup, unless there is
+    // a name and that name is listed in the ancestor field list
+    if (!fieldList) {
+      fieldList = ancestorFieldList;
+      usedAncestorFieldList = true;
+    }
+  }
+
+  if (fieldList) {
 
     // Take only those fields in the fieldList that are descendants of the `name` field
     if (name) {
       // Replace generic name with real name. We assume that field names
-      // with $ apply to all array items. Field list will not have the
+      // with $ apply to all array items. Field list will now have the
       // correct array field item number instead of $.
       if (genericName !== name) {
         fieldList = _.map(fieldList, function (field) {
@@ -167,7 +195,7 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
     });
   }
 
-  if (!fieldList || fieldList.length === 0) {
+  if (!fieldList || (fieldList.length === 0 && usedAncestorFieldList)) {
     // Get list of field names that are descendants of this field's name.
     // If name/genericName is undefined, this will return top-level
     // schema keys.
@@ -198,16 +226,19 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
     var fieldDefs = ss.schema(field);
 
     // Don't include fields with autoform.omit=true
-    if (fieldDefs.autoform && fieldDefs.autoform.omit === true)
+    if (fieldDefs.autoform && fieldDefs.autoform.omit === true) {
       return false;
+    }
 
     // Don't include fields with denyInsert=true when it's an insert form
-    if (fieldDefs.denyInsert && options.submitType === "insert")
+    if (fieldDefs.denyInsert && form.type === "insert") {
       return false;
+    }
 
     // Don't include fields with denyUpdate=true when it's an update form
-    if (fieldDefs.denyUpdate && options.submitType === "update")
+    if (fieldDefs.denyUpdate && form.type === "update") {
       return false;
+    }
 
     return true;
   });
@@ -215,90 +246,41 @@ regHelper("afFieldNames", function autoFormFieldNames(options) {
   // Ensure fields are not added more than once
   fieldList = _.unique(fieldList);
 
+  // We return it as an array of objects because that
+  // works better with Blaze contexts
+  fieldList = _.map(fieldList, function (name) {
+    return {name: name};
+  });
+
   return fieldList;
+});
+
+
+/*
+ * afSelectOptionAtts
+ */
+Template.registerHelper('afSelectOptionAtts', function afSelectOptionAtts() {
+  var atts = _.pick(this, 'value');
+  if (this.selected) {
+    atts.selected = "";
+  }
+  if (this.htmlAtts) {
+    _.extend(atts, this.htmlAtts);
+  }
+  return atts;
+});
+
+// Expects to be called with this.name available
+Template.registerHelper('afOptionsFromSchema', function afOptionsFromSchema() {
+  return AutoForm._getOptionsForField(this.name);
 });
 
 /*
  * afTemplateName
- *
- * Returns the full template name. In the simplest scenario, this is templateType_templateName
- * as passed in. However, if templateName is not provided, it is looked up in the following
- * manner:
- *
- * 1. autoform.<componentType>.template from the schema (field+type override for all forms)
- * 2. autoform.template from the schema (field override for all forms)
- * 3. template-<componentType> attribute on an ancestor component within the same form (form+type for all fields)
- * 4. template attribute on an ancestor component within the same form (form specificity for all types and fields)
- * 5. Default template for component type, as set by AutoForm.setDefaultTemplateForType
- * 6. Default template, as set by AutoForm.setDefaultTemplate.
- * 7. Built-in default template, currently bootstrap-3.
+ * Deprecated. Don't use this. Eventually remove it.
  */
-regHelper('afTemplateName', function afTemplateNameHelper(templateType, templateName) {
-  var self = this, result, schemaAutoFormDefs, templateFromAncestor, defaultTemplate;
-
-  var result = templateType + '_' + templateName; // templateName might be undefined, but the result will be the same
-  if (Template[result]) {
-    return result;
-  }
-
-  // If the attributes provided a templateName but that template didn't exist, show a warning
-  if (templateName && AutoForm._debug) {
-    console.warn(templateType + ': "' + templateName + '" is not a valid template name. Falling back to a different template.');
-  }
-
-  // Get `autoform` object from the schema, if present.
-  // Skip for quickForm because it renders a form and not a field.
-  if (templateType !== 'quickForm' && self.atts && self.atts.name) {
-    schemaAutoFormDefs = AutoForm.getSchemaForField(self.atts.name).autoform;
-  }
-
-  // Fallback #1: autoform.<componentType>.template from the schema
-  if (schemaAutoFormDefs && schemaAutoFormDefs[templateType] && schemaAutoFormDefs[templateType].template && Template[templateType + '_' + schemaAutoFormDefs[templateType].template]) {
-    return templateType + '_' + schemaAutoFormDefs[templateType].template;
-  }
-
-  // Fallback #2: autoform.template from the schema
-  if (schemaAutoFormDefs && schemaAutoFormDefs.template && Template[templateType + '_' + schemaAutoFormDefs.template]) {
-    return templateType + '_' + schemaAutoFormDefs.template;
-  }
-
-  // Fallback #3: template-<componentType> attribute on an ancestor component within the same form
-  templateFromAncestor = AutoForm.findAttribute("template-" + templateType);
-  if (templateFromAncestor && Template[templateType + '_' + templateFromAncestor]) {
-    return templateType + '_' + templateFromAncestor;
-  }
-
-  // Fallback #4: template attribute on an ancestor component within the same form
-  templateFromAncestor = AutoForm.findAttribute("template");
-  if (templateFromAncestor && Template[templateType + '_' + templateFromAncestor]) {
-    return templateType + '_' + templateFromAncestor;
-  }
-
-  // Fallback #5: Default template for component type, as set by AutoForm.setDefaultTemplateForType
-  defaultTemplate = AutoForm.getDefaultTemplateForType(templateType);
-  if (defaultTemplate && Template[templateType + '_' + defaultTemplate]) {
-    return templateType + '_' + defaultTemplate;
-  }
-
-  // Fallback #6: Default template, as set by AutoForm.setDefaultTemplate
-  defaultTemplate = AutoForm.getDefaultTemplate();
-  if (defaultTemplate && Template[templateType + '_' + defaultTemplate]) {
-    return templateType + '_' + defaultTemplate;
-  }
-
-  // Fallback #7: hard-coded default
-  return "bootstrap3";
+Template.registerHelper('afTemplateName', function afTemplateNameHelper(templateType, templateName) {
+  var self = this;
+  console.log('The afTemplateName template helper is deprecated. Use AutoForm.getTemplateName method in your own helper.');
+  return AutoForm.getTemplateName(templateType, templateName, self.atts && self.atts.name);
 });
-
-/*
- * PRIVATE
- */
-
-function parseOptions(options, helperName) {
-  var hash = (options || {}).hash || {};
-  // Find the autoform context
-  var afContext = AutoForm.find(helperName);
-  // Call getDefs for side effect of throwing errors when name is not in schema
-  hash.name && AutoForm.Utility.getDefs(afContext.ss, hash.name);
-  return _.extend({}, afContext, hash);
-}

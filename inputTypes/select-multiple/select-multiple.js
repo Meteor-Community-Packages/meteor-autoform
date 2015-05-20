@@ -13,6 +13,7 @@ AutoForm.addInputType("select-multiple", {
             name: context.name,
             label: subOpt.label,
             value: subOpt.value,
+            htmlAtts: _.omit(subOpt, 'label', 'value'),
             // _id must be included because it is a special property that
             // #each uses to track unique list items when adding and removing them
             // See https://github.com/meteor/meteor/issues/2174
@@ -30,6 +31,7 @@ AutoForm.addInputType("select-multiple", {
           name: context.name,
           label: opt.label,
           value: opt.value,
+          htmlAtts: _.omit(opt, 'label', 'value'),
           // _id must be included because it is a special property that
           // #each uses to track unique list items when adding and removing them
           // See https://github.com/meteor/meteor/issues/2174
@@ -41,18 +43,5 @@ AutoForm.addInputType("select-multiple", {
     });
 
     return context;
-  }
-});
-
-Template["afSelectMultiple"].helpers({
-  optionAtts: function afSelectOptionAtts() {
-    var item = this;
-    var atts = {
-      value: item.value
-    };
-    if (item.selected) {
-      atts.selected = "";
-    }
-    return atts;
   }
 });

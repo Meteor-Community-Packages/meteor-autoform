@@ -69,8 +69,8 @@
       "1.0.5"
     ],
     [
-      "mrt:moment",
-      "2.8.1"
+      "momentjs:moment",
+      "2.8.4"
     ],
     [
       "observe-sequence",
@@ -83,6 +83,10 @@
     [
       "random",
       "1.0.1"
+    ],
+    [
+      "reactive-dict",
+      "1.0.4"
     ],
     [
       "reactive-var",
@@ -110,6 +114,6 @@
     ]
   ],
   "pluginDependencies": [],
-  "toolVersion": "meteor-tool@1.0.36",
+  "toolVersion": "meteor-tool@1.0.35",
   "format": "1.0"
 }

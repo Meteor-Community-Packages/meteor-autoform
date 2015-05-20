@@ -1,25 +1,25 @@
-defaultFormId = "_afGenericID";
-formPreserve = new FormPreserve("autoforms");
-formData = {}; //for looking up autoform data by form ID
-templatesById = {}; //keep a reference of autoForm templates by form `id` for AutoForm.getFormValues
-formValues = {}; //for reactive show/hide based on current value of a field
-formDeps = {}; //for invalidating the form inner context and causing rerender
-inputTypeDefinitions = {}; //for storing input type definitions added by AutoForm.addInputType
-fd = new FormData();
+/* global AutoForm:true, FormPreserve */
+
+AutoForm = AutoForm || {};
+
+// formPreserve is used to keep current form data across hot code
+// reloads for any forms that are currently rendered
+AutoForm.formPreserve = new FormPreserve("autoforms");
+
+AutoForm.reactiveFormData = new FormData();
+
+AutoForm._inputTypeDefinitions = {}; //for storing input type definitions added by AutoForm.addInputType
+AutoForm._formTypeDefinitions = {}; //for storing submit type definitions added by AutoForm.addFormType
+
 arrayTracker = new ArrayTracker();
-componentTypeList = ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'];
 
-// backwards compatibility
-if (typeof Tracker === "undefined" && typeof Deps !== "undefined") {
-  Tracker = Deps;
-}
-
-afDestroyUpdateForm = new ReactiveVar(false);
+// Used by AutoForm._forceResetFormValues; temporary hack
+AutoForm._destroyForm = {};
 
 // reactive templates
-globalDefaultTemplate = "bootstrap3"
+globalDefaultTemplate = "bootstrap3";
 defaultTypeTemplates = {};
 deps = {
-  defaultTemplate: new Tracker.Dependency,
+  defaultTemplate: new Tracker.Dependency(),
   defaultTypeTemplates: {}
 };

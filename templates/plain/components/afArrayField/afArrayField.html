@@ -1,39 +1,3 @@
-<template name="quickForm_plain">
-  {{#autoForm this.qfAutoFormContext}}
-    {{> afQuickFields}}
-    {{#if qfShouldRenderButton}}
-    <div>
-      <button type="submit" {{submitButtonAtts}}>
-      {{#with ../atts.buttonContent}}
-      {{this}}
-      {{else}}
-      Submit
-      {{/with}}
-      </button>
-    </div>
-    {{/if}}
-  {{/autoForm}}
-</template>
-
-<template name="afFormGroup_plain">
-  <div class="{{#if afFieldIsInvalid name=this.atts.name}}has-error{{/if}}">
-    {{#unless this.skipLabel}}
-    <label {{this.afFieldLabelAtts}}>{{#if this.labelText}}{{this.labelText}}{{else}}{{afFieldLabelText name=this.atts.name}}{{/if}}</label>
-    {{/unless}}
-    {{> afFieldInput this.afFieldInputAtts}}
-    <span>{{{afFieldMessage name=this.atts.name}}}</span>
-  </div>
-</template>
-
-<template name="afObjectField_plain">
-  <fieldset>
-    {{#with afFieldLabelText name=this.atts.name}}
-    <legend>{{this}}</legend>
-    {{/with}}
-    {{> afQuickFields name=this.atts.name}}
-  </fieldset>
-</template>
-
 <template name="afArrayField_plain">
   <fieldset>
     <legend>{{afFieldLabelText name=this.atts.name}}</legend>

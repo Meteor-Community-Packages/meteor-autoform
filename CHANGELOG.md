@@ -6,6 +6,61 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.1.2
+
+Fix validation of typeless forms when done with `AutoForm.validateForm()`
+
+### 5.1.1
+
+Fix validation of typeless forms broken in 5.1.0 (Thanks @abecks)
+
+### 5.1.0
+
+* Fix date handling when dealing with very low year numbers. (Thanks @jfly)
+* For `type="update"` and `type="method-update"` forms, a `formToModifier` hook is called instead of `formToDoc`, and it's passed a Mongo modifier. For forms with no `type` attribute, both `formToDoc` and `formToModifier` are called. (You should provide one or both based on whether you use the doc, the modifier, or both in your `onSubmit` hook.)
+* Array handling was changed in 5.0 to support additional use cases. However, this change also resulted in a MongoDB array handling quirk no longer being masked by AutoForm. Since this caused confusion for many people, array handling is now reverted back to pre-5.0 behavior. If your form needs to update specific array items as opposed to entire arrays, you can opt in to the proper array handling by putting `setArrayItems=true` on your `autoForm` or `quickForm`.
+* For "method" and "method-update" type forms, before hooks will now run before validation, unless you've specified both a `schema` attribute and a `collection` attribute. In that case, validation against the form schema happens before the before hooks run, and validation against the collection schema happens after the before hooks run, before your method is called.
+* Changes to avoid benign errors being thrown.
+* Fix potential for infinite loops related to tracking field values.
+
+### 5.0.3
+
+Compatible with Meteor v1.0.4+
+
+### 5.0.1, 5.0.2
+
+Minor fixes
+
+### 5.0.0
+* **Compatibility break:** You can no longer do `options="auto"`, but you can do `options=afOptionsFromSchema` for essentially the same effect. The `afOptionsFromSchema` helper requires that you have a property named `name` in the current context, which is set to the field name.
+* **Compatibility break:** The function signature for `AutoForm.getFieldValue` is reversed from `(formId, fieldName)` to `(fieldName, [formId])` with `formId` optional. You must not pass the `formId` argument when using it in a helper that is run within the context of the form. Conversely, you *must* pass `formId` if not calling it within an autoform.
+* **Compatibility break:** The `afFieldNames` helper now returns an array of objects with `name` property instead of returning the array of names directly.
+* **Compatibility break:** The `method` form type now calls the server method with only one argument, the submitted form document. If your server method needs the update modifier and document _id instead of the document, change your form's type to `method-update`. The `before` hooks for a `method-update` form are passed (and should return) the modifier object instead of the document.
+* **Compatibility break:** The arguments passed to "before" hooks have changed. `docId` and `template` are no longer passed as arguments but are available as `this.docId` and `this.template`. Only a single object, `doc` is passed to every "before" hook.
+* **Compatibility break:** When defining "before" and "after" hooks for methods, use the word "method" instead of the method name. If you need different logic based on method name, you can examine `this.formAttributes.meteormethod` in your hook function.
+* **Compatibility break:** Hooks that were passed `formId` and/or `template` as arguments no longer receive those arguments. Use `this.formId` or `this.template` if you need them.
+* **Compatibility break:** If you have custom templates for `afFormGroup` or `afObjectField`, change all `this.atts` references to `this`.
+* **Compatibility break:** `AutoForm.find()` is removed and should be replaced by a more specific call to one of the new API functions like `AutoForm.getFormId()` or `AutoForm.getFormSchema()` or `AutoForm.getFormCollection()` or `AutoForm.getCurrentDataForForm()` or `AutoForm.templateInstanceForForm()`. See [current API docs](https://github.com/aldeed/meteor-autoform/blob/master/api.md).
+* **Compatibility break:** `noselect` attribute must be set to `true` without quotation marks. Any other value will have no effect.
+* You can now use `afFieldValueIs` and `afFieldValueContains` helpers outside of the form in which the field appears if you add `formId="myFormId"` attribute to them.
+* When providing options for a `select` or `select-multiple` input type, you can now add additional props to the objects in the options array and those properties will become attributes on the `option` element in the generated HTML.
+* `data-required` attribute is now present on the form group `div` element for all built-in `afFormGroup` templates if the field is required. This allows you to use css like the following to display an asterisk after required fields: `[data-required] label:after {content: '*'}`
+* There are no longer issues when your input type template name contains underscores.
+* A new `update-pushArray` form type allows you to create insert-like forms that push the resulting document into an array field in an existing collection document. See the README and http://autoform.meteor.com/updatepush
+* Added `autosaveOnKeyup` form option. See README.
+* If you specify default attributes within an `autoform` object in your schema, any of the attributes may be functions that return their value, and when the function is called `this.name` will be set to the current field name, which is helpful for fields that are nested in one or more arrays.
+* You can now add custom form types using `AutoForm.addFormType`. See the API documentation. The built-in form types are defined this way, too. This allows for a lot of flexibility in what happens upon validation and submission of a form.
+* In any form hook, you can now call `this.addStickyValidationError(key, type, [value])` to add a custom validation error that will not be overridden by subsequent revalidations on the client. This can be useful if you need to show a form error based on errors coming back from the server, and you don't want it to disappear when fields are revalidated on the client on blur, keyup, etc. The sticky error will go away when the form is reset (such as after a successful submission), when the form instance is destroyed, or when you call `this.removeStickyValidationError(key)` in any hook.
+
+### 4.2.2
+
+* Fixed "Can't set timers inside simulations" error (Thanks @SachaG)
+* Switched Moment dependency to official `momentjs:moment` package
+
+### 4.2.1
+
+Fix `AutoForm.getFieldValue` reactivity when the field is in an `#if` block
+
 ### 4.2.0
 
 * As an alternative to the current method of specifying `options` as an array of objects, you can now specify options as an object with {value: label} format. Values are coerced into the expected type. (Thanks @comerc)

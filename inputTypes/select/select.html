@@ -4,11 +4,11 @@
       {{#if this.optgroup}}
         <optgroup label="{{this.optgroup}}">
         {{#each this.items}}
-        <option {{optionAtts}}>{{this.label}}</option>
+        <option {{afSelectOptionAtts}}>{{this.label}}</option>
         {{/each}}
         </optgroup>
       {{else}}
-        <option {{optionAtts}}>{{this.label}}</option>
+        <option {{afSelectOptionAtts}}>{{this.label}}</option>
       {{/if}}
     {{/each}}
   </select>

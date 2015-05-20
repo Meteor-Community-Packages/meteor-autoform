@@ -7,7 +7,7 @@
     "forin"         : true,
     "immed"         : false,
     "indent"        : 2,
-    "latedef"       : true,
+    "latedef"       : false,
     "newcap"        : false,
     "noarg"         : true,
     "noempty"       : true,

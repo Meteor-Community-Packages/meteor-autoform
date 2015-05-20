@@ -1,7 +1,3 @@
 <template name="afObjectField">
-  {{#with atts=this}}
-    {{#with afTemplateName 'afObjectField' ../template}}
-      {{> UI.dynamic template=this data=..}}
-    {{/with}}
-  {{/with}}
+  {{> Template.dynamic template=getTemplateName data=this}}
 </template>
