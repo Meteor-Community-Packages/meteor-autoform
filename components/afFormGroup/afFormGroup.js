@@ -33,7 +33,7 @@ Template.afFormGroup.helpers({
       afFieldLabelAtts: afFieldLabelAtts,
       afFieldInputAtts: afFieldInputAtts,
       name: c.atts.name,
-      required: !fieldSchema.optional,
+      required: fieldSchema ? !fieldSchema.optional : false,
       labelText: (typeof c.atts.label === 'string') ? c.atts.label : null
     };
   }

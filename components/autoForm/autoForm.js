@@ -105,7 +105,7 @@ Template.autoForm.created = function autoFormCreated() {
       var retrievedDoc = AutoForm.formPreserve.getDocument(formId);
       if (retrievedDoc !== false) {
         // Ensure we keep the _id property which may not be present in retrievedDoc.
-        doc = _.extend(doc || {}, retrievedDoc);
+        doc = _.extend(doc || {}, retrievedDoc || {});
       }
     }
 
@@ -119,6 +119,7 @@ Template.autoForm.created = function autoFormCreated() {
           throw new Error('Oops! Did you forget to return the modified document from your docToForm hook for the ' + formId + ' form?');
         }
       });
+
       // Create a "flat doc" that can be used to easily get values for corresponding
       // form fields.
       mDoc = new MongoObject(doc);
@@ -131,9 +132,7 @@ Template.autoForm.created = function autoFormCreated() {
     // react to field values set from the database document. That is,
     // computations dependent on AutoForm.getFieldValue will rerun properly
     // when the form is initially rendered using values from `doc`.
-    setTimeout(function () {
-      updateAllTrackedFieldValues(template);
-    }, 0);
+    updateAllTrackedFieldValues(template);
   });
 };
 

@@ -112,9 +112,12 @@ Template.autoForm.events({
     };
 
     // Get the form type definition
-    var ftd = AutoForm._formTypeDefinitions[formType];
-    if (!ftd) {
-      throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
+    var ftd;
+    try {
+      ftd = Utility.getFormTypeDef(formType);
+    } catch (err) {
+      event.preventDefault();
+      throw err;
     }
 
     // Gather hooks
@@ -161,6 +164,13 @@ Template.autoForm.events({
     } else {
       formDoc = AutoForm.getFormValues(formId, template, ss, false);
       hookContext.insertDoc = formDoc;
+    }
+
+    // It is pretty unlikely since we are submitting it, but if
+    // for some reason this form is not currently rendered, we exit.
+    if (!formDoc) {
+      event.preventDefault();
+      return;
     }
 
     function endSubmission() {
@@ -443,26 +453,13 @@ Template.autoForm.events({
 
     if (this.doc) {
       event.preventDefault();
-
       AutoForm._forceResetFormValues(formId);
-
-      // Focus the autofocus element
-      if (template && template.view._domrange && !template.view.isDestroyed) {
-        template.$("[autofocus]").focus();
-      }
-    } else {
-      // This must be done after we allow this event handler to return
-      // because we have to let the browser reset all fields before we
-      // update their values for deps.
-      setTimeout(function () {
-        if (template && template.view._domrange && !template.view.isDestroyed) {
-          // Mark all fields as changed
-          updateAllTrackedFieldValues(template);
-          // Focus the autofocus element
-          template.$("[autofocus]").focus();
-        }
-      }, 0);
     }
+
+    // Mark all fields as changed
+    updateAllTrackedFieldValues(template);
+    // Focus the autofocus element
+    template.$("[autofocus]").focus();
 
   },
   'keydown .autoform-array-item input': function (event) {
