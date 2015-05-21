@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.2.0
+
+Fix issues with errors being thrown during reactive changes and issues with getting reactive field values.
+
 ### 5.1.2
 
 Fix validation of typeless forms when done with `AutoForm.validateForm()`
