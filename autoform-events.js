@@ -1,4 +1,4 @@
-/* global AutoForm, Hooks, _validateForm, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues, SimpleSchema */
+/* global AutoForm, Hooks, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues, SimpleSchema */
 
 // all form events handled here
 var lastAutoSaveElement = null;
@@ -112,9 +112,12 @@ Template.autoForm.events({
     };
 
     // Get the form type definition
-    var ftd = AutoForm._formTypeDefinitions[formType];
-    if (!ftd) {
-      throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
+    var ftd;
+    try {
+      ftd = Utility.getFormTypeDef(formType);
+    } catch (err) {
+      event.preventDefault();
+      throw err;
     }
 
     // Gather hooks
@@ -135,6 +138,7 @@ Template.autoForm.events({
       event: event,
       formAttributes: form,
       formId: formId,
+      formTypeDefinition: ftd,
       removeStickyValidationError: function (key) {
         delete AutoForm.templateInstanceForForm(formId)._stickyErrors[key];
         // revalidate that field
@@ -160,6 +164,13 @@ Template.autoForm.events({
     } else {
       formDoc = AutoForm.getFormValues(formId, template, ss, false);
       hookContext.insertDoc = formDoc;
+    }
+
+    // It is pretty unlikely since we are submitting it, but if
+    // for some reason this form is not currently rendered, we exit.
+    if (!formDoc) {
+      event.preventDefault();
+      return;
     }
 
     function endSubmission() {
@@ -291,7 +302,12 @@ Template.autoForm.events({
       // validate against the form schema. Then before hooks can add any missing
       // properties before we validate against the full collection schema.
       try {
-        isValid = _validateForm(formId, formDoc);
+        isValid = (form.validation === 'none') ||
+          ftd.validateForm.call({
+            form: form,
+            formDoc: formDoc,
+            useCollectionSchema: false
+          });
       } catch (e) {
         // Catch exceptions in validation functions which will bubble up here, cause a form with
         // onSubmit() to submit prematurely and prevent the error from being reported
@@ -448,26 +464,13 @@ Template.autoForm.events({
 
     if (this.doc) {
       event.preventDefault();
-
       AutoForm._forceResetFormValues(formId);
-
-      // Focus the autofocus element
-      if (template && template.view._domrange && !template.view.isDestroyed) {
-        template.$("[autofocus]").focus();
-      }
-    } else {
-      // This must be done after we allow this event handler to return
-      // because we have to let the browser reset all fields before we
-      // update their values for deps.
-      setTimeout(function () {
-        if (template && template.view._domrange && !template.view.isDestroyed) {
-          // Mark all fields as changed
-          updateAllTrackedFieldValues(template);
-          // Focus the autofocus element
-          template.$("[autofocus]").focus();
-        }
-      }, 0);
     }
+
+    // Mark all fields as changed
+    updateAllTrackedFieldValues(template);
+    // Focus the autofocus element
+    template.$("[autofocus]").focus();
 
   },
   'keydown .autoform-array-item input': function (event) {

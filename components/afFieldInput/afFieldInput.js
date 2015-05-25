@@ -68,17 +68,8 @@ Template.afFieldInput.helpers({
     // will not pick up the new value when there are #if etc.
     // blocks involved.
     // See https://github.com/aldeed/meteor-autoform/issues/461
-    Tracker.afterFlush(function () {
-      var template;
-      // Can error due to timing issues if form is removed, but
-      // this should never matter.
-      try {
-        template = AutoForm.templateInstanceForForm();
-      } catch (error) {}
-      if (template) {
-        updateTrackedFieldValue(template, c.atts.name);
-      }
-    });
+    var template = AutoForm.templateInstanceForForm();
+    updateTrackedFieldValue(template, c.atts.name);
     
     // Build input data context
     var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), form.type);

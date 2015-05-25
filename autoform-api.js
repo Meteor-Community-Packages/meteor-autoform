@@ -1,4 +1,4 @@
-/* global AutoForm:true, SimpleSchema, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, _validateForm, validateField, arrayTracker, ReactiveVar, getAllFieldsInForm, setDefaults:true, getFlatDocOfFieldValues, MongoObject */
+/* global AutoForm:true, SimpleSchema, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, validateField, arrayTracker, ReactiveVar, getAllFieldsInForm, setDefaults:true, getFlatDocOfFieldValues, MongoObject */
 
 // This file defines the public, exported API
 
@@ -258,17 +258,20 @@ AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templa
  * @param {Template} [template] The template instance, if already known, as a performance optimization.
  * @param {SimpleSchema} [ss] The SimpleSchema instance, if already known, as a performance optimization.
  * @param {Boolean} [getModifier] Set to `true` to return a modifier object or `false` to return a normal object. For backwards compatibility, and object containing both is returned if this is undefined.
- * @return {Object}
+ * @return {Object|null}
  *
  * Returns an object representing the current values of all schema-based fields in the form.
- * The returned object is either a normal object or a MongoDB modifier, based on the `getModifier` argument.
+ * The returned object is either a normal object or a MongoDB modifier, based on the `getModifier` argument. Return value may be `null` if the form is not currently rendered on screen.
  */
 AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, getModifier) {
   var insertDoc, updateDoc, transforms;
 
   template = template || AutoForm.templateInstanceForForm(formId);
-  if (!template || !template.view._domrange || template.view.isDestroyed) {
-    throw new Error("getFormValues: There is currently no autoForm template rendered for the form with id " + formId);
+  if (!template ||
+      !template.view ||
+      !template.view._domrange ||
+      template.view.isDestroyed) {
+    return null;
   }
 
   // Get a reference to the SimpleSchema instance that should be used for
@@ -401,15 +404,21 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
  * @public
  * @param {String} fieldName The name of the field for which you want the current value.
  * @param {String} [formId] The `id` attribute of the `autoForm` you want current values for. Default is the closest form from the current context.
- * @return {Any}
+ * @return {Any|undefined}
  *
  * Returns the value of the field (the value that would be used if the form were submitted right now).
- * This is a reactive method that will rerun whenever the current value of the requested field changes.
+ * This is a reactive method that will rerun whenever the current value of the requested field changes. Return value will be undefined if the field is not currently rendered.
  */
 AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
   // find AutoForm template
-  var template = AutoForm.templateInstanceForForm(formId);
-  if (!template || !template.fieldValuesReady.get() || !template.view._domrange || template.view.isDestroyed) {
+  var template = Tracker.nonreactive(function () {
+    return AutoForm.templateInstanceForForm(formId);
+  });
+  if (!template ||
+      !template.fieldValuesReady.get() ||
+      !template.view ||
+      !template.view._domrange ||
+      template.view.isDestroyed) {
     return;
   }
 
@@ -421,9 +430,14 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
   template.formValues[fieldName].depend();
 
   var doc = AutoForm.getFormValues(formId, template, null, false);
+  if (!doc) {
+    return;
+  }
 
   var mDoc = new MongoObject(doc);
-  return mDoc.getValueForKey(fieldName);
+  var value = mDoc.getValueForKey(fieldName);
+
+  return value;
 };
 
 /**
@@ -444,9 +458,7 @@ AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTempl
     view = view.originalParentView || view.parentView;
   }
 
-  if (!view) {
-    throw new Error("The element does not appear to be in a template view");
-  }
+  if (!view) return;
 
   // View names have "Template." at the beginning so we slice that off.
   return view.name.slice(9);
@@ -592,8 +604,11 @@ AutoForm.addFormType = function afAddFormType(name, definition) {
  */
 AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipEmpty) {
   var template = AutoForm.templateInstanceForForm(formId);
-  if (!template || !template.view._domrange || template.view.isDestroyed) {
-    throw new Error("validateField: There is currently no autoForm template rendered for the form with id " + formId);
+  if (!template ||
+      !template.view ||
+      !template.view._domrange ||
+      template.view.isDestroyed) {
+    return true;
   }
 
   return validateField(fieldName, formId, skipEmpty, false);
@@ -609,8 +624,30 @@ AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipE
  * this method causes the reactive validation messages to appear.
  */
 AutoForm.validateForm = function autoFormValidateForm(formId) {
+  var form = AutoForm.getCurrentDataForForm(formId);
+  var formDoc, formType = form.type;
+
+  var ftd = Utility.getFormTypeDef(formType);
+
   // Gather all form values
-  return _validateForm(formId, AutoForm.getFormValues(formId, null, null, false));
+  if (ftd.needsModifierAndDoc) {
+    formDoc = AutoForm.getFormValues(formId, null, null);
+  } else if (ftd.usesModifier) {
+    formDoc = AutoForm.getFormValues(formId, null, null, true);
+  } else {
+    formDoc = AutoForm.getFormValues(formId, null, null, false);
+  }
+
+  // If form is not currently rendered, return true
+  if (!formDoc) {
+    return true;
+  }
+
+  return (form.validation === 'none') || ftd.validateForm.call({
+    form: form,
+    formDoc: formDoc,
+    useCollectionSchema: false
+  });
 };
 
 /**
@@ -756,10 +793,17 @@ AutoForm.getInputType = function getInputType(atts) {
 
   // Get schema definition, using the item definition for array fields
   defs = AutoForm.getSchemaForField(atts.name);
+  if (!defs) {
+    return 'text';
+  }
+
   schemaType = defs.type;
   if (schemaType === Array) {
     expectsArray = true;
     schemaType = AutoForm.getSchemaForField(atts.name + ".$").type;
+    if (!defs) {
+      return 'text';
+    }
   }
 
   // Based on the `type` attribute, the `type` from the schema, and/or
@@ -826,10 +870,9 @@ AutoForm.getInputType = function getInputType(atts) {
  * @method AutoForm.getSchemaForField
  * @public
  * @param {String} name The field name attribute / schema key.
- * @return {Object}
+ * @return {Object|undefined}
  *
  * Call this method from a UI helper to get the field definitions based on the schema used by the closest containing autoForm.
- * Always throws an error or returns the schema object.
  */
 AutoForm.getSchemaForField = function autoFormGetSchemaForField(name) {
   var ss = AutoForm.getFormSchema();
@@ -883,7 +926,6 @@ AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) {
  * @return {Object}
  *
  * Call this method from a UI helper to get the field definitions based on the schema used by the closest containing autoForm.
- * Always throws an error or returns the schema object.
  */
 AutoForm.getLabelForField = function autoFormGetSchemaForField(name) {
   var ss = AutoForm.getFormSchema(), label = ss.label(name);
@@ -905,40 +947,42 @@ AutoForm.getLabelForField = function autoFormGetSchemaForField(name) {
  * Gets the template instance for the form with formId or the closest form to the current context.
  */
 AutoForm.templateInstanceForForm = function (formId) {
-  return AutoForm.viewForForm(formId).templateInstance();
+  var view = AutoForm.viewForForm(formId);
+
+  if (!view) return;
+
+  return view.templateInstance();
 };
 
 /**
  * @method AutoForm.viewForForm
  * @public
  * @param {String} [formId] The form's `id` attribute. Do not pass this if calling from within a form context.
- * @returns {Blaze.View} The `Blaze.View` instance for the autoForm. Always returns the view or throws an error.
+ * @returns {Blaze.View|undefined} The `Blaze.View` instance for the autoForm.
  *
  * Gets the `Blaze.View` instance for the form with formId or the closest form to the current context.
  */
 AutoForm.viewForForm = function (formId) {
-  var formElement;
+  var formElement, view;
 
   if (formId) {
     formElement = document.getElementById(formId);
     if (!formElement) {
-      throw new Error('No form with ID ' + formId + ' is currently rendered. If this call originated from within a template event or helper, you should call without passing a formId to avoid seeing this error');
+      return;
     }
   }
 
   // If formElement is undefined, Blaze.getView returns the current view.
-  // It will throw an error if there is no current view.
-  var view = Blaze.getView(formElement);
-  if (!view) {
-    throw new Error('AutoForm.viewForForm: Unable to find current view');
-  }
+  try {
+    view = Blaze.getView(formElement);
+  } catch (err) {}
 
   while (view && view.name !== 'Template.autoForm') {
     view = view.originalParentView || view.parentView;
   }
 
   if (!view || view.name !== 'Template.autoForm') {
-    throw new Error('AutoForm.viewForForm: Unable to find autoForm view');
+    return;
   }
 
   return view;
@@ -973,13 +1017,20 @@ AutoForm.getArrayCountFromDocForField = function (formId, field) {
  * @param {String} formId The form's `id` attribute
  * @returns {Object} Current data context for the form, or an empty object.
  *
- * Returns the current data context for a form. Always returns an object
- * or throws an error.
+ * Returns the current data context for a form.
  * You can call this without a formId from within a helper and
  * the data for the nearest containing form will be returned.
  */
 AutoForm.getCurrentDataForForm = function (formId) {
-  return setDefaults(Blaze.getData(AutoForm.viewForForm(formId)));
+  var view = AutoForm.viewForForm(formId);
+
+  if (!view) return;
+
+  var data = Blaze.getData(view);
+
+  if (!data) return;
+
+  return setDefaults(data);
 };
 
 /**
@@ -989,7 +1040,6 @@ AutoForm.getCurrentDataForForm = function (formId) {
  * @returns {Object} Current data context for the form, or an empty object.
  *
  * Returns the current data context for a form plus some extra properties.
- * Always returns an object or throws an error.
  * You can call this without a formId from within a helper and
  * the data for the nearest containing form will be returned.
  */
@@ -1000,10 +1050,7 @@ AutoForm.getCurrentDataPlusExtrasForForm = function (formId) {
 
   // add form type definition
   var formType = data.type || 'normal';
-  data.formTypeDef = AutoForm._formTypeDefinitions[formType];
-  if (!data.formTypeDef) {
-    throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
-  }
+  data.formTypeDef = Utility.getFormTypeDef(formType);
 
   return data;
 };
@@ -1187,22 +1234,16 @@ setDefaults = function setDefaults(data) {
     }
 
     // Form type definition can optionally alter the schema
-    var ftd = AutoForm._formTypeDefinitions[formType];
-    if (!ftd) {
-      throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
-    }
+    var ftd = Utility.getFormTypeDef(formType);
 
     if (typeof ftd.adjustSchema === 'function') {
       schema = ftd.adjustSchema.call({form: data}, schema);
     }
 
-    // If we have no schema, throw an error
-    if (!schema) {
-      throw new Error('AutoForm: form with id "' + data.id + '" needs either "schema" or "collection" attribute');
+    // If we have a schema, cache it
+    if (schema) {
+      data._resolvedSchema = schema;
     }
-
-    // cache it
-    data._resolvedSchema = schema;
   }
 
   return data;

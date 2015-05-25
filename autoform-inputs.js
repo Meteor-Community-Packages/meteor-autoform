@@ -26,6 +26,7 @@ getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
  * * The `defaultValue` from the schema
  */
 getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fieldDefaultValue, typeDefs) {
+
   if (typeof value === "undefined") {
     // Get the value for this key in the current document
     if (mDoc) {
@@ -145,10 +146,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
 
   // Before returning the context, we allow the registered form type to
   // adjust it if necessary.
-  var ftd = AutoForm._formTypeDefinitions[formType];
-  if (!ftd) {
-    throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
-  }
+  var ftd = Utility.getFormTypeDef(formType);
   if (typeof ftd.adjustInputContext === 'function') {
     inputTypeContext = ftd.adjustInputContext(inputTypeContext);
   }
@@ -158,13 +156,38 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
 
 updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) {
 
-  function markChanged() {
+  if (template) {
     template.formValues = template.formValues || {};
     if (!template.formValues[fieldName]) {
       template.formValues[fieldName] = new Tracker.Dependency();
     }
+    // In case we call updateTrackedFieldValue from multiple places at once,
+    // call .changed() only once
+    if (template.formValues[fieldName].requestInProgress) {
+      return;
+    }
+    template.formValues[fieldName].requestInProgress = true;
+  }
 
-    template.formValues[fieldName].changed();
+  function markChanged() {
+    // We always want to be sure to wait for DOM updates to
+    // finish before we indicate that values have changed.
+    // Using a value of 0 here did not work, but 100 seems to
+    // work in testing. We'll need to keep an eye on this.
+    // Not an ideal solution.
+    setTimeout(function () {
+      // Template or view may have disappeared while
+      // we waited to run this
+      if (template &&
+          template.view &&
+          template.view._domrange &&
+          !template.view.isDestroyed) {
+
+        template.formValues[fieldName].changed();
+        template.formValues[fieldName].requestInProgress = false;
+
+      }
+    }, 100);
   }
 
   markChanged();
