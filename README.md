@@ -1,7 +1,12 @@
-[![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
 
-AutoForm
+AutoForm (FORKED)
 =========================
+
+**PLEASE NOTE**: This is an unofficial fork of ```meteor-autoform```. The original author is currently MIA and we're hopeful will return to work on the package. Until then, I will try to maintain and merge PRs in his absence.
+
+If you want to help, I would like to get started by creating a proper testing suite for AutoForm. Ideally something that uses PhantomJS to verify functionality across the board.
+
+-------------------------
 
 AutoForm is a Meteor package that adds UI components and helpers to easily create basic forms with automatic insert and update events, and automatic reactive validation. This package requires and automatically installs the [simple-schema](https://github.com/aldeed/meteor-simple-schema) package. You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you have to add to your app yourself.
 
@@ -981,7 +986,7 @@ var hooksObject = {
     // alter doc
     // return doc;
   },
-  
+
   // Called every time an update or typeless form
   // is revalidated, which can be often if keyup
   // validation is used.
