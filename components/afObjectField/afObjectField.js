@@ -6,6 +6,6 @@ Template.afObjectField.helpers({
   },
   innerContext: function() {
     var c = AutoForm.Utility.getComponentContext(this, 'afObjectField');
-    return _.extend({{}, this, c.atts);
+    return _.extend({}, this, c.atts);
   }
 });
