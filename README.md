@@ -362,8 +362,9 @@ set (the same effect as setting a `value` attribute on each field within the for
 * `validation`: Optional. See the "Fine Tuning Validation" section.
 * `template`: Optional. See the "Templates" section.
 * `type`: Optional. The form type. Default if not provided is "normal". See [Form Types](#form-types).
-* `meteormethod`: Optional. When `type` is "method", indicate the name of the
+* `meteormethod`: Optional. When `type` is "method" or "method-update", indicate the name of the
 Meteor method in this attribute.
+* `ddp`: Optional. When `type` is "method" or "method-update", provide an alternative DDP Connection that should be used to call the Meteor method in this attribute.
 * `resetOnSuccess`: Optional. The form is automatically reset
 for you after a successful submission action. You can skip this by setting this
 attribute to `false`.
@@ -647,6 +648,8 @@ Use the `scope` attribute on your form to define the array field into which the 
 
 Will call the server method with the name you specify in the `meteormethod` attribute. Passes a single argument, `doc`, which is the document resulting from the form submission.
 
+You may optionally specify a DDP Connection in the `ddp` attribute. If you do, the method will be called using the DDP connection provided.
+
 The method is not called until `doc` is valid on the client.
 
 **You must call `check()` in the method or perform your own validation since a user could bypass the client side validation.**
@@ -657,6 +660,8 @@ Will call the server method with the name you specify in the `meteormethod` attr
 
 * `modifier`: the modifier object generated from the form values
 * `documentId`: the `_id` of the document being updated
+
+You may optionally specify a DDP Connection in the `ddp` attribute. If you do, the method will be called using the DDP connection provided.
 
 The method is not called until `modifier` is valid on the client.
 
