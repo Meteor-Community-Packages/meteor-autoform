@@ -1,12 +1,7 @@
+[![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
 
-AutoForm (FORKED)
+AutoForm
 =========================
-
-**PLEASE NOTE**: This is an unofficial fork of ```meteor-autoform```. The original author is currently MIA and we're hopeful will return to work on the package. Until then, I will try to maintain and merge PRs in his absence.
-
-If you want to help, I would like to get started by creating a proper testing suite for AutoForm. Ideally something that uses PhantomJS to verify functionality across the board.
-
--------------------------
 
 AutoForm is a Meteor package that adds UI components and helpers to easily create basic forms with automatic insert and update events, and automatic reactive validation. This package requires and automatically installs the [simple-schema](https://github.com/aldeed/meteor-simple-schema) package. You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you have to add to your app yourself.
 
@@ -502,11 +497,11 @@ group, that is, everything related to a single field -- the label, the input,
 and the error message -- in one line.
 
 This component accepts the same attributes as `afFieldInput`.
-Attributes that are prefixed with `formgroup-` become attributes on the `div` 
-element, which contains the label and the field. Attributes that are prefixed 
-with `label-` become attributes on the rendered `label` element while any 
-remaining attributes are forwarded to the `afFieldInput` component. You can 
-also set `label=false` to omit the `label` element or set `label` to a 
+Attributes that are prefixed with `formgroup-` become attributes on the `div`
+element, which contains the label and the field. Attributes that are prefixed
+with `label-` become attributes on the rendered `label` element while any
+remaining attributes are forwarded to the `afFieldInput` component. You can
+also set `label=false` to omit the `label` element or set `label` to a
 string to use that text as the label text.
 
 ### afQuickField
