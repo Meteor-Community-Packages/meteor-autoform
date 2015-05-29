@@ -154,50 +154,57 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   return inputTypeContext;
 };
 
+function markChanged(template, fieldName) {
+  // We always want to be sure to wait for DOM updates to
+  // finish before we indicate that values have changed.
+  // Using a value of 0 here did not work, but 100 seems to
+  // work in testing. We'll need to keep an eye on this.
+  // Not an ideal solution.
+  setTimeout(function () {
+    // Template or view may have disappeared while
+    // we waited to run this
+    if (template &&
+        template.view &&
+        template.view._domrange &&
+        !template.view.isDestroyed) {
+
+      template.formValues[fieldName].changed();
+      template.formValues[fieldName].requestInProgress = false;
+
+    }
+  }, 100);
+}
+
 updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) {
-
-  if (template) {
-    template.formValues = template.formValues || {};
-    if (!template.formValues[fieldName]) {
-      template.formValues[fieldName] = new Tracker.Dependency();
-    }
-    // In case we call updateTrackedFieldValue from multiple places at once,
-    // call .changed() only once
-    if (template.formValues[fieldName].requestInProgress) {
-      return;
-    }
-    template.formValues[fieldName].requestInProgress = true;
+  if (!template) {
+    return;
   }
 
-  function markChanged() {
-    // We always want to be sure to wait for DOM updates to
-    // finish before we indicate that values have changed.
-    // Using a value of 0 here did not work, but 100 seems to
-    // work in testing. We'll need to keep an eye on this.
-    // Not an ideal solution.
-    setTimeout(function () {
-      // Template or view may have disappeared while
-      // we waited to run this
-      if (template &&
-          template.view &&
-          template.view._domrange &&
-          !template.view.isDestroyed) {
-
-        template.formValues[fieldName].changed();
-        template.formValues[fieldName].requestInProgress = false;
-
-      }
-    }, 100);
+  template.formValues = template.formValues || {};
+  if (!template.formValues[fieldName]) {
+    template.formValues[fieldName] = new Tracker.Dependency();
   }
+  // In case we call updateTrackedFieldValue from multiple places at once,
+  // call .changed() only once
+  if (template.formValues[fieldName].requestInProgress) {
+    return;
+  }
+  template.formValues[fieldName].requestInProgress = true;
 
-  markChanged();
+  markChanged(template, fieldName);
 
   // To properly handle array fields, we'll mark the ancestors as changed, too
   // XXX Might be a more elegant way to handle this
   var dotPos = fieldName.lastIndexOf('.');
   while (dotPos !== -1) {
     fieldName = fieldName.slice(0, dotPos);
-    markChanged();
+
+    if (!template.formValues[fieldName]) {
+      template.formValues[fieldName] = new Tracker.Dependency();
+    }
+
+    markChanged(template, fieldName);
+
     dotPos = fieldName.lastIndexOf('.');
   }
 };

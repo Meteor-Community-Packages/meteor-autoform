@@ -114,6 +114,7 @@ Dates and times:
 * [notorii:autoform-datetimepicker](https://atmospherejs.com/notorii/autoform-datetimepicker)
 * [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
 * [antalakas:autoform-bs-daterangepicker](https://atmospherejs.com/antalakas/autoform-bs-daterangepicker)
+* [drewy:autoform-datetimepicker](https://atmospherejs.com/drewy/autoform-datetimepicker)
 
 Selects:
 
@@ -157,6 +158,7 @@ Other:
 
 * [meteoric:autoform-ionic](https://github.com/meteoric/autoform-ionic)
 * [fabienb4:autoform-semantic-ui](https://atmospherejs.com/fabienb4/autoform-semantic-ui)
+* [gildaspk:autoform-materialize](https://atmospherejs.com/gildaspk/autoform-materialize)
 
 #### Admin Panels
 
@@ -366,8 +368,9 @@ set (the same effect as setting a `value` attribute on each field within the for
 * `validation`: Optional. See the "Fine Tuning Validation" section.
 * `template`: Optional. See the "Templates" section.
 * `type`: Optional. The form type. Default if not provided is "normal". See [Form Types](#form-types).
-* `meteormethod`: Optional. When `type` is "method", indicate the name of the
+* `meteormethod`: Optional. When `type` is "method" or "method-update", indicate the name of the
 Meteor method in this attribute.
+* `ddp`: Optional. When `type` is "method" or "method-update", provide an alternative DDP Connection that should be used to call the Meteor method in this attribute.
 * `resetOnSuccess`: Optional. The form is automatically reset
 for you after a successful submission action. You can skip this by setting this
 attribute to `false`.
@@ -499,8 +502,12 @@ group, that is, everything related to a single field -- the label, the input,
 and the error message -- in one line.
 
 This component accepts the same attributes as `afFieldInput`.
-Attributes that are prefixed with `label-` become attributes on the rendered `label` element while
-any remaining attributes are forwarded to the `afFieldInput` component. You can also set `label=false` to omit the `label` element or set `label` to a string to use that text as the label text.
+Attributes that are prefixed with `formgroup-` become attributes on the `div` 
+element, which contains the label and the field. Attributes that are prefixed 
+with `label-` become attributes on the rendered `label` element while any 
+remaining attributes are forwarded to the `afFieldInput` component. You can 
+also set `label=false` to omit the `label` element or set `label` to a 
+string to use that text as the label text.
 
 ### afQuickField
 
@@ -647,6 +654,8 @@ Use the `scope` attribute on your form to define the array field into which the 
 
 Will call the server method with the name you specify in the `meteormethod` attribute. Passes a single argument, `doc`, which is the document resulting from the form submission.
 
+You may optionally specify a DDP Connection in the `ddp` attribute. If you do, the method will be called using the DDP connection provided.
+
 The method is not called until `doc` is valid on the client.
 
 **You must call `check()` in the method or perform your own validation since a user could bypass the client side validation.**
@@ -657,6 +666,8 @@ Will call the server method with the name you specify in the `meteormethod` attr
 
 * `modifier`: the modifier object generated from the form values
 * `documentId`: the `_id` of the document being updated
+
+You may optionally specify a DDP Connection in the `ddp` attribute. If you do, the method will be called using the DDP connection provided.
 
 The method is not called until `modifier` is valid on the client.
 
@@ -1291,7 +1302,7 @@ Making a custom input type (form widget) is easy.
 * `valueIn`: Optional. A function that adjusts the initial value of the field, which is then available in your template as `this.value`. You could use this, for example, to change a `Date` object to a string representing the date. You could also use a helper in your template to achieve the same result.
 * `valueOut`: Required. A function that AutoForm calls when it wants to know what the current value stored in your widget is. In this function, `this` is the jQuery object representing the element that has the `data-schema-key` attribute in your custom template. So, for example, in a simple case your `valueOut` function might just do `return this.val()`.
 * `valueConverters`: Optional. An object that defines converters for one or more schema types. Generally you will use `valueOut` to return a value for the most common or logical schema type, and then define one or more converter functions here. The converters receive the `valueOut` value as an argument and should then return either the same value or a type converted/adjusted variation of it. The possible converter keys are: "string", "stringArray", "number", "numberArray", "boolean", "booleanArray", "date", and "dateArray". Refer to the built-in type definitions for examples.
-* `contextAdjust`: Optional. A function that adjusts the context object that your custom template receives. That is, this function accepts an object argument, potentially modifies it, and then returns it. That returned object then becomes `this` in your custom template.
+* `contextAdjust`: Optional. A function that adjusts the context object that your custom template receives. That is, this function accepts an object argument, potentially modifies it, and then returns it. That returned object then becomes `this` in your custom template. If you need access to attributes of the parent autoForm in this function, use `AutoForm.getCurrentDataForForm()` to get them.
 
 It's possible to use template helpers instead of `valueIn` and `contextAdjust`, but by keeping template helpers to a minimum, you make it easier for someone to override the theme template and still use your custom input type. For example, the `bootstrap3` template overrides some of the default input types to add classes and adjust markup a bit, but it does not need to redefine template helpers to make context adjustments since `valueIn` and `contextAdjust` do that.
 
