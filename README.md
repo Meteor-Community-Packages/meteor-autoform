@@ -117,6 +117,7 @@ Selects:
 * [aldeed:autoform-bs-button-group-input](https://atmospherejs.com/aldeed/autoform-bs-button-group-input)
 * [comerc:autoform-selectize](https://atmospherejs.com/comerc/autoform-selectize)
 * [vazco:universe-autoform-select](https://atmospherejs.com/vazco/universe-autoform-select)
+* [lukemadera:autoform-autocomplete](https://atmospherejs.com/lukemadera/autoform-autocomplete)
 
 WYSIWYGs:
 
@@ -129,6 +130,7 @@ Autocompletes:
 * [miguelalarcos:afwrap-xautocomplete](https://atmospherejs.com/miguelalarcos/afwrap-xautocomplete)
 * [comerc:autoform-typeahead](https://atmospherejs.com/comerc/autoform-typeahead)
 * [lukemadera:autoform-googleplace](https://atmospherejs.com/lukemadera/autoform-googleplace)
+* [lukemadera:autoform-autocomplete](https://atmospherejs.com/lukemadera/autoform-autocomplete)
 
 Files:
 
