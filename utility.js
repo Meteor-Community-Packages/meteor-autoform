@@ -118,6 +118,9 @@ Utility = {
    */
   getSelectOptions: function getSelectOptions(defs, hash) {
     var schemaType = defs.type;
+    if(!schemaType){
+      return;
+    }
     var selectOptions = hash.options;
 
     // Handle options="allowed"
@@ -435,11 +438,15 @@ Utility = {
    * an error if we can't find an autoform context.
    */
   getComponentContext: function autoFormGetComponentContext(context, name) {
-    var atts, defs, formComponentAttributes, fieldAttributes, fieldAttributesForComponentType, ss;
+    var atts, defs = {}, formComponentAttributes, fieldAttributes, fieldAttributesForComponentType, ss;
 
     atts = _.clone(context || {});
     ss = AutoForm.getFormSchema();
-    defs = Utility.getDefs(ss, atts.name); //defs will not be undefined
+
+    try{
+      // the field might not exist anymore if the schema has changed
+      defs = Utility.getDefs(ss, atts.name);
+    }catch(e){}
 
     // Look up the tree if we're in a helper, checking to see if any ancestor components
     // had a <componentType>-attribute specified.
