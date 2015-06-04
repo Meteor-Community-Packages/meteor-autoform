@@ -477,9 +477,9 @@ AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTempl
 AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   var field, fieldName, fieldType, arrayItemFieldType, val, typeDef, inputTypeTemplate, dataContext, autoConvert;
 
-  Tracker.nonreactive(function() { 
+  Tracker.nonreactive(function() {
     //don't rerun when data context of element changes, can cause infinite loops
-    
+
     dataContext = Blaze.getData(element);
     if (dataContext && dataContext.atts) {
       autoConvert = dataContext.atts.autoConvert;
@@ -602,7 +602,7 @@ AutoForm.addFormType = function afAddFormType(name, definition) {
  * In addition to returning a boolean that indicates whether the field is currently valid,
  * this method causes the reactive validation messages to appear.
  */
-AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipEmpty) {
+AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipEmpty, throttleTime) {
   var template = AutoForm.templateInstanceForForm(formId);
   if (!template ||
       !template.view ||
@@ -611,7 +611,7 @@ AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipE
     return true;
   }
 
-  return validateField(fieldName, formId, skipEmpty, false);
+  return validateField(fieldName, formId, skipEmpty, false, throttleTime);
 };
 
 /**
