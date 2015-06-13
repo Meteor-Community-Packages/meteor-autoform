@@ -1125,6 +1125,23 @@ summary: {
 
 Tip: Any attribute can instead be provided as a function that returns the attribute's value.
 
+You can pass objects and arrays using the `data` property, for example:
+
+```js
+summary: {
+  type: String,
+  autoform: {
+    data: {
+      someArray: ['apple', 'orange', 'banana'],
+      someObj: {
+        complex: {
+          data: 'structure'
+        }
+      }
+    }
+  }
+}
+
 ## Complex Schemas
 
 You can use mongo dot notation to map an input to a subdocument. For example:

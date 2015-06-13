@@ -90,7 +90,8 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
           "noselect",
           "options",
           "template",
-          "defaultValue");
+          "defaultValue",
+          "data");
 
   // Add required if required
   if (typeof inputAtts.required === "undefined" && !defs.optional) {
@@ -132,7 +133,6 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
    * Set up the context. This is the object that becomes `this` in the
    * input type template.
    */
-
   var inputTypeContext = {
     name: inputAtts.name,
     schemaType: defs.type,
@@ -143,6 +143,14 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
     atts: inputAtts,
     selectOptions: AutoForm.Utility.getSelectOptions(defs, hash)
   };
+
+  /*
+   * Pass through complex data structures defined in the field schema.
+   * We do not want these turned into attributes.
+   */
+  if(hash.data){
+    inputTypeContext.data = hash.hash;
+  }
 
   // Before returning the context, we allow the registered form type to
   // adjust it if necessary.
