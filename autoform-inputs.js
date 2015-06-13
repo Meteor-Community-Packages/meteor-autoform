@@ -149,7 +149,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
    * We do not want these turned into attributes.
    */
   if(hash.data){
-    inputTypeContext.data = hash.hash;
+    inputTypeContext.data = hash.data;
   }
 
   // Before returning the context, we allow the registered form type to
