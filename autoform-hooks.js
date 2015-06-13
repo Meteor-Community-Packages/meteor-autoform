@@ -6,6 +6,7 @@ Hooks = {
     before: {},
     after: {},
     formToDoc: [],
+    formToModifier: [],
     docToForm: [],
     onSubmit: [],
     onSuccess: [],

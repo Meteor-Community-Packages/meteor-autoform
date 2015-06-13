@@ -6,6 +6,7 @@ Template.afFormGroup.helpers({
   },
   innerContext: function afFormGroupContext() {
     var c = AutoForm.Utility.getComponentContext(this, 'afFormGroup');
+    var afFormGroupAtts = formGroupAtts(c.atts);
     var afFieldLabelAtts = formGroupLabelAtts(c.atts);
     var afFieldInputAtts = formGroupInputAtts(c.atts);
 
@@ -30,10 +31,12 @@ Template.afFormGroup.helpers({
 
     return {
       skipLabel: (c.atts.label === false),
+      afFormGroupClass: c.atts['formgroup-class'],
+      afFormGroupAtts: afFormGroupAtts,
       afFieldLabelAtts: afFieldLabelAtts,
       afFieldInputAtts: afFieldInputAtts,
       name: c.atts.name,
-      required: !fieldSchema.optional,
+      required: fieldSchema ? !fieldSchema.optional : false,
       labelText: (typeof c.atts.label === 'string') ? c.atts.label : null
     };
   }
@@ -42,6 +45,17 @@ Template.afFormGroup.helpers({
 /*
  * Private
  */
+
+function formGroupAtts(atts) {
+  // Separate formgroup options from input options; formgroup items begin with 'formgroup-'
+  var labelAtts = {};
+  _.each(atts, function autoFormLabelAttsEach(val, key) {
+    if (key.indexOf('formgroup-') === 0 && key != 'formgroup-class') {
+      labelAtts[key.substring(10)] = val;
+    }
+  });
+  return labelAtts;
+}
 
 function formGroupLabelAtts(atts) {
   // Separate label options from input options; label items begin with 'label-'
@@ -55,11 +69,11 @@ function formGroupLabelAtts(atts) {
 }
 
 function formGroupInputAtts(atts) {
-  // Separate label options from input options; label items begin with 'label-'
+  // Separate input options from label and formgroup options
   // We also don't want the 'label' option
   var inputAtts = {};
   _.each(atts, function autoFormLabelAttsEach(val, key) {
-    if (['id-prefix', 'id', 'label'].indexOf(key) === -1 && key.indexOf('label-') !== 0) {
+    if (['id-prefix', 'id', 'label'].indexOf(key) === -1 && key.indexOf('label-') !== 0 && key.indexOf('formgroup-') !== 0) {
       inputAtts[key] = val;
     }
   });

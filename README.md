@@ -99,40 +99,81 @@ $ meteor add aldeed:autoform
 
 *Submit a pull request to add your package to this list!*
 
-The following community packages provide additional custom input types that you can use in your autoforms:
+#### Custom Input Types
 
-* [aldeed:autoform-select2](https://atmospherejs.com/aldeed/autoform-select2)
+Dates and times:
+
 * [aldeed:autoform-bs-datepicker](https://atmospherejs.com/aldeed/autoform-bs-datepicker)
 * [aldeed:autoform-bs-datetimepicker](https://atmospherejs.com/aldeed/autoform-bs-datetimepicker)
+* [miguelalarcos:afwrap-xdatetime](https://atmospherejs.com/miguelalarcos/afwrap-xdatetime)
+* [notorii:autoform-datetimepicker](https://atmospherejs.com/notorii/autoform-datetimepicker)
+* [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
+* [antalakas:autoform-bs-daterangepicker](https://atmospherejs.com/antalakas/autoform-bs-daterangepicker)
+* [drewy:autoform-datetimepicker](https://atmospherejs.com/drewy/autoform-datetimepicker)
+
+Selects:
+
+* [aldeed:autoform-select2](https://atmospherejs.com/aldeed/autoform-select2)
+* [aldeed:autoform-bs-button-group-input](https://atmospherejs.com/aldeed/autoform-bs-button-group-input)
+* [comerc:autoform-selectize](https://atmospherejs.com/comerc/autoform-selectize)
+* [vazco:universe-autoform-select](https://atmospherejs.com/vazco/universe-autoform-select)
+
+WYSIWYGs:
+
+* [mpowaga:autoform-summernote](https://atmospherejs.com/mpowaga/autoform-summernote)
+* [donchess:autoform-froala](https://atmospherejs.com/donchess/autoform-froala)
+
+Autocompletes:
+
+* [comerc:autoform-placecomplete](https://atmospherejs.com/comerc/autoform-placecomplete)
+* [miguelalarcos:afwrap-xautocomplete](https://atmospherejs.com/miguelalarcos/afwrap-xautocomplete)
+* [comerc:autoform-typeahead](https://atmospherejs.com/comerc/autoform-typeahead)
+* [lukemadera:autoform-googleplace](https://atmospherejs.com/lukemadera/autoform-googleplace)
+
+Files:
+
 * [cfs:autoform](https://atmospherejs.com/cfs/autoform)
 * [yogiben:autoform-file](https://atmospherejs.com/yogiben/autoform-file)
 * [naxio:autoform-file](https://atmospherejs.com/naxio/autoform-file)
-* [mpowaga:autoform-summernote](https://atmospherejs.com/mpowaga/autoform-summernote)
-* [aldeed:autoform-bs-button-group-input](https://atmospherejs.com/aldeed/autoform-bs-button-group-input)
+
+Maps:
+
 * [yogiben:autoform-map](https://atmospherejs.com/yogiben/autoform-map)
-* [comerc:autoform-placecomplete](https://atmospherejs.com/comerc/autoform-placecomplete)
-* [comerc:autoform-bs-more](https://atmospherejs.com/comerc/autoform-bs-more)
-* [comerc:autoform-selectize](https://atmospherejs.com/comerc/autoform-selectize)
-* [miguelalarcos:afwrap-xautocomplete](https://atmospherejs.com/miguelalarcos/afwrap-xautocomplete)
-* [miguelalarcos:afwrap-xdatetime](https://atmospherejs.com/miguelalarcos/afwrap-xdatetime)
-* [comerc:autoform-typeahead](https://atmospherejs.com/comerc/autoform-typeahead)
+
+Ranges/Sliders:
+
+* [elevatedevdesign:autoform-nouislider](https://github.com/ElevateDevelopmentAndDesign/meteor-autoform-nouislider)
+
+Other:
+
 * [comerc:autoform-contenteditable2](https://atmospherejs.com/comerc/autoform-contenteditable2)
+* [hausor:autoform-bs-minicolors](https://atmospherejs.com/hausor/autoform-bs-minicolors)
+
+#### Themes
+
 * [meteoric:autoform-ionic](https://github.com/meteoric/autoform-ionic)
-* [notorii:autoform-datetimepicker](https://atmospherejs.com/notorii/autoform-datetimepicker)
-* [lukemadera:autoform-googleplace](https://atmospherejs.com/lukemadera/autoform-googleplace)
-* [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
-* [vazco:universe-autoform-select](https://atmospherejs.com/vazco/universe-autoform-select)
-* [antalakas:autoform-bs-daterangepicker](https://atmospherejs.com/antalakas/autoform-bs-daterangepicker)
+* [fabienb4:autoform-semantic-ui](https://atmospherejs.com/fabienb4/autoform-semantic-ui)
+* [gildaspk:autoform-materialize](https://atmospherejs.com/gildaspk/autoform-materialize)
 
-The following community packages provide other add-on features related to autoform:
+#### Admin Panels
 
-* [yogiben:admin](https://atmospherejs.com/yogiben/admin) provides CRUD admin pages using autoforms.
-* [forwarder:autoform-wizard](https://atmospherejs.com/forwarder/autoform-wizard) and [planifica:wizard](https://atmospherejs.com/planifica/wizard) provide wizard components for autoform.
-* [yogiben:autoform-modals](https://atmospherejs.com/yogiben/autoform-modals) provides autoform bootstrap modals to insert, update, remove docs from collections.
-* [jameslefrere:autoform-semantic-ui](https://atmospherejs.com/jameslefrere/autoform-semantic-ui) provides a Semantic UI theme for autoform.
-* [comerc:autoform-fixtures](https://github.com/comerc/meteor-autoform-fixtures/) provides fixtures data for Collection2.
-* [kaoskeya:admin](https://atmospherejs.com/kaoskeya/admin) provides autoform based admin panel that integrates with your existing bootstrap design.
-* [orionjs:core](https://atmospherejs.com/orionjs) provides a autoform based CMS.
+* [yogiben:admin](https://atmospherejs.com/yogiben/admin)
+* [kaoskeya:admin](https://atmospherejs.com/kaoskeya/admin)
+
+#### Content Management Systems
+
+* [orionjs:core](https://atmospherejs.com/orionjs)
+
+#### Components
+
+* [comerc:autoform-bs-more](https://atmospherejs.com/comerc/autoform-bs-more)
+* [forwarder:autoform-wizard](https://atmospherejs.com/forwarder/autoform-wizard)
+* [planifica:wizard](https://atmospherejs.com/planifica/wizard)
+* [yogiben:autoform-modals](https://atmospherejs.com/yogiben/autoform-modals)
+
+#### Other
+
+* [comerc:autoform-fixtures](https://github.com/comerc/meteor-autoform-fixtures/)
 
 ## Demo
 
@@ -322,8 +363,9 @@ set (the same effect as setting a `value` attribute on each field within the for
 * `validation`: Optional. See the "Fine Tuning Validation" section.
 * `template`: Optional. See the "Templates" section.
 * `type`: Optional. The form type. Default if not provided is "normal". See [Form Types](#form-types).
-* `meteormethod`: Optional. When `type` is "method", indicate the name of the
+* `meteormethod`: Optional. When `type` is "method" or "method-update", indicate the name of the
 Meteor method in this attribute.
+* `ddp`: Optional. When `type` is "method" or "method-update", provide an alternative DDP Connection that should be used to call the Meteor method in this attribute.
 * `resetOnSuccess`: Optional. The form is automatically reset
 for you after a successful submission action. You can skip this by setting this
 attribute to `false`.
@@ -334,6 +376,7 @@ attribute to `false`.
 * `removeEmptyStrings`: Optional. Set to `false` for an insert or update form to keep empty string values when cleaning the form document.
 * `trimStrings`: Optional. Set to `false` for an insert or update form to keep leading and trailing spaces for string values when cleaning the form document.
 * `setArrayItems`: Optional. Set to `true` for an update form that is updating specific array items. Note that there is a quirk of MongoDB that will create objects instead of arrays when this is set to `true`, if there is not already an array in the database. So if you set this to `true`, be sure that the corresponding array property is never `null` or missing in the database. It must always be an array with 0 or more items.
+* `preserveForm`: Optional. Set to `false` to disable preserving of form values across hot refreshes. This can sometimes help resolve issues with sticky form values.
 * Any additional attributes are passed along to the `<form>` element, meaning that you can add classes, etc. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`.
 
 ### quickForm
@@ -454,8 +497,12 @@ group, that is, everything related to a single field -- the label, the input,
 and the error message -- in one line.
 
 This component accepts the same attributes as `afFieldInput`.
-Attributes that are prefixed with `label-` become attributes on the rendered `label` element while
-any remaining attributes are forwarded to the `afFieldInput` component. You can also set `label=false` to omit the `label` element or set `label` to a string to use that text as the label text.
+Attributes that are prefixed with `formgroup-` become attributes on the `div` 
+element, which contains the label and the field. Attributes that are prefixed 
+with `label-` become attributes on the rendered `label` element while any 
+remaining attributes are forwarded to the `afFieldInput` component. You can 
+also set `label=false` to omit the `label` element or set `label` to a 
+string to use that text as the label text.
 
 ### afQuickField
 
@@ -602,6 +649,8 @@ Use the `scope` attribute on your form to define the array field into which the 
 
 Will call the server method with the name you specify in the `meteormethod` attribute. Passes a single argument, `doc`, which is the document resulting from the form submission.
 
+You may optionally specify a DDP Connection in the `ddp` attribute. If you do, the method will be called using the DDP connection provided.
+
 The method is not called until `doc` is valid on the client.
 
 **You must call `check()` in the method or perform your own validation since a user could bypass the client side validation.**
@@ -612,6 +661,8 @@ Will call the server method with the name you specify in the `meteormethod` attr
 
 * `modifier`: the modifier object generated from the form values
 * `documentId`: the `_id` of the document being updated
+
+You may optionally specify a DDP Connection in the `ddp` attribute. If you do, the method will be called using the DDP connection provided.
 
 The method is not called until `modifier` is valid on the client.
 
@@ -1246,7 +1297,7 @@ Making a custom input type (form widget) is easy.
 * `valueIn`: Optional. A function that adjusts the initial value of the field, which is then available in your template as `this.value`. You could use this, for example, to change a `Date` object to a string representing the date. You could also use a helper in your template to achieve the same result.
 * `valueOut`: Required. A function that AutoForm calls when it wants to know what the current value stored in your widget is. In this function, `this` is the jQuery object representing the element that has the `data-schema-key` attribute in your custom template. So, for example, in a simple case your `valueOut` function might just do `return this.val()`.
 * `valueConverters`: Optional. An object that defines converters for one or more schema types. Generally you will use `valueOut` to return a value for the most common or logical schema type, and then define one or more converter functions here. The converters receive the `valueOut` value as an argument and should then return either the same value or a type converted/adjusted variation of it. The possible converter keys are: "string", "stringArray", "number", "numberArray", "boolean", "booleanArray", "date", and "dateArray". Refer to the built-in type definitions for examples.
-* `contextAdjust`: Optional. A function that adjusts the context object that your custom template receives. That is, this function accepts an object argument, potentially modifies it, and then returns it. That returned object then becomes `this` in your custom template.
+* `contextAdjust`: Optional. A function that adjusts the context object that your custom template receives. That is, this function accepts an object argument, potentially modifies it, and then returns it. That returned object then becomes `this` in your custom template. If you need access to attributes of the parent autoForm in this function, use `AutoForm.getCurrentDataForForm()` to get them.
 
 It's possible to use template helpers instead of `valueIn` and `contextAdjust`, but by keeping template helpers to a minimum, you make it easier for someone to override the theme template and still use your custom input type. For example, the `bootstrap3` template overrides some of the default input types to add classes and adjust markup a bit, but it does not need to redefine template helpers to make context adjustments since `valueIn` and `contextAdjust` do that.
 

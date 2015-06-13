@@ -553,6 +553,19 @@ Utility = {
       atts["class"] = klass;
     }
     return atts;
+  },
+  /**
+   * @method Utility.getFormTypeDef
+   * @private
+   * @param {String} formType The form type
+   * @return {Object} The definition. Throws an error if type hasn't been defined.
+   */
+  getFormTypeDef: function getFormTypeDef(formType) {
+    var ftd = AutoForm._formTypeDefinitions[formType];
+    if (!ftd) {
+      throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
+    }
+    return ftd;
   }
 };
 

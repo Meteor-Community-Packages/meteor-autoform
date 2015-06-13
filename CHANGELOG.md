@@ -6,6 +6,18 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.3.0
+
+* Fix `Uncaught TypeError: Cannot read property 'changed' of undefined` error
+* Fix for checkboxes and radio buttons not triggering form change event (Thanks @abecks)
+* Add `ddp` attribute for specifying an alternative DDP connection for "method" and "method-update" forms (Thanks @patrickleet)
+* Add support for `formgroup-` prefix on `afFormGroup`/`afQuickField` attributes. For example, `formgroup-class="foo"` adds "foo" class to the form group element. (Thanks @fknipp)
+* For Bootstrap theme templates, you can now specify `panelClass`, `headingClass`, and `bodyClass` attributes for the `afObjectField` component. (Thanks @fknipp)
+
+### 5.2.0
+
+Fix issues with errors being thrown during reactive changes and issues with getting reactive field values.
+
 ### 5.1.2
 
 Fix validation of typeless forms when done with `AutoForm.validateForm()`
