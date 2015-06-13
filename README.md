@@ -1141,6 +1141,7 @@ summary: {
     }
   }
 }
+```
 
 ## Complex Schemas
 
