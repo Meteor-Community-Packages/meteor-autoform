@@ -454,14 +454,14 @@ AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTempl
   // if the enclosing view is not a template, perhaps because
   // the template contains a block helper like if, with, each,
   // then look up the view chain until we arrive at a template
-  while (view && view.name.slice(0, 9) !== "Template.") {
+  while (view && view.name.indexOf('Template') === -1 && view.name.indexOf('BlazeComponent') === -1) {
     view = view.originalParentView || view.parentView;
   }
 
   if (!view) return;
 
-  // View names have "Template." at the beginning so we slice that off.
-  return view.name.slice(9);
+  // View names have "Template." or "BlazeComponent." at the beginning so we slice that off.
+  return view.name.slice(view.name.indexOf('.') + 1);
 };
 
 /**
