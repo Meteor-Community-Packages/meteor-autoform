@@ -32,17 +32,7 @@ AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) {
     _.each(formIds, function (formId) {
 
       // Init the hooks object if not done yet
-      Hooks.form[formId] = Hooks.form[formId] || {
-        before: {},
-        after: {},
-        formToDoc: [],
-        docToForm: [],
-        onSubmit: [],
-        onSuccess: [],
-        onError: [],
-        beginSubmit: [],
-        endSubmit: []
-      };
+      Hooks.form[formId] = Hooks.form[formId] || Hooks.getDefault();
 
       Hooks.addHooksToList(Hooks.form[formId], hooks, replace);
     });
