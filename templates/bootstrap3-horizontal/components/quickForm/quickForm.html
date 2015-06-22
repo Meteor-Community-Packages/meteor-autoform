@@ -1,6 +1,16 @@
 <template name="quickForm_bootstrap3-horizontal">
+
   {{#autoForm qfAutoFormContext}}
-  {{> afQuickFields quickFieldsAtts}}
+
+  {{#each fieldGroups}}
+    <fieldset class="{{fieldGroupClass}}">
+      {{#if fieldGroupLabel}}
+        <legend class="af-fieldgroup-heading">{{fieldGroupLabel}}</legend>
+      {{/if}}
+      {{> afQuickFields quickFieldsAtts}}
+    </fieldset>
+  {{/each}}
+
   {{#if qfShouldRenderButton}}
   <div class="form-group">
     <div class="{{labelClass}}"></div>
@@ -15,5 +25,7 @@
     </div>
   </div>
   {{/if}}
+
   {{/autoForm}}
+
 </template>
