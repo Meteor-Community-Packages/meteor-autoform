@@ -40,7 +40,7 @@ AutoForm.addFormType('update-pushArray', {
   },
   adjustSchema: function (ss) {
     var scope = this.form.scope, newSchemaDef = {};
-    var searchString = scope+'.$.';
+    var searchString = scope.replace(/[0-9]/g, "$") +'.$.';
 
     // create new SS instance with only the fields that begin with `scope`
     _.each(ss.schema(), function (val, key) {
