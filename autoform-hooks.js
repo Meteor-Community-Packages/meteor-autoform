@@ -4,10 +4,7 @@ Hooks = {
   form: {}
 };
 
-/**
- * The names of all supported hooks, excluding "before" and "after".
- * @type {String}
- */
+// The names of all supported hooks, excluding "before" and "after".
 var hookNames = ['formToDoc', 'formToModifier', 'docToForm', 'onSubmit', 'onSuccess', 'onError',
     'beginSubmit', 'endSubmit'];
 
