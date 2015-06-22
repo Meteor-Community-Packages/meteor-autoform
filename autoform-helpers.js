@@ -225,6 +225,11 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
   fieldList = _.filter(fieldList, function shouldIncludeField(field) {
     var fieldDefs = ss.schema(field);
 
+    // Don't include fields that are not in the schema
+    if (!fieldDefs) {
+      return false;
+    }
+
     // Don't include fields with autoform.omit=true
     if (fieldDefs.autoform && fieldDefs.autoform.omit === true) {
       return false;
