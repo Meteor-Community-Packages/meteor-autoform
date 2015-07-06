@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.3.1
+
+Fix issue where `afFieldValue` tracking didn't work for non-boolean radio buttons and check boxes.
+
 ### 5.3.0
 
 * Fix `Uncaught TypeError: Cannot read property 'changed' of undefined` error
