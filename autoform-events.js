@@ -398,13 +398,11 @@ Template.autoForm.events({
     // especially in an autosave situation. This is an attempt to
     // prevent that from happening.
     var keyVal;
-    switch(event.target.type){
-      case 'checkbox':
-      case 'radio':
-        keyVal = $(event.target).prop('checked');
-        break;
-      default:
-        keyVal = event.target.value;
+    if (event.target.type === 'checkbox' && event.target.value === 'true') {
+      // Special handling for boolean checkboxes, which always have the value "true"
+      keyVal = $(event.target).prop('checked');
+    } else {
+      keyVal = event.target.value;
     }
 
     keyVal = key + '___' + keyVal;
