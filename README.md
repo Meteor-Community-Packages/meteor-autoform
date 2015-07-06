@@ -144,7 +144,11 @@ Maps:
 
 Ranges/Sliders:
 
-* [elevatedevdesign:autoform-nouislider](https://github.com/ElevateDevelopmentAndDesign/meteor-autoform-nouislider)
+* [elevatedevdesign:autoform-nouislider](https://github.com/ElevateDev/meteor-autoform-nouislider)
+
+Payments
+
+* [elevatedevdesign:autoform-jquery-payments](https://github.com/ElevateDev/meteor-autoform-jquery-payments)
 
 Other:
 
