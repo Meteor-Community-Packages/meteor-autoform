@@ -525,7 +525,7 @@ Refer to the "Objects and Arrays" section for additional information.
 ```html
 {{> afQuickField name='firstField' autofocus=''}}
 {{> afQuickField name='weirdColors' style="color: orange" label-style="color: green"}}
-{{> afQuickField name="longString" rows="5"}}
+{{> afQuickField name="longString" rows=5}}
 {{> afQuickField name="radioBoolean" type="boolean-radios" trueLabel="Yes" falseLabel="No"}}
 {{> afQuickField name="selectBoolean" type="boolean-select" trueLabel="Yes" falseLabel="No"}}
 {{> afQuickField name="optionsButNoSelect" options=numSelectOptions noselect="true"}}
