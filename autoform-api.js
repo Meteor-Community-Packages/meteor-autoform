@@ -467,9 +467,9 @@ AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTempl
 AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   var field, fieldName, fieldType, arrayItemFieldType, val, typeDef, inputTypeTemplate, dataContext, autoConvert;
 
-  Tracker.nonreactive(function() { 
+  Tracker.nonreactive(function() {
     //don't rerun when data context of element changes, can cause infinite loops
-    
+
     dataContext = Blaze.getData(element);
     if (dataContext && dataContext.atts) {
       autoConvert = dataContext.atts.autoConvert;
@@ -999,6 +999,18 @@ AutoForm.getArrayCountFromDocForField = function (formId, field) {
     }
   }
   return docCount;
+};
+
+/**
+ * @method AutoForm.parseData
+ * @public
+ * @param {Object} data Current data context for the form, or an empty object. Usually this is used from a quickForm, since the autoForm won't be rendered yet. Otherwise you should use AutoForm.getCurrentDataForForm if you can.
+ * @returns {Object} Current data context for the form, or an empty object.
+ *
+ * Parses and alters the current data context for a form. It will have default values added and a `_resolvedSchema` property that has the schema the form should use.
+ */
+AutoForm.parseData = function (data) {
+  return setDefaults(data);
 };
 
 /**

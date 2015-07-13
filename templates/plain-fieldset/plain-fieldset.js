@@ -11,10 +11,5 @@ Template['quickForm_plain-fieldset'].helpers({
       atts['class'] = qfAtts.buttonClasses;
     }
     return atts;
-  },
-  qfAutoFormContext: function () {
-    var ctx = _.clone(this.qfAutoFormContext);
-    delete ctx['id-prefix'];
-    return ctx;
   }
 });

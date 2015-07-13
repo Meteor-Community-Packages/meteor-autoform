@@ -16,7 +16,7 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
   }
 
   var form = AutoForm.getCurrentDataForForm(formId);
-  var ss = AutoForm.getFormSchema(formId);
+  var ss = AutoForm.getFormSchema(formId, form);
 
   if (!ss) {
     return true;

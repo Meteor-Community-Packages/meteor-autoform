@@ -26,14 +26,13 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
       return SimpleSchema.defaultLabel(name);
     } else {
       // else, just capitalise name
-      return name.charAt(0).toUpperCase() + name.slice(1)
+      return name.charAt(0).toUpperCase() + name.slice(1);
     }
   },
   quickFieldsAtts: function () {
     // These are the quickForm attributes that we want to forward to
     // the afQuickFields component.
-    atts = _.pick(this.atts, 'fields', 'id-prefix', 'input-col-class', 'label-class');
-    return atts;
+    return _.pick(this.atts, 'fields', 'id-prefix', 'input-col-class', 'label-class');
   },
   submitButtonAtts: function () {
     var qfAtts = this.atts;
@@ -47,10 +46,15 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   },
   qfAutoFormContext: function () {
     var ctx = _.clone(this.qfAutoFormContext || {});
-    ctx = AutoForm.Utility.addClass(ctx, "form-horizontal");
-    delete ctx["input-col-class"];
-    delete ctx["label-class"];
-    delete ctx["id-prefix"];
+    ctx = AutoForm.Utility.addClass(ctx, 'form-horizontal');
+
+    // input-col-class and label-class attributes are unique to this template so they will
+    // not have been removed by AutoForm core. We remove them from the autoForm context
+    // because they are attributes supported only by quickFields, quickField,
+    // afObjectField, afArrayField, and afFormGroup.
+    delete ctx['input-col-class'];
+    delete ctx['label-class'];
+
     return ctx;
   }
 });
