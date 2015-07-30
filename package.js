@@ -13,7 +13,7 @@ Package.onUse(function(api) {
   api.use('check');
   // client
   api.use(['livedata', 'underscore', 'deps', 'templating', 'ui', 'blaze', 'ejson', 'reactive-var', 'reactive-dict', 'random'], 'client');
-  api.use('momentjs:moment@2.8.4', 'client');
+  api.use('momentjs:moment@2.10.6', 'client');
   api.use('mrt:moment-timezone@0.2.1', 'client', {weak: true});
   api.use(['aldeed:collection2@2.0.0', 'reload'], 'client', {weak: true});
 
