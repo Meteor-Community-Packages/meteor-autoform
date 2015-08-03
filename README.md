@@ -503,11 +503,11 @@ group, that is, everything related to a single field -- the label, the input,
 and the error message -- in one line.
 
 This component accepts the same attributes as `afFieldInput`.
-Attributes that are prefixed with `formgroup-` become attributes on the `div` 
-element, which contains the label and the field. Attributes that are prefixed 
-with `label-` become attributes on the rendered `label` element while any 
-remaining attributes are forwarded to the `afFieldInput` component. You can 
-also set `label=false` to omit the `label` element or set `label` to a 
+Attributes that are prefixed with `formgroup-` become attributes on the `div`
+element, which contains the label and the field. Attributes that are prefixed
+with `label-` become attributes on the rendered `label` element while any
+remaining attributes are forwarded to the `afFieldInput` component. You can
+also set `label=false` to omit the `label` element or set `label` to a
 string to use that text as the label text.
 
 ### afQuickField
@@ -998,7 +998,7 @@ var hooksObject = {
     // alter doc
     // return doc;
   },
-  
+
   // Called every time an update or typeless form
   // is revalidated, which can be often if keyup
   // validation is used.
@@ -1289,6 +1289,28 @@ If you create a good set of templates for a commonly used framework or a
 common purpose, consider releasing it as a separate add-on package. The goal
 is to keep the built-in templates minimal but to provide many others through
 separate packages.
+
+## Grouping Fields
+
+The "plain", "bootstrap", and "bootstrap-horizontal" quickForm templates allow you to group fields into fieldsets in the schema if you want.
+
+For example if you add this to several of the fields in your form schema:
+
+```js
+{
+  autoform: {
+    group: 'Contact Information'
+  }
+}
+```
+
+Then all of those fields will be grouped into a `fieldset` with a `legend` that says "Contact Information". The fieldsets appear below any fields that do no list a group.
+
+This only affects quickForms.
+
+The `fieldset` has class "af-fieldGroup" and the `legend` has class "af-fieldGroup-heading" to help with styling.
+
+The [Telescope](https://telescope.readme.io/docs) app makes use of this feature. Thanks to **@SachaG** for contributing it.
 
 ## Defining Custom Input Types
 
