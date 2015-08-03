@@ -6,6 +6,13 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.4.0
+
+* New `autoform.group` option. See "Grouping Fields" in README. (Thanks @SachaG)
+* `formToModifier` now works properly (Thanks @aramk)
+* `update-pushArray` forms now work properly when there is an array index in the `scope` field
+* Other minor documentation and dependency changes
+
 ### 5.3.2
 
 Better fix to `afFieldValue` tracking for check boxes
