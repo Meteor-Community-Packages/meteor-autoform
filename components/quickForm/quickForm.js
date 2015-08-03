@@ -5,75 +5,54 @@ Template.quickForm.helpers({
     return AutoForm.getTemplateName('quickForm', this.template);
   },
   innerContext: function quickFormContext() {
-    var atts = AutoForm.parseData(_.clone(this));
+    var atts = this;
+    var adjustedData = AutoForm.parseData(_.clone(this));
+    var simpleSchema = adjustedData._resolvedSchema;
     var sortedSchema = {};
     var fieldGroups = [];
+    var grouplessFieldContext;
 
     // --------------- A. Schema --------------- //
-    // get schema
-    // note: replace this by a standard function?
 
-    if (atts.fields) {
-      // if atts.fields exists, transform it into an array
-      // note: is there a standard function we can use here instead of replace and split?
-      atts.fields = atts.fields.replace(' ', '').split(',');
+    var fieldList = atts.fields;
+    if (fieldList) {
+      fieldList = AutoForm.Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
 
-      // then loop over atts.fields to restrict the schema to its fields and reorder it
-      var simpleSchema = atts._resolvedSchema;
-      atts.fields.forEach(function (fieldName) {
-        var genericFieldName = SimpleSchema._makeGeneric(fieldName); // use '$'' instead of '0'
-        sortedSchema[fieldName] = simpleSchema.schema(genericFieldName);
+      // get the schema object, but sorted into the same order as the field list
+      fieldList.forEach(function (fieldName) {
+        sortedSchema[fieldName] = simpleSchema.schema(fieldName);
       });
+    } else {
+      sortedSchema = simpleSchema.schema();
     }
 
     // --------------- B. Field With No Groups --------------- //
 
-    // copy atts
-    var defaultGroup = {name: '_defaultGroup', atts: _.clone(atts)};
-
-    // get all fields with no field group specified
-    // but exclude fields whose name end with a '$'
-    defaultGroup.atts.fields = _.map(sortedSchema, function (field, fieldName) {
-      return fieldName &&
-        (fieldName.slice(-1) !== '$') &&
-        (!field.autoform || !field.autoform.group);
-    });
-    defaultGroup.atts.fields = _.compact(defaultGroup.atts.fields);
-
-    // do not push empty groups
-    if (!!defaultGroup.atts.fields.length) {
-      fieldGroups.push(defaultGroup);
+    var grouplessFields = getFieldsWithNoGroup(sortedSchema);
+    if (grouplessFields.length > 0) {
+      grouplessFieldContext = {
+        atts: _.extend({}, atts, {fields: grouplessFields}),
+        fields: grouplessFields
+      };
     }
 
     // --------------- C. Field With Groups --------------- //
 
-    // get list of unique field groups with any falsy values removed
-    var fieldGroupNames = _.compact(_.unique(_.map(sortedSchema, function (field) {
-      return field.autoform && field.autoform.group ;
-    }))).sort();
+    // get sorted list of field groups
+    var fieldGroupNames = getSortedFieldGroupNames(sortedSchema);
 
-    // loop over field group names, and push relevant field to fieldGroups array
-    // but exclude fields whose name end with a '$'
+    // Loop through the list and make a field group context for each
     _.each(fieldGroupNames, function (fieldGroupName) {
-      // for each field group, get list of field names
-      var fieldsForGroup = _.compact(_.map(sortedSchema, function (field, fieldName) {
-        return (fieldName.slice(-1) !== '$') && field.autoform && field.autoform.group && field.autoform.group === fieldGroupName && fieldName;
-      }));
+      var fieldsForGroup = getFieldsForGroup(fieldGroupName, sortedSchema);
 
-      // make sure the group is not empty
-      if (!!fieldsForGroup.length) {
-
-        // copy parent atts over to field group context, while adding 'name' and overwriting 'fields'
-        var group = {
+      if (fieldsForGroup.length > 0) {
+        fieldGroups.push({
           name: fieldGroupName,
-          atts: _.clone(atts) // note: clone atts to make sure we don't modify the original
-        };
-        group.atts.fields = fieldsForGroup;
-        fieldGroups.push(group);
+          atts: _.extend({}, atts, {fields: fieldsForGroup}),
+          fields: fieldsForGroup
+        });
       }
-
     });
-
 
     // --------------- D. Context --------------- //
 
@@ -93,8 +72,71 @@ Template.quickForm.helpers({
       qfAutoFormContext: qfAutoFormContext,
       atts: atts,
       qfShouldRenderButton: qfShouldRenderButton,
-      fieldGroups: fieldGroups
+      fieldGroups: fieldGroups,
+      grouplessFields: grouplessFieldContext
     };
     return context;
   }
 });
+
+/* Private Functions */
+
+/**
+ * Takes a schema object and returns a sorted array of field group names for it
+ *
+ * @param   {Object}   schemaObj Like from mySimpleSchema.schema()
+ * @returns {String[]} Array of field group names
+ */
+function getSortedFieldGroupNames(schemaObj) {
+  var names = _.map(schemaObj, function (field) {
+    return field.autoform && field.autoform.group;
+  });
+
+  // Remove undefined
+  names = _.compact(names);
+
+  // Remove duplicate names
+  names = _.unique(names);
+
+  return names.sort();
+}
+
+/**
+ * Returns the schema field names that belong in the group.
+ *
+ * @param   {String}   groupName The group name
+ * @param   {Object}   schemaObj Like from mySimpleSchema.schema()
+ * @returns {String[]} Array of field names (schema keys)
+ */
+function getFieldsForGroup(groupName, schemaObj) {
+  var fields = _.map(schemaObj, function (field, fieldName) {
+    return (fieldName.slice(-2) !== '.$') &&
+      field.autoform &&
+      field.autoform.group === groupName &&
+      fieldName;
+  });
+
+  // Remove undefined
+  fields = _.compact(fields);
+
+  return fields;
+}
+
+/**
+ * Returns the schema field names that don't belong to a group
+ *
+ * @param   {Object}   schemaObj Like from mySimpleSchema.schema()
+ * @returns {String[]} Array of field names (schema keys)
+ */
+function getFieldsWithNoGroup(schemaObj) {
+  var fields = _.map(schemaObj, function (field, fieldName) {
+    return (fieldName.slice(-2) !== '.$') &&
+      (!field.autoform || !field.autoform.group) &&
+      fieldName;
+  });
+
+  // Remove undefined
+  fields = _.compact(fields);
+
+  return fields;
+}

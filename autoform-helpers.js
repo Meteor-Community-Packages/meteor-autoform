@@ -168,7 +168,7 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
 
     // If top level fields, be sure to remove any with $ in them
     else {
-      fieldList = _.filter(fieldList, function filterFieldsByName(field) {
+      fieldList = _.filter(fieldList, function filterArrayFields(field) {
         return (field.slice(-2) !== '.$' && field.indexOf('.$.') === -1);
       });
     }

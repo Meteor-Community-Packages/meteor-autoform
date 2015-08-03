@@ -5,9 +5,6 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
   labelClass: function () {
     return this.atts["label-class"];
   },
-  fieldGroupClass: function () {
-    return this.name === '_defaultGroup' ? 'af-defaultFieldGroup' : 'af-fieldGroup';
-  },
   fieldGroupLabel: function () {
     var name = this.name;
 
