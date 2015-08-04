@@ -407,16 +407,52 @@ See [this demo](http://autoform.meteor.com/qfdetails) for examples of what happe
 
 ### afFieldInput
 
-Renders an input control for the field. The type of control depends on what you set the `type` attribute to. All of the HTML5 input types plus a few more are built in. There are add-on packages that provide additional input types (widgets, UI controls).
+Renders an input control for the field. The type of control depends on what you set the `type` attribute to. All of the HTML5 input types plus a few more are built in. Here is the full list of included input types:
+
+* boolean-checkbox
+* boolean-radios
+* boolean-select
+* button
+* color
+* contenteditable
+* date
+* datetime
+* datetime-local
+* email
+* file
+* hidden
+* image
+* month
+* number
+* password
+* radio
+* range
+* reset
+* search
+* select
+* select-checkbox
+* select-checkbox-inline
+* select-multiple
+* select-radio
+* select-radio-inline
+* submit
+* tel
+* text
+* textarea
+* time
+* url
+* week
+
+There are add-on packages that provide additional input types (widgets, UI controls).
 
 If you don't include a `type` attribute, the following logic is used to automatically select an appropriate type:
 
-* If you supply the `options` attribute, a `<select>` control is used. If your schema expects an array for the field, then it is a multiple-select control. If you prefer radios or checkboxes (for example, if it is a short list of options), then add `noselect=true` attribute.
-* Otherwise if the schema type is `String` and you include the `rows` attribute, a `<textarea>` is used.
-* Otherwise if the schema type is `Number`, `<input type="number">` is used.
-* Otherwise if the schema type is `Date`, `<input type="date">` is used.
-* Otherwise if the schema type is `Boolean`, the "boolean-checkbox" type is used. You may want to specify an override type of "boolean-radios" or "boolean-select" instead. If you do so, use the `trueLabel` and `falseLabel` attributes to set the labels used in the radio or select control.
-* Otherwise `<input type="text">` is used.
+* If you supply the `options` attribute, a `select` input is used. If your schema expects an array for the field, then it is a `select-multiple` input. If you prefer radios or checkboxes (for example, if it is a short list of options), then add `noselect=true` attribute or simply set the `type` to `select-checkbox`, `select-checkbox-inline`, `select-radio`, or `select-radio-inline`.
+* Otherwise if the schema type is `String` and you include the `rows` attribute, a `textarea` is used.
+* Otherwise if the schema type is `Number`, a `number` type is used.
+* Otherwise if the schema type is `Date`, a `date` type is used.
+* Otherwise if the schema type is `Boolean`, the `boolean-checkbox` type is used. You may want to specify a `type` of `boolean-radios` or `boolean-select` instead. If you do so, use the `trueLabel` and `falseLabel` attributes to set the labels used in the radio or select control.
+* Otherwise a `text` type is used.
 
 The following attributes are recognized:
 
@@ -433,9 +469,9 @@ to capitalize the labels generated from `allowedValues`.
 * `noselect`: Use in conjunction with `options` attribute. Set this attribute
 to `true` to render radios or checkboxes for the `options` instead of `select`.
 * `trueLabel`: Set to the string that should be used as the label for the `true`
-option for a boolean field.
+option for an input with type `boolean-select` or `boolean-radios`.
 * `falseLabel`: Set to the string that should be used as the label for the `false`
-option for a boolean field.
+option for an input with type `boolean-select` or `boolean-radios`.
 * `value`: Set a specific, potentially reactive, value for the input. If you have also provided a `doc` attribute on the `autoForm` or `quickForm`, this value will override the value from the `doc` object.
 * `defaultValue`: Set a reactive default value for the input. If you have also provided a `doc` attribute on the `autoForm` or `quickForm`, this value will be used only when the `doc` object has no value for this field. This takes precedence over the `defaultValue` property of the field's schema. (Also, `defaultValue` from the schema is slightly different in that it is never used if you provide a `doc` attribute.)
 *  Any additional attributes are passed along to the generated DOM element, meaning that you can add `class`, etc. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`.
