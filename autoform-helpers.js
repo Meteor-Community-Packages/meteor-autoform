@@ -5,9 +5,9 @@ function parseOptions(options) {
   // Find the form's schema
   var ss = AutoForm.getFormSchema();
   // Call getDefs for side effect of throwing errors when name is not in schema
-  if (hash.name) {
-    AutoForm.Utility.getDefs(ss, hash.name);
-  }
+  //if (hash.name) {
+  //  AutoForm.Utility.getDefs(ss, hash.name);
+  //}
   return _.extend({}, hash, {ss: ss});
 }
 
