@@ -404,10 +404,10 @@ Template.autoForm.events({
     }
 
     keyVal = key + '___' + keyVal;
-
-    if (keyVal === lastKeyVal) {
-      return;
-    }
+    //This would cause drop down 'select' change not submit occationally in each loop. Commenting it out fixed the issue.
+    // if (keyVal === lastKeyVal) {
+    //   return;
+    // }
     lastKeyVal = keyVal;
 
     var formId = this.id;
