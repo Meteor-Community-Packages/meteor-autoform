@@ -90,7 +90,8 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
           "noselect",
           "options",
           "template",
-          "defaultValue");
+          "defaultValue",
+          "data");
 
   // Add required if required
   if (typeof inputAtts.required === "undefined" && !defs.optional) {
@@ -143,6 +144,14 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
     atts: inputAtts,
     selectOptions: AutoForm.Utility.getSelectOptions(defs, hash)
   };
+
+  /*
+   * Merge data property from the field schema with the context.
+   * We do not want these turned into HTML attributes.
+   */
+  if(hash.data){
+    _.extend(inputTypeContext, hash.data);
+  }
 
   // Before returning the context, we allow the registered form type to
   // adjust it if necessary.
