@@ -1,4 +1,4 @@
-/* global AutoForm, ReactiveVar, arrayTracker, Hooks, MongoObject, updateAllTrackedFieldValues, Utility, setDefaults */
+/* global AutoForm, ReactiveVar, arrayTracker, Hooks, MongoObject, Utility, setDefaults */
 
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
@@ -68,8 +68,6 @@ Template.autoForm.created = function autoFormCreated() {
   // be wiped out by further client validation.
   template._stickyErrors = {};
 
-  template.fieldValuesReady = new ReactiveVar(false);
-
   template.autorun(function (c) {
     var data = Template.currentData(); // rerun when current data changes
     var formId = data.id;
@@ -127,17 +125,19 @@ Template.autoForm.created = function autoFormCreated() {
     } else {
       AutoForm.reactiveFormData.sourceDoc(formId, null);
     }
-
-    // This ensures that anything dependent on field values will properly
-    // react to field values set from the database document. That is,
-    // computations dependent on AutoForm.getFieldValue will rerun properly
-    // when the form is initially rendered using values from `doc`.
-    updateAllTrackedFieldValues(template);
   });
 };
 
 Template.autoForm.rendered = function autoFormRendered() {
-  this.fieldValuesReady.set(true);
+  var lastId;
+  this.autorun(function () {
+    var data = Template.currentData(); // rerun when current data changes
+
+    if (data.id === lastId) return;
+    lastId = data.id;
+
+    AutoForm.triggerFormRenderedDestroyedReruns(data.id);
+  });
 };
 
 Template.autoForm.destroyed = function autoFormDestroyed() {
@@ -152,4 +152,7 @@ Template.autoForm.destroyed = function autoFormDestroyed() {
 
   // Unregister form preservation
   AutoForm.formPreserve.unregisterForm(formId);
+
+  // Trigger value reruns
+  AutoForm.triggerFormRenderedDestroyedReruns(formId);
 };

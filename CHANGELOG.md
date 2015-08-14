@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.4.1
+
+* Fix `AutoForm.getFieldValue` so that it reacts properly when first called outside of the form, before the form has been rendered. Also attempt to limit unnecessary reruns.
+
 ### 5.4.0
 
 * New `autoform.group` option. See "Grouping Fields" in README. (Thanks @SachaG)

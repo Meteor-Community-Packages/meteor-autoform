@@ -69,8 +69,12 @@ Template.afFieldInput.helpers({
     // blocks involved.
     // See https://github.com/aldeed/meteor-autoform/issues/461
     var template = AutoForm.templateInstanceForForm();
-    updateTrackedFieldValue(template, c.atts.name);
-    
+    if (template.view.isRendered) {
+      // No need to do this on first run because we'll rerun the value functions
+      // once the form is rendered anyway
+      updateTrackedFieldValue(template, c.atts.name);
+    }
+
     // Build input data context
     var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), form.type);
 

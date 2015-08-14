@@ -404,11 +404,11 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
   var template = Tracker.nonreactive(function () {
     return AutoForm.templateInstanceForForm(formId);
   });
-  if (!template ||
-      !template.fieldValuesReady.get() ||
-      !template.view ||
-      !template.view._domrange ||
-      template.view.isDestroyed) {
+
+  if (!template) {
+    if (formId) {
+      AutoForm.rerunWhenFormRenderedOrDestroyed(formId);
+    }
     return;
   }
 
@@ -418,6 +418,12 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
     template.formValues[fieldName] = new Tracker.Dependency();
   }
   template.formValues[fieldName].depend();
+
+  if (!template.view ||
+      !template.view._domrange ||
+      template.view.isDestroyed) {
+    return;
+  }
 
   var doc = AutoForm.getFormValues(formId, template, null, false);
   if (!doc) {
@@ -1249,4 +1255,19 @@ setDefaults = function setDefaults(data) {
   }
 
   return data;
+};
+
+var waitingForForms = {};
+AutoForm.rerunWhenFormRenderedOrDestroyed = function (formId) {
+  if (!_.has(waitingForForms, formId)) {
+    waitingForForms[formId] = new Tracker.Dependency();
+  }
+  waitingForForms[formId].depend();
+};
+
+AutoForm.triggerFormRenderedDestroyedReruns = function (formId) {
+  if (!_.has(waitingForForms, formId)) {
+    waitingForForms[formId] = new Tracker.Dependency();
+  }
+  waitingForForms[formId].changed();
 };
