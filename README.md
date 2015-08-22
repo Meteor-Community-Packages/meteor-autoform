@@ -165,6 +165,7 @@ Other:
 
 * [yogiben:admin](https://atmospherejs.com/yogiben/admin)
 * [kaoskeya:admin](https://atmospherejs.com/kaoskeya/admin)
+* [vimes1984:foundation-angular-admin](https://atmospherejs.com/vimes1984/foundation-angular-admin)
 
 #### Content Management Systems
 
