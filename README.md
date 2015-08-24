@@ -464,6 +464,7 @@ element to be a `select` element with these options, unless you also use
 `noselect`. To use the `allowedValues` from the schema as the options, set
 `options="allowed"`. To specify a label to be displayed when there is no
 option selected, set `firstOption="(My Select One Label)"`.
+* `firstOption`: Use with the `options` attribute to specify a string to use for the first option of a `select` input, which shows when nothing has been selected yet. For example, `firstOption="(You Should Really Pick Something From This List)"`. There is a default first option "(Select One)". If you don't want any default option, then do `firstOption=false`, but make sure your `select` input has a default `value` or this will result in a confusing UX where it looks like the first option is selected but it isn't.
 * `capitalize`: Used only when you've set `options="allowed"`. Set this to `true`
 to capitalize the labels generated from `allowedValues`.
 * `noselect`: Use in conjunction with `options` attribute. Set this attribute
