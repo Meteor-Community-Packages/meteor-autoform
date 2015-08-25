@@ -123,6 +123,7 @@ WYSIWYGs:
 
 * [mpowaga:autoform-summernote](https://atmospherejs.com/mpowaga/autoform-summernote)
 * [donchess:autoform-froala](https://atmospherejs.com/donchess/autoform-froala)
+* [vimes1984:autoform-textangular](https://atmospherejs.com/vimes1984/autoform-textangular)
 
 Autocompletes:
 
