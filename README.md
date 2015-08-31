@@ -451,7 +451,7 @@ If you don't include a `type` attribute, the following logic is used to automati
 * Otherwise if the schema type is `String` and you include the `rows` attribute, a `textarea` is used.
 * Otherwise if the schema type is `Number`, a `number` type is used.
 * Otherwise if the schema type is `Date`, a `date` type is used.
-* Otherwise if the schema type is `Boolean`, the `boolean-checkbox` type is used. You may want to specify a `type` of `boolean-radios` or `boolean-select` instead. If you do so, use the `trueLabel` and `falseLabel` attributes to set the labels used in the radio or select control.
+* Otherwise if the schema type is `Boolean`, the `boolean-checkbox` type is used. You may want to specify a `type` of `boolean-radios` or `boolean-select` instead. If you do so, use the `trueLabel`, `falseLabel`, and `nullLabel` attributes to set the labels used in the radio or select control.
 * Otherwise a `text` type is used.
 
 The following attributes are recognized:
@@ -473,6 +473,7 @@ to `true` to render radios or checkboxes for the `options` instead of `select`.
 option for an input with type `boolean-select` or `boolean-radios`.
 * `falseLabel`: Set to the string that should be used as the label for the `false`
 option for an input with type `boolean-select` or `boolean-radios`.
+* `nullLabel`: Set to the string that should be used as the label for the empty value option for an input with type `boolean-select` or `boolean-radios`.
 * `value`: Set a specific, potentially reactive, value for the input. If you have also provided a `doc` attribute on the `autoForm` or `quickForm`, this value will override the value from the `doc` object.
 * `defaultValue`: Set a reactive default value for the input. If you have also provided a `doc` attribute on the `autoForm` or `quickForm`, this value will be used only when the `doc` object has no value for this field. This takes precedence over the `defaultValue` property of the field's schema. (Also, `defaultValue` from the schema is slightly different in that it is never used if you provide a `doc` attribute.)
 *  Any additional attributes are passed along to the generated DOM element, meaning that you can add `class`, etc. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`.

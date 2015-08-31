@@ -43,7 +43,7 @@ AutoForm.addInputType("boolean-select", {
     }
   },
   contextAdjust: function (context) {
-    var atts = _.omit(context.atts, 'trueLabel', 'falseLabel', 'firstOption');
+    var atts = _.omit(context.atts, 'trueLabel', 'falseLabel', 'nullLabel', 'firstOption');
 
     // build items list
     context.items = [
@@ -55,7 +55,7 @@ AutoForm.addInputType("boolean-select", {
         // See https://github.com/meteor/meteor/issues/2174
         _id: "",
         selected: (context.value !== false && context.value !== true),
-        label: context.atts.firstOption || "(Select One)",
+        label: context.atts.nullLabel || context.atts.firstOption || "(Select One)",
         atts: atts
       },
       {
