@@ -55,6 +55,7 @@ Package.onUse(function(api) {
     'formTypes/readonly.js',
     'formTypes/disabled.js',
     // input types
+    'inputTypes/value-converters.js',
     'inputTypes/boolean-checkbox/boolean-checkbox.html',
     'inputTypes/boolean-checkbox/boolean-checkbox.js',
     'inputTypes/boolean-radios/boolean-radios.html',

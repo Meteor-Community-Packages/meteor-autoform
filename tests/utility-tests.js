@@ -191,9 +191,9 @@ if (Meteor.isClient) {
     });
   });
 
-  Tinytest.add('AutoForm - Utility - stringToNumber', function(test) {
+  Tinytest.add('AutoForm - valueConverters - stringToNumber', function(test) {
     function testMaybeNum(val, expect) {
-      var mod = Utility.stringToNumber(val);
+      var mod = AutoForm.valueConverters.stringToNumber(val);
       test.equal(mod, expect);
     }
 
@@ -292,22 +292,22 @@ if (Meteor.isClient) {
 
   var startOfDayUTC = moment.utc("0001-3-14", "YYYY-MM-DD").toDate();
   var endOfDayUTC = moment.utc("0001-3-14 23:59:59", "YYYY-MM-DD HH:mm:ss").toDate();
-  Tinytest.add('AutoForm - Utility - dateToDateString', function(test) {
+  Tinytest.add('AutoForm - valueConverters - dateToDateString', function(test) {
     // There's no way to set the timezone for Javascript's Date object, so
     // we check what the current timezone is.
     var tzOffset = new Date().getTimezoneOffset();
     if(tzOffset > 0) {
-      test.equal(AutoForm.Utility.dateToDateString(startOfDayUTC), "0001-03-13");
+      test.equal(AutoForm.valueConverters.dateToDateString(startOfDayUTC), "0001-03-13");
     } else if(tzOffset < 0) {
-      test.equal(AutoForm.Utility.dateToDateString(endOfDayUTC), "0001-03-15");
+      test.equal(AutoForm.valueConverters.dateToDateString(endOfDayUTC), "0001-03-15");
     } else {
-      test.equal(AutoForm.Utility.dateToDateString(startOfDayUTC), "0001-03-14");
-      test.equal(AutoForm.Utility.dateToDateString(endOfDayUTC), "0001-03-14");
+      test.equal(AutoForm.valueConverters.dateToDateString(startOfDayUTC), "0001-03-14");
+      test.equal(AutoForm.valueConverters.dateToDateString(endOfDayUTC), "0001-03-14");
     }
   });
-  Tinytest.add('AutoForm - Utility - dateToDateStringUTC', function(test) {
-    test.equal(AutoForm.Utility.dateToDateStringUTC(startOfDayUTC), "0001-03-14");
-    test.equal(AutoForm.Utility.dateToDateStringUTC(endOfDayUTC), "0001-03-14");
+  Tinytest.add('AutoForm - valueConverters - dateToDateStringUTC', function(test) {
+    test.equal(AutoForm.valueConverters.dateToDateStringUTC(startOfDayUTC), "0001-03-14");
+    test.equal(AutoForm.valueConverters.dateToDateStringUTC(endOfDayUTC), "0001-03-14");
   });
 
 }

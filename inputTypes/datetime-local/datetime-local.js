@@ -2,7 +2,7 @@ AutoForm.addInputType("datetime-local", {
   template: "afInputDateTimeLocal",
   valueIn: function (val, atts) {
     //convert Date to string value
-    return (val instanceof Date) ? AutoForm.Utility.dateToNormalizedLocalDateAndTimeString(val, atts.timezoneId) : val;
+    return (val instanceof Date) ? AutoForm.valueConverters.dateToNormalizedLocalDateAndTimeString(val, atts.timezoneId) : val;
   },
   valueOut: function () {
     var val = this.val();
@@ -23,37 +23,25 @@ AutoForm.addInputType("datetime-local", {
     }
   },
   valueConverters: {
-    "string": function (val) {
-      return (val instanceof Date) ? AutoForm.Utility.dateToNormalizedLocalDateAndTimeString(val, this.attr("data-timezone-id")) : val;
+    "string": function dateToNormalizedLocalDateAndTimeString(val) {
+      return (val instanceof Date) ? AutoForm.valueConverters.dateToNormalizedLocalDateAndTimeString(val, this.attr("data-timezone-id")) : val;
     },
-    "stringArray": function (val) {
+    "stringArray": function dateToNormalizedLocalDateAndTimeStringArray(val) {
       if (val instanceof Date) {
-        return [AutoForm.Utility.dateToNormalizedLocalDateAndTimeString(val, this.attr("data-timezone-id"))];
+        return [AutoForm.valueConverters.dateToNormalizedLocalDateAndTimeString(val, this.attr("data-timezone-id"))];
       }
       return val;
     },
-    "number": function (val) {
-      return (val instanceof Date) ? val.getTime() : val;
-    },
-    "numberArray": function (val) {
-      if (val instanceof Date) {
-        return [val.getTime()];
-      }
-      return val;
-    },
-    "dateArray": function (val) {
-      if (val instanceof Date) {
-        return [val];
-      }
-      return val;
-    }
+    "number": AutoForm.valueConverters.dateToNumber,
+    "numberArray": AutoForm.valueConverters.dateToNumberArray,
+    "dateArray": AutoForm.valueConverters.dateToDateArray
   },
   contextAdjust: function (context) {
     if (typeof context.atts.max === "undefined" && context.max instanceof Date) {
-      context.atts.max = AutoForm.Utility.dateToNormalizedLocalDateAndTimeString(context.max, context.atts.timezoneId);
+      context.atts.max = AutoForm.valueConverters.dateToNormalizedLocalDateAndTimeString(context.max, context.atts.timezoneId);
     }
     if (typeof context.atts.min === "undefined" && context.min instanceof Date) {
-      context.atts.min = AutoForm.Utility.dateToNormalizedLocalDateAndTimeString(context.min, context.atts.timezoneId);
+      context.atts.min = AutoForm.valueConverters.dateToNormalizedLocalDateAndTimeString(context.min, context.atts.timezoneId);
     }
     if (context.atts.timezoneId) {
       context.atts["data-timezone-id"] = context.atts.timezoneId;

@@ -2,7 +2,7 @@ AutoForm.addInputType("datetime", {
   template: "afInputDateTime",
   valueIn: function (val) {
     //convert Date to string value
-    return (val instanceof Date) ? AutoForm.Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(val): val;
+    return AutoForm.valueConverters.dateToNormalizedForcedUtcGlobalDateAndTimeString(val);
   },
   valueOut: function () {
     var val = this.val();
@@ -15,37 +15,18 @@ AutoForm.addInputType("datetime", {
     }
   },
   valueConverters: {
-    "string": function (val) {
-      return (val instanceof Date) ? AutoForm.Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(val) : val;
-    },
-    "stringArray": function (val) {
-      if (val instanceof Date) {
-        return [AutoForm.Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(val)];
-      }
-      return val;
-    },
-    "number": function (val) {
-      return (val instanceof Date) ? val.getTime() : val;
-    },
-    "numberArray": function (val) {
-      if (val instanceof Date) {
-        return [val.getTime()];
-      }
-      return val;
-    },
-    "dateArray": function (val) {
-      if (val instanceof Date) {
-        return [val];
-      }
-      return val;
-    }
+    "string": AutoForm.valueConverters.dateToNormalizedForcedUtcGlobalDateAndTimeString,
+    "stringArray": AutoForm.valueConverters.dateToNormalizedForcedUtcGlobalDateAndTimeStringArray,
+    "number": AutoForm.valueConverters.dateToNumber,
+    "numberArray": AutoForm.valueConverters.dateToNumberArray,
+    "dateArray": AutoForm.valueConverters.dateToDateArray
   },
   contextAdjust: function (context) {
     if (typeof context.atts.max === "undefined" && context.max instanceof Date) {
-      context.atts.max = AutoForm.Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(context.max);
+      context.atts.max = AutoForm.valueConverters.dateToNormalizedForcedUtcGlobalDateAndTimeString(context.max);
     }
     if (typeof context.atts.min === "undefined" && context.min instanceof Date) {
-      context.atts.min = AutoForm.Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString(context.min);
+      context.atts.min = AutoForm.valueConverters.dateToNormalizedForcedUtcGlobalDateAndTimeString(context.min);
     }
     return context;
   }

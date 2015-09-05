@@ -327,44 +327,6 @@ Utility = {
     return regEx.test(timeString);
   },
   /**
-   * @method  Utility.dateToDateString
-   * @private
-   * @param  {Date} date
-   * @return {String}
-   *
-   * Returns a "valid date string" representing the local date.
-   */
-  dateToDateString: function dateToDateString(date) {
-    return moment(date).format("YYYY-MM-DD");
-  },
-  /**
-   * @method  Utility.dateToDateStringUTC
-   * @private
-   * @param  {Date} date
-   * @return {String}
-   *
-   * Returns a "valid date string" representing the date converted to the UTC time zone.
-   */
-  dateToDateStringUTC: function dateToDateStringUTC(date) {
-    return moment.utc(date).format("YYYY-MM-DD");
-  },
-  /**
-   * @method  Utility.dateToNormalizedForcedUtcGlobalDateAndTimeString
-   * @private
-   * @param  {Date} date
-   * @return {String}
-   *
-   * Returns a "valid normalized forced-UTC global date and time string" representing the time
-   * converted to the UTC time zone and expressed as the shortest possible string for the given
-   * time (e.g. omitting the seconds component entirely if the given time is zero seconds past the minute).
-   *
-   * http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#date-and-time-state-(type=datetime)
-   * http://www.whatwg.org/specs/web-apps/current-work/multipage/common-microsyntaxes.html#valid-normalized-forced-utc-global-date-and-time-string
-   */
-  dateToNormalizedForcedUtcGlobalDateAndTimeString: function dateToNormalizedForcedUtcGlobalDateAndTimeString(date) {
-    return moment(date).utc().format("YYYY-MM-DD[T]HH:mm:ss.SSS[Z]");
-  },
-  /**
    * @method  Utility.isValidNormalizedForcedUtcGlobalDateAndTimeString
    * @private
    * @param  {String} dateString
@@ -382,27 +344,6 @@ Utility = {
     var timePart = dateString.substring(11, dateString.length - 1);
     var zPart = dateString.substring(dateString.length - 1);
     return Utility.isValidDateString(datePart) && tPart === "T" && Utility.isValidTimeString(timePart) && zPart === "Z";
-  },
-  /**
-   * @method Utility.dateToNormalizedLocalDateAndTimeString
-   * @private
-   * @param {Date} date The Date object
-   * @param {String} [timezoneId] A valid timezoneId that moment-timezone understands, e.g., "America/Los_Angeles"
-   * @return {String}
-   *
-   * Returns a "valid normalized local date and time string".
-   */
-  dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString(date, timezoneId) {
-    var m = moment(date);
-    // by default, we assume local timezone; add moment-timezone to app and pass timezoneId
-    // to use a different timezone
-    if (typeof timezoneId === "string") {
-      if (typeof m.tz !== "function") {
-        throw new Error("If you specify a timezoneId, make sure that you've added a moment-timezone package to your app");
-      }
-      m.tz(timezoneId);
-    }
-    return m.format("YYYY-MM-DD[T]HH:mm:ss.SSS");
   },
   /**
    * @method  Utility.isValidNormalizedLocalDateAndTimeString
@@ -490,56 +431,6 @@ Utility = {
     }
   },
   /**
-   * @method Utility.stringToBool
-   * @private
-   * @param {String} val A string or null or undefined.
-   * @return {Boolean|String} The string converted to a Boolean.
-   *
-   * If the string is "true" or "1", returns `true`. If the string is "false" or "0", returns `false`. Otherwise returns the original string.
-   */
-  stringToBool: function stringToBool(val) {
-    if (typeof val === "string" && val.length > 0) {
-      var lval = val.toLowerCase();
-      if (lval === "true" || lval === "1") {
-        return true;
-      } else if (lval === "false" || lval === "0") {
-        return false;
-      }
-    }
-    return val;
-  },
-  /**
-   * @method Utility.stringToNumber
-   * @private
-   * @param {String} val A string or null or undefined.
-   * @return {Number|String} The string converted to a Number or the original value.
-   *
-   * Returns Number(val) unless the result is NaN.
-   */
-  stringToNumber: function stringToNumber(val) {
-    if (typeof val === "string" && val.length > 0) {
-      var numVal = Number(val);
-      if (!isNaN(numVal)) {
-        return numVal;
-      }
-    }
-    return val;
-  },
-  /**
-   * @method Utility.stringToDate
-   * @private
-   * @param {String} val A string or null or undefined.
-   * @return {Date|String} The string converted to a Date instance.
-   *
-   * Returns new Date(val) as long as val is a string with at least one character. Otherwise returns the original string.
-   */
-  stringToDate: function stringToDate(val) {
-    if (typeof val === "string" && val.length > 0) {
-      return new Date(val);
-    }
-    return val;
-  },
-  /**
    * @method Utility.addClass
    * @private
    * @param {Object} atts An object that might have a "class" property
@@ -568,7 +459,6 @@ Utility = {
     return ftd;
   }
 };
-
 
 // getPrototypeOf polyfill
 if (typeof Object.getPrototypeOf !== "function") {

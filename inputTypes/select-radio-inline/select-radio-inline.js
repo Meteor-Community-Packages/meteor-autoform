@@ -28,7 +28,7 @@ AutoForm.addInputType("select-radio-inline", {
   }
 });
 
-Template["afRadioGroupInline"].helpers({
+Template.afRadioGroupInline.helpers({
   atts: function selectedAttsAdjust() {
     var atts = _.clone(this.atts);
     if (this.selected) {
@@ -42,6 +42,6 @@ Template["afRadioGroupInline"].helpers({
   dsk: function dsk() {
     return {
       "data-schema-key": this.atts["data-schema-key"]
-    }
+    };
   }
 });

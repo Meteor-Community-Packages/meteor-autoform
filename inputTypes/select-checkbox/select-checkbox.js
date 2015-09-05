@@ -35,7 +35,7 @@ AutoForm.addInputType("select-checkbox", {
   }
 });
 
-Template["afCheckboxGroup"].helpers({
+Template.afCheckboxGroup.helpers({
   atts: function selectedAttsAdjust() {
     var atts = _.clone(this.atts);
     if (this.selected) {

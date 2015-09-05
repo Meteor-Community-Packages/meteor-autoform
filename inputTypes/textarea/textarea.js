@@ -1,41 +1,30 @@
 AutoForm.addInputType("textarea", {
   template: "afTextarea",
   valueConverters: {
-    "string": function (val) {
-      return val;
-    },
     "stringArray": function (val) {
       if (typeof val === "string" && val.length > 0) {
         return linesToArray(val);
       }
       return val;
     },
-    "number": AutoForm.Utility.stringToNumber,
-    "numberArray": function (val) {
-      if (typeof val === "string" && val.length > 0) {
-        var arr = linesToArray(val);
-        return _.map(arr, function (item) {
-          return AutoForm.Utility.stringToNumber(item);
-        });
-      }
-      return val;
-    },
-    "boolean": AutoForm.Utility.stringToBool,
+    "number": AutoForm.valueConverters.stringToNumber,
+    "numberArray": AutoForm.valueConverters.stringToNumberArray,
+    "boolean": AutoForm.valueConverters.stringToBoolean,
     "booleanArray": function (val) {
       if (typeof val === "string" && val.length > 0) {
         var arr = linesToArray(val);
         return _.map(arr, function (item) {
-          return AutoForm.Utility.stringToBool(item);
+          return AutoForm.valueConverters.stringToBoolean(item);
         });
       }
       return val;
     },
-    "date": AutoForm.Utility.stringToDate,
+    "date": AutoForm.valueConverters.stringToDate,
     "dateArray": function (val) {
       if (typeof val === "string" && val.length > 0) {
         var arr = linesToArray(val);
         return _.map(arr, function (item) {
-          return AutoForm.Utility.stringToDate(item);
+          return AutoForm.valueConverters.stringToDate(item);
         });
       }
       return val;

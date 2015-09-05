@@ -118,6 +118,13 @@
 
     // common Meteor packages
     "_": false,               // Underscore.js
-    "$": false
+    "$": false,
+
+    // Imports
+    "moment": false,
+
+    // This package
+    "AutoForm": true,
+    "Utility": true
   }
 }
