@@ -259,7 +259,6 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
   template = template || AutoForm.templateInstanceForForm(formId);
   if (!template ||
       !template.view ||
-      !template.view._domrange ||
       template.view.isDestroyed) {
     return null;
   }
@@ -270,6 +269,10 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
 
   var form = AutoForm.getCurrentDataForForm(formId);
 
+  // if the form is not rendered yet, we just return the form doc
+  if(!template.view._domrange) {
+    return form.doc;
+  }
   // By default, we do not keep empty strings
   var keepEmptyStrings = false;
   if (form.removeEmptyStrings === false) {
@@ -420,7 +423,6 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
   template.formValues[fieldName].depend();
 
   if (!template.view ||
-      !template.view._domrange ||
       template.view.isDestroyed) {
     return;
   }
