@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.5.1
+
+Add jquery dependency for Meteor 1.2 compatibility
+
 ### 5.5.0
 
 For `boolean-radios` and `boolean-select` input types, you can now use the `nullLabel` attribute to specify a label (e.g., "None") for when the value is not set (or to unset it). For backwards compatibility, the `boolean-radios` type will not render a radio element for unsetting unless you set `nullLabel`.
