@@ -489,8 +489,8 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   fieldName = field.attr("data-schema-key");
 
   // If we have a schema, we can autoconvert to the correct data type
-  if (ss) {
-    fieldType = ss.schema(fieldName).type;
+  if (ss && (fieldType = ss.schema(fieldName))) {
+    fieldType = fiedType.type
   }
 
   // Get the name of the input type template used to render the input element
