@@ -871,8 +871,12 @@ AutoForm.getInputType = function getInputType(atts) {
  * Call this method from a UI helper to get the field definitions based on the schema used by the closest containing autoForm.
  */
 AutoForm.getSchemaForField = function autoFormGetSchemaForField(name) {
-  var ss = AutoForm.getFormSchema();
-  return AutoForm.Utility.getDefs(ss, name);
+  var ss = AutoForm.getFormSchema(), defs = {};
+  // The field might not exist in the schema anymore
+  try{
+    defs = AutoForm.Utility.getDefs(ss, name);
+  }catch(e){}
+  return defs;
 };
 
 /**

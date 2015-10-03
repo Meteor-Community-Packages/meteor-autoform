@@ -376,11 +376,19 @@ Utility = {
    * an error if we can't find an autoform context.
    */
   getComponentContext: function autoFormGetComponentContext(context, name) {
-    var atts, defs, formComponentAttributes, fieldAttributes, fieldAttributesForComponentType, ss;
+    var atts, defs = {}, formComponentAttributes, fieldAttributes, fieldAttributesForComponentType, ss;
 
     atts = _.clone(context || {});
     ss = AutoForm.getFormSchema();
-    defs = Utility.getDefs(ss, atts.name); //defs will not be undefined
+
+    // The component might not exist in the schema anymore
+    try{
+      defs = Utility.getDefs(ss, atts.name); //defs will not be undefined
+    }catch(e){}
+
+    // Look up the tree if we're in a helper, checking to see if any ancestor components
+    // had a <componentType>-attribute specified.
+    formComponentAttributes = AutoForm.findAttributesWithPrefix(name + "-");
 
     // Look up the tree if we're in a helper, checking to see if any ancestor components
     // had a <componentType>-attribute specified.
