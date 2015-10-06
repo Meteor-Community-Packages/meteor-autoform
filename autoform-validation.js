@@ -51,4 +51,12 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
 
 // Throttle field validation to occur at most every 300ms,
 // with leading and trailing calls.
-validateField = _.throttle(_validateField, 300);
+validateField = function (key, formId, skipEmpty, onlyIfAlreadyInvalid, throttleTime) {
+  if(typeof throttleTime === 'undefined') {
+    throttleTime = 300;
+  }
+
+  return _.throttle(_validateField, throttleTime)(
+    key, formId, skipEmpty, onlyIfAlreadyInvalid
+  );
+}

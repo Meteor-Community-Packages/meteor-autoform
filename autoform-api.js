@@ -600,7 +600,7 @@ AutoForm.addFormType = function afAddFormType(name, definition) {
  * In addition to returning a boolean that indicates whether the field is currently valid,
  * this method causes the reactive validation messages to appear.
  */
-AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipEmpty) {
+AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipEmpty, throttleTime) {
   var template = AutoForm.templateInstanceForForm(formId);
   if (!template ||
       !template.view ||
@@ -609,7 +609,7 @@ AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipE
     return true;
   }
 
-  return validateField(fieldName, formId, skipEmpty, false);
+  return validateField(fieldName, formId, skipEmpty, false, throttleTime);
 };
 
 /**
