@@ -1177,6 +1177,27 @@ summary: {
 
 Tip: Any attribute can instead be provided as a function that returns the attribute's value.
 
+You can pass data structures using the `data` property. They will not be used as attributes, instead they will
+be available in the field's context. For example:
+
+```js
+summary: {
+  type: String,
+  autoform: {
+    afFieldInput: {
+      data: {
+        someArray: ['apple', 'orange', 'banana'],
+        someObj: {
+          complex: {
+            data: 'structure'
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 ## Complex Schemas
 
 You can use mongo dot notation to map an input to a subdocument. For example:
