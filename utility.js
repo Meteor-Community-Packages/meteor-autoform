@@ -390,10 +390,6 @@ Utility = {
     // had a <componentType>-attribute specified.
     formComponentAttributes = AutoForm.findAttributesWithPrefix(name + "-");
 
-    // Look up the tree if we're in a helper, checking to see if any ancestor components
-    // had a <componentType>-attribute specified.
-    formComponentAttributes = AutoForm.findAttributesWithPrefix(name + "-");
-
     // Get any field-specific attributes defined in the schema.
     // They can be in autoform.attrName or autoform.componentType.attrName, with
     // the latter overriding the former.
