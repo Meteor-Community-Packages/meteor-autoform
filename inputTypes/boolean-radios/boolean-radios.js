@@ -5,6 +5,8 @@ AutoForm.addInputType("boolean-radios", {
       return false;
     } else if (this.find('input[value=true]').is(":checked")) {
       return true;
+    } else if (this.find('input[value=null]').is(":checked")) {
+      return null;
     }
   },
   valueConverters: {
