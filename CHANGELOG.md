@@ -6,6 +6,19 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.6.0
+
+- Add ability to specify a `data` attribute on `afFieldInput`, which is then added to the data context of the input type template. (See the readme.)
+- Fix issue with submitting proper value when the `null` option is chosen for a boolean field
+- Fix issues with reactive reruns that change the form schema
+- Adjust value returned from AutoForm.getFieldValue when the form isn't rendered yet
+- Fix issue with autosaving changes to multiple select fields
+- Adjustments to support BlazeComponents
+- Fix width of array field when there is only one
+- Fix initial value of contenteditable fields
+
+Thanks to all who submitted PRs: @abecks, @kellyje, @bySabi, @vimes1984, @Nieziemski, @smeijer
+
 ### 5.5.1
 
 Add jquery dependency for Meteor 1.2 compatibility
