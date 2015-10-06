@@ -259,7 +259,6 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
   template = template || AutoForm.templateInstanceForForm(formId);
   if (!template ||
       !template.view ||
-      !template.view._domrange ||
       template.view.isDestroyed) {
     return null;
   }
@@ -307,18 +306,26 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
     schema: ss
   };
 
-  // Build a flat document from field values
-  var doc = getFlatDocOfFieldValues(getAllFieldsInForm(template), ss);
+  // Get a preliminary doc based on the form
+  var doc;
 
-  // Expand the flat document
-  doc = AutoForm.Utility.expandObj(doc);
+  if (template.view._domrange) {
+    // Build a flat document from field values
+    doc = getFlatDocOfFieldValues(getAllFieldsInForm(template), ss);
 
-  // When all fields that comprise a sub-object are empty, we should unset
-  // the whole subobject and not complain about required fields in it. For example,
-  // if `profile.address` has several properties but they are all null or undefined,
-  // we will set `profile.address=null`. This ensures that we don't get incorrect validation
-  // errors about required fields that are children of optional objects.
-  AutoForm.Utility.bubbleEmpty(doc, keepEmptyStrings);
+    // Expand the flat document
+    doc = AutoForm.Utility.expandObj(doc);
+
+    // When all fields that comprise a sub-object are empty, we should unset
+    // the whole subobject and not complain about required fields in it. For example,
+    // if `profile.address` has several properties but they are all null or undefined,
+    // we will set `profile.address=null`. This ensures that we don't get incorrect validation
+    // errors about required fields that are children of optional objects.
+    AutoForm.Utility.bubbleEmpty(doc, keepEmptyStrings);
+  } else {
+    // If the form is not yet rendered, use the form.doc
+    doc = form.doc || {};
+  }
 
   // Create and clean insert doc.
   if (getModifier !== true) {
@@ -419,21 +426,11 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
   }
   template.formValues[fieldName].depend();
 
-  if (!template.view ||
-      !template.view._domrange ||
-      template.view.isDestroyed) {
-    return;
-  }
-
   var doc = AutoForm.getFormValues(formId, template, null, false);
-  if (!doc) {
-    return;
-  }
+  if (!doc) return;
 
   var mDoc = new MongoObject(doc);
-  var value = mDoc.getValueForKey(fieldName);
-
-  return value;
+  return mDoc.getValueForKey(fieldName);
 };
 
 /**
