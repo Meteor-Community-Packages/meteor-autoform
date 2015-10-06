@@ -124,6 +124,10 @@ WYSIWYGs:
 * [mpowaga:autoform-summernote](https://atmospherejs.com/mpowaga/autoform-summernote)
 * [donchess:autoform-froala](https://atmospherejs.com/donchess/autoform-froala)
 
+Markdowns:
+
+* [q42:autoform-markdown](https://atmospherejs.com/q42/autoform-markdown)
+
 Autocompletes:
 
 * [comerc:autoform-placecomplete](https://atmospherejs.com/comerc/autoform-placecomplete)
