@@ -471,7 +471,7 @@ AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTempl
  * Unlike `AutoForm.getFieldValue`, this function is not reactive.
  */
 AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
-  var field, fieldName, fieldType, arrayItemFieldType, val, typeDef, inputTypeTemplate, dataContext, autoConvert;
+  var field, fieldName, fieldType, fieldSchema, arrayItemFieldType, val, typeDef, inputTypeTemplate, dataContext, autoConvert;
 
   Tracker.nonreactive(function() {
     //don't rerun when data context of element changes, can cause infinite loops
@@ -490,7 +490,10 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
 
   // If we have a schema, we can autoconvert to the correct data type
   if (ss) {
-    fieldType = ss.schema(fieldName).type;
+    fieldSchema = ss.schema(fieldName);
+    if (fieldSchema) {
+      fieldType = fieldSchema.type;
+    }
   }
 
   // Get the name of the input type template used to render the input element
