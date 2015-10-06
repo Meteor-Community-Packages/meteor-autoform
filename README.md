@@ -123,6 +123,7 @@ WYSIWYGs:
 
 * [mpowaga:autoform-summernote](https://atmospherejs.com/mpowaga/autoform-summernote)
 * [donchess:autoform-froala](https://atmospherejs.com/donchess/autoform-froala)
+* [vimes1984:autoform-textangular](https://atmospherejs.com/vimes1984/autoform-textangular)
 
 Markdowns:
 
@@ -171,6 +172,7 @@ Other:
 
 * [yogiben:admin](https://atmospherejs.com/yogiben/admin)
 * [kaoskeya:admin](https://atmospherejs.com/kaoskeya/admin)
+* [vimes1984:foundation-angular-admin](https://atmospherejs.com/vimes1984/foundation-angular-admin)
 
 #### Content Management Systems
 
