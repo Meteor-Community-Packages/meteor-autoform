@@ -397,10 +397,11 @@ Template.autoForm.events({
     // loops by continually saying the field changed when it did not,
     // especially in an autosave situation. This is an attempt to
     // prevent that from happening.
-    var keyVal = event.target.value;
+    var $target = $(event.target);
+    var keyVal = $target.val();
     if (event.target.type === 'checkbox') {
       // Special handling for checkboxes, which always have the same value
-      keyVal = keyVal + '_' + $(event.target).prop('checked');
+      keyVal = keyVal + '_' + $target.prop('checked');
     }
 
     keyVal = key + '___' + keyVal;
