@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.6.1
+
+Fix boolean-radios templates
+
 ### 5.6.0
 
 - Add ability to specify a `data` attribute on `afFieldInput`, which is then added to the data context of the input type template. (See the readme.)
