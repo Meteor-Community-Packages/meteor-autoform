@@ -51,7 +51,6 @@ AutoForm.addFormType('normal', {
     if (shouldStop) {
       this.event.preventDefault();
       this.event.stopPropagation();
-      this.endSubmission();
     }
   },
   needsModifierAndDoc: true,
