@@ -461,6 +461,12 @@ Utility = {
       throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
     }
     return ftd;
+  },
+  checkTemplate: function checkTemplate(template) {
+    return !!(template &&
+            template.view &&
+            template.view._domrange &&
+            !template.view.isDestroyed);
   }
 };
 

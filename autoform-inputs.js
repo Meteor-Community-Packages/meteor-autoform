@@ -186,9 +186,7 @@ function markChanged(template, fieldName) {
 }
 
 updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) {
-  if (!template) {
-    return;
-  }
+  if (!template) return;
 
   template.formValues = template.formValues || {};
   if (!template.formValues[fieldName]) {

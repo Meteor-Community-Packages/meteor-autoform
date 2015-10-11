@@ -5,9 +5,7 @@ var lastAutoSaveElement = null;
 var lastKeyVal = null;
 
 function beginSubmit(formId, template, hookContext) {
-  if (!template || !template.view._domrange || template.view.isDestroyed) {
-    return;
-  }
+  if (!Utility.checkTemplate(template)) return;
 
   // Get user-defined hooks
   var hooks = Hooks.getHooks(formId, 'beginSubmit');
@@ -25,9 +23,7 @@ function beginSubmit(formId, template, hookContext) {
 }
 
 function endSubmit(formId, template, hookContext) {
-  if (!template || !template.view._domrange || template.view.isDestroyed) {
-    return;
-  }
+  if (!Utility.checkTemplate(template)) return;
 
   // Try to avoid incorrect reporting of which input caused autosave
   lastAutoSaveElement = null;
@@ -129,7 +125,7 @@ Template.autoForm.events({
     // Prep context with which hooks are called
     var hookContext = {
       addStickyValidationError: function (key, type, value) {
-        AutoForm.templateInstanceForForm(formId)._stickyErrors[key] = {type: type, value: value};
+        AutoForm.addStickyValidationError(formId, key, type, value);
       },
       autoSaveChangedElement: lastAutoSaveElement,
       collection: collection,
@@ -140,9 +136,7 @@ Template.autoForm.events({
       formId: formId,
       formTypeDefinition: ftd,
       removeStickyValidationError: function (key) {
-        delete AutoForm.templateInstanceForForm(formId)._stickyErrors[key];
-        // revalidate that field
-        validateField(key, formId, false, false);
+        AutoForm.removeStickyValidationErrors(formId, key);
       },
       resetForm: function () {
         AutoForm.resetForm(formId, template);
@@ -333,6 +327,11 @@ Template.autoForm.events({
     }, hookContext));
   },
   'keyup [data-schema-key]': function autoFormKeyUpHandler(event) {
+    // Ignore enter/return, shift, ctrl, cmd, tab, arrows, etc.
+    // Most of these are just optimizations, but without ignoring Enter, errors can fail to show up
+    // because of conflicts between running onSubmit handlers and this around the same time.
+    if (_.contains([13, 9, 16, 20, 17, 91, 37, 38, 39, 40], event.keyCode)) return;
+
     // validateField is throttled, so we need to get the nearest form's
     // ID here, while we're still in the correct context
     var formId = AutoForm.getFormId();
@@ -345,7 +344,7 @@ Template.autoForm.events({
 
     if ((validationType === 'keyup' || validationType === 'submitThenKeyup')) {
       var key = getKeyForElement(event.currentTarget);
-      if (!key) {return;}
+      if (!key) return;
 
       validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid(validationType));
 

@@ -8,19 +8,12 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
   var template = AutoForm.templateInstanceForForm(formId);
 
   // If form is not currently rendered, return true
-  if (!template ||
-      !template.view ||
-      !template.view._domrange ||
-      template.view.isDestroyed) {
-    return true;
-  }
+  if (!Utility.checkTemplate(template)) return true;
 
   var form = AutoForm.getCurrentDataForForm(formId);
   var ss = AutoForm.getFormSchema(formId, form);
 
-  if (!ss) {
-    return true;
-  }
+  if (!ss) return true;
 
   // Skip validation if onlyIfAlreadyInvalid is true and the form is
   // currently valid.

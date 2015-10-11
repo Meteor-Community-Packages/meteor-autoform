@@ -99,10 +99,8 @@ AutoForm._forceResetFormValues = function autoFormForceResetFormValues(formId) {
  */
 AutoForm.resetForm = function autoFormResetForm(formId, template) {
   template = template || AutoForm.templateInstanceForForm(formId);
-
-  if (template && template.view._domrange && !template.view.isDestroyed) {
-    template.$("form")[0].reset();
-  }
+  if (!Utility.checkTemplate(template)) return;
+  template.$("form")[0].reset();
 };
 
 /**
@@ -200,7 +198,8 @@ AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templa
   // Get `autoform` object from the schema, if present.
   // Skip for quickForm because it renders a form and not a field.
   if (templateType !== 'quickForm' && fieldName) {
-    schemaAutoFormDefs = AutoForm.getSchemaForField(fieldName).autoform;
+    var fieldSchema = AutoForm.getSchemaForField(fieldName);
+    schemaAutoFormDefs = fieldSchema && fieldSchema.autoform;
   }
 
   // Fallback #1: autoform.<componentType>.template from the schema
@@ -259,6 +258,7 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
   template = template || AutoForm.templateInstanceForForm(formId);
   if (!template ||
       !template.view ||
+      // We check for domrange later in this function
       template.view.isDestroyed) {
     return null;
   }
@@ -601,14 +601,6 @@ AutoForm.addFormType = function afAddFormType(name, definition) {
  * this method causes the reactive validation messages to appear.
  */
 AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipEmpty) {
-  var template = AutoForm.templateInstanceForForm(formId);
-  if (!template ||
-      !template.view ||
-      !template.view._domrange ||
-      template.view.isDestroyed) {
-    return true;
-  }
-
   return validateField(fieldName, formId, skipEmpty, false);
 };
 
@@ -791,18 +783,14 @@ AutoForm.getInputType = function getInputType(atts) {
 
   // Get schema definition, using the item definition for array fields
   defs = AutoForm.getSchemaForField(atts.name);
-  if (!defs) {
-    return 'text';
-  }
-
-  schemaType = defs.type;
+  schemaType = defs && defs.type;
   if (schemaType === Array) {
     expectsArray = true;
-    schemaType = AutoForm.getSchemaForField(atts.name + ".$").type;
-    if (!defs) {
-      return 'text';
-    }
+    defs = AutoForm.getSchemaForField(atts.name + ".$");
+    schemaType = defs && defs.type;
   }
+
+  if (!schemaType) return 'text';
 
   // Based on the `type` attribute, the `type` from the schema, and/or
   // other characteristics such as regEx and whether an array is expected,
@@ -873,12 +861,9 @@ AutoForm.getInputType = function getInputType(atts) {
  * Call this method from a UI helper to get the field definitions based on the schema used by the closest containing autoForm.
  */
 AutoForm.getSchemaForField = function autoFormGetSchemaForField(name) {
-  var ss = AutoForm.getFormSchema(), defs = {};
-  // The field might not exist in the schema anymore
-  try{
-    defs = AutoForm.Utility.getDefs(ss, name);
-  }catch(e){}
-  return defs;
+  var ss = AutoForm.getFormSchema();
+  if (!ss) return;
+  return ss.schema(name); // might be undefined
 };
 
 /**
@@ -893,14 +878,10 @@ AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) {
   var ss, def, saf, allowedValues;
 
   ss = AutoForm.getFormSchema();
-  if (!ss) {
-    return;
-  }
+  if (!ss) return;
 
   def = ss.getDefinition(name);
-  if (!def) {
-    return;
-  }
+  if (!def) return;
 
   // If options in schema, use those
   saf = def.autoform;
@@ -916,9 +897,7 @@ AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) {
 
   // If schema has allowedValues, use those
   allowedValues = ss.getAllowedValuesForKey(name);
-  if (allowedValues) {
-    return 'allowed';
-  }
+  if (allowedValues) return 'allowed';
 };
 
 /**
@@ -929,7 +908,7 @@ AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) {
  *
  * Call this method from a UI helper to get the field definitions based on the schema used by the closest containing autoForm.
  */
-AutoForm.getLabelForField = function autoFormGetSchemaForField(name) {
+AutoForm.getLabelForField = function autoFormGetLabelForField(name) {
   var ss = AutoForm.getFormSchema(), label = ss.label(name);
   // for array items we don't want to inflect the label because
   // we will end up with a number;
@@ -1134,6 +1113,31 @@ AutoForm.selectFirstInvalidField = function selectFirstInvalidField(formId, ss) 
   }
 };
 
+AutoForm.addStickyValidationError = function addStickyValidationError(formId, key, type, value) {
+  var template = AutoForm.templateInstanceForForm(formId);
+  if (!template) return;
+
+  // Add error
+  template._stickyErrors[key] = {
+    type: type,
+    value: value
+  };
+
+  // Revalidate that field
+  validateField(key, formId, false, false);
+};
+
+AutoForm.removeStickyValidationErrors = function removeStickyValidationErrors(formId, key) {
+  var template = AutoForm.templateInstanceForForm(formId);
+  if (!template) return;
+
+  // Remove errors
+  delete template._stickyErrors[key];
+
+  // Revalidate that field
+  validateField(key, formId, false, false);
+};
+
 /**
  * @method AutoForm._validateFormDoc
  * @public
@@ -1220,9 +1224,7 @@ AutoForm._validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss
  * @returns {String} The data context with property defaults added.
  */
 setDefaults = function setDefaults(data) {
-  if (!data) {
-    data = {};
-  }
+  if (!data) data = {};
 
   // default form type is "normal"
   if (typeof data.type !== 'string') {
