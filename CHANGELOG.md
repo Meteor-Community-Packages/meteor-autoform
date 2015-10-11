@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.7.1
+
+For "normal" type forms, don't end submission until `this.done()` is called.
+
 ### 5.7.0
 
 Sticky validation improvements
