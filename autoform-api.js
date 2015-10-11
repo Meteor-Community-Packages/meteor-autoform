@@ -1127,7 +1127,7 @@ AutoForm.addStickyValidationError = function addStickyValidationError(formId, ke
   validateField(key, formId, false, false);
 };
 
-AutoForm.removeStickyValidationErrors = function removeStickyValidationErrors(formId, key) {
+AutoForm.removeStickyValidationError = function removeStickyValidationError(formId, key) {
   var template = AutoForm.templateInstanceForForm(formId);
   if (!template) return;
 

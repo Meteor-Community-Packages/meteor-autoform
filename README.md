@@ -1069,7 +1069,7 @@ var hooksObject = {
 
 The following properties and functions are available in all submission hooks when they are called. This does not include formToDoc, formToModifier, or docToForm.
 
-* `this.addStickyValidationError(key, type, [value])`: Call this to add a custom validation error that will not be overridden by subsequent revalidations on the client. This can be useful if you need to show a form error based on errors coming back from the server, and you don't want it to disappear when fields are revalidated on the client on blur, keyup, etc. The sticky error will go away when the form is reset (such as after a successful submission), when the form instance is destroyed, or when you call `this.removeStickyValidationError(key)` in any hook.
+* `this.addStickyValidationError(key, type, [value])`: Calls `AutoForm.addStickyValidationError` for the form
 * `this.autoSaveChangedElement`: The input element that was changed to cause this form submission (if the submission was due to autosave)
 * `this.collection`: The collection attached to the form (from `collection` attribute)
 * `this.currentDoc`: The current document attached to the form (from `doc` attribute)
@@ -1078,7 +1078,7 @@ The following properties and functions are available in all submission hooks whe
 * `this.formAttributes`: The object containing all the form attributes from the `autoForm` or `quickForm`
 * `this.formId`: The form's `id` attribute (useful in a global hook)
 * `this.insertDoc`: The gathered current form values, as a normal object
-* `this.removeStickyValidationError(key)`: Call this to remove a sticky validation error you previously added to the current form instance.
+* `this.removeStickyValidationError(key)`: Calls `AutoForm.removeStickyValidationError` for the form
 * `this.resetForm()`: Call this if you need to reset the form
 * `this.ss`: The SimpleSchema instance used for validating the form
 * `this.ssIsOverride`: This is `true` if `this.ss` is an override schema, meaning it's coming from a `schema` attribute on the `autoForm` or `quickForm`, but there is also a `collection` attribute pointing to a collection that has its own schema attached.
@@ -1378,6 +1378,13 @@ This only affects quickForms.
 The `fieldset` has class "af-fieldGroup" and the `legend` has class "af-fieldGroup-heading" to help with styling.
 
 The [Telescope](https://telescope.readme.io/docs) app makes use of this feature. Thanks to **@SachaG** for contributing it.
+
+## Sticky Validation Errors
+
+Every time AutoForm revalidates your form, it overwrites the list of invalid fields for that form. This means that adding your own errors to the form validation context (using the SimpleSchema API) will not always work because your custom errors will disappear upon first revalidation. To solve this, you can add sticky errors for a form. Sticky errors do not go away unless you reset the form, the form instance is destroyed, or you manually remove them.
+
+- `AutoForm.addStickyValidationError(formId, key, type, [value])`
+- `AutoForm.removeStickyValidationError(formId, key)
 
 ## Defining Custom Input Types
 

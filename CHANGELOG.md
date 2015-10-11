@@ -6,6 +6,14 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.7.0
+
+Sticky validation improvements
+
+- Add API outside of hooks for settings and removing sticky validation errors
+- Properly show sticky validation errors as soon as they are added
+- Optimizations to keyup validation
+
 ### 5.6.1
 
 Fix boolean-radios templates

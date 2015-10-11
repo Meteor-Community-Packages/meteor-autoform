@@ -136,7 +136,7 @@ Template.autoForm.events({
       formId: formId,
       formTypeDefinition: ftd,
       removeStickyValidationError: function (key) {
-        AutoForm.removeStickyValidationErrors(formId, key);
+        AutoForm.removeStickyValidationError(formId, key);
       },
       resetForm: function () {
         AutoForm.resetForm(formId, template);
