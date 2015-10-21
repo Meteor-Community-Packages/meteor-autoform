@@ -7,9 +7,10 @@ AutoForm.addInputType("date", {
   valueOut: function () {
     var val = this.val();
     if (AutoForm.Utility.isValidDateString(val)) {
-      //Date constructor will interpret val as UTC and create
-      //date at mignight in the morning of val date in UTC time zone
-      return new Date(val);
+      //Create date at mignight in the morning of val date in UTC time zone
+      var vals = val.split('-');
+      --vals[1];
+      return new Date(Date.UTC.apply(Date, vals));
     } else {
       return null;
     }
