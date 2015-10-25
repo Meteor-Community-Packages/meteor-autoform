@@ -20,6 +20,10 @@ Utility = {
           newDoc[key] = val;
         }
       } else if (_.isArray(val)) {
+        // Make sure the empty strings are removed and the array change its length accordingly
+        if (!keepEmptyStrings) {
+          val = val.filter(Boolean);
+        }   
         val = cleanNulls(val, true, keepEmptyStrings); //recurse into non-typed arrays
         if (!_.isEmpty(val)) {
           newDoc[key] = val;
