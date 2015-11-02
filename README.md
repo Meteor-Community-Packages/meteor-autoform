@@ -110,6 +110,7 @@ Dates and times:
 * [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
 * [antalakas:autoform-bs-daterangepicker](https://atmospherejs.com/antalakas/autoform-bs-daterangepicker)
 * [drewy:autoform-datetimepicker](https://atmospherejs.com/drewy/autoform-datetimepicker)
+* [bookmd:autoform-time-from-now](https://atmospherejs.com/bookmd/autoform-time-from-now)
 
 Selects:
 
