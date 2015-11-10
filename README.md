@@ -189,6 +189,8 @@ Other:
 #### Other
 
 * [comerc:autoform-fixtures](https://github.com/comerc/meteor-autoform-fixtures/)
+* [tooit:content-types](https://atmospherejs.com/tooit/content-types)
+* [tooit:content-types-bootstrap3](https://atmospherejs.com/tooit/content-types-bootstrap3)
 
 ## Demo
 
