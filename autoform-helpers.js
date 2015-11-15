@@ -231,6 +231,10 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
       return false;
     }
 
+    if(fieldDefs.autoform && _.isFunction(fieldDefs.autoform.omit) && fieldDefs.autoform.omit(field) === true) {
+      return false;
+    }
+
     // Don't include fields with denyInsert=true when it's an insert form
     if (fieldDefs.denyInsert && form.type === "insert") {
       return false;
