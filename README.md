@@ -713,16 +713,20 @@ The method is not called until `doc` is valid on the client.
 
 ### method-update
 
-Will call the server method with the name you specify in the `meteormethod` attribute. Passes two arguments:
+Will call the server method with the name you specify in the `meteormethod` attribute.
 
-* `modifier`: the modifier object generated from the form values
-* `documentId`: the `_id` of the document being updated
+There are two possible ways your method can be called.
+
+1. By default, your method will be called with two arguments:
+  * `modifier`: the modifier object generated from the form values
+  * `documentId`: the `_id` of the document being updated
+2. If you set `singleMethodArgument=true` as a form attribute, your method will be called with a single object argument with `_id` and `modifier` properties. You should do this if using the [mdg:validated-method](https://github.com/meteor/validated-method) package.
 
 You may optionally specify a DDP Connection in the `ddp` attribute. If you do, the method will be called using the DDP connection provided.
 
 The method is not called until `modifier` is valid on the client.
 
-**You must call `check()` in the method or perform your own validation since a user could bypass the client side validation.**
+**You must call `check()` in the method or perform your own validation since a user could bypass the client side validation. Using the [mdg:validated-method](https://github.com/meteor/validated-method) package is recommended.**
 
 ### normal
 
