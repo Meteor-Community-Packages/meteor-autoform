@@ -119,6 +119,7 @@ Selects:
 * [comerc:autoform-selectize](https://atmospherejs.com/comerc/autoform-selectize)
 * [vazco:universe-autoform-select](https://atmospherejs.com/vazco/universe-autoform-select)
 * [lukemadera:autoform-autocomplete](https://atmospherejs.com/lukemadera/autoform-autocomplete)
+* [rikonor:autoform-image-gallery](https://github.com/rikonor/meteor-autoform-image-gallery)
 
 WYSIWYGs:
 
