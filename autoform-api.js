@@ -643,15 +643,19 @@ AutoForm.validateForm = function autoFormValidateForm(formId) {
 /**
  * @method AutoForm.getValidationContext
  * @public
- * @param {String} formId The `id` attribute of the `autoForm` for which you want the validation context
+ * @param {String} [formId] The `id` attribute of the `autoForm` for which you want the validation context
  * @return {SimpleSchemaValidationContext} The SimpleSchema validation context object.
  *
  * Use this method to get the validation context, which can be used to check
  * the current invalid fields, manually invalidate fields, etc.
  */
 AutoForm.getValidationContext = function autoFormGetValidationContext(formId) {
-  var ss = AutoForm.getFormSchema(formId);
-  return ss && ss.namedContext(formId);
+  var form = AutoForm.getCurrentDataForForm(formId);
+  var ss = form._resolvedSchema;
+  if (!ss) return;
+  // formId may not be passed in, but we MUST pass it into namedContext to get back proper context
+  formId = formId || form.id;
+  return ss.namedContext(formId);
 };
 
 /**
