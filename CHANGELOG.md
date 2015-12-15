@@ -6,6 +6,10 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.8.1
+
+Fix AutoForm.getValidationContext to return correct context when no `formId` argument is provided.
+
 ### 5.8.0
 
 You can now set `singleMethodArgument=true` as a form attribute on a `method-update` type form, and your method will be called with a single object argument with `_id` and `modifier` properties. You should do this if using the [mdg:validated-method](https://github.com/meteor/validated-method) package.
