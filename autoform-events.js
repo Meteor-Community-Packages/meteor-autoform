@@ -458,10 +458,8 @@ Template.autoForm.events({
       // there is no need to reset validation for it. No error need be thrown.
     }
 
-    if (this.doc) {
-      event.preventDefault();
-      AutoForm._forceResetFormValues(formId);
-    }
+    event.preventDefault();
+    AutoForm._forceResetFormValues(formId);
 
     // Mark all fields as changed
     updateAllTrackedFieldValues(template);
