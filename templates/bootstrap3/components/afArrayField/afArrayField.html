@@ -10,7 +10,10 @@
       {{#afEachArrayItem name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
       <li class="list-group-item autoform-array-item">
         <div>
-          <div class="autoform-remove-item-wrap">
+          <div class="autoform-item-actions-wrap">
+            {{#if ../atts.enableSorting }}
+            <div class="btn btn-default autoform-drag-item"><span class="glyphicon glyphicon-menu-hamburger"></span></div>
+            {{/if}}
             {{#if afArrayFieldHasMoreThanMinimum name=../atts.name minCount=../atts.minCount maxCount=../atts.maxCount}}
             <button type="button" class="btn btn-primary autoform-remove-item"><span class="glyphicon glyphicon-minus"></span></button>
             {{/if}}
@@ -22,7 +25,7 @@
       </li>
       {{/afEachArrayItem}}
       {{#if afArrayFieldHasLessThanMaximum name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
-      <li class="list-group-item">
+      <li class="list-group-item autoform-add-item-wrap">
         <button type="button" class="btn btn-primary autoform-add-item" data-autoform-field="{{this.atts.name}}" data-autoform-minCount="{{this.atts.minCount}}" data-autoform-maxCount="{{this.atts.maxCount}}"><span class="glyphicon glyphicon-plus"></span></button>
       </li>
       {{/if}}

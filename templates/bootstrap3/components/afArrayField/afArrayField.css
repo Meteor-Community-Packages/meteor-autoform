@@ -3,13 +3,19 @@
   width: 100%;
 }
 
-.list-group-item.autoform-array-item .autoform-remove-item-wrap {
+.list-group-item.autoform-array-item .autoform-item-actions-wrap {
   display: table-cell;
 }
 
 .list-group-item.autoform-array-item .autoform-remove-item {
   vertical-align: top;
   margin-right: 15px;
+}
+
+.list-group-item.autoform-array-item .autoform-drag-item {
+  vertical-align: top;
+  margin-right: 15px;
+  margin-bottom: 15px;
 }
 
 .list-group-item.autoform-array-item .autoform-array-item-body {
