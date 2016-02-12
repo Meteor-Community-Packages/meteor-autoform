@@ -2,7 +2,7 @@
 
 // all form events handled here
 var lastAutoSaveElement = null;
-var lastKeyVal = null;
+var lastKeyVals = {};
 
 function beginSubmit(formId, template, hookContext) {
   if (!Utility.checkTemplate(template)) return;
@@ -392,6 +392,8 @@ Template.autoForm.events({
     var key = getKeyForElement(event.target);
     if (!key) {return;}
 
+    var formId = this.id;
+
     // Some plugins, like jquery.inputmask, can cause infinite
     // loops by continually saying the field changed when it did not,
     // especially in an autosave situation. This is an attempt to
@@ -405,12 +407,10 @@ Template.autoForm.events({
 
     keyVal = key + '___' + keyVal;
 
-    if (keyVal === lastKeyVal) {
+    if (formId in lastKeyVals && keyVal === lastKeyVals[formId]) {
       return;
     }
-    lastKeyVal = keyVal;
-
-    var formId = this.id;
+    lastKeyVals[formId] = keyVal;
 
     // Mark field value as changed for reactive updates
     updateTrackedFieldValue(template, key);
