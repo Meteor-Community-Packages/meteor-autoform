@@ -553,22 +553,30 @@ Just as `quickForm` renders a form in one line, `afFormGroup` renders a form
 group, that is, everything related to a single field -- the label, the input,
 and the error message -- in one line.
 
-This component accept iconHelp and textHelp atributtes for help-block bootstrap style.
-* iconHelp:
-    {
-         title: 'This is a title'       //required, allowed values any String
-         content: 'any string or HTML'  //required if type is 'popover'
-         type: 'popover',               //optional, allowed values  'popover'|'tooltip',  'tooltip' as default
-         placement: 'top',              //optional, allowed values  'top' | 'bottom' | 'left' | 'right', 'top' as default
-         icon: 'info-sign',             //optional, allowed values  any Glyphicons normaly 'info-sign' or 'question-sign'  'info-sign' as default. ('glyphicon glyphicon-' is include)
-         trigger: 'hover'               //optional, allowed values  'click' | 'hover' | 'focus' | 'manual',  'hover' as default
-        
-    } 
-    //for custom style use ".iconHelp" selector
+This component accept iconHelp and textHelp attributes for help-block bootstrap style.
+* iconHelp
+``` 
+iconHelp:{
+     title: 'This is a title'       //required, allowed values any String
+     content: 'any string or HTML'  //required if type is 'popover'
+     type: 'popover',               //optional, allowed values  'popover'|'tooltip',  'tooltip' as default
+     placement: 'top',              //optional, allowed values  'top' | 'bottom' | 'left' | 'right', 'top' as default
+     icon: 'info-sign',             //optional, allowed values  any Glyphicons normaly 'info-sign' or 'question-sign'  'info-sign' as default. ('glyphicon glyphicon-' is include)
+     trigger: 'hover'               //optional, allowed values  'click' | 'hover' | 'focus' | 'manual',  'hover' as default
     
-* textHelp: "This a help block for a form grop" // any String (no HTML) will be render after label. for custom style use "small.help-block" selector
+}
+``` 
+for custom style use ".iconHelp" selector
 
-example:
+    
+* textHelp: 
+```
+textHelp: "This a help block for a form grop" // any String (no HTML) will be render after label.
+```
+ for custom style use "small.help-block" selector
+ 
+#### Example:
+```
     name: {
             type: String,
             optional: true,
@@ -582,7 +590,7 @@ example:
                 }
             }
         }
-
+``` 
 This component also accepts the same attributes as `afFieldInput`.
 Attributes that are prefixed with `formgroup-` become attributes on the `div`
 element, which contains the label and the field. Attributes that are prefixed
