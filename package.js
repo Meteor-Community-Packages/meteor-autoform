@@ -221,6 +221,12 @@ Package.onUse(function(api) {
     // plain-fieldset Template
     'templates/plain-fieldset/plain-fieldset.html',
     'templates/plain-fieldset/plain-fieldset.js',
+
+
+    //icon help
+      'templates/bootstrap3/components/afFormGroup/afIconHelp.html',
+      'templates/bootstrap3/components/afFormGroup/afIconHelp.js',
+      'templates/bootstrap3/components/afFormGroup/afIconHelp.css',
   ], 'client');
 });
 

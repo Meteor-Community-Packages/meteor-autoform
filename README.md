@@ -553,13 +553,45 @@ Just as `quickForm` renders a form in one line, `afFormGroup` renders a form
 group, that is, everything related to a single field -- the label, the input,
 and the error message -- in one line.
 
-This component accepts the same attributes as `afFieldInput`.
+This component accept iconHelp and textHelp atributtes for help-block bootstrap style.
+* iconHelp:
+    {
+         title: 'This is a title'       //required, allowed values any String
+         content: 'any string or HTML'  //required if type is 'popover'
+         type: 'popover',               //optional, allowed values  'popover'|'tooltip',  'tooltip' as default
+         placement: 'top',              //optional, allowed values  'top' | 'bottom' | 'left' | 'right', 'top' as default
+         icon: 'info-sign',             //optional, allowed values  any Glyphicons normaly 'info-sign' or 'question-sign'  'info-sign' as default. ('glyphicon glyphicon-' is include)
+         trigger: 'hover'               //optional, allowed values  'click' | 'hover' | 'focus' | 'manual',  'hover' as default
+        
+    } 
+    //for custom style use ".iconHelp" selector
+    
+* textHelp: "This a help block for a form grop" // any String (no HTML) will be render after label. for custom style use "small.help-block" selector
+
+example:
+    name: {
+            type: String,
+            optional: true,
+            autoform: {
+                afFormGroup: {
+                    iconHelp: {
+                        title: 'This a help title',
+                        content: 'this is a help content'
+                    },
+                    textHelp: "Just a help text after label"
+                }
+            }
+        }
+
+This component also accepts the same attributes as `afFieldInput`.
 Attributes that are prefixed with `formgroup-` become attributes on the `div`
 element, which contains the label and the field. Attributes that are prefixed
 with `label-` become attributes on the rendered `label` element while any
 remaining attributes are forwarded to the `afFieldInput` component. You can
 also set `label=false` to omit the `label` element or set `label` to a
 string to use that text as the label text.
+
+
 
 ### afQuickField
 

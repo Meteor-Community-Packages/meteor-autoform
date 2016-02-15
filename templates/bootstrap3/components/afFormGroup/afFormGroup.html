@@ -1,9 +1,12 @@
 <template name="afFormGroup_bootstrap3">
-  <div class="form-group {{#if afFieldIsInvalid name=this.name}}has-error{{/if}} {{afFormGroupClass}}" data-required={{required}} {{afFormGroupAtts}}>
-    {{#unless skipLabel}}
-    <label {{bsFieldLabelAtts}}>{{#if this.labelText}}{{this.labelText}}{{else}}{{afFieldLabelText name=this.name}}{{/if}}</label>
-    {{/unless}}
-    {{> afFieldInput this.afFieldInputAtts}}
-    <span class="help-block">{{{afFieldMessage name=this.name}}}</span>
-  </div>
+    <div class="form-group {{#if afFieldIsInvalid name=this.name}}has-error{{/if}} {{afFormGroupClass}}"
+         data-required={{required}} {{afFormGroupAtts}}>
+        {{#unless skipLabel}}
+            <label {{bsFieldLabelAtts}}>{{#if this.labelText}}{{this.labelText}}{{else}}{{afFieldLabelText name=this.name}}{{/if}}
+            {{#if iconHelp}}{{>afIconHelp iconHelp}}{{/if}}</label>
+        {{/unless}}
+        <small class="help-block">{{textHelp}}</small>
+        {{> afFieldInput this.afFieldInputAtts}}
+        <span class="help-block">{{{afFieldMessage name=this.name}}}</span>
+    </div>
 </template>
