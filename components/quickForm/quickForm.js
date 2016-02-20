@@ -130,7 +130,7 @@ function getFieldsForGroup(groupName, schemaObj) {
  */
 function getFieldsWithNoGroup(schemaObj) {
   var fields = _.map(schemaObj, function (field, fieldName) {
-    return (fieldName.slice(-2) !== '.$') &&
+    return (fieldName.indexOf('.$') === -1) &&
       (!field.autoform || !field.autoform.group) &&
       fieldName;
   });
