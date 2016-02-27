@@ -1,5 +1,18 @@
 /* global AutoForm, ReactiveVar, arrayTracker, Hooks, MongoObject, Utility, setDefaults */
 
+Template.autoForm.onCreated(function() {
+  var self = this;
+
+  _.each(Hooks.regex, function(opts, re) {
+    if(opts.regex.test(self.data.id)) {
+      // Init the hooks object if not done yet
+      Hooks.form[self.data.id] = Hooks.form[self.data.id] || Hooks.getDefault();
+
+      Hooks.addHooksToList(Hooks.form[self.data.id], opts.hooks, opts.replace);
+    }
+  });
+});
+
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
     // After removing all of the props we know about, everything else should

@@ -21,7 +21,7 @@ AutoForm.Utility = Utility;
  * form.
  */
 AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) {
-  if (typeof formIds === "string") {
+  if (typeof formIds === "string" || formIds instanceof RegExp) {
     formIds = [formIds];
   }
 
@@ -30,11 +30,20 @@ AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) {
     Hooks.addHooksToList(Hooks.global, hooks, replace);
   } else {
     _.each(formIds, function (formId) {
+      if(formId instanceof RegExp) {
+        // Stash regex and let forms check to see if they match as they're created
+        // We do this since we don't know the actual form ID here, and therefor can't add the hooks
+        Hooks.regex[formId] = {
+          regex: formId,
+          hooks: hooks,
+          replace: replace
+        };
+      } else {
+        // Init the hooks object if not done yet
+        Hooks.form[formId] = Hooks.form[formId] || Hooks.getDefault();
 
-      // Init the hooks object if not done yet
-      Hooks.form[formId] = Hooks.form[formId] || Hooks.getDefault();
-
-      Hooks.addHooksToList(Hooks.form[formId], hooks, replace);
+        Hooks.addHooksToList(Hooks.form[formId], hooks, replace);
+      }
     });
   }
 };

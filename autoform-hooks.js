@@ -1,7 +1,8 @@
 // Manages all hooks, supporting append/replace, get
 
 Hooks = {
-  form: {}
+  form: {},
+  regex: {},
 };
 
 // The names of all supported hooks, excluding "before" and "after".
