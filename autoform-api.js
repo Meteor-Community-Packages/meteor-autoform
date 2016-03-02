@@ -1110,7 +1110,13 @@ AutoForm.selectFirstInvalidField = function selectFirstInvalidField(formId, ss) 
     fields.each(function () {
       var f = $(this);
       if (ctx.keyIsInvalid(f.attr('data-schema-key'))) {
-        f.focus();
+        if (!f.attr('tabindex')) {
+          f.attr('tabindex', 0); // Make sure the field is 'focusable'
+          f.focus();
+          f.removeAttr('tabindex');
+        } else {
+          f.focus();
+        }
         return false;
       }
     });
