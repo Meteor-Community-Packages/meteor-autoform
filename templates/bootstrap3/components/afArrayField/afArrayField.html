@@ -1,6 +1,6 @@
 <template name="afArrayField_bootstrap3">
-  <div class="panel panel-default">
-    <div class="panel-heading">{{afFieldLabelText name=this.atts.name}}</div>
+  <div class="panel {{panelClass}}">
+    <div class="panel-heading {{headingClass}}">{{afFieldLabelText name=this.atts.name}}</div>
     {{#if afFieldIsInvalid name=this.atts.name}}
     <div class="panel-body has-error">
       <span class="help-block">{{{afFieldMessage name=this.atts.name}}}</span>
