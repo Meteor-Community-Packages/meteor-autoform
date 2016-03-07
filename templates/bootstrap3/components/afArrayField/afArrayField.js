@@ -3,6 +3,6 @@ Template.afArrayField_bootstrap3.helpers({
     return this.atts.panelClass || 'panel-default';
   },
   headingClass: function() {
-    return return this.atts.headingClass || '';
+    return this.atts.headingClass || '';
   }
 });
