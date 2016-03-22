@@ -196,7 +196,7 @@ Other:
 
 ## Demo
 
-[Live](http://autoform.meteor.com)
+[Live](http://autoform.meteorapp.com)
 
 [Source](https://github.com/aldeed/autoform-demo)
 
