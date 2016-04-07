@@ -13,12 +13,15 @@ AutoForm.addFormType('insert', {
       throw new Error("AutoForm: You must specify a collection when form type is insert.");
     }
 
-    // See if the collection has a schema attached
-    var collectionHasSchema = (typeof collection.simpleSchema === "function" &&
-                               collection.simpleSchema() != null);
+    
+    
 
     // Run "before.insert" hooks
     this.runBeforeHooks(this.insertDoc, function (doc) {
+      // See if the collection has a schema attached
+      // Moved schema check after beforehooks, to make it possible to add schema selector in hooks
+      var collectionHasSchema = (typeof collection.simpleSchema === "function" &&
+                               collection.simpleSchema(doc) != null);
       // Perform insert
       if (collectionHasSchema) {
         // If the collection2 pkg is used and a schema is attached, we pass a validationContext
