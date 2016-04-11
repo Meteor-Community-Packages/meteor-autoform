@@ -478,7 +478,23 @@ Template.autoForm.events({
     }
   },
   'click .autoform-remove-item': function autoFormClickRemoveItem(event, template) {
-    var self = this; // This type of button must be used within an afEachArrayItem block, so we know the context
+    // This type of button must be used within an afEachArrayItem block, so we know the context
+    // This can be called from nested templates
+    var self =Blaze.getView( Blaze.getView(event.currentTarget), 'Template.afArrayField').templateInstance()
+    var inst;
+    view = Blaze.getView(event.currentTarget)
+    while (view){
+      if(view.templateInstance){
+        
+        if(view.name == 'Template.afEachArrayItem')
+          break;
+        inst= view.templateInstance();
+      } 
+      view=view.originalParentView || view.parentView;
+    }
+    // inst is now the farthest parent before Template.afEachArrayItem
+    self=inst.data;
+  
 
     event.preventDefault();
 
