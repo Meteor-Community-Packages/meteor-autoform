@@ -1,9 +1,6 @@
 Template["afFormGroup_bootstrap3-horizontal"].helpers({
   afFieldInputAtts: function () {
-    var atts = _.clone(this.afFieldInputAtts || {});
-    if ('input-col-class' in atts) {
-      delete atts['input-col-class'];
-    }
+    var atts = _.omit(this.afFieldInputAtts || {}, 'input-col-class');
     // We have a special template for check boxes, but otherwise we
     // want to use the same as those defined for bootstrap3 template.
     if (AutoForm.getInputType(this.afFieldInputAtts) === "boolean-checkbox") {

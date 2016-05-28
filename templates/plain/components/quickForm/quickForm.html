@@ -1,6 +1,19 @@
 <template name="quickForm_plain">
   {{#autoForm qfAutoFormContext}}
-    {{> afQuickFields quickFieldsAtts}}
+
+    {{#with grouplessFields}}
+      {{> afQuickFields quickFieldsAtts}}
+    {{/with}}
+
+    {{#each fieldGroups}}
+      <fieldset class="af-fieldGroup">
+        {{#with fieldGroupLabel}}
+          <legend class="af-fieldGroup-heading">{{this}}</legend>
+        {{/with}}
+        {{> afQuickFields quickFieldsAtts}}
+      </fieldset>
+    {{/each}}
+
     {{#if qfShouldRenderButton}}
     <div>
       <button type="submit" {{submitButtonAtts}}>
@@ -12,5 +25,6 @@
       </button>
     </div>
     {{/if}}
+
   {{/autoForm}}
 </template>

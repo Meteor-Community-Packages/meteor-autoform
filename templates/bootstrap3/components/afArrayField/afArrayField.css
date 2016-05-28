@@ -1,5 +1,6 @@
 .list-group-item.autoform-array-item > div {
   display: table;
+  width: 100%;
 }
 
 .list-group-item.autoform-array-item .autoform-remove-item-wrap {

@@ -99,10 +99,8 @@ AutoForm._forceResetFormValues = function autoFormForceResetFormValues(formId) {
  */
 AutoForm.resetForm = function autoFormResetForm(formId, template) {
   template = template || AutoForm.templateInstanceForForm(formId);
-
-  if (template && template.view._domrange && !template.view.isDestroyed) {
-    template.$("form")[0].reset();
-  }
+  if (!Utility.checkTemplate(template)) return;
+  template.$("form")[0].reset();
 };
 
 /**
@@ -200,7 +198,8 @@ AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templa
   // Get `autoform` object from the schema, if present.
   // Skip for quickForm because it renders a form and not a field.
   if (templateType !== 'quickForm' && fieldName) {
-    schemaAutoFormDefs = AutoForm.getSchemaForField(fieldName).autoform;
+    var fieldSchema = AutoForm.getSchemaForField(fieldName);
+    schemaAutoFormDefs = fieldSchema && fieldSchema.autoform;
   }
 
   // Fallback #1: autoform.<componentType>.template from the schema
@@ -259,7 +258,7 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
   template = template || AutoForm.templateInstanceForForm(formId);
   if (!template ||
       !template.view ||
-      !template.view._domrange ||
+      // We check for domrange later in this function
       template.view.isDestroyed) {
     return null;
   }
@@ -307,18 +306,26 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
     schema: ss
   };
 
-  // Build a flat document from field values
-  var doc = getFlatDocOfFieldValues(getAllFieldsInForm(template), ss);
+  // Get a preliminary doc based on the form
+  var doc;
 
-  // Expand the flat document
-  doc = AutoForm.Utility.expandObj(doc);
+  if (template.view._domrange) {
+    // Build a flat document from field values
+    doc = getFlatDocOfFieldValues(getAllFieldsInForm(template), ss);
 
-  // When all fields that comprise a sub-object are empty, we should unset
-  // the whole subobject and not complain about required fields in it. For example,
-  // if `profile.address` has several properties but they are all null or undefined,
-  // we will set `profile.address=null`. This ensures that we don't get incorrect validation
-  // errors about required fields that are children of optional objects.
-  AutoForm.Utility.bubbleEmpty(doc, keepEmptyStrings);
+    // Expand the flat document
+    doc = AutoForm.Utility.expandObj(doc);
+
+    // When all fields that comprise a sub-object are empty, we should unset
+    // the whole subobject and not complain about required fields in it. For example,
+    // if `profile.address` has several properties but they are all null or undefined,
+    // we will set `profile.address=null`. This ensures that we don't get incorrect validation
+    // errors about required fields that are children of optional objects.
+    AutoForm.Utility.bubbleEmpty(doc, keepEmptyStrings);
+  } else {
+    // If the form is not yet rendered, use the form.doc
+    doc = form.doc || {};
+  }
 
   // Create and clean insert doc.
   if (getModifier !== true) {
@@ -404,11 +411,11 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
   var template = Tracker.nonreactive(function () {
     return AutoForm.templateInstanceForForm(formId);
   });
-  if (!template ||
-      !template.fieldValuesReady.get() ||
-      !template.view ||
-      !template.view._domrange ||
-      template.view.isDestroyed) {
+
+  if (!template) {
+    if (formId) {
+      AutoForm.rerunWhenFormRenderedOrDestroyed(formId);
+    }
     return;
   }
 
@@ -420,14 +427,10 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
   template.formValues[fieldName].depend();
 
   var doc = AutoForm.getFormValues(formId, template, null, false);
-  if (!doc) {
-    return;
-  }
+  if (!doc) return;
 
   var mDoc = new MongoObject(doc);
-  var value = mDoc.getValueForKey(fieldName);
-
-  return value;
+  return mDoc.getValueForKey(fieldName);
 };
 
 /**
@@ -444,14 +447,16 @@ AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTempl
   // if the enclosing view is not a template, perhaps because
   // the template contains a block helper like if, with, each,
   // then look up the view chain until we arrive at a template
-  while (view && view.name.slice(0, 9) !== "Template.") {
+  while (view &&
+         view.name.indexOf('Template.') !== 0 &&
+         view.name.indexOf('BlazeComponent.') !== 0) {
     view = view.originalParentView || view.parentView;
   }
 
   if (!view) return;
 
-  // View names have "Template." at the beginning so we slice that off.
-  return view.name.slice(9);
+  // View names have "Template." or "BlazeComponent." at the beginning so we slice that off.
+  return view.name.slice(view.name.indexOf('.') + 1);
 };
 
 /**
@@ -465,11 +470,11 @@ AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTempl
  * Unlike `AutoForm.getFieldValue`, this function is not reactive.
  */
 AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
-  var field, fieldName, fieldType, arrayItemFieldType, val, typeDef, inputTypeTemplate, dataContext, autoConvert;
+  var field, fieldName, fieldType, fieldSchema, arrayItemFieldType, val, typeDef, inputTypeTemplate, dataContext, autoConvert;
 
-  Tracker.nonreactive(function() { 
+  Tracker.nonreactive(function() {
     //don't rerun when data context of element changes, can cause infinite loops
-    
+
     dataContext = Blaze.getData(element);
     if (dataContext && dataContext.atts) {
       autoConvert = dataContext.atts.autoConvert;
@@ -484,7 +489,10 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
 
   // If we have a schema, we can autoconvert to the correct data type
   if (ss) {
-    fieldType = ss.schema(fieldName).type;
+    fieldSchema = ss.schema(fieldName);
+    if (fieldSchema) {
+      fieldType = fieldSchema.type;
+    }
   }
 
   // Get the name of the input type template used to render the input element
@@ -593,14 +601,6 @@ AutoForm.addFormType = function afAddFormType(name, definition) {
  * this method causes the reactive validation messages to appear.
  */
 AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipEmpty) {
-  var template = AutoForm.templateInstanceForForm(formId);
-  if (!template ||
-      !template.view ||
-      !template.view._domrange ||
-      template.view.isDestroyed) {
-    return true;
-  }
-
   return validateField(fieldName, formId, skipEmpty, false);
 };
 
@@ -643,15 +643,19 @@ AutoForm.validateForm = function autoFormValidateForm(formId) {
 /**
  * @method AutoForm.getValidationContext
  * @public
- * @param {String} formId The `id` attribute of the `autoForm` for which you want the validation context
+ * @param {String} [formId] The `id` attribute of the `autoForm` for which you want the validation context
  * @return {SimpleSchemaValidationContext} The SimpleSchema validation context object.
  *
  * Use this method to get the validation context, which can be used to check
  * the current invalid fields, manually invalidate fields, etc.
  */
 AutoForm.getValidationContext = function autoFormGetValidationContext(formId) {
-  var ss = AutoForm.getFormSchema(formId);
-  return ss && ss.namedContext(formId);
+  var form = AutoForm.getCurrentDataForForm(formId);
+  var ss = form._resolvedSchema;
+  if (!ss) return;
+  // formId may not be passed in, but we MUST pass it into namedContext to get back proper context
+  formId = formId || form.id;
+  return ss.namedContext(formId);
 };
 
 /**
@@ -783,18 +787,14 @@ AutoForm.getInputType = function getInputType(atts) {
 
   // Get schema definition, using the item definition for array fields
   defs = AutoForm.getSchemaForField(atts.name);
-  if (!defs) {
-    return 'text';
-  }
-
-  schemaType = defs.type;
+  schemaType = defs && defs.type;
   if (schemaType === Array) {
     expectsArray = true;
-    schemaType = AutoForm.getSchemaForField(atts.name + ".$").type;
-    if (!defs) {
-      return 'text';
-    }
+    defs = AutoForm.getSchemaForField(atts.name + ".$");
+    schemaType = defs && defs.type;
   }
+
+  if (!schemaType) return 'text';
 
   // Based on the `type` attribute, the `type` from the schema, and/or
   // other characteristics such as regEx and whether an array is expected,
@@ -866,7 +866,8 @@ AutoForm.getInputType = function getInputType(atts) {
  */
 AutoForm.getSchemaForField = function autoFormGetSchemaForField(name) {
   var ss = AutoForm.getFormSchema();
-  return AutoForm.Utility.getDefs(ss, name);
+  if (!ss) return;
+  return ss.schema(name); // might be undefined
 };
 
 /**
@@ -881,14 +882,10 @@ AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) {
   var ss, def, saf, allowedValues;
 
   ss = AutoForm.getFormSchema();
-  if (!ss) {
-    return;
-  }
+  if (!ss) return;
 
   def = ss.getDefinition(name);
-  if (!def) {
-    return;
-  }
+  if (!def) return;
 
   // If options in schema, use those
   saf = def.autoform;
@@ -904,9 +901,7 @@ AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) {
 
   // If schema has allowedValues, use those
   allowedValues = ss.getAllowedValuesForKey(name);
-  if (allowedValues) {
-    return 'allowed';
-  }
+  if (allowedValues) return 'allowed';
 };
 
 /**
@@ -917,7 +912,7 @@ AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) {
  *
  * Call this method from a UI helper to get the field definitions based on the schema used by the closest containing autoForm.
  */
-AutoForm.getLabelForField = function autoFormGetSchemaForField(name) {
+AutoForm.getLabelForField = function autoFormGetLabelForField(name) {
   var ss = AutoForm.getFormSchema(), label = ss.label(name);
   // for array items we don't want to inflect the label because
   // we will end up with a number;
@@ -999,6 +994,18 @@ AutoForm.getArrayCountFromDocForField = function (formId, field) {
     }
   }
   return docCount;
+};
+
+/**
+ * @method AutoForm.parseData
+ * @public
+ * @param {Object} data Current data context for the form, or an empty object. Usually this is used from a quickForm, since the autoForm won't be rendered yet. Otherwise you should use AutoForm.getCurrentDataForForm if you can.
+ * @returns {Object} Current data context for the form, or an empty object.
+ *
+ * Parses and alters the current data context for a form. It will have default values added and a `_resolvedSchema` property that has the schema the form should use.
+ */
+AutoForm.parseData = function (data) {
+  return setDefaults(data);
 };
 
 /**
@@ -1110,6 +1117,31 @@ AutoForm.selectFirstInvalidField = function selectFirstInvalidField(formId, ss) 
   }
 };
 
+AutoForm.addStickyValidationError = function addStickyValidationError(formId, key, type, value) {
+  var template = AutoForm.templateInstanceForForm(formId);
+  if (!template) return;
+
+  // Add error
+  template._stickyErrors[key] = {
+    type: type,
+    value: value
+  };
+
+  // Revalidate that field
+  validateField(key, formId, false, false);
+};
+
+AutoForm.removeStickyValidationError = function removeStickyValidationError(formId, key) {
+  var template = AutoForm.templateInstanceForForm(formId);
+  if (!template) return;
+
+  // Remove errors
+  delete template._stickyErrors[key];
+
+  // Revalidate that field
+  validateField(key, formId, false, false);
+};
+
 /**
  * @method AutoForm._validateFormDoc
  * @public
@@ -1196,9 +1228,7 @@ AutoForm._validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss
  * @returns {String} The data context with property defaults added.
  */
 setDefaults = function setDefaults(data) {
-  if (!data) {
-    data = {};
-  }
+  if (!data) data = {};
 
   // default form type is "normal"
   if (typeof data.type !== 'string') {
@@ -1237,6 +1267,21 @@ setDefaults = function setDefaults(data) {
   }
 
   return data;
+};
+
+var waitingForForms = {};
+AutoForm.rerunWhenFormRenderedOrDestroyed = function (formId) {
+  if (!_.has(waitingForForms, formId)) {
+    waitingForForms[formId] = new Tracker.Dependency();
+  }
+  waitingForForms[formId].depend();
+};
+
+AutoForm.triggerFormRenderedDestroyedReruns = function (formId) {
+  if (!_.has(waitingForForms, formId)) {
+    waitingForForms[formId] = new Tracker.Dependency();
+  }
+  waitingForForms[formId].changed();
 };
 
 /**

@@ -4,10 +4,6 @@ function parseOptions(options) {
   var hash = (options || {}).hash || {};
   // Find the form's schema
   var ss = AutoForm.getFormSchema();
-  // Call getDefs for side effect of throwing errors when name is not in schema
-  if (hash.name) {
-    AutoForm.Utility.getDefs(ss, hash.name);
-  }
   return _.extend({}, hash, {ss: ss});
 }
 
@@ -168,7 +164,7 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
 
     // If top level fields, be sure to remove any with $ in them
     else {
-      fieldList = _.filter(fieldList, function filterFieldsByName(field) {
+      fieldList = _.filter(fieldList, function filterArrayFields(field) {
         return (field.slice(-2) !== '.$' && field.indexOf('.$.') === -1);
       });
     }
@@ -224,6 +220,11 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
   // Filter out fields we never want
   fieldList = _.filter(fieldList, function shouldIncludeField(field) {
     var fieldDefs = ss.schema(field);
+
+    // Don't include fields that are not in the schema
+    if (!fieldDefs) {
+      return false;
+    }
 
     // Don't include fields with autoform.omit=true
     if (fieldDefs.autoform && fieldDefs.autoform.omit === true) {

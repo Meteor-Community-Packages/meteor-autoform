@@ -4,20 +4,16 @@ Hooks = {
   form: {}
 };
 
-/**
- * @return {String} The names of all supported hooks, excluding "before" and "after".
- */
-function getHookNames() {
-  return ['formToDoc', 'formToModifier', 'docToForm', 'onSubmit', 'onSuccess',
-      'onError', 'beginSubmit', 'endSubmit'];
-};
+// The names of all supported hooks, excluding "before" and "after".
+var hookNames = ['formToDoc', 'formToModifier', 'docToForm', 'onSubmit', 'onSuccess', 'onError',
+    'beginSubmit', 'endSubmit'];
 
 Hooks.getDefault = function() {
   var hooks = {
     before: {},
     after: {}
   };
-  _.each(getHookNames(), function(hookName) {
+  _.each(hookNames, function(hookName) {
     hooks[hookName] = [];
   });
   return hooks;
@@ -45,7 +41,7 @@ Hooks.addHooksToList = function addHooksToList(hooksList, hooks, replace) {
   });
 
   // Add all other hooks
-  _.each(getHookNames(), function autoFormHooksEach(name) {
+  _.each(hookNames, function autoFormHooksEach(name) {
     if (hooks[name]) {
       if (typeof hooks[name] !== "function") {
         throw new Error("AutoForm " + name + " hook must be a function, not " + typeof hooks[name]);

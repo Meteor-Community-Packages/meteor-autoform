@@ -6,6 +6,70 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.8.1
+
+Fix AutoForm.getValidationContext to return correct context when no `formId` argument is provided.
+
+### 5.8.0
+
+You can now set `singleMethodArgument=true` as a form attribute on a `method-update` type form, and your method will be called with a single object argument with `_id` and `modifier` properties. You should do this if using the [mdg:validated-method](https://github.com/meteor/validated-method) package.
+
+### 5.7.1
+
+For "normal" type forms, don't end submission until `this.done()` is called.
+
+### 5.7.0
+
+Sticky validation improvements
+
+- Add API outside of hooks for settings and removing sticky validation errors
+- Properly show sticky validation errors as soon as they are added
+- Optimizations to keyup validation
+
+### 5.6.1
+
+Fix boolean-radios templates
+
+### 5.6.0
+
+- Add ability to specify a `data` attribute on `afFieldInput`, which is then added to the data context of the input type template. (See the readme.)
+- Fix issue with submitting proper value when the `null` option is chosen for a boolean field
+- Fix issues with reactive reruns that change the form schema
+- Adjust value returned from AutoForm.getFieldValue when the form isn't rendered yet
+- Fix issue with autosaving changes to multiple select fields
+- Adjustments to support BlazeComponents
+- Fix width of array field when there is only one
+- Fix initial value of contenteditable fields
+
+Thanks to all who submitted PRs: @abecks, @kellyje, @bySabi, @vimes1984, @Nieziemski, @smeijer
+
+### 5.5.1
+
+Add jquery dependency for Meteor 1.2 compatibility
+
+### 5.5.0
+
+For `boolean-radios` and `boolean-select` input types, you can now use the `nullLabel` attribute to specify a label (e.g., "None") for when the value is not set (or to unset it). For backwards compatibility, the `boolean-radios` type will not render a radio element for unsetting unless you set `nullLabel`.
+
+### 5.4.1
+
+Fix `AutoForm.getFieldValue` so that it reacts properly when first called outside of the form, before the form has been rendered. Also attempt to limit unnecessary reruns.
+
+### 5.4.0
+
+* New `autoform.group` option. See "Grouping Fields" in README. (Thanks @SachaG)
+* `formToModifier` now works properly (Thanks @aramk)
+* `update-pushArray` forms now work properly when there is an array index in the `scope` field
+* Other minor documentation and dependency changes
+
+### 5.3.2
+
+Better fix to `afFieldValue` tracking for check boxes
+
+### 5.3.1
+
+Fix issue where `afFieldValue` tracking didn't work for non-boolean radio buttons and check boxes.
+
 ### 5.3.0
 
 * Fix `Uncaught TypeError: Cannot read property 'changed' of undefined` error

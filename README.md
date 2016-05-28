@@ -110,6 +110,7 @@ Dates and times:
 * [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
 * [antalakas:autoform-bs-daterangepicker](https://atmospherejs.com/antalakas/autoform-bs-daterangepicker)
 * [drewy:autoform-datetimepicker](https://atmospherejs.com/drewy/autoform-datetimepicker)
+* [bookmd:autoform-time-from-now](https://atmospherejs.com/bookmd/autoform-time-from-now)
 
 Selects:
 
@@ -117,11 +118,18 @@ Selects:
 * [aldeed:autoform-bs-button-group-input](https://atmospherejs.com/aldeed/autoform-bs-button-group-input)
 * [comerc:autoform-selectize](https://atmospherejs.com/comerc/autoform-selectize)
 * [vazco:universe-autoform-select](https://atmospherejs.com/vazco/universe-autoform-select)
+* [lukemadera:autoform-autocomplete](https://atmospherejs.com/lukemadera/autoform-autocomplete)
+* [rikonor:autoform-image-gallery](https://github.com/rikonor/meteor-autoform-image-gallery)
 
 WYSIWYGs:
 
 * [mpowaga:autoform-summernote](https://atmospherejs.com/mpowaga/autoform-summernote)
 * [donchess:autoform-froala](https://atmospherejs.com/donchess/autoform-froala)
+* [vimes1984:autoform-textangular](https://atmospherejs.com/vimes1984/autoform-textangular)
+
+Markdowns:
+
+* [q42:autoform-markdown](https://atmospherejs.com/q42/autoform-markdown)
 
 Autocompletes:
 
@@ -129,12 +137,14 @@ Autocompletes:
 * [miguelalarcos:afwrap-xautocomplete](https://atmospherejs.com/miguelalarcos/afwrap-xautocomplete)
 * [comerc:autoform-typeahead](https://atmospherejs.com/comerc/autoform-typeahead)
 * [lukemadera:autoform-googleplace](https://atmospherejs.com/lukemadera/autoform-googleplace)
+* [lukemadera:autoform-autocomplete](https://atmospherejs.com/lukemadera/autoform-autocomplete)
 
 Files:
 
 * [cfs:autoform](https://atmospherejs.com/cfs/autoform)
 * [yogiben:autoform-file](https://atmospherejs.com/yogiben/autoform-file)
 * [naxio:autoform-file](https://atmospherejs.com/naxio/autoform-file)
+* [elevatedevdesign:autoform-slingshot](https://github.com/ElevateDev/meteor-autoform-slingshot)
 
 Maps:
 
@@ -142,7 +152,11 @@ Maps:
 
 Ranges/Sliders:
 
-* [elevatedevdesign:autoform-nouislider](https://github.com/ElevateDevelopmentAndDesign/meteor-autoform-nouislider)
+* [elevatedevdesign:autoform-nouislider](https://github.com/ElevateDev/meteor-autoform-nouislider)
+
+Payments
+
+* [elevatedevdesign:autoform-jquery-payments](https://github.com/ElevateDev/meteor-autoform-jquery-payments)
 
 Other:
 
@@ -154,11 +168,14 @@ Other:
 * [meteoric:autoform-ionic](https://github.com/meteoric/autoform-ionic)
 * [fabienb4:autoform-semantic-ui](https://atmospherejs.com/fabienb4/autoform-semantic-ui)
 * [gildaspk:autoform-materialize](https://atmospherejs.com/gildaspk/autoform-materialize)
+* [poetic:react-autoform-material-ui](https://atmospherejs.com/poetic/react-autoform-material-ui)
 
 #### Admin Panels
 
 * [yogiben:admin](https://atmospherejs.com/yogiben/admin)
 * [kaoskeya:admin](https://atmospherejs.com/kaoskeya/admin)
+* [vimes1984:foundation-angular-admin](https://atmospherejs.com/vimes1984/foundation-angular-admin)
+* [tooit:content-types](https://github.com/tooit/meteor-content-types)
 
 #### Content Management Systems
 
@@ -174,6 +191,8 @@ Other:
 #### Other
 
 * [comerc:autoform-fixtures](https://github.com/comerc/meteor-autoform-fixtures/)
+* [tooit:content-types](https://atmospherejs.com/tooit/content-types)
+* [tooit:content-types-bootstrap3](https://atmospherejs.com/tooit/content-types-bootstrap3)
 
 ## Demo
 
@@ -401,16 +420,52 @@ See [this demo](http://autoform.meteor.com/qfdetails) for examples of what happe
 
 ### afFieldInput
 
-Renders an input control for the field. The type of control depends on what you set the `type` attribute to. All of the HTML5 input types plus a few more are built in. There are add-on packages that provide additional input types (widgets, UI controls).
+Renders an input control for the field. The type of control depends on what you set the `type` attribute to. All of the HTML5 input types plus a few more are built in. Here is the full list of included input types:
+
+* boolean-checkbox
+* boolean-radios
+* boolean-select
+* button
+* color
+* contenteditable
+* date
+* datetime
+* datetime-local
+* email
+* file
+* hidden
+* image
+* month
+* number
+* password
+* radio
+* range
+* reset
+* search
+* select
+* select-checkbox
+* select-checkbox-inline
+* select-multiple
+* select-radio
+* select-radio-inline
+* submit
+* tel
+* text
+* textarea
+* time
+* url
+* week
+
+There are add-on packages that provide additional input types (widgets, UI controls).
 
 If you don't include a `type` attribute, the following logic is used to automatically select an appropriate type:
 
-* If you supply the `options` attribute, a `<select>` control is used. If your schema expects an array for the field, then it is a multiple-select control. If you prefer radios or checkboxes (for example, if it is a short list of options), then add `noselect=true` attribute.
-* Otherwise if the schema type is `String` and you include the `rows` attribute, a `<textarea>` is used.
-* Otherwise if the schema type is `Number`, `<input type="number">` is used.
-* Otherwise if the schema type is `Date`, `<input type="date">` is used.
-* Otherwise if the schema type is `Boolean`, the "boolean-checkbox" type is used. You may want to specify an override type of "boolean-radios" or "boolean-select" instead. If you do so, use the `trueLabel` and `falseLabel` attributes to set the labels used in the radio or select control.
-* Otherwise `<input type="text">` is used.
+* If you supply the `options` attribute, a `select` input is used. If your schema expects an array for the field, then it is a `select-multiple` input. If you prefer radios or checkboxes (for example, if it is a short list of options), then add `noselect=true` attribute or simply set the `type` to `select-checkbox`, `select-checkbox-inline`, `select-radio`, or `select-radio-inline`.
+* Otherwise if the schema type is `String` and you include the `rows` attribute, a `textarea` is used.
+* Otherwise if the schema type is `Number`, a `number` type is used.
+* Otherwise if the schema type is `Date`, a `date` type is used.
+* Otherwise if the schema type is `Boolean`, the `boolean-checkbox` type is used. You may want to specify a `type` of `boolean-radios` or `boolean-select` instead. If you do so, use the `trueLabel`, `falseLabel`, and `nullLabel` attributes to set the labels used in the radio or select control.
+* Otherwise a `text` type is used.
 
 The following attributes are recognized:
 
@@ -422,14 +477,16 @@ element to be a `select` element with these options, unless you also use
 `noselect`. To use the `allowedValues` from the schema as the options, set
 `options="allowed"`. To specify a label to be displayed when there is no
 option selected, set `firstOption="(My Select One Label)"`.
+* `firstOption`: Use with the `options` attribute to specify a string to use for the first option of a `select` input, which shows when nothing has been selected yet. For example, `firstOption="(You Should Really Pick Something From This List)"`. There is a default first option "(Select One)". If you don't want any default option, then do `firstOption=false`, but make sure your `select` input has a default `value` or this will result in a confusing UX where it looks like the first option is selected but it isn't.
 * `capitalize`: Used only when you've set `options="allowed"`. Set this to `true`
 to capitalize the labels generated from `allowedValues`.
 * `noselect`: Use in conjunction with `options` attribute. Set this attribute
 to `true` to render radios or checkboxes for the `options` instead of `select`.
 * `trueLabel`: Set to the string that should be used as the label for the `true`
-option for a boolean field.
+option for an input with type `boolean-select` or `boolean-radios`.
 * `falseLabel`: Set to the string that should be used as the label for the `false`
-option for a boolean field.
+option for an input with type `boolean-select` or `boolean-radios`.
+* `nullLabel`: Set to the string that should be used as the label for the empty value option for an input with type `boolean-select` or `boolean-radios`.
 * `value`: Set a specific, potentially reactive, value for the input. If you have also provided a `doc` attribute on the `autoForm` or `quickForm`, this value will override the value from the `doc` object.
 * `defaultValue`: Set a reactive default value for the input. If you have also provided a `doc` attribute on the `autoForm` or `quickForm`, this value will be used only when the `doc` object has no value for this field. This takes precedence over the `defaultValue` property of the field's schema. (Also, `defaultValue` from the schema is slightly different in that it is never used if you provide a `doc` attribute.)
 *  Any additional attributes are passed along to the generated DOM element, meaning that you can add `class`, etc. When providing a boolean attribute, set it to `true` (no quotation marks) or a helper that returns `true`.
@@ -497,11 +554,11 @@ group, that is, everything related to a single field -- the label, the input,
 and the error message -- in one line.
 
 This component accepts the same attributes as `afFieldInput`.
-Attributes that are prefixed with `formgroup-` become attributes on the `div` 
-element, which contains the label and the field. Attributes that are prefixed 
-with `label-` become attributes on the rendered `label` element while any 
-remaining attributes are forwarded to the `afFieldInput` component. You can 
-also set `label=false` to omit the `label` element or set `label` to a 
+Attributes that are prefixed with `formgroup-` become attributes on the `div`
+element, which contains the label and the field. Attributes that are prefixed
+with `label-` become attributes on the rendered `label` element while any
+remaining attributes are forwarded to the `afFieldInput` component. You can
+also set `label=false` to omit the `label` element or set `label` to a
 string to use that text as the label text.
 
 ### afQuickField
@@ -519,7 +576,7 @@ Refer to the "Objects and Arrays" section for additional information.
 ```html
 {{> afQuickField name='firstField' autofocus=''}}
 {{> afQuickField name='weirdColors' style="color: orange" label-style="color: green"}}
-{{> afQuickField name="longString" rows="5"}}
+{{> afQuickField name="longString" rows=5}}
 {{> afQuickField name="radioBoolean" type="boolean-radios" trueLabel="Yes" falseLabel="No"}}
 {{> afQuickField name="selectBoolean" type="boolean-select" trueLabel="Yes" falseLabel="No"}}
 {{> afQuickField name="optionsButNoSelect" options=numSelectOptions noselect="true"}}
@@ -657,16 +714,20 @@ The method is not called until `doc` is valid on the client.
 
 ### method-update
 
-Will call the server method with the name you specify in the `meteormethod` attribute. Passes two arguments:
+Will call the server method with the name you specify in the `meteormethod` attribute.
 
-* `modifier`: the modifier object generated from the form values
-* `documentId`: the `_id` of the document being updated
+There are two possible ways your method can be called.
+
+1. By default, your method will be called with two arguments:
+  * `modifier`: the modifier object generated from the form values
+  * `documentId`: the `_id` of the document being updated
+2. If you set `singleMethodArgument=true` as a form attribute, your method will be called with a single object argument with `_id` and `modifier` properties. You should do this if using the [mdg:validated-method](https://github.com/meteor/validated-method) package.
 
 You may optionally specify a DDP Connection in the `ddp` attribute. If you do, the method will be called using the DDP connection provided.
 
 The method is not called until `modifier` is valid on the client.
 
-**You must call `check()` in the method or perform your own validation since a user could bypass the client side validation.**
+**You must call `check()` in the method or perform your own validation since a user could bypass the client side validation. Using the [mdg:validated-method](https://github.com/meteor/validated-method) package is recommended.**
 
 ### normal
 
@@ -992,7 +1053,7 @@ var hooksObject = {
     // alter doc
     // return doc;
   },
-  
+
   // Called every time an update or typeless form
   // is revalidated, which can be often if keyup
   // validation is used.
@@ -1017,7 +1078,7 @@ var hooksObject = {
 
 The following properties and functions are available in all submission hooks when they are called. This does not include formToDoc, formToModifier, or docToForm.
 
-* `this.addStickyValidationError(key, type, [value])`: Call this to add a custom validation error that will not be overridden by subsequent revalidations on the client. This can be useful if you need to show a form error based on errors coming back from the server, and you don't want it to disappear when fields are revalidated on the client on blur, keyup, etc. The sticky error will go away when the form is reset (such as after a successful submission), when the form instance is destroyed, or when you call `this.removeStickyValidationError(key)` in any hook.
+* `this.addStickyValidationError(key, type, [value])`: Calls `AutoForm.addStickyValidationError` for the form
 * `this.autoSaveChangedElement`: The input element that was changed to cause this form submission (if the submission was due to autosave)
 * `this.collection`: The collection attached to the form (from `collection` attribute)
 * `this.currentDoc`: The current document attached to the form (from `doc` attribute)
@@ -1026,7 +1087,7 @@ The following properties and functions are available in all submission hooks whe
 * `this.formAttributes`: The object containing all the form attributes from the `autoForm` or `quickForm`
 * `this.formId`: The form's `id` attribute (useful in a global hook)
 * `this.insertDoc`: The gathered current form values, as a normal object
-* `this.removeStickyValidationError(key)`: Call this to remove a sticky validation error you previously added to the current form instance.
+* `this.removeStickyValidationError(key)`: Calls `AutoForm.removeStickyValidationError` for the form
 * `this.resetForm()`: Call this if you need to reset the form
 * `this.ss`: The SimpleSchema instance used for validating the form
 * `this.ssIsOverride`: This is `true` if `this.ss` is an override schema, meaning it's coming from a `schema` attribute on the `autoForm` or `quickForm`, but there is also a `collection` attribute pointing to a collection that has its own schema attached.
@@ -1124,6 +1185,27 @@ summary: {
 ```
 
 Tip: Any attribute can instead be provided as a function that returns the attribute's value.
+
+You can pass data structures using the `data` property. They will not be used as attributes, instead they will
+be available in the field's context. For example:
+
+```js
+summary: {
+  type: String,
+  autoform: {
+    afFieldInput: {
+      data: {
+        someArray: ['apple', 'orange', 'banana'],
+        someObj: {
+          complex: {
+            data: 'structure'
+          }
+        }
+      }
+    }
+  }
+}
+```
 
 ## Complex Schemas
 
@@ -1283,6 +1365,35 @@ If you create a good set of templates for a commonly used framework or a
 common purpose, consider releasing it as a separate add-on package. The goal
 is to keep the built-in templates minimal but to provide many others through
 separate packages.
+
+## Grouping Fields
+
+The "plain", "bootstrap", and "bootstrap-horizontal" quickForm templates allow you to group fields into fieldsets in the schema if you want.
+
+For example if you add this to several of the fields in your form schema:
+
+```js
+{
+  autoform: {
+    group: 'Contact Information'
+  }
+}
+```
+
+Then all of those fields will be grouped into a `fieldset` with a `legend` that says "Contact Information". The fieldsets appear below any fields that do no list a group.
+
+This only affects quickForms.
+
+The `fieldset` has class "af-fieldGroup" and the `legend` has class "af-fieldGroup-heading" to help with styling.
+
+The [Telescope](https://telescope.readme.io/docs) app makes use of this feature. Thanks to **@SachaG** for contributing it.
+
+## Sticky Validation Errors
+
+Every time AutoForm revalidates your form, it overwrites the list of invalid fields for that form. This means that adding your own errors to the form validation context (using the SimpleSchema API) will not always work because your custom errors will disappear upon first revalidation. To solve this, you can add sticky errors for a form. Sticky errors do not go away unless you reset the form, the form instance is destroyed, or you manually remove them.
+
+- `AutoForm.addStickyValidationError(formId, key, type, [value])`
+- `AutoForm.removeStickyValidationError(formId, key)
 
 ## Defining Custom Input Types
 

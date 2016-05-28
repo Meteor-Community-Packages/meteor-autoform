@@ -90,7 +90,8 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
           "noselect",
           "options",
           "template",
-          "defaultValue");
+          "defaultValue",
+          "data");
 
   // Add required if required
   if (typeof inputAtts.required === "undefined" && !defs.optional) {
@@ -144,6 +145,14 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
     selectOptions: AutoForm.Utility.getSelectOptions(defs, hash)
   };
 
+  /*
+   * Merge data property from the field schema with the context.
+   * We do not want these turned into HTML attributes.
+   */
+  if(hash.data){
+    _.extend(inputTypeContext, hash.data);
+  }
+
   // Before returning the context, we allow the registered form type to
   // adjust it if necessary.
   var ftd = Utility.getFormTypeDef(formType);
@@ -166,7 +175,8 @@ function markChanged(template, fieldName) {
     if (template &&
         template.view &&
         template.view._domrange &&
-        !template.view.isDestroyed) {
+        !template.view.isDestroyed &&
+        template.formValues[fieldName]) {
 
       template.formValues[fieldName].changed();
       template.formValues[fieldName].requestInProgress = false;
@@ -176,9 +186,7 @@ function markChanged(template, fieldName) {
 }
 
 updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) {
-  if (!template) {
-    return;
-  }
+  if (!template) return;
 
   template.formValues = template.formValues || {};
   if (!template.formValues[fieldName]) {

@@ -14,8 +14,13 @@ Template['quickForm_bootstrap3-inline'].helpers({
   qfAutoFormContext: function () {
     var ctx = _.clone(this.qfAutoFormContext || {});
     ctx = AutoForm.Utility.addClass(ctx, 'form-inline');
-    delete ctx['id-prefix'];
+
+    // label-class attribute is unique to this template so it will
+    // not have been removed by AutoForm core. We remove it from the autoForm context
+    // because it is an attribute supported only by quickFields, quickField,
+    // afObjectField, afArrayField, and afFormGroup.
     delete ctx['label-class'];
+
     return ctx;
   },
   quickFieldsAtts: function () {

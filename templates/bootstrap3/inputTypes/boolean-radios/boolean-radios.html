@@ -6,5 +6,10 @@
     <div class="radio">
       <label><input type="radio" value="true" name="{{this.name}}" {{trueAtts}} /> {{#with this.atts.trueLabel}}{{this}}{{else}}True{{/with}}</label>
     </div>
+    {{#if this.atts.nullLabel}}
+    <div class="radio">
+      <label><input type="radio" value="null" name="{{this.name}}" {{nullAtts}} /> {{this.atts.nullLabel}}</label>
+    </div>
+    {{/if}}
   </div>
 </template>

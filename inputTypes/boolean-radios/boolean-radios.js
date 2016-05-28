@@ -5,55 +5,36 @@ AutoForm.addInputType("boolean-radios", {
       return false;
     } else if (this.find('input[value=true]').is(":checked")) {
       return true;
+    } else if (this.find('input[value=null]').is(":checked")) {
+      return null;
     }
   },
   valueConverters: {
-    "string": function (val) {
-      if (val === true) {
-        return "TRUE";
-      } else if (val === false) {
-        return "FALSE";
-      }
-      return val;
-    },
-    "stringArray": function (val) {
-      if (val === true) {
-        return ["TRUE"];
-      } else if (val === false) {
-        return ["FALSE"];
-      }
-      return val;
-    },
-    "number": function (val) {
-      if (val === true) {
-        return 1;
-      } else if (val === false) {
-        return 0;
-      }
-      return val;
-    },
-    "numberArray": function (val) {
-      if (val === true) {
-        return [1];
-      } else if (val === false) {
-        return [0];
-      }
-      return val;
-    }
+    "string": AutoForm.valueConverters.booleanToString,
+    "stringArray": AutoForm.valueConverters.booleanToStringArray,
+    "number": AutoForm.valueConverters.booleanToNumber,
+    "numberArray": AutoForm.valueConverters.booleanToNumberArray
   }
 });
 
-Template["afBooleanRadioGroup"].helpers({
+Template.afBooleanRadioGroup.helpers({
   falseAtts: function falseAtts() {
-    var atts = _.omit(this.atts, 'trueLabel', 'falseLabel', 'data-schema-key');
+    var atts = _.omit(this.atts, 'trueLabel', 'falseLabel', 'nullLabel', 'data-schema-key');
     if (this.value === false) {
       atts.checked = "";
     }
     return atts;
   },
   trueAtts: function trueAtts() {
-    var atts = _.omit(this.atts, 'trueLabel', 'falseLabel', 'data-schema-key');
+    var atts = _.omit(this.atts, 'trueLabel', 'falseLabel', 'nullLabel', 'data-schema-key');
     if (this.value === true) {
+      atts.checked = "";
+    }
+    return atts;
+  },
+  nullAtts: function nullAtts() {
+    var atts = _.omit(this.atts, 'trueLabel', 'falseLabel', 'nullLabel', 'data-schema-key');
+    if (this.value !== true && this.value !== false) {
       atts.checked = "";
     }
     return atts;

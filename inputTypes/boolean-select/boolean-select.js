@@ -9,41 +9,13 @@ AutoForm.addInputType("boolean-select", {
     }
   },
   valueConverters: {
-    "string": function (val) {
-      if (val === true) {
-        return "TRUE";
-      } else if (val === false) {
-        return "FALSE";
-      }
-      return val;
-    },
-    "stringArray": function (val) {
-      if (val === true) {
-        return ["TRUE"];
-      } else if (val === false) {
-        return ["FALSE"];
-      }
-      return val;
-    },
-    "number": function (val) {
-      if (val === true) {
-        return 1;
-      } else if (val === false) {
-        return 0;
-      }
-      return val;
-    },
-    "numberArray": function (val) {
-      if (val === true) {
-        return [1];
-      } else if (val === false) {
-        return [0];
-      }
-      return val;
-    }
+    "string": AutoForm.valueConverters.booleanToString,
+    "stringArray": AutoForm.valueConverters.booleanToStringArray,
+    "number": AutoForm.valueConverters.booleanToNumber,
+    "numberArray": AutoForm.valueConverters.booleanToNumberArray
   },
   contextAdjust: function (context) {
-    var atts = _.omit(context.atts, 'trueLabel', 'falseLabel', 'firstOption');
+    var atts = _.omit(context.atts, 'trueLabel', 'falseLabel', 'nullLabel', 'firstOption');
 
     // build items list
     context.items = [
@@ -55,7 +27,7 @@ AutoForm.addInputType("boolean-select", {
         // See https://github.com/meteor/meteor/issues/2174
         _id: "",
         selected: (context.value !== false && context.value !== true),
-        label: context.atts.firstOption || "(Select One)",
+        label: context.atts.nullLabel || context.atts.firstOption || "(Select One)",
         atts: atts
       },
       {

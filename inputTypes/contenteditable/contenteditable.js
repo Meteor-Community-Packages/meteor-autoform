@@ -24,3 +24,12 @@ Template.afContenteditable.helpers({
     }
   }
 });
+
+Template.afContenteditable.onRendered(function () {
+  var template = this;
+
+  template.autorun(function () {
+    var data = Template.currentData();
+    template.$('[contenteditable]').html(data.value);
+  });
+});

@@ -2,7 +2,7 @@ Package.describe({
   name: "aldeed:autoform",
   summary: "Easily create forms with automatic insert and update, and automatic reactive validation.",
   git: "https://github.com/aldeed/meteor-autoform.git",
-  version: "5.3.0"
+  version: "5.8.1"
 });
 
 Package.onUse(function(api) {
@@ -12,9 +12,10 @@ Package.onUse(function(api) {
   api.use('aldeed:simple-schema@1.1.0');
   api.use('check');
   // client
-  api.use(['livedata', 'underscore', 'deps', 'templating', 'ui', 'blaze', 'ejson', 'reactive-var', 'reactive-dict', 'random'], 'client');
-  api.use('momentjs:moment@2.8.4', 'client');
+  api.use(['livedata', 'underscore', 'deps', 'templating', 'ui', 'blaze', 'ejson', 'reactive-var', 'reactive-dict', 'random', 'jquery'], 'client');
+  api.use('momentjs:moment@2.10.6', 'client');
   api.use('mrt:moment-timezone@0.2.1', 'client', {weak: true});
+  api.use('aldeed:moment-timezone@0.4.0', 'client', {weak: true});
   api.use(['aldeed:collection2@2.0.0', 'reload'], 'client', {weak: true});
 
   // Imply SS to make sure SimpleSchema object is available to app
@@ -54,6 +55,7 @@ Package.onUse(function(api) {
     'formTypes/readonly.js',
     'formTypes/disabled.js',
     // input types
+    'inputTypes/value-converters.js',
     'inputTypes/boolean-checkbox/boolean-checkbox.html',
     'inputTypes/boolean-checkbox/boolean-checkbox.js',
     'inputTypes/boolean-radios/boolean-radios.html',
@@ -223,7 +225,7 @@ Package.onUse(function(api) {
 });
 
 Package.onTest(function (api) {
-  api.use(['aldeed:autoform', 'tinytest', 'underscore']);
+  api.use(['aldeed:autoform', 'tinytest', 'underscore', 'mongo']);
   api.use('momentjs:moment', 'client');
   api.addFiles(['tests/utility-tests.js', 'tests/autoform-tests.js']);
 });

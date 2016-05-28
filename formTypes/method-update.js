@@ -29,10 +29,16 @@ AutoForm.addFormType('method-update', {
         // Call the method. If a ddp connection was provided, use
         // that instead of the default Meteor connection
         var ddp = c.formAttributes.ddp;
-        if (ddp && ddp.call && typeof ddp.call === 'function') {
-          ddp.call(c.formAttributes.meteormethod, updateDoc, c.docId, c.result);
+        ddp = (ddp && typeof ddp.call === 'function') ? ddp : Meteor;
+        // If singleMethodArgument=true, we call with a single object argument
+        // for compatibility with validated-method
+        if (c.formAttributes.singleMethodArgument === true) {
+          ddp.call(c.formAttributes.meteormethod, {
+            _id: c.docId,
+            modifier: updateDoc,
+          }, c.result);
         } else {
-          Meteor.call(c.formAttributes.meteormethod, updateDoc, c.docId, c.result);
+          ddp.call(c.formAttributes.meteormethod, updateDoc, c.docId, c.result);
         }
       }
     });

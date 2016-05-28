@@ -4,48 +4,13 @@ AutoForm.addInputType("text", {
     return this.val();
   },
   valueConverters: {
-    "stringArray": function (val) {
-      if (typeof val === "string") {
-        val = val.split(",");
-        return _.map(val, function (item) {
-          return $.trim(item);
-        });
-      }
-      return val;
-    },
-    "number": AutoForm.Utility.stringToNumber,
-    "numberArray": function (val) {
-      if (typeof val === "string") {
-        val = val.split(",");
-        return _.map(val, function (item) {
-          item = $.trim(item);
-          return AutoForm.Utility.stringToNumber(item);
-        });
-      }
-      return val;
-    },
-    "boolean": AutoForm.Utility.stringToBool,
-    "booleanArray": function (val) {
-      if (typeof val === "string") {
-        val = val.split(",");
-        return _.map(val, function (item) {
-          item = $.trim(item);
-          return AutoForm.Utility.stringToBool(item);
-        });
-      }
-      return val;
-    },
-    "date": AutoForm.Utility.stringToDate,
-    "dateArray": function (val) {
-      if (typeof val === "string") {
-        val = val.split(",");
-        return _.map(val, function (item) {
-          item = $.trim(item);
-          return AutoForm.Utility.stringToDate(item);
-        });
-      }
-      return val;
-    }
+    "stringArray": AutoForm.valueConverters.stringToStringArray,
+    "number": AutoForm.valueConverters.stringToNumber,
+    "numberArray": AutoForm.valueConverters.stringToNumberArray,
+    "boolean": AutoForm.valueConverters.stringToBoolean,
+    "booleanArray": AutoForm.valueConverters.stringToBooleanArray,
+    "date": AutoForm.valueConverters.stringToDate,
+    "dateArray": AutoForm.valueConverters.stringToDateArray
   },
   contextAdjust: function (context) {
     if (typeof context.atts.maxlength === "undefined" && typeof context.max === "number") {
