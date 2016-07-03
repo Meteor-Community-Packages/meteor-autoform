@@ -145,6 +145,7 @@ Files:
 * [yogiben:autoform-file](https://atmospherejs.com/yogiben/autoform-file)
 * [naxio:autoform-file](https://atmospherejs.com/naxio/autoform-file)
 * [elevatedevdesign:autoform-slingshot](https://github.com/ElevateDev/meteor-autoform-slingshot)
+* [universe:files-blaze-ui](https://github.com/vazco/universe-files-blaze-ui)
 
 Maps:
 
