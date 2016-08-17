@@ -1249,7 +1249,7 @@ setDefaults = function setDefaults(data) {
     } else {
       var collection = AutoForm.Utility.lookup(data.collection);
       if (collection && typeof collection.simpleSchema === 'function') {
-        schema = collection.simpleSchema();
+        schema = collection.simpleSchema(data.doc);
       }
     }
 
