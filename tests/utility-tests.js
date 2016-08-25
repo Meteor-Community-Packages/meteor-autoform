@@ -226,6 +226,13 @@ if (Meteor.isClient) {
       baz: 1
     });
     testExpandObj({
+      'foo.0bar': "baz",
+      baz: 1
+    }, {
+      foo: {"0bar": "baz"},
+      baz: 1
+    });
+    testExpandObj({
       'foo.bar.0': "foo",
       'foo.bar.1': "baz",
       baz: 1
