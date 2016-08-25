@@ -221,7 +221,6 @@ Utility = {
         } else {
           //see if the next piece is a number
           nextPiece = subkeys[i + 1];
-          nextPiece = parseInt(nextPiece, 10);
           if (isNaN(nextPiece) && !_.isObject(current[subkey])) {
             current[subkey] = {};
           } else if (!isNaN(nextPiece) && !_.isArray(current[subkey])) {
