@@ -120,6 +120,7 @@ Selects:
 * [vazco:universe-autoform-select](https://atmospherejs.com/vazco/universe-autoform-select)
 * [lukemadera:autoform-autocomplete](https://atmospherejs.com/lukemadera/autoform-autocomplete)
 * [rikonor:autoform-image-gallery](https://github.com/rikonor/meteor-autoform-image-gallery)
+* [newnectar:meteor-autoform-select-country-flags](https://atmospherejs.com/newnectar/meteor-autoform-select-country-flags)
 
 WYSIWYGs:
 
