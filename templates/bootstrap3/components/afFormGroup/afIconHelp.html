@@ -1,12 +1,12 @@
 <template name="afIconHelp">
 
     {{#if isPopOver}}
-        <i class="glyphicon glyphicon-{{data.icon}} iconHelp" data-toggle="popover" data-placement="{{data.placement}}"
+        <i class="{{data.icon}} iconHelp" data-toggle="popover" data-placement="{{data.placement}}"
            title="{{data.title}}" data-content="{{data.content}}"
            tabindex="0" role="button" data-html="true" data-trigger="{{data.trigger}}"></i>
 
     {{else}}
-        <i class="glyphicon glyphicon-{{data.icon}} iconHelp" data-toggle="tooltip" data-placement="{{data.placement}}"
+        <i class="{{data.icon}} iconHelp" data-toggle="tooltip" data-placement="{{data.placement}}"
            title="{{data.title}}"></i>
     {{/if}}
 </template>
