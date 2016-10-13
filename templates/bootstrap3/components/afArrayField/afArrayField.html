@@ -7,7 +7,7 @@
     </div>
     {{/if}}
     <ul class="list-group">
-      {{#afEachArrayItem name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount}}
+      {{#afEachArrayItem name=this.atts.name minCount=this.atts.minCount maxCount=this.atts.maxCount options=this.attrs.options type=this.attr.type}}
       <li class="list-group-item autoform-array-item">
         <div>
           <div class="autoform-remove-item-wrap">
@@ -16,7 +16,7 @@
             {{/if}}
           </div>
           <div class="autoform-array-item-body">
-            {{> afQuickField name=this.name label=false options=afOptionsFromSchema}}
+            {{> afQuickField name=this.name type=../atts.type label=false options=../atts.options}}
           </div>
         </div>
       </li>
