@@ -16,6 +16,7 @@ arrayTracker = new ArrayTracker();
 // Used by AutoForm._forceResetFormValues; temporary hack
 AutoForm._destroyForm = {};
 
+
 // reactive templates
 globalDefaultTemplate = "bootstrap3";
 defaultTypeTemplates = {};
