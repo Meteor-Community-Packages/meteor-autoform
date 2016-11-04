@@ -237,7 +237,7 @@ AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templa
   }
 
   // Found nothing. Return undefined
-  return;
+
 };
 
 /**

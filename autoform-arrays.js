@@ -69,9 +69,8 @@ ArrayTracker.prototype.initField = function atInitField(formId, field, ss, docCo
 	for (var i = 0; i < arrayCount; i++) {
 		var loopCtx = createLoopCtx(formId, field, i, childKeys, overrideMinCount, overrideMaxCount);
 		loopArray.push(loopCtx);
-	};
-
-	self.info[formId][field].array = loopArray;
+  }
+  self.info[formId][field].array = loopArray;
 	var count = loopArray.length;
 	self.info[formId][field].count = count;
 	self.info[formId][field].visibleCount = count;
@@ -162,7 +161,7 @@ ArrayTracker.prototype.addOneToField = function atAddOneToField(formId, field, s
   	return;
   }
 
-  var currentCount = self.info[formId][field].visibleCount
+  var currentCount = self.info[formId][field].visibleCount;
   var maxCount = self.getMinMax(ss, field, overrideMinCount, overrideMaxCount).maxCount;
 
   if (currentCount < maxCount) {
@@ -200,7 +199,7 @@ ArrayTracker.prototype.removeFromFieldAtIndex = function atRemoveFromFieldAtInde
     self.info[formId][field].visibleCount--;
     self.info[formId][field].deps.changed();
   }
-}
+};
 
 /*
  * PRIVATE
@@ -208,9 +207,9 @@ ArrayTracker.prototype.removeFromFieldAtIndex = function atRemoveFromFieldAtInde
 var createLoopCtx = function(formId, field, index, childKeys, overrideMinCount, overrideMaxCount) {
   var loopCtx = {
   	formId:         formId,
-  	arrayFieldName: field, 
+  	arrayFieldName: field,
   	name:           field + '.' + index,
-  	index:          index, 
+  	index:          index,
   	minCount:       overrideMinCount,
   	maxCount:       overrideMaxCount
   };
@@ -224,4 +223,4 @@ var createLoopCtx = function(formId, field, index, childKeys, overrideMinCount, 
   }
 
   return loopCtx;
-}
+};
