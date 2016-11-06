@@ -47,7 +47,6 @@ Template.autoForm.helpers({
     if (this.validation !== "browser" && !htmlAttributes.novalidate) {
       htmlAttributes.novalidate = "novalidate";
     }
-
     return htmlAttributes;
   },
   afDestroyUpdateForm: function (formId) {

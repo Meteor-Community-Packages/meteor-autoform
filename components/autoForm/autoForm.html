@@ -2,7 +2,8 @@
   {{#unless afDestroyUpdateForm this.id}}
   {{! afDestroyUpdateForm is a workaround for sticky input attributes}}
   {{! See https://github.com/meteor/meteor/issues/2431 }}
-  <form {{atts}}>
+
+  <form {{atts}} >
     {{> Template.contentBlock ..}}
   </form>
   {{/unless}}
