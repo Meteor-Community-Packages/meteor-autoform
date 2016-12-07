@@ -45,7 +45,7 @@ Template.autoForm.helpers({
     // By default, we add the `novalidate="novalidate"` attribute to our form,
     // unless the user passes `validation="browser"`.
     if (this.validation !== "browser" && !htmlAttributes.novalidate) {
-      htmlAttributes.novalidate = "novalidate";
+      htmlAttributes.noValidate = "novalidate";
     }
     return htmlAttributes;
   },
