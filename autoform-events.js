@@ -422,7 +422,12 @@ Template.autoForm.events({
     // changes instead of validating the field
     if (form.autosave === true || form.autosaveOnKeyup === true) {
       lastAutoSaveElement = event.target;
-      $(event.currentTarget).submit();
+      if ($(event.target).parents('.dropdown-menu').length == 0) {
+        $(event.currentTarget).submit();
+      }
+      else
+        event.preventDefault();
+
       return;
     }
 
@@ -442,6 +447,10 @@ Template.autoForm.events({
         validateField(arrayKey, formId, false, onlyIfAlreadyInvalid(validationType));
       }
     }
+  },
+  'click .dropdown-toggle' : function dropdown_toggle(event, template) {
+    if ($(event.target).next().css('display') == 'block')
+      $(event.currentTarget).submit();
   },
   'reset form': function autoFormResetHandler(event, template) {
     var formId = this.id;
