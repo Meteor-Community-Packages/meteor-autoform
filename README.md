@@ -561,7 +561,7 @@ iconHelp:{
      content: 'any string or HTML'  //required if type is 'popover'
      type: 'popover',               //optional, allowed values  'popover'|'tooltip',  'tooltip' as default
      placement: 'top',              //optional, allowed values  'top' | 'bottom' | 'left' | 'right', 'top' as default
-     icon: 'info-sign',             //optional, allowed values  any Glyphicons normaly 'info-sign' or 'question-sign'  'info-sign' as default. ('glyphicon glyphicon-' is include)
+     icon: 'glyphicon glyphicon-info-sign',             //optional, allowed values  any Glyphicons normaly 'glyphicon glyphicon-info-sign' or 'glyphicon glyphicon-question-sign'  'glyphicon glyphicon-info-sign' as default.
      trigger: 'hover'               //optional, allowed values  'click' | 'hover' | 'focus' | 'manual',  'hover' as default
     
 }

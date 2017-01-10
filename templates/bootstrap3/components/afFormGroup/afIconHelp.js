@@ -10,7 +10,7 @@ Template.afIconHelp.helpers({
         return Object.assign({
             type: 'popover',
             placement: 'top',
-            icon: 'info-sign',
+            icon: 'glyphicon glyphicon-info-sign',
             trigger: 'hover'
         }, this);
     },
