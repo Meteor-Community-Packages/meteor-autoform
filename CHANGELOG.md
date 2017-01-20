@@ -6,6 +6,11 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 5.8.2
+
+Moved dependencies from aldeed:simple-schema to npm package simpl-schema 
+
+
 ### 5.8.1
 
 Fix AutoForm.getValidationContext to return correct context when no `formId` argument is provided.

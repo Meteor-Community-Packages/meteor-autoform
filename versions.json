@@ -1,8 +1,8 @@
 {
   "dependencies": [
     [
-      "aldeed:simple-schema",
-      "1.1.0"
+      "simpl-schema",
+      "0.1.0"
     ],
     [
       "base64",
@@ -46,7 +46,7 @@
     ],
     [
       "jquery",
-      "1.0.1"
+      "1.5.0"
     ],
     [
       "json",

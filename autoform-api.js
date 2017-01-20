@@ -2,6 +2,7 @@
 
 // This file defines the public, exported API
 
+
 AutoForm = AutoForm || {}; //exported
 
 /**
@@ -914,12 +915,13 @@ AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) {
  */
 AutoForm.getLabelForField = function autoFormGetLabelForField(name) {
   var ss = AutoForm.getFormSchema(), label = ss.label(name);
+
   // for array items we don't want to inflect the label because
   // we will end up with a number;
-  // TODO this check should probably be in the SimpleSchema code
-  if (SimpleSchema._makeGeneric(name).slice(-1) === "$" && !isNaN(parseInt(label, 10))) {
-    label = null;
-  }
+  // TODO this check must in the SimpleSchema code since we moved to npm package simpl-schema
+  //if (SimpleSchema._makeGeneric(name).slice(-1) === "$" && !isNaN(parseInt(label, 10))) {
+  //  label = null;
+  //}
   return label;
 };
 

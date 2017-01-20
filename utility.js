@@ -1,5 +1,7 @@
 /* global Utility:true, MongoObject, AutoForm, moment, SimpleSchema */
 
+import MongoObject from 'mongo-object';
+
 Utility = {
   componentTypeList: ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'],
   /**
@@ -493,6 +495,8 @@ if (typeof Object.getPrototypeOf !== "function") {
 var isBasicObject = function(obj) {
   return _.isObject(obj) && Object.getPrototypeOf(obj) === Object.prototype;
 };
+
+import SimpleSchema from 'simpl-schema';
 
 /*
  * Extend SS for now; TODO put this in SS package
