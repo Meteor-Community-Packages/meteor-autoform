@@ -1,5 +1,8 @@
 /* global AutoForm, Hooks, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues, SimpleSchema */
 
+import SimpleSchema from 'simpl-schema';
+
+
 // all form events handled here
 var lastAutoSaveElement = null;
 var lastKeyVal = null;
