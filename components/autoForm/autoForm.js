@@ -1,5 +1,7 @@
 /* global AutoForm, ReactiveVar, arrayTracker, Hooks, MongoObject, Utility, setDefaults */
 
+import MongoObject from 'mongo-object';
+
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
     // After removing all of the props we know about, everything else should
