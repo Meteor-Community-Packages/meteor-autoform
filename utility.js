@@ -1,6 +1,9 @@
 /* global Utility:true, MongoObject, AutoForm, moment, SimpleSchema */
 
 import MongoObject from 'mongo-object';
+import SimpleSchema from 'simpl-schema';
+
+
 
 Utility = {
   componentTypeList: ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'],
@@ -119,9 +122,8 @@ Utility = {
    * Get select options
    */
   getSelectOptions: function getSelectOptions(defs, hash) {
-    var schemaType = defs.type;
+    var schemaType = defs.type.definitions[0].type; //FIXME getDefinitionType independent from arr index
     var selectOptions = hash.options;
-
     // Handle options="allowed"
     if (selectOptions === "allowed") {
       selectOptions = _.map(defs.allowedValues, function(v) {
@@ -129,7 +131,6 @@ Utility = {
         if (hash.capitalize && v.length > 0 && schemaType === String) {
           label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
         }
-
         return {label: label, value: v};
       });
     }
@@ -495,8 +496,6 @@ if (typeof Object.getPrototypeOf !== "function") {
 var isBasicObject = function(obj) {
   return _.isObject(obj) && Object.getPrototypeOf(obj) === Object.prototype;
 };
-
-import SimpleSchema from 'simpl-schema';
 
 /*
  * Extend SS for now; TODO put this in SS package
