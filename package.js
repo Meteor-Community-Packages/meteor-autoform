@@ -2,30 +2,36 @@ Package.describe({
   name: "aldeed:autoform",
   summary: "Easily create forms with automatic insert and update, and automatic reactive validation.",
   git: "https://github.com/aldeed/meteor-autoform.git",
-  version: "5.8.1"
+  version: "5.8.2"
 });
+
+Npm.depends({
+  "simpl-schema":"0.1.0",
+});
+
 
 Package.onUse(function(api) {
   // Dependencies
-  api.versionsFrom(['METEOR@0.9.3', 'METEOR@0.9.4', 'METEOR@1.0']);
+  api.versionsFrom(['METEOR@0.9.3', 'METEOR@0.9.4', 'METEOR@1.0', 'METEOR@1.4']);
+
   // common
-  api.use('aldeed:simple-schema@1.1.0');
   api.use('check');
+  api.use('ecmascript');
+
   // client
   api.use(['livedata', 'underscore', 'deps', 'templating', 'ui', 'blaze', 'ejson', 'reactive-var', 'reactive-dict', 'random', 'jquery'], 'client');
   api.use('momentjs:moment@2.10.6', 'client');
   api.use('mrt:moment-timezone@0.2.1', 'client', {weak: true});
   api.use('aldeed:moment-timezone@0.4.0', 'client', {weak: true});
-  api.use(['aldeed:collection2@2.0.0', 'reload'], 'client', {weak: true});
 
-  // Imply SS to make sure SimpleSchema object is available to app
-  api.imply('aldeed:simple-schema');
+  api.use(['aldeed:collection2-core', 'reload'], 'client', {weak: true});
 
   // Exports
   api.export('AutoForm', 'client');
   api.export('Utility', 'client', {testOnly: true});
 
   // Common Files
+  //api.addFiles( '.npm/package/node_modules/simpl-schema/dist/SimpleSchema.js');
   api.addFiles(['autoform-common.js']);
 
   // Client Files
@@ -229,3 +235,6 @@ Package.onTest(function (api) {
   api.use('momentjs:moment', 'client');
   api.addFiles(['tests/utility-tests.js', 'tests/autoform-tests.js']);
 });
+
+
+

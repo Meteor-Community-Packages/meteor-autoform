@@ -1,5 +1,6 @@
 /* global AutoForm:true, SimpleSchema, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, validateField, arrayTracker, ReactiveVar, getAllFieldsInForm, setDefaults:true, getFlatDocOfFieldValues, MongoObject */
 
+import SimpleSchema from 'simpl-schema'; //FIXME this is a real dirty fix
 // This file defines the public, exported API
 
 AutoForm = AutoForm || {}; //exported
@@ -744,6 +745,8 @@ AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(pr
   return result;
 };
 
+
+
 /**
  * @method AutoForm.debug
  * @public
@@ -914,12 +917,13 @@ AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) {
  */
 AutoForm.getLabelForField = function autoFormGetLabelForField(name) {
   var ss = AutoForm.getFormSchema(), label = ss.label(name);
+
   // for array items we don't want to inflect the label because
   // we will end up with a number;
-  // TODO this check should probably be in the SimpleSchema code
-  if (SimpleSchema._makeGeneric(name).slice(-1) === "$" && !isNaN(parseInt(label, 10))) {
-    label = null;
-  }
+  // TODO this check must move into the SimpleSchema code since we moved to npm package simpl-schema
+  //if (SimpleSchema._makeGeneric(name).slice(-1) === "$" && !isNaN(parseInt(label, 10))) {
+  //  label = null;
+  //}
   return label;
 };
 
