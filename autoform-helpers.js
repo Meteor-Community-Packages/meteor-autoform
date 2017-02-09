@@ -76,6 +76,15 @@ Template.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options)
 });
 
 /*
+ * afFieldValue
+ */
+Template.registerHelper('afFieldValue', function autoFormFieldValue(options) {
+  options = parseOptions(options, 'afFieldValue');
+
+  return AutoForm.getFieldValue(options.name, options.formId || AutoForm.getFormId());
+});
+
+/*
  * afArrayFieldIsFirstVisible
  */
 Template.registerHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFirstVisible() {
