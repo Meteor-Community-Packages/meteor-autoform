@@ -14,8 +14,8 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
     }
 
     // if SimpleSchema.defaultLabel is defined, use it
-    if (typeof SimpleSchema.defaultLabel === "function") {
-      return SimpleSchema.defaultLabel(name);
+    if (AutoForm.SimpleSchema && typeof AutoForm.SimpleSchema.defaultLabel === "function") {
+      return AutoForm.SimpleSchema.defaultLabel(name);
     } else {
       // else, just capitalise name
       return name.charAt(0).toUpperCase() + name.slice(1);

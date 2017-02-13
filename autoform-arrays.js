@@ -8,7 +8,7 @@ ArrayTracker = function afArrayTracker() {
 };
 
 ArrayTracker.prototype.getMinMax = function atGetMinMax(ss, field, overrideMinCount, overrideMaxCount) {
-  var defs = AutoForm.Utility.getDefs(ss, field);
+  var defs = AutoForm.Utility.getFieldDefinition(ss, field);
 
   // minCount is set by the schema, but can be set higher on the field attribute
   overrideMinCount = overrideMinCount || 0;
@@ -61,8 +61,8 @@ ArrayTracker.prototype.initField = function atInitField(formId, field, ss, docCo
 
 	// If this is an array of objects, collect names of object props
 	var childKeys = [];
-	if (ss.schema(field + '.$').type === Object) {
-    childKeys = ss.objectKeys(SimpleSchema._makeGeneric(field) + '.$');
+	if (AutoForm.Utility.getFieldDefinition(ss, field + '.$').type === Object) {
+    childKeys = ss.objectKeys(AutoForm.Utility.makeKeyGeneric(field) + '.$');
 	}
 
 	var loopArray = [];
@@ -170,8 +170,8 @@ ArrayTracker.prototype.addOneToField = function atAddOneToField(formId, field, s
 
 	  // If this is an array of objects, collect names of object props
 	  var childKeys = [];
-	  if (ss.schema(field + '.$').type === Object) {
-      childKeys = ss.objectKeys(SimpleSchema._makeGeneric(field) + '.$');
+	  if (AutoForm.Utility.getFieldDefinition(ss, field + '.$').type === Object) {
+      childKeys = ss.objectKeys(AutoForm.Utility.makeKeyGeneric(field) + '.$');
 	  }
 
 	  var loopCtx = createLoopCtx(formId, field, i, childKeys, overrideMinCount, overrideMaxCount);
@@ -208,9 +208,9 @@ ArrayTracker.prototype.removeFromFieldAtIndex = function atRemoveFromFieldAtInde
 var createLoopCtx = function(formId, field, index, childKeys, overrideMinCount, overrideMaxCount) {
   var loopCtx = {
   	formId:         formId,
-  	arrayFieldName: field, 
+  	arrayFieldName: field,
   	name:           field + '.' + index,
-  	index:          index, 
+  	index:          index,
   	minCount:       overrideMinCount,
   	maxCount:       overrideMaxCount
   };

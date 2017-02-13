@@ -235,7 +235,7 @@ Books.attachSchema(new SimpleSchema({
     optional: true,
     max: 1000
   }
-}));
+}, { tracker: Tracker }));
 ```
 
 *Be sure to define proper insert security for untrusted code if you've removed the `insecure` package. Call allow/deny or use [ongoworks:security](https://atmospherejs.com/ongoworks/security).*
@@ -714,14 +714,7 @@ The method is not called until `doc` is valid on the client.
 
 ### method-update
 
-Will call the server method with the name you specify in the `meteormethod` attribute.
-
-There are two possible ways your method can be called.
-
-1. By default, your method will be called with two arguments:
-  * `modifier`: the modifier object generated from the form values
-  * `documentId`: the `_id` of the document being updated
-2. If you set `singleMethodArgument=true` as a form attribute, your method will be called with a single object argument with `_id` and `modifier` properties. You should do this if using the [mdg:validated-method](https://github.com/meteor/validated-method) package.
+Will call the server method with the name you specify in the `meteormethod` attribute. Your method will be called with a single object argument with `_id` and `modifier` properties.
 
 You may optionally specify a DDP Connection in the `ddp` attribute. If you do, the method will be called using the DDP connection provided.
 
@@ -848,7 +841,7 @@ Schema.contact = new SimpleSchema({
         label: "Message",
         max: 1000
     }
-});
+}, { tracker: Tracker });
 ```
 
 Note that we've created an object `Schema` in which to store all of our app's schemas.
@@ -1453,7 +1446,7 @@ Schemas.ContactForm = new SimpleSchema({
     label: "Message",
     max: 1000
   }
-});
+}, { tracker: Tracker });
 
 //... define all schemas
 

@@ -46,7 +46,7 @@ Template.afFieldInput.helpers({
 
     // Adjust for array fields if necessary
     if (defs.type === Array) {
-      defs = ss.schema(c.atts.name + ".$");
+      defs = AutoForm.Utility.getFieldDefinition(ss, c.atts.name + ".$");
     }
 
     // Determine what `type` attribute should be if not set

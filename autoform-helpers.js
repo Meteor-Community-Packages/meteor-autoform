@@ -1,4 +1,4 @@
-/* global arrayTracker, SimpleSchema, AutoForm */
+/* global arrayTracker, AutoForm */
 
 function parseOptions(options) {
   var hash = (options || {}).hash || {};
@@ -119,7 +119,7 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
 
   if (name) {
     namePlusDot = name + ".";
-    genericName = SimpleSchema._makeGeneric(name);
+    genericName = AutoForm.Utility.makeKeyGeneric(name);
     genericNamePlusDot = genericName + ".";
   }
 
@@ -213,13 +213,13 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
     fieldList = _.difference(fieldList, omitFields);
     // If omitFields contains generic field names (with $) we omit those too
     fieldList = _.reject(fieldList, function (f) {
-      return _.contains(omitFields, SimpleSchema._makeGeneric(f));
+      return _.contains(omitFields, AutoForm.Utility.makeKeyGeneric(f));
     });
   }
 
   // Filter out fields we never want
   fieldList = _.filter(fieldList, function shouldIncludeField(field) {
-    var fieldDefs = ss.schema(field);
+    var fieldDefs = AutoForm.Utility.getFieldDefinition(ss, field);
 
     // Don't include fields that are not in the schema
     if (!fieldDefs) {
@@ -274,14 +274,4 @@ Template.registerHelper('afSelectOptionAtts', function afSelectOptionAtts() {
 // Expects to be called with this.name available
 Template.registerHelper('afOptionsFromSchema', function afOptionsFromSchema() {
   return AutoForm._getOptionsForField(this.name);
-});
-
-/*
- * afTemplateName
- * Deprecated. Don't use this. Eventually remove it.
- */
-Template.registerHelper('afTemplateName', function afTemplateNameHelper(templateType, templateName) {
-  var self = this;
-  console.log('The afTemplateName template helper is deprecated. Use AutoForm.getTemplateName method in your own helper.');
-  return AutoForm.getTemplateName(templateType, templateName, self.atts && self.atts.name);
 });

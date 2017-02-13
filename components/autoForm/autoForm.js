@@ -1,4 +1,6 @@
-/* global AutoForm, ReactiveVar, arrayTracker, Hooks, MongoObject, Utility, setDefaults */
+import MongoObject from 'mongo-object';
+
+/* global AutoForm, ReactiveVar, arrayTracker, Hooks, Utility, setDefaults */
 
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {

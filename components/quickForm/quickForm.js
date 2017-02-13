@@ -17,14 +17,15 @@ Template.quickForm.helpers({
     var fieldList = atts.fields;
     if (fieldList) {
       fieldList = AutoForm.Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
-
-      // get the schema object, but sorted into the same order as the field list
-      fieldList.forEach(function (fieldName) {
-        sortedSchema[fieldName] = simpleSchema.schema(fieldName);
-      });
     } else {
-      sortedSchema = simpleSchema.schema();
+      const fullSchema = simpleSchema.mergedSchema();
+      fieldList = _.keys(fullSchema);
     }
+
+    // get the schema object, but sorted into the same order as the field list
+    fieldList.forEach(fieldName => {
+      sortedSchema[fieldName] = AutoForm.Utility.getFieldDefinition(simpleSchema, fieldName);
+    });
 
     // --------------- B. Field With No Groups --------------- //
 

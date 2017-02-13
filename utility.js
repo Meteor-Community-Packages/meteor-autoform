@@ -1,4 +1,6 @@
-/* global Utility:true, MongoObject, AutoForm, moment, SimpleSchema */
+import MongoObject from 'mongo-object';
+
+/* global Utility:true, AutoForm, moment */
 
 Utility = {
   componentTypeList: ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'],
@@ -163,26 +165,23 @@ Utility = {
     return obj;
   },
   /**
-   * @method Utility.getDefs
+   * @method Utility.getFieldDefinition
    * @private
    * @param {SimpleSchema} ss
    * @param {String} name
    * @return {Object} Schema definitions object
    *
-   * Returns the schema definitions object from a SimpleSchema instance. Equivalent to calling
-   * `ss.schema(name)` but handles throwing errors if `name` is not a string or is not a valid
-   * field name for this SimpleSchema instance.
+   * Returns the schema definitions object from a SimpleSchema instance, grabbing the first
+   * type definition out of potentially multiple.
    */
-  getDefs: function getDefs(ss, name) {
-    if (typeof name !== "string") {
-      throw new Error("Invalid field name: (not a string)");
-    }
+  getFieldDefinition(ss, name) {
+    const def = ss.getDefinition(name);
+    if (!def) return;
 
-    var defs = ss.schema(name);
-    if (!defs) {
-      throw new Error("Invalid field name: " + name);
-    }
-    return defs;
+    return {
+      ...def,
+      ...(def.type && def.type[0]) || {},
+    };
   },
   /**
    * @method Utility.objAffectsKey
@@ -381,10 +380,8 @@ Utility = {
     atts = _.clone(context || {});
     ss = AutoForm.getFormSchema();
 
-    // The component might not exist in the schema anymore
-    try{
-      defs = Utility.getDefs(ss, atts.name); //defs will not be undefined
-    }catch(e){}
+    defs = Utility.getFieldDefinition(ss, atts.name);
+    if (!defs) return;
 
     // Look up the tree if we're in a helper, checking to see if any ancestor components
     // had a <componentType>-attribute specified.
@@ -467,7 +464,12 @@ Utility = {
             template.view &&
             template.view._domrange &&
             !template.view.isDestroyed);
-  }
+  },
+  // This is copied from mongo-object to avoid a direct dep on that package
+  makeKeyGeneric(key) {
+    if (typeof key !== 'string') return null;
+    return key.replace(/\.[0-9]+(?=\.|$)/g, '.$');
+  },
 };
 
 // getPrototypeOf polyfill
@@ -493,19 +495,3 @@ if (typeof Object.getPrototypeOf !== "function") {
 var isBasicObject = function(obj) {
   return _.isObject(obj) && Object.getPrototypeOf(obj) === Object.prototype;
 };
-
-/*
- * Extend SS for now; TODO put this in SS package
- */
-if (typeof SimpleSchema.prototype.getAllowedValuesForKey !== 'function') {
-  SimpleSchema.prototype.getAllowedValuesForKey = function (key) {
-    var defs = this.getDefinition(key, ['type', 'allowedValues']);
-
-    // For array fields, `allowedValues` is on the array item definition
-    if (defs.type === Array) {
-      defs = this.getDefinition(key+".$", ['allowedValues']);
-    }
-
-    return defs.allowedValues;
-  };
-}

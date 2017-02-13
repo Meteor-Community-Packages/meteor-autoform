@@ -137,9 +137,8 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   var inputTypeContext = {
     name: inputAtts.name,
     schemaType: defs.type,
-    min: (typeof defs.min === "function") ? defs.min() : defs.min,
-    max: (typeof defs.max === "function") ? defs.max() : defs.max,
-    decimal: defs.decimal,
+    min: defs.min,
+    max: defs.max,
     value: value,
     atts: inputAtts,
     selectOptions: AutoForm.Utility.getSelectOptions(defs, hash)
@@ -149,9 +148,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
    * Merge data property from the field schema with the context.
    * We do not want these turned into HTML attributes.
    */
-  if(hash.data){
-    _.extend(inputTypeContext, hash.data);
-  }
+  if (hash.data) _.extend(inputTypeContext, hash.data);
 
   // Before returning the context, we allow the registered form type to
   // adjust it if necessary.

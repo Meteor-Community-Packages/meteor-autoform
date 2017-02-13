@@ -1,4 +1,4 @@
-/* global AutoForm, SimpleSchema */
+/* global AutoForm */
 
 AutoForm.addFormType('update-pushArray', {
   onSubmit: function () {
@@ -39,17 +39,7 @@ AutoForm.addFormType('update-pushArray', {
     return AutoForm._validateFormDoc(this.formDoc, false, this.form.id, ss, this.form);
   },
   adjustSchema: function (ss) {
-    var scope = this.form.scope, newSchemaDef = {};
-    var searchString = SimpleSchema._makeGeneric(scope) + '.$.';
-
-    // create new SS instance with only the fields that begin with `scope`
-    _.each(ss.schema(), function (val, key) {
-      if (key.indexOf(searchString) === 0) {
-        newSchemaDef[key.slice(searchString.length)] = val;
-      }
-    });
-
-    return new SimpleSchema(newSchemaDef);
+    return ss.getObjectSchema(this.form.scope + '.$');
   },
   shouldPrevalidate: function () {
     // Prevalidate because the form is generated with a schema

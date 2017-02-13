@@ -1,4 +1,4 @@
-/* global AutoForm, Hooks, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues, SimpleSchema */
+/* global AutoForm, Hooks, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues */
 
 // all form events handled here
 var lastAutoSaveElement = null;
@@ -43,7 +43,7 @@ function endSubmit(formId, template, hookContext) {
 }
 
 function adjustKeyForArrays(key) {
-  var gKey = SimpleSchema._makeGeneric(key);
+  var gKey = AutoForm.Utility.makeKeyGeneric(key);
   if (gKey.slice(-2) === '.$' || gKey.indexOf('.$.') !== -1) {
     key = gKey.slice(0, gKey.indexOf('.$'));
   }
@@ -173,23 +173,18 @@ Template.autoForm.events({
     }
 
     function failedValidation() {
-      // add invalidKeys array as a property
+      // add validationErrors array as a property
       // of the Error object before we call
       // onError hooks
       var ec = ss.namedContext(formId);
-      var ik = ec.invalidKeys(), error;
+      var ik = ec.validationErrors(), error;
       if (ik) {
         if (ik.length) {
-          // We add `message` prop to the invalidKeys.
-          // Maybe SS pkg should just add that property back in?
-          ik = _.map(ik, function (o) {
-            return _.extend({message: ec.keyErrorMessage(o.name)}, o);
-          });
-          error = new Error(ik[0].message);
+          error = new Error(ik[0].message || ec.keyErrorMessage(ik[0].name));
         } else {
           error = new Error('form failed validation');
         }
-        error.invalidKeys = ik;
+        error.validationErrors = ik;
       } else {
         error = new Error('form failed validation');
       }
@@ -452,11 +447,7 @@ Template.autoForm.events({
     arrayTracker.resetForm(formId);
 
     var vc = AutoForm.getValidationContext(formId);
-    if (vc) {
-      vc.resetValidation();
-      // If simpleSchema is undefined, we haven't yet rendered the form, and therefore
-      // there is no need to reset validation for it. No error need be thrown.
-    }
+    if (vc) vc.reset();
 
     if (this.doc) {
       event.preventDefault();
