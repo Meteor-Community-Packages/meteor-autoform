@@ -6,6 +6,13 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 6.0.0
+
+This version is updated to work with the new SimpleSchema NPM package. It is not backwards compatible with the Meteor SimpleSchema package. See:
+* https://github.com/aldeed/node-simple-schema
+* https://github.com/aldeed/meteor-simple-schema/blob/v2/CHANGELOG.md#200
+* https://github.com/aldeed/meteor-collection2#important-note-the-version-in-this-repo-is-deprecated
+
 ### 5.8.1
 
 Fix AutoForm.getValidationContext to return correct context when no `formId` argument is provided.
