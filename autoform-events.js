@@ -400,7 +400,7 @@ Template.autoForm.events({
 
     keyVal = key + '___' + keyVal;
 
-    if (keyVal === lastKeyVal) {
+    if (keyVal === lastKeyVal && event.target.type !== 'radio') {
       return;
     }
     lastKeyVal = keyVal;
