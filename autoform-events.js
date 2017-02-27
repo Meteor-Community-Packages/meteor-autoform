@@ -449,10 +449,8 @@ Template.autoForm.events({
     var vc = AutoForm.getValidationContext(formId);
     if (vc) vc.reset();
 
-    if (this.doc) {
-      event.preventDefault();
-      AutoForm._forceResetFormValues(formId);
-    }
+    event.preventDefault();
+    AutoForm._forceResetFormValues(formId);
 
     // Mark all fields as changed
     updateAllTrackedFieldValues(template);
