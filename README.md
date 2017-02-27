@@ -1399,7 +1399,7 @@ The [Telescope](https://telescope.readme.io/docs) app makes use of this feature.
 Every time AutoForm revalidates your form, it overwrites the list of invalid fields for that form. This means that adding your own errors to the form validation context (using the SimpleSchema API) will not always work because your custom errors will disappear upon first revalidation. To solve this, you can add sticky errors for a form. Sticky errors do not go away unless you reset the form, the form instance is destroyed, or you manually remove them.
 
 - `AutoForm.addStickyValidationError(formId, key, type, [value])`
-- `AutoForm.removeStickyValidationError(formId, key)
+- `AutoForm.removeStickyValidationError(formId, key)`
 
 ## Defining Custom Input Types
 
