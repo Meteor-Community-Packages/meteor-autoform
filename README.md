@@ -158,6 +158,7 @@ Files:
 * [yogiben:autoform-file](https://atmospherejs.com/yogiben/autoform-file)
 * [naxio:autoform-file](https://atmospherejs.com/naxio/autoform-file)
 * [elevatedevdesign:autoform-slingshot](https://github.com/ElevateDev/meteor-autoform-slingshot)
+* [ostrio:autoform-files](https://github.com/VeliovGroup/meteor-autoform-file)
 
 Maps:
 
