@@ -767,7 +767,7 @@ have not been added to it.
 This object has *not* been validated.
 * `currentDoc`: The object that's currently bound to the form through the `doc` attribute
 
-In addition to the normal `this` hook context, there is a `this.done()` method, which you *must* call when you are done with your custom client submission logic. This allows you to do asynchronous tasks if necessary. You may optionally pass one argument. If you pass an `Error` object, then any `onError` hooks will be called; otherwise, any `onSuccess` hooks will be called.
+In addition to the normal `this` hook context, there is a `this.done()` method, which you *must* call when you are done with your custom client submission logic. This allows you to do asynchronous tasks if necessary. You may optionally pass arguments. If you pass an `Error` object, then any `onError` hooks will be called; otherwise, any `onSuccess` hooks will be called.  The `onSuccess` hook has `formType` and `result` parameters, so calling `this.done(null, "foo")` will set the `result` to `"foo"`.
 
 If you return `false`, no further submission will happen, and it is equivalent
 to calling `this.event.preventDefault()` and `this.event.stopPropagation()`. If you return anything other than `false`, the browser will submit the form.
