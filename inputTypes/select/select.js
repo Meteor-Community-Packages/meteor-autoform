@@ -24,6 +24,9 @@ AutoForm.addInputType("select", {
 
     // If a firstOption was provided, add that to the items list first
     if (firstOption !== false) {
+      if (typeof firstOption === 'function'){
+        firstOption = firstOption();
+      }
       context.items.push({
         name: context.name,
         label: (typeof firstOption === "string" ? firstOption : "(Select One)"),
