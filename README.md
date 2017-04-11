@@ -184,7 +184,8 @@ Other:
 
 * [meteoric:autoform-ionic](https://github.com/meteoric/autoform-ionic)
 * [fabienb4:autoform-semantic-ui](https://atmospherejs.com/fabienb4/autoform-semantic-ui)
-* [gildaspk:autoform-materialize](https://atmospherejs.com/gildaspk/autoform-materialize)
+* [mozfet:autoform-materialize](https://atmospherejs.com/mozfet/autoform-materialize)
+* [mozfet:autoform-modals-materialize](https://atmospherejs.com/mozfet/autoform-modals-materialize)
 * [poetic:react-autoform-material-ui](https://atmospherejs.com/poetic/react-autoform-material-ui)
 
 #### Admin Panels
