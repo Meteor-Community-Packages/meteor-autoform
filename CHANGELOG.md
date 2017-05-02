@@ -6,6 +6,16 @@ forms with automatic insert and update events, and automatic reactive validation
 
 ## Change Log
 
+### 6.1.0
+
+* `firstOption` when specified in the schema can now be a function (thanks @MartinBucko)
+* Insert forms reset more reliably after successful submission (thanks @alexk7)
+* `AutoForm.selectFirstInvalidField` works on more types of fields (thanks @ro6)
+* The form `doc` is now passed to the schema during validation to support multiple schema variations (thanks @gregory, @nidem)
+* `afArrayField` with the `bootstrap3` template now supports `panelClass` and `headingClass` attributes (thanks @c316)
+* When you have multiple `autosave=true` forms with the same field name and value, they will now reliably save every time (thanks @abernix)
+* Readme improvements: @brajt, @kmills006, @dandalf
+
 ### 6.0.0
 
 This version is updated to work with the new SimpleSchema NPM package. It is not backwards compatible with the Meteor SimpleSchema package. See:
