@@ -5,7 +5,8 @@ Template.afQuickField.helpers({
     var c = AutoForm.Utility.getComponentContext(this, "afQuickField");
     // Render a group of fields if we expect an Object and we don't have options
     // and we have not overridden the type
-    return (c.defs.type === Object && !c.atts.options && !c.atts.type);
+    const isSubschema = typeof c.defs.type === 'object' && c.defs.type._schema;
+    return ((c.defs.type === Object || isSubschema) && !c.atts.options && !c.atts.type);
   },
   isFieldArray: function afQuickFieldIsFieldArray() {
     var c = AutoForm.Utility.getComponentContext(this, "afQuickField");
