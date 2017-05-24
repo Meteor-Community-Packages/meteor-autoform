@@ -1,3 +1,52 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [aldeed:autoform Public API](#aldeedautoform-public-api)
+  - [<a name="AutoForm.Utility"></a>*AutoForm*.Utility {any}&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformutilityaautoformutility-anynbspnbspsubiclientisub)
+  - [<a name="AutoForm.addHooks"></a>*AutoForm*.addHooks(formIds, hooks)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformaddhooksaautoformaddhooksformids-hooksnbspnbspsubiclientisub)
+  - [<a name="AutoForm.hooks"></a>*AutoForm*.hooks(hooks)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformhooksaautoformhookshooksnbspnbspsubiclientisub)
+  - [<a name="AutoForm._hooks"></a>*AutoForm*._hooks {any}&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoform_hooksaautoform_hooks-anynbspnbspsubiclientisub)
+  - [<a name="AutoForm._globalHooks"></a>*AutoForm*._globalHooks {any}&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoform_globalhooksaautoform_globalhooks-anynbspnbspsubiclientisub)
+  - [<a name="AutoForm._forceResetFormValues"></a>*AutoForm*._forceResetFormValues(formId)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoform_forceresetformvaluesaautoform_forceresetformvaluesformidnbspnbspsubiclientisub)
+  - [<a name="AutoForm.resetForm"></a>*AutoForm*.resetForm(formId, [template])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformresetformaautoformresetformformid-templatenbspnbspsubiclientisub)
+  - [<a name="AutoForm.setDefaultTemplate"></a>*AutoForm*.setDefaultTemplate(template)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformsetdefaulttemplateaautoformsetdefaulttemplatetemplatenbspnbspsubiclientisub)
+  - [<a name="AutoForm.getDefaultTemplate"></a>*AutoForm*.getDefaultTemplate()&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetdefaulttemplateaautoformgetdefaulttemplatenbspnbspsubiclientisub)
+  - [<a name="AutoForm.setDefaultTemplateForType"></a>*AutoForm*.setDefaultTemplateForType(type, template)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformsetdefaulttemplatefortypeaautoformsetdefaulttemplatefortypetype-templatenbspnbspsubiclientisub)
+  - [<a name="AutoForm.getDefaultTemplateForType"></a>*AutoForm*.getDefaultTemplateForType(type)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetdefaulttemplatefortypeaautoformgetdefaulttemplatefortypetypenbspnbspsubiclientisub)
+  - [<a name="AutoForm.getTemplateName"></a>*AutoForm*.getTemplateName(templateType, templateName, [fieldName], [skipExistsCheck])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgettemplatenameaautoformgettemplatenametemplatetype-templatename-fieldname-skipexistschecknbspnbspsubiclientisub)
+  - [<a name="AutoForm.getFormValues"></a>*AutoForm*.getFormValues(formId, [template], [ss], [getModifier])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetformvaluesaautoformgetformvaluesformid-template-ss-getmodifiernbspnbspsubiclientisub)
+  - [<a name="AutoForm.getFieldValue"></a>*AutoForm*.getFieldValue(fieldName, [formId])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetfieldvalueaautoformgetfieldvaluefieldname-formidnbspnbspsubiclientisub)
+  - [<a name="AutoForm.getInputTypeTemplateNameForElement"></a>*AutoForm*.getInputTypeTemplateNameForElement(element)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetinputtypetemplatenameforelementaautoformgetinputtypetemplatenameforelementelementnbspnbspsubiclientisub)
+  - [<a name="AutoForm.getInputValue"></a>*AutoForm*.getInputValue(element, [ss])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetinputvalueaautoformgetinputvalueelement-ssnbspnbspsubiclientisub)
+  - [<a name="AutoForm.addInputType"></a>*AutoForm*.addInputType(name, definition)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformaddinputtypeaautoformaddinputtypename-definitionnbspnbspsubiclientisub)
+  - [<a name="AutoForm.addFormType"></a>*AutoForm*.addFormType(name, definition)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformaddformtypeaautoformaddformtypename-definitionnbspnbspsubiclientisub)
+  - [<a name="AutoForm.validateField"></a>*AutoForm*.validateField(formId, fieldName, [skipEmpty])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformvalidatefieldaautoformvalidatefieldformid-fieldname-skipemptynbspnbspsubiclientisub)
+  - [<a name="AutoForm.validateForm"></a>*AutoForm*.validateForm(formId)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformvalidateformaautoformvalidateformformidnbspnbspsubiclientisub)
+  - [<a name="AutoForm.getValidationContext"></a>*AutoForm*.getValidationContext([formId])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetvalidationcontextaautoformgetvalidationcontextformidnbspnbspsubiclientisub)
+  - [<a name="AutoForm.findAttribute"></a>*AutoForm*.findAttribute(attrName)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformfindattributeaautoformfindattributeattrnamenbspnbspsubiclientisub)
+  - [<a name="AutoForm.findAttributesWithPrefix"></a>*AutoForm*.findAttributesWithPrefix(prefix)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformfindattributeswithprefixaautoformfindattributeswithprefixprefixnbspnbspsubiclientisub)
+  - [<a name="AutoForm.debug"></a>*AutoForm*.debug()&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformdebugaautoformdebugnbspnbspsubiclientisub)
+  - [<a name="AutoForm.arrayTracker"></a>*AutoForm*.arrayTracker {any}&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformarraytrackeraautoformarraytracker-anynbspnbspsubiclientisub)
+  - [<a name="AutoForm.getInputType"></a>*AutoForm*.getInputType(atts)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetinputtypeaautoformgetinputtypeattsnbspnbspsubiclientisub)
+  - [<a name="AutoForm.getSchemaForField"></a>*AutoForm*.getSchemaForField(name)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetschemaforfieldaautoformgetschemaforfieldnamenbspnbspsubiclientisub)
+  - [<a name="AutoForm._getOptionsForField"></a>*AutoForm*._getOptionsForField(name)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoform_getoptionsforfieldaautoform_getoptionsforfieldnamenbspnbspsubiclientisub)
+  - [<a name="AutoForm.getLabelForField"></a>*AutoForm*.getLabelForField(name)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetlabelforfieldaautoformgetlabelforfieldnamenbspnbspsubiclientisub)
+  - [<a name="AutoForm.templateInstanceForForm"></a>*AutoForm*.templateInstanceForForm([formId])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformtemplateinstanceforformaautoformtemplateinstanceforformformidnbspnbspsubiclientisub)
+  - [<a name="AutoForm.viewForForm"></a>*AutoForm*.viewForForm([formId])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformviewforformaautoformviewforformformidnbspnbspsubiclientisub)
+  - [<a name="AutoForm.getArrayCountFromDocForField"></a>*AutoForm*.getArrayCountFromDocForField(formId, field)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetarraycountfromdocforfieldaautoformgetarraycountfromdocforfieldformid-fieldnbspnbspsubiclientisub)
+  - [<a name="AutoForm.parseData"></a>*AutoForm*.parseData(data)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformparsedataaautoformparsedatadatanbspnbspsubiclientisub)
+  - [<a name="AutoForm.getCurrentDataForForm"></a>*AutoForm*.getCurrentDataForForm(formId)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetcurrentdataforformaautoformgetcurrentdataforformformidnbspnbspsubiclientisub)
+  - [<a name="AutoForm.getCurrentDataPlusExtrasForForm"></a>*AutoForm*.getCurrentDataPlusExtrasForForm()&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetcurrentdataplusextrasforformaautoformgetcurrentdataplusextrasforformnbspnbspsubiclientisub)
+  - [<a name="AutoForm.getFormCollection"></a>*AutoForm*.getFormCollection(formId)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetformcollectionaautoformgetformcollectionformidnbspnbspsubiclientisub)
+  - [<a name="AutoForm.getFormSchema"></a>*AutoForm*.getFormSchema([formId], [form])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetformschemaaautoformgetformschemaformid-formnbspnbspsubiclientisub)
+  - [<a name="AutoForm.getFormId"></a>*AutoForm*.getFormId()&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetformidaautoformgetformidnbspnbspsubiclientisub)
+  - [<a name="AutoForm.selectFirstInvalidField"></a>*AutoForm*.selectFirstInvalidField(formId, ss)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformselectfirstinvalidfieldaautoformselectfirstinvalidfieldformid-ssnbspnbspsubiclientisub)
+  - [<a name="AutoForm._validateFormDoc"></a>*AutoForm*._validateFormDoc(doc, isModifier, formId, ss, form, [key])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoform_validateformdocaautoform_validateformdocdoc-ismodifier-formid-ss-form-keynbspnbspsubiclientisub)
+  - [<a name="AutoForm.valueConverters.stringToNumber"></a>*AutoFormvalueConverters*.stringToNumber(val)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformvalueconvertersstringtonumberaautoformvalueconvertersstringtonumbervalnbspnbspsubiclientisub)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## aldeed:autoform Public API ##
 
 Easily create forms with automatic insert and update, and automatic reactive validation.

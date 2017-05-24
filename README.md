@@ -18,6 +18,12 @@ AutoForm 6.0 is now available and requires switching your app to using the Simpl
 
 - [Installation](#installation)
   - [Community Add-On Packages](#community-add-on-packages)
+    - [Custom Input Types](#custom-input-types)
+    - [Themes](#themes)
+    - [Admin Panels](#admin-panels)
+    - [Content Management Systems](#content-management-systems)
+    - [Components](#components)
+    - [Other](#other)
 - [Demo](#demo)
 - [Example](#example)
   - [A Basic Insert Form](#a-basic-insert-form)
@@ -33,6 +39,7 @@ AutoForm 6.0 is now available and requires switching your app to using the Simpl
   - [afFormGroup](#afformgroup)
   - [afQuickField](#afquickfield)
     - [afQuickField Examples](#afquickfield-examples)
+  - [afFieldValue](#affieldvalue)
   - [afFieldValueIs and afFieldValueContains](#affieldvalueis-and-affieldvaluecontains)
   - [afFieldNames](#affieldnames)
   - [afQuickFields](#afquickfields)
@@ -59,7 +66,7 @@ AutoForm 6.0 is now available and requires switching your app to using the Simpl
 - [The Form Document](#the-form-document)
   - [Getting Current Field Values](#getting-current-field-values)
 - [Callbacks/Hooks](#callbackshooks)
-  - [formToDoc and docToForm](#formtodoc-and-doctoform)
+  - [formToDoc, formToModifier, and docToForm](#formtodoc-formtomodifier-and-doctoform)
 - [Putting Field Attribute Defaults in the Schema](#putting-field-attribute-defaults-in-the-schema)
 - [Complex Schemas](#complex-schemas)
 - [Dates](#dates)
@@ -69,6 +76,8 @@ AutoForm 6.0 is now available and requires switching your app to using the Simpl
 - [Theme Templates](#theme-templates)
   - [Using a Different Template](#using-a-different-template)
   - [Creating a Custom Template](#creating-a-custom-template)
+- [Grouping Fields](#grouping-fields)
+- [Sticky Validation Errors](#sticky-validation-errors)
 - [Defining Custom Input Types](#defining-custom-input-types)
 - [Common Questions](#common-questions)
   - [Should the value of `schema` and `collection` have quotation marks around it?](#should-the-value-of-schema-and-collection-have-quotation-marks-around-it)
@@ -600,6 +609,14 @@ Refer to the "Objects and Arrays" section for additional information.
 {{> afQuickField name="optionsButNoSelect" options=numSelectOptions noselect="true"}}
 {{> afQuickField name="firstOptionSelect" firstOption="(Select Something)" options=numSelectOptions}}
 {{> afQuickField name="decimal" step="0.01"}}
+```
+
+### afFieldValue
+
+Displays the current value of a field
+
+```
+{{afFieldValue name='someField'}}
 ```
 
 ### afFieldValueIs and afFieldValueContains
