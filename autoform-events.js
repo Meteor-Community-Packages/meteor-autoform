@@ -2,7 +2,7 @@
 
 // all form events handled here
 var lastAutoSaveElement = null;
-var lastKeyVals = {};
+lastKeyVals = {};
 
 function beginSubmit(formId, template, hookContext) {
   if (!Utility.checkTemplate(template)) return;
@@ -445,6 +445,8 @@ Template.autoForm.events({
 
     // Reset array counts
     arrayTracker.resetForm(formId);
+    // Reset the last key value for the form
+    delete lastKeyVals[formId];
 
     var vc = AutoForm.getValidationContext(formId);
     if (vc) vc.reset();

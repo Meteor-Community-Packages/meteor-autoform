@@ -1,6 +1,6 @@
 import MongoObject from 'mongo-object';
 
-/* global AutoForm, ReactiveVar, arrayTracker, Hooks, Utility, setDefaults */
+/* global AutoForm, ReactiveVar, arrayTracker, lastKeyVals, Hooks, Utility, setDefaults */
 
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
@@ -81,6 +81,8 @@ Template.autoForm.created = function autoFormCreated() {
     // When we change the form, loading a different doc, reloading the current doc, etc.,
     // we also want to reset the array counts for the form
     arrayTracker.resetForm(formId);
+    // and the stored last key value for the form
+    delete lastKeyVals[formId];
 
     data = setDefaults(data);
 
