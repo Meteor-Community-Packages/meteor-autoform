@@ -398,6 +398,8 @@ Template.autoForm.events({
     if (event.target.type === 'checkbox') {
       // Special handling for checkboxes, which always have the same value
       keyVal = keyVal + '_' + $target.prop('checked');
+    } else if (event.target.isContentEditable) {
+      keyVal = $target.html();
     }
 
     keyVal = key + '___' + keyVal;
@@ -451,6 +453,9 @@ Template.autoForm.events({
 
     event.preventDefault();
     AutoForm._forceResetFormValues(formId);
+
+    // This value is no longer valid when we reset the form, clear it
+    delete lastKeyVals[formId];
 
     // Mark all fields as changed
     updateAllTrackedFieldValues(template);
