@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform)
+[![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform) [![OpenCollective](https://opencollective.com/autoform/backers/badge.svg)](#backers) [![OpenCollective](https://opencollective.com/autoform/sponsors/badge.svg)](#sponsors)
 
 AutoForm
 =========================
