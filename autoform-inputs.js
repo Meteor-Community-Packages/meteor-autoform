@@ -6,7 +6,7 @@ getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
     var fieldName, val = AutoForm.getInputValue(this, ss);
     if (val !== void 0) {
       // Get the field/schema key name
-      fieldName = $(this).attr("data-schema-key");
+      fieldName = $(this).attr('data-schema-key');
       doc[fieldName] = val;
     }
   });
@@ -27,7 +27,7 @@ getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
  */
 getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fieldDefaultValue, typeDefs) {
 
-  if (typeof value === "undefined") {
+  if (typeof value === 'undefined') {
     // Get the value for this key in the current document
     if (mDoc) {
       var valueInfo = mDoc.getInfoForKey(atts.name);
@@ -56,7 +56,7 @@ getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fi
 
   // If the component expects the value to be an array, and it's not, make it one
   if (typeDefs.valueIsArray && !_.isArray(value)) {
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
       value = value.split(',');
     } else {
       value = [value];
@@ -66,7 +66,7 @@ getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fi
   // At this point we have a value or an array of values.
   // Run through the components valueIn function if we have one.
   // It should then be in whatever format the component expects.
-  if (typeof typeDefs.valueIn === "function") {
+  if (typeof typeDefs.valueIn === 'function') {
     value = typeDefs.valueIn(value, atts);
   }
 
@@ -85,17 +85,17 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   // We don't want to alter the original hash, so we clone it and
   // remove some stuff that should not be HTML attributes.
   var inputAtts = _.omit(hash,
-          "type",
-          "value",
-          "noselect",
-          "options",
-          "template",
-          "defaultValue",
-          "data");
+    'type',
+    'value',
+    'noselect',
+    'options',
+    'template',
+    'defaultValue',
+    'data');
 
   // Add required if required
-  if (typeof inputAtts.required === "undefined" && !defs.optional) {
-    inputAtts.required = "";
+  if (typeof inputAtts.required === 'undefined' && !defs.optional) {
+    inputAtts.required = '';
   }
 
    // Add data-schema-key to every type of element
@@ -105,7 +105,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   // We check hash.placeholder instead of inputAtts.placeholder because
   // we're setting inputAtts.placeholder, so it wouldn't be the same on
   // subsequent reactive runs of this function.
-  if (hash.placeholder === "schemaLabel") {
+  if (hash.placeholder === 'schemaLabel') {
     inputAtts.placeholder = label;
   }
 
@@ -113,7 +113,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   // in a simple way, we add the attributes to the HTML
   // only if their value is `true`. That is, unlike in
   // HTML, their mere presence does not matter.
-  _.each(["disabled", "readonly", "checked", "required", "autofocus"], function (booleanProp) {
+  _.each(['disabled', 'readonly', 'checked', 'required', 'autofocus'], function (booleanProp) {
     if (!_.has(hash, booleanProp)) {
       return;
     }
@@ -121,8 +121,8 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
     // For historical reasons, we treat the string "true" and an empty string as `true`, too.
     // But an empty string value results in the cleanest rendered output for boolean props,
     // so we standardize as that.
-    if (hash[booleanProp] === true || hash[booleanProp] === "true" || hash[booleanProp] === "") {
-      inputAtts[booleanProp] = "";
+    if (hash[booleanProp] === true || hash[booleanProp] === 'true' || hash[booleanProp] === '') {
+      inputAtts[booleanProp] = '';
     } else {
       // If the value is anything else, we don't render it
       delete inputAtts[booleanProp];
@@ -224,7 +224,7 @@ updateAllTrackedFieldValues = function updateAllTrackedFieldValues(template) {
 
 getAllFieldsInForm = function getAllFieldsInForm(template) {
   // Get all elements with `data-schema-key` attribute, unless disabled
-  return template.$("[data-schema-key]").not("[disabled]");
+  return template.$('[data-schema-key]').not('[disabled]');
   // Exclude fields in sub-forms, since they will belong to a different AutoForm and schema.
   // TODO need some selector/filter that actually works correctly for excluding subforms
   // return template.$('[data-schema-key]').not("[disabled]").not(template.$('form form [data-schema-key]'));

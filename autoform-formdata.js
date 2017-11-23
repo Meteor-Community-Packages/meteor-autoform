@@ -46,11 +46,11 @@ FormData.prototype.sourceDoc = function (formId, sourceDoc) {
   self.initForm(formId);
 
   if (sourceDoc || sourceDoc === null) {
-    //setter
+    // setter
     self.forms[formId].sourceDoc = sourceDoc;
     self.forms[formId].deps.sourceDoc.changed();
   } else {
-    //getter
+    // getter
     self.forms[formId].deps.sourceDoc.depend();
     return self.forms[formId].sourceDoc;
   }

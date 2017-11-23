@@ -17,18 +17,18 @@ Utility = {
     var newDoc = isArray ? [] : {};
     _.each(doc, function(val, key) {
       if (!_.isArray(val) && isBasicObject(val)) {
-        val = cleanNulls(val, false, keepEmptyStrings); //recurse into plain objects
+        val = cleanNulls(val, false, keepEmptyStrings); // recurse into plain objects
         if (!_.isEmpty(val)) {
           newDoc[key] = val;
         }
       } else if (_.isArray(val)) {
-        val = cleanNulls(val, true, keepEmptyStrings); //recurse into non-typed arrays
+        val = cleanNulls(val, true, keepEmptyStrings); // recurse into non-typed arrays
         if (!_.isEmpty(val)) {
           newDoc[key] = val;
         }
       } else if (!Utility.isNullUndefinedOrEmptyString(val)) {
         newDoc[key] = val;
-      } else if (keepEmptyStrings && typeof val === "string" && val.length === 0) {
+      } else if (keepEmptyStrings && typeof val === 'string' && val.length === 0) {
         newDoc[key] = val;
       }
     });
@@ -48,15 +48,15 @@ Utility = {
     _.each(flatDoc, function(val, key) {
       // If value is undefined, null, or an empty string, report this as null so it will be unset
       if (val === null) {
-        nulls[key] = "";
+        nulls[key] = '';
       } else if (val === void 0) {
-        nulls[key] = "";
-      } else if (!keepEmptyStrings && typeof val === "string" && val.length === 0) {
-        nulls[key] = "";
+        nulls[key] = '';
+      } else if (!keepEmptyStrings && typeof val === 'string' && val.length === 0) {
+        nulls[key] = '';
       }
       // If value is an array in which all the values recursively are undefined, null, or an empty string, report this as null so it will be unset
       else if (_.isArray(val) && Utility.cleanNulls(val, true, keepEmptyStrings).length === 0) {
-        nulls[key] = "";
+        nulls[key] = '';
       }
     });
     return nulls;
@@ -80,7 +80,7 @@ Utility = {
 
     // Flatten doc
     mDoc = new MongoObject(doc);
-    flatDoc = mDoc.getFlatObject({keepArrays: !!options.keepArrays});
+    flatDoc = mDoc.getFlatObject({ keepArrays: !!options.keepArrays });
     // Get a list of null, undefined, and empty string values so we can unset them instead
     nulls = Utility.reportNulls(flatDoc, !!options.keepEmptyStrings);
     flatDoc = Utility.cleanNulls(flatDoc, false, !!options.keepEmptyStrings);
@@ -123,21 +123,21 @@ Utility = {
     var selectOptions = hash.options;
 
     // Handle options="allowed"
-    if (selectOptions === "allowed") {
+    if (selectOptions === 'allowed') {
       selectOptions = _.map(defs.allowedValues, function(v) {
         var label = v;
         if (hash.capitalize && v.length > 0 && schemaType === String) {
           label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
         }
 
-        return {label: label, value: v};
+        return { label: label, value: v };
       });
     }
 
     // Hashtable
     else if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
       selectOptions = _.map(selectOptions, function(v, k) {
-        return {label: v, value: schemaType(k)};
+        return { label: v, value: schemaType(k) };
       });
     }
 
@@ -154,11 +154,11 @@ Utility = {
    */
   lookup: function lookup(obj) {
     var ref = window, arr;
-    if (typeof obj === "string") {
-      arr = obj.split(".");
-      while(arr.length && (ref = ref[arr.shift()]));
+    if (typeof obj === 'string') {
+      arr = obj.split('.');
+      while (arr.length && (ref = ref[arr.shift()]));
       if (!ref) {
-        throw new Error(obj + " is not in the window scope");
+        throw new Error(obj + ' is not in the window scope');
       }
       return ref;
     }
@@ -206,19 +206,19 @@ Utility = {
   expandObj: function expandObj(doc) {
     var newDoc = {}, subkeys, subkey, subkeylen, nextPiece, current;
     _.each(doc, function(val, key) {
-      subkeys = key.split(".");
+      subkeys = key.split('.');
       subkeylen = subkeys.length;
       current = newDoc;
       for (var i = 0; i < subkeylen; i++) {
         subkey = subkeys[i];
-        if (typeof current[subkey] !== "undefined" && !_.isObject(current[subkey])) {
-          break; //already set for some reason; leave it alone
+        if (typeof current[subkey] !== 'undefined' && !_.isObject(current[subkey])) {
+          break; // already set for some reason; leave it alone
         }
         if (i === subkeylen - 1) {
-          //last iteration; time to set the value
+          // last iteration; time to set the value
           current[subkey] = val;
         } else {
-          //see if the next piece is a number
+          // see if the next piece is a number
           nextPiece = subkeys[i + 1];
           nextPiece = parseInt(nextPiece, 10);
           if (isNaN(nextPiece) && !_.isObject(current[subkey])) {
@@ -249,7 +249,7 @@ Utility = {
             compactArrays(arrayItem);
           });
         } else if (!(val instanceof Date) && _.isObject(val)) {
-          //recurse into objects
+          // recurse into objects
           compactArrays(val);
         }
       });
@@ -272,12 +272,12 @@ Utility = {
           });
         } else if (isBasicObject(val)) {
           var allEmpty = _.all(val, function (prop) {
-            return (prop === void 0 || prop === null || (!keepEmptyStrings && typeof prop === "string" && prop.length === 0));
+            return (prop === void 0 || prop === null || (!keepEmptyStrings && typeof prop === 'string' && prop.length === 0));
           });
           if (_.isEmpty(val) || allEmpty) {
             obj[key] = null;
           } else {
-            //recurse into objects
+            // recurse into objects
             bubbleEmpty(val);
           }
         }
@@ -293,7 +293,7 @@ Utility = {
    * Returns `true` if the value is null, undefined, or an empty string
    */
   isNullUndefinedOrEmptyString: function isNullUndefinedOrEmptyString(val) {
-    return (val === void 0 || val === null || (typeof val === "string" && val.length === 0));
+    return (val === void 0 || val === null || (typeof val === 'string' && val.length === 0));
   },
   /**
    * @method Utility.isValidDateString
@@ -316,12 +316,12 @@ Utility = {
    * Returns `true` if timeString is a "valid time string"
    */
   isValidTimeString: function isValidTimeString(timeString) {
-    if (typeof timeString !== "string") {
+    if (typeof timeString !== 'string') {
       return false;
     }
 
-    //this reg ex actually allows a few invalid hours/minutes/seconds, but
-    //we can catch that when parsing
+    // this reg ex actually allows a few invalid hours/minutes/seconds, but
+    // we can catch that when parsing
     var regEx = /^[0-2][0-9]:[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
     return regEx.test(timeString);
   },
@@ -334,7 +334,7 @@ Utility = {
    * Returns true if dateString is a "valid normalized forced-UTC global date and time string"
    */
   isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString(dateString) {
-    if (typeof dateString !== "string") {
+    if (typeof dateString !== 'string') {
       return false;
     }
 
@@ -342,7 +342,7 @@ Utility = {
     var tPart = dateString.substring(10, 11);
     var timePart = dateString.substring(11, dateString.length - 1);
     var zPart = dateString.substring(dateString.length - 1);
-    return Utility.isValidDateString(datePart) && tPart === "T" && Utility.isValidTimeString(timePart) && zPart === "Z";
+    return Utility.isValidDateString(datePart) && tPart === 'T' && Utility.isValidTimeString(timePart) && zPart === 'Z';
   },
   /**
    * @method  Utility.isValidNormalizedLocalDateAndTimeString
@@ -353,14 +353,14 @@ Utility = {
    * Returns true if dtString is a "valid normalized local date and time string"
    */
   isValidNormalizedLocalDateAndTimeString: function isValidNormalizedLocalDateAndTimeString(dtString) {
-    if (typeof dtString !== "string") {
+    if (typeof dtString !== 'string') {
       return false;
     }
 
     var datePart = dtString.substring(0, 10);
     var tPart = dtString.substring(10, 11);
     var timePart = dtString.substring(11, dtString.length);
-    return Utility.isValidDateString(datePart) && tPart === "T" && Utility.isValidTimeString(timePart);
+    return Utility.isValidDateString(datePart) && tPart === 'T' && Utility.isValidTimeString(timePart);
   },
   /**
    * @method Utility.getComponentContext
@@ -385,7 +385,7 @@ Utility = {
 
     // Look up the tree if we're in a helper, checking to see if any ancestor components
     // had a <componentType>-attribute specified.
-    formComponentAttributes = AutoForm.findAttributesWithPrefix(name + "-");
+    formComponentAttributes = AutoForm.findAttributesWithPrefix(name + '-');
 
     // Get any field-specific attributes defined in the schema.
     // They can be in autoform.attrName or autoform.componentType.attrName, with
@@ -423,7 +423,7 @@ Utility = {
    * @return {Array} The array, building it from a comma-delimited string if necessary.
    */
   stringToArray: function stringToArray(s, errorMessage) {
-    if (typeof s === "string") {
+    if (typeof s === 'string') {
       return s.replace(/ /g, '').split(',');
     } else if (!_.isArray(s)) {
       throw new Error(errorMessage);
@@ -439,10 +439,10 @@ Utility = {
    * @return {Object} The object with klass added to the "class" property, creating the property if necessary
    */
   addClass: function addClass(atts, klass) {
-    if (typeof atts["class"] === "string") {
-      atts["class"] += " " + klass;
+    if (typeof atts['class'] === 'string') {
+      atts['class'] += ' ' + klass;
     } else {
-      atts["class"] = klass;
+      atts['class'] = klass;
     }
     return atts;
   },
@@ -473,8 +473,8 @@ Utility = {
 };
 
 // getPrototypeOf polyfill
-if (typeof Object.getPrototypeOf !== "function") {
-  if (typeof "".__proto__ === "object") {
+if (typeof Object.getPrototypeOf !== 'function') {
+  if (typeof ''.__proto__ === 'object') {
     Object.getPrototypeOf = function(object) {
       return object.__proto__;
     };

@@ -4,7 +4,7 @@ function parseOptions(options) {
   var hash = (options || {}).hash || {};
   // Find the form's schema
   var ss = AutoForm.getFormSchema();
-  return _.extend({}, hash, {ss: ss});
+  return _.extend({}, hash, { ss: ss });
 }
 
 /*
@@ -107,7 +107,7 @@ Template.registerHelper('afFieldValueContains', function autoFormFieldValueConta
   options = parseOptions(options, 'afFieldValueContains');
 
   var currentValue = AutoForm.getFieldValue(options.name, options.formId);
-  return _.isArray(currentValue) && (_.contains(currentValue, options.value) || options.values && _.intersection(currentValue, options.values.split(",")));
+  return _.isArray(currentValue) && (_.contains(currentValue, options.value) || options.values && _.intersection(currentValue, options.values.split(',')));
 });
 
 /*
@@ -121,15 +121,15 @@ Template.registerHelper('afFieldLabelText', function autoFormFieldLabelText(opti
 /*
  * afFieldNames
  */
-Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
+Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
   options = parseOptions(options, 'afFieldNames');
   var ss = options.ss, name = options.name, namePlusDot, genericName, genericNamePlusDot;
   var form = AutoForm.getCurrentDataForForm();
 
   if (name) {
-    namePlusDot = name + ".";
+    namePlusDot = name + '.';
     genericName = AutoForm.Utility.makeKeyGeneric(name);
-    genericNamePlusDot = genericName + ".";
+    genericNamePlusDot = genericName + '.';
   }
 
   // Get the list of fields we want included
@@ -138,7 +138,7 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
     fieldList = AutoForm.Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
   }
 
-  var ancestorFieldList = AutoForm.findAttribute("fields");
+  var ancestorFieldList = AutoForm.findAttribute('fields');
   if (ancestorFieldList) {
     ancestorFieldList = AutoForm.Utility.stringToArray(ancestorFieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
 
@@ -187,13 +187,13 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
     // we will use a single field for the city, with no afObjectField
     // template around it.
     fieldList = _.reject(fieldList, function (field) {
-      var lastDotPos = field.lastIndexOf(".");
+      var lastDotPos = field.lastIndexOf('.');
       if (lastDotPos === -1) {
-        return false; //keep
+        return false; // keep
       }
 
       var parentField = field.slice(0, lastDotPos);
-      if (parentField.slice(-2) === ".$") {
+      if (parentField.slice(-2) === '.$') {
         parentField = parentField.slice(0, -2);
       }
       return _.contains(fieldList, parentField) && parentField !== name && parentField !== genericName;
@@ -210,13 +210,13 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
       // Tack child field name on to end of parent field name. This
       // ensures that we keep the desired array index for array items.
       fieldList = _.map(fieldList, function (field) {
-        return name + "." + field;
+        return name + '.' + field;
       });
     }
   }
 
   // If user wants to omit some fields, remove those from the array
-  var omitFields = options.omitFields || AutoForm.findAttribute("omitFields");
+  var omitFields = options.omitFields || AutoForm.findAttribute('omitFields');
   if (omitFields) {
     omitFields = AutoForm.Utility.stringToArray(omitFields, 'AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
     fieldList = _.difference(fieldList, omitFields);
@@ -241,12 +241,12 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
     }
 
     // Don't include fields with denyInsert=true when it's an insert form
-    if (fieldDefs.denyInsert && form.type === "insert") {
+    if (fieldDefs.denyInsert && form.type === 'insert') {
       return false;
     }
 
     // Don't include fields with denyUpdate=true when it's an update form
-    if (fieldDefs.denyUpdate && form.type === "update") {
+    if (fieldDefs.denyUpdate && form.type === 'update') {
       return false;
     }
 
@@ -259,7 +259,7 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
   // We return it as an array of objects because that
   // works better with Blaze contexts
   fieldList = _.map(fieldList, function (name) {
-    return {name: name};
+    return { name: name };
   });
 
   return fieldList;
@@ -272,7 +272,7 @@ Template.registerHelper("afFieldNames", function autoFormFieldNames(options) {
 Template.registerHelper('afSelectOptionAtts', function afSelectOptionAtts() {
   var atts = _.pick(this, 'value');
   if (this.selected) {
-    atts.selected = "";
+    atts.selected = '';
   }
   if (this.htmlAtts) {
     _.extend(atts, this.htmlAtts);

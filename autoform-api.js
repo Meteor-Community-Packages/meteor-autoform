@@ -4,7 +4,7 @@ import MongoObject from 'mongo-object';
 
 // This file defines the public, exported API
 
-AutoForm = AutoForm || {}; //exported
+AutoForm = AutoForm || {}; // exported
 
 /**
  * @property AutoForm.Utility
@@ -23,7 +23,7 @@ AutoForm.Utility = Utility;
  * form.
  */
 AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) {
-  if (typeof formIds === "string") {
+  if (typeof formIds === 'string') {
     formIds = [formIds];
   }
 
@@ -102,7 +102,7 @@ AutoForm._forceResetFormValues = function autoFormForceResetFormValues(formId) {
 AutoForm.resetForm = function autoFormResetForm(formId, template) {
   template = template || AutoForm.templateInstanceForForm(formId);
   if (!Utility.checkTemplate(template)) return;
-  template.$("form")[0].reset();
+  template.$('form')[0].reset();
 };
 
 /**
@@ -136,8 +136,8 @@ AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(
   if (!deps.defaultTypeTemplates[type]) {
     deps.defaultTypeTemplates[type] = new Tracker.Dependency();
   }
-  if (template !== null && !Template[type + "_" + template]) {
-    throw new Error("setDefaultTemplateForType can't set default template to \"" + template + "\" for type \"" + type + "\" because there is no defined template with the name \"" + type + "_" + template + "\"");
+  if (template !== null && !Template[type + '_' + template]) {
+    throw new Error('setDefaultTemplateForType can\'t set default template to "' + template + '" for type "' + type + '" because there is no defined template with the name "' + type + '_' + template + '"');
   }
   defaultTypeTemplates[type] = template;
   deps.defaultTypeTemplates[type].changed();
@@ -214,13 +214,13 @@ AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templa
   }
 
   // Fallback #3: template-<componentType> attribute on an ancestor component within the same form
-  let templateFromAncestor = AutoForm.findAttribute("template-" + templateType);
+  let templateFromAncestor = AutoForm.findAttribute('template-' + templateType);
   if (templateFromAncestor && templateExists(templateType + '_' + templateFromAncestor)) {
     return templateType + '_' + templateFromAncestor;
   }
 
   // Fallback #4: template attribute on an ancestor component within the same form
-  templateFromAncestor = AutoForm.findAttribute("template");
+  templateFromAncestor = AutoForm.findAttribute('template');
   if (templateFromAncestor && templateExists(templateType + '_' + templateFromAncestor)) {
     return templateType + '_' + templateFromAncestor;
   }
@@ -475,7 +475,7 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   var field, fieldName, fieldType, fieldSchema, arrayItemFieldType, val, typeDef, inputTypeTemplate, dataContext, autoConvert;
 
   Tracker.nonreactive(function() {
-    //don't rerun when data context of element changes, can cause infinite loops
+    // don't rerun when data context of element changes, can cause infinite loops
 
     dataContext = Blaze.getData(element);
     if (dataContext && dataContext.atts) {
@@ -487,7 +487,7 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   field = $(element);
 
   // Get the field/schema key name
-  fieldName = field.attr("data-schema-key");
+  fieldName = field.attr('data-schema-key');
 
   // If we have a schema, we can autoconvert to the correct data type
   if (ss) fieldType = ss.getQuickTypeForKey(fieldName);
@@ -502,10 +502,10 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   }
 
   // Figure out what registered input type was used to render this element
-  typeDef = _.where(AutoForm._inputTypeDefinitions, {template: inputTypeTemplate})[0];
+  typeDef = _.where(AutoForm._inputTypeDefinitions, { template: inputTypeTemplate })[0];
 
   // If field has a "data-null-value" attribute, value should always be null
-  if (field.attr("data-null-value") !== void 0) {
+  if (field.attr('data-null-value') !== void 0) {
     val = null;
   }
   // Otherwise get the field's value using the input type's `valueOut` function if provided
@@ -520,7 +520,7 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   // run through input's type converter if provided
   if (val !== void 0 && autoConvert !== false && typeDef && typeDef.valueConverters && fieldType) {
     var converterFunc = typeDef.valueConverters[fieldType];
-    if (typeof converterFunc === "function") {
+    if (typeof converterFunc === 'function') {
       val = converterFunc.call(field, val);
     }
   }
@@ -731,7 +731,7 @@ AutoForm.debug = function autoFormDebug() {
   AutoForm._debug = true;
   AutoForm.addHooks(null, {
     onError: function (operation, error) {
-      console.log("Error in " + this.formId, operation, error);
+      console.log('Error in ' + this.formId, operation, error);
     }
   });
 };
@@ -1165,7 +1165,7 @@ AutoForm._validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss
     if (stickyError) {
       isValid = false;
       vc.addValidationErrors([
-        {name: key, type: stickyError.type, value: stickyError.value}
+        { name: key, type: stickyError.type, value: stickyError.value }
       ]);
     }
   } else {
@@ -1179,7 +1179,7 @@ AutoForm._validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss
     if (!_.isEmpty(stickyErrors)) {
       isValid = false;
       stickyErrors = _.map(stickyErrors, function (obj, k) {
-        return {name: k, type: obj.type, value: obj.value};
+        return { name: k, type: obj.type, value: obj.value };
       });
       vc.addValidationErrors(stickyErrors);
     }
@@ -1227,7 +1227,7 @@ setDefaults = function setDefaults(data) {
     var ftd = Utility.getFormTypeDef(formType);
 
     if (typeof ftd.adjustSchema === 'function') {
-      schema = ftd.adjustSchema.call({form: data}, schema);
+      schema = ftd.adjustSchema.call({ form: data }, schema);
     }
 
     // If we have a schema, cache it

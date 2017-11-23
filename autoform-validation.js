@@ -18,7 +18,7 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
   // Skip validation if onlyIfAlreadyInvalid is true and the form is
   // currently valid.
   if (onlyIfAlreadyInvalid && ss.namedContext(formId).isValid()) {
-    return true; //skip validation
+    return true; // skip validation
   }
 
   // Create a document based on all the values of all the inputs on the form
@@ -36,7 +36,7 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
   // Skip validation if skipEmpty is true and the field we're validating
   // has no value.
   if (skipEmpty && !AutoForm.Utility.objAffectsKey(docToValidate, key)) {
-    return true; //skip validation
+    return true; // skip validation
   }
 
   return AutoForm._validateFormDoc(docToValidate, !!ftd.usesModifier, formId, ss, form, key);

@@ -15,7 +15,7 @@ function beginSubmit(formId, template, hookContext) {
     });
   } else {
     // If there are no user-defined hooks, by default we disable the submit button during submission
-    var submitButton = template.find("button[type=submit]") || template.find("input[type=submit]");
+    var submitButton = template.find('button[type=submit]') || template.find('input[type=submit]');
     if (submitButton) {
       submitButton.disabled = true;
     }
@@ -35,7 +35,7 @@ function endSubmit(formId, template, hookContext) {
     });
   } else {
     // If there are no user-defined hooks, by default we disable the submit button during submission
-    var submitButton = template.find("button[type=submit]") || template.find("input[type=submit]");
+    var submitButton = template.find('button[type=submit]') || template.find('input[type=submit]');
     if (submitButton) {
       submitButton.disabled = false;
     }
@@ -69,18 +69,18 @@ function onlyIfAlreadyInvalid(validationType) {
  * @returns {String|undefined} The schema key
  */
 function getKeyForElement(element) {
-  var key = element.getAttribute("data-schema-key");
+  var key = element.getAttribute('data-schema-key');
   if (!key) {
-    key = $(element).closest('[data-schema-key]').attr("data-schema-key");
+    key = $(element).closest('[data-schema-key]').attr('data-schema-key');
   }
   return key;
 }
 
-//throttle autosave, at most autosave every 500ms
+// throttle autosave, at most autosave every 500ms
 var throttleAutosave = _.throttle(function(event) {
   lastAutoSaveElement = event.target;
   $(event.currentTarget).submit();
-}, 500, {leading: false});
+}, 500, { leading: false });
 
 Template.autoForm.events({
   'submit form': function autoFormSubmitHandler(event, template) {
@@ -218,7 +218,7 @@ Template.autoForm.events({
           } else if (!_.isObject(d)) {
             throw new Error("A 'before' hook must return an object");
           } else {
-            runHook(i+1, d);
+            runHook(i + 1, d);
           }
         };
 
@@ -260,7 +260,7 @@ Template.autoForm.events({
           AutoForm.resetForm(formId, template);
         }
         // Set docId in the context for insert forms, too
-        if (formType === "insert") {
+        if (formType === 'insert') {
           hookContext.docId = result;
         }
         _.each(onSuccessHooks, function onSuccessEach(hook) {
@@ -335,7 +335,7 @@ Template.autoForm.events({
     var form = AutoForm.getCurrentDataForForm(formId);
 
     var validationType = form.validation;
-    var skipEmpty = !(event.keyCode === 8 || event.keyCode === 46); //if deleting or backspacing, don't skip empty
+    var skipEmpty = !(event.keyCode === 8 || event.keyCode === 46); // if deleting or backspacing, don't skip empty
 
     if ((validationType === 'keyup' || validationType === 'submitThenKeyup')) {
       var key = getKeyForElement(event.currentTarget);
@@ -455,7 +455,7 @@ Template.autoForm.events({
     // Mark all fields as changed
     updateAllTrackedFieldValues(template);
     // Focus the autofocus element
-    template.$("[autofocus]").focus();
+    template.$('[autofocus]').focus();
 
   },
   'keydown .autoform-array-item input': function (event) {
@@ -488,9 +488,9 @@ Template.autoForm.events({
     // We pull from data attributes because the button could be manually
     // added anywhere, so we don't know the data context.
     var btn = $(event.currentTarget);
-    var name = btn.attr("data-autoform-field");
-    var minCount = btn.attr("data-autoform-minCount"); // optional, overrides schema
-    var maxCount = btn.attr("data-autoform-maxCount"); // optional, overrides schema
+    var name = btn.attr('data-autoform-field');
+    var minCount = btn.attr('data-autoform-minCount'); // optional, overrides schema
+    var maxCount = btn.attr('data-autoform-maxCount'); // optional, overrides schema
 
     var data = template.data;
     var formId = data && data.id;
