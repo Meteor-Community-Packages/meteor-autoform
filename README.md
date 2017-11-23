@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform) [![OpenCollective](https://opencollective.com/autoform/backers/badge.svg)](#backers) [![OpenCollective](https://opencollective.com/autoform/sponsors/badge.svg)](#sponsors)
+[![Backers on Open Collective](https://opencollective.com/meteor-autoform/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/meteor-autoform/sponsors/badge.svg)](#sponsors) [![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform) [![OpenCollective](https://opencollective.com/autoform/backers/badge.svg)](#backers) [![OpenCollective](https://opencollective.com/autoform/sponsors/badge.svg)](#sponsors)
 
 AutoForm
 =========================
@@ -1683,3 +1683,33 @@ Anyone is welcome to contribute. Fork, make your changes, and then submit a pull
 Thanks to [all those who have contributed code changes](https://github.com/aldeed/meteor-autoform/graphs/contributors) and all who have helped by submitting bug reports and feature ideas.
 
 [![Support via Gittip](https://rawgithub.com/twolfson/gittip-badge/0.2.0/dist/gittip.png)](https://www.gittip.com/aldeed/)
+
+## Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute]](CONTRIBUTING.md).
+<a href="graphs/contributors"><img src="https://opencollective.com/meteor-autoform/contributors.svg?width=890" /></a>
+
+
+## Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/meteor-autoform#backer)]
+
+<a href="https://opencollective.com/meteor-autoform#backers" target="_blank"><img src="https://opencollective.com/meteor-autoform/backers.svg?width=890"></a>
+
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/meteor-autoform#sponsor)]
+
+<a href="https://opencollective.com/meteor-autoform/sponsor/0/website" target="_blank"><img src="https://opencollective.com/meteor-autoform/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/meteor-autoform/sponsor/1/website" target="_blank"><img src="https://opencollective.com/meteor-autoform/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/meteor-autoform/sponsor/2/website" target="_blank"><img src="https://opencollective.com/meteor-autoform/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/meteor-autoform/sponsor/3/website" target="_blank"><img src="https://opencollective.com/meteor-autoform/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/meteor-autoform/sponsor/4/website" target="_blank"><img src="https://opencollective.com/meteor-autoform/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/meteor-autoform/sponsor/5/website" target="_blank"><img src="https://opencollective.com/meteor-autoform/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/meteor-autoform/sponsor/6/website" target="_blank"><img src="https://opencollective.com/meteor-autoform/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/meteor-autoform/sponsor/7/website" target="_blank"><img src="https://opencollective.com/meteor-autoform/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/meteor-autoform/sponsor/8/website" target="_blank"><img src="https://opencollective.com/meteor-autoform/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/meteor-autoform/sponsor/9/website" target="_blank"><img src="https://opencollective.com/meteor-autoform/sponsor/9/avatar.svg"></a>
+
+
