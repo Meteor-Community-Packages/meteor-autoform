@@ -1,5 +1,22 @@
 # Contribute
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Introduction](#introduction)
+- [Your First Contribution](#your-first-contribution)
+- [Submitting code](#submitting-code)
+- [Code review process](#code-review-process)
+- [Financial contributions](#financial-contributions)
+- [Questions](#questions)
+- [Credits](#credits)
+  - [Contributors](#contributors)
+  - [Backers](#backers)
+  - [Sponsors](#sponsors)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Introduction
 
 First, thank you for considering contributing to AutoForm! It's people like you that make the open source community such a great community! 😊

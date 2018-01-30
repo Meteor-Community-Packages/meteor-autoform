@@ -3,11 +3,11 @@
 AutoForm
 =========================
 
-AutoForm is a Meteor package that adds UI components and helpers to easily create basic forms with automatic insert and update events, and automatic reactive validation. Versions 6+ of this package require that you separately install the [simpl-schema](https://github.com/aldeed/node-simple-schema) NPM package. Prior versions require and automatically install the [simple-schema](https://github.com/aldeed/meteor-simple-schema) Meteor package. You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2-core) package, which you have to add to your app yourself.
+AutoForm is a Meteor package that adds UI components and helpers to easily create basic forms with automatic insert and update events, and automatic reactive validation. Versions 6+ of this package require that you separately install the [simpl-schema](https://github.com/aldeed/node-simple-schema) NPM package. Prior versions require and automatically install the [simple-schema](https://github.com/aldeed/meteor-simple-schema) Meteor package. You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you have to add to your app yourself.
 
 ## NOTE: AutoForm 6.0
 
-AutoForm 6.0 is now available and requires switching your app to using the SimpleSchema package from NPM and `aldeed:collection2-core` package. Be sure to check out the [change log](https://github.com/aldeed/meteor-autoform/blob/devel/CHANGELOG.md#600) for full details. Note that if you use add-on packages that haven't been updated yet, you will not yet be able to update to version 6.
+AutoForm 6.0 is now available and requires switching your app to using the SimpleSchema package from NPM. Be sure to check out the [change log](https://github.com/aldeed/meteor-autoform/blob/devel/CHANGELOG.md#600) for full details. Note that if you use add-on packages that haven't been updated yet, you will not yet be able to update to version 6.
 
 **Add-on Package Authors**: Please test your package against AutoForm 6.0, and then release a major version update in which you change your `api.use` to `api.use('aldeed:autoform@6.0.0');`. I do NOT recommend using something like `api.use('aldeed:autoform@4.0.0 || 5.0.0 || 6.0.0');` to try to support multiple major versions of AutoForm because there is currently a known Meteor issue where trying to support too many dependency paths leads to running out of memory when trying to resolve dependencies.
 
@@ -93,6 +93,9 @@ AutoForm 6.0 is now available and requires switching your app to using the Simpl
 - [Examples](#examples)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
+- [Contributors](#contributors)
+- [Backers](#backers)
+- [Sponsors](#sponsors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -231,7 +234,7 @@ Other:
 
 Let's say you have the following Mongo.Collection instance, with schema support
 provided by the collection2 package. (Adding `autoform` to your app does not add
-`collection2` by default so you need to run `meteor add aldeed:collection2-core` for this example
+`collection2` by default so you need to run `meteor add aldeed:collection2@3.0.0` for this example
 to work.)
 
 ```js
