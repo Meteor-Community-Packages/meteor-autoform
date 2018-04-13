@@ -1,6 +1,7 @@
 <template name="afArrayField_plain">
   <fieldset>
     <legend>{{afFieldLabelText name=this.atts.name}}</legend>
+    <div class="help-text" >{{{afFieldHelpText name=this.atts.name}}}</div>
     {{#if afFieldIsInvalid name=this.atts.name}}
     <div class="autoform-array-field-error">
       {{{afFieldMessage name=this.atts.name}}}

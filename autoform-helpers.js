@@ -12,6 +12,20 @@ function parseOptions(options) {
  */
 
 /*
+ * afFieldHelpText
+ */
+Template.registerHelper('afFieldHelpText', function autoFormFieldHelpText(options) {
+  options = parseOptions(options, 'afFieldHelpText');
+
+  var af = options.ss.get(options.name,'autoform');
+
+  if (af && af.hasOwnProperty('afFieldHelpText')) {
+    return af.afFieldHelpText
+  }
+  return
+});
+
+/*
  * afFieldMessage
  */
 Template.registerHelper('afFieldMessage', function autoFormFieldMessage(options) {

@@ -6,6 +6,7 @@
     </div>
     {{/with}}
     <div class="panel-body {{bodyClass}}">
+      <div class="help-text">{{{afFieldHelpText name=this.name}}}</div>
       {{#if afFieldIsInvalid name=this.name}}
       <span class="help-block">{{{afFieldMessage name=this.name}}}</span>
       {{/if}}

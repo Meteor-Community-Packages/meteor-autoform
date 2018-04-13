@@ -4,6 +4,7 @@
     <label {{bsFieldLabelAtts}}>{{#if this.labelText}}{{this.labelText}}{{else}}{{afFieldLabelText name=this.name}}{{/if}}</label>
     {{/unless}}
     {{> afFieldInput this.afFieldInputAtts}}
+    <div class="help-text">{{{afFieldHelpText name=this.name}}}</div>
     <span class="help-block">{{{afFieldMessage name=this.name}}}</span>
   </div>
 </template>
