@@ -1,4 +1,7 @@
 Template.quickForm_bootstrap3.helpers({
+  fieldGroupHelp: function () {
+    return this.help
+  },
   fieldGroupLabel: function () {
     var name = this.name;
 

@@ -10,6 +10,9 @@
         {{#with fieldGroupLabel}}
           <legend class="af-fieldGroup-heading">{{this}}</legend>
         {{/with}}
+        {{#with fieldGroupHelp}}
+          <div class="group-help">{{this}}</div>
+        {{/with}}
         {{> afQuickFields quickFieldsAtts}}
       </fieldset>
     {{/each}}

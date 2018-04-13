@@ -1407,11 +1407,12 @@ For example if you add this to several of the fields in your form schema:
 {
   autoform: {
     group: 'Contact Information'
+    groupHelp: 'Please add your contact informations"
   }
 }
 ```
 
-Then all of those fields will be grouped into a `fieldset` with a `legend` that says "Contact Information". The fieldsets appear below any fields that do no list a group.
+Then all of those fields will be grouped into a `fieldset` with a `legend` that says "Contact Information" and optionally an help text for the group under the legend. The fieldsets appear below any fields that do no list a group.
 
 This only affects quickForms.
 

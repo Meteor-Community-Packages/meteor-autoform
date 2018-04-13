@@ -43,12 +43,13 @@ Template.quickForm.helpers({
     var fieldGroupNames = getSortedFieldGroupNames(sortedSchema);
 
     // Loop through the list and make a field group context for each
-    _.each(fieldGroupNames, function (fieldGroupName) {
-      var fieldsForGroup = getFieldsForGroup(fieldGroupName, sortedSchema);
+    _.each(fieldGroupNames, function (fieldGroup) {
+      var fieldsForGroup = getFieldsForGroup(fieldGroup.name, sortedSchema);
 
       if (fieldsForGroup.length > 0) {
         fieldGroups.push({
-          name: fieldGroupName,
+          name: fieldGroup.name,
+          help: fieldGroup.help,
           atts: _.extend({}, atts, {fields: fieldsForGroup}),
           fields: fieldsForGroup
         });
@@ -89,17 +90,18 @@ Template.quickForm.helpers({
  * @returns {String[]} Array of field group names
  */
 function getSortedFieldGroupNames(schemaObj) {
-  var names = _.map(schemaObj, function (field) {
-    return field.autoform && field.autoform.group;
-  });
-
-  // Remove undefined
-  names = _.compact(names);
-
-  // Remove duplicate names
-  names = _.unique(names);
-
-  return names.sort();
+  const names =
+    _.chain(schemaObj)
+    .map(function (field) {
+      return {
+        name: field.autoform && field.autoform.group,
+        help: field.autoform && field.autoform.groupHelp,
+      }})
+    .filter(function (obj) { return obj.name })
+    .sortBy(function (obj) { return obj.name })
+    .unique(true,function (obj) { return obj.name })
+    .value()
+  return names
 }
 
 /**
