@@ -1,5 +1,16 @@
 /* global AutoForm */
 
+Template.afQuickField.onCreated(function onCreated() {
+  const name = this.data.name
+  if (this.data.hiddenFields && _.some(Utility.stringToArray(this.data.hiddenFields),
+    function(field) {
+      return (name == field) } )) {
+        this.data.isHidden = true
+        // both class for bs3 and bs4
+        this.data['formgroup-class'] = "d-none hidden"
+    }
+})
+
 Template.afQuickField.helpers({
   isGroup: function afQuickFieldIsGroup() {
     var c = AutoForm.Utility.getComponentContext(this, "afQuickField");
