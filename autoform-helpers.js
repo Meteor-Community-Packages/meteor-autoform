@@ -20,7 +20,11 @@ Template.registerHelper('afFieldHelpText', function autoFormFieldHelpText(option
   var af = options.ss.get(options.name,'autoform');
 
   if (af && af.hasOwnProperty('afFieldHelpText')) {
-    return af.afFieldHelpText
+    if (_.isFunction(af.afFieldHelpText)) {
+      return af.afFieldHelpText()
+    } else {
+      return af.afFieldHelpText
+    }
   }
   return
 });
