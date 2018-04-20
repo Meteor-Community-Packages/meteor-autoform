@@ -47,9 +47,15 @@ Template.quickForm.helpers({
       var fieldsForGroup = getFieldsForGroup(fieldGroup.name, sortedSchema);
 
       if (fieldsForGroup.length > 0) {
+        var help = ''
+        if (_.isFunction(fieldGroup.help)) {
+          help = fieldGroup.help()
+        } else {
+            help = fieldGroup.help
+        }
         fieldGroups.push({
           name: fieldGroup.name,
-          help: fieldGroup.help,
+          help: help,
           atts: _.extend({}, atts, {fields: fieldsForGroup}),
           fields: fieldsForGroup
         });
