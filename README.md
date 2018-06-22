@@ -191,6 +191,7 @@ Other:
 * [comerc:autoform-contenteditable2](https://atmospherejs.com/comerc/autoform-contenteditable2)
 * [hausor:autoform-bs-minicolors](https://atmospherejs.com/hausor/autoform-bs-minicolors)
 * [valedaemon:autoform-materialize-tags](https://atmospherejs.com/valedaemon/autoform-materialize-tags)
+* [luixal:autoform-bs-iconpicker](https://github.com/luixal/autoform-bs-iconpicker)
 
 #### Themes
 
