@@ -24,7 +24,7 @@ Utility = {
       } else if (_.isArray(val)) {
         val = cleanNulls(val, true, keepEmptyStrings); // recurse into non-typed arrays
         if (!_.isEmpty(val)) {
-          newDoc[key] = val;
+          newDoc[key] = val.filter(Boolean);
         }
       } else if (!Utility.isNullUndefinedOrEmptyString(val)) {
         newDoc[key] = val;
