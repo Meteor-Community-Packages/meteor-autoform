@@ -186,6 +186,10 @@ Payments
 
 * [elevatedevdesign:autoform-jquery-payments](https://github.com/ElevateDev/meteor-autoform-jquery-payments)
 
+Modeling:
+
+* [jkuester:autoform-bpmn](https://github.com/jankapunkt/meteor-autoform-bpmn)
+
 Other:
 
 * [comerc:autoform-contenteditable2](https://atmospherejs.com/comerc/autoform-contenteditable2)
