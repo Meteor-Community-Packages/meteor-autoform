@@ -131,8 +131,10 @@ function getFieldsForGroup(groupName, schemaObj) {
  */
 function getFieldsWithNoGroup(schemaObj) {
   var fields = _.map(schemaObj, function (field, fieldName) {
+    let parent = schemaObj[fieldName.substr(0, fieldName.indexOf('.'))];
     return (fieldName.slice(-2) !== '.$') &&
       (!field.autoform || !field.autoform.group) &&
+      (!parent || !parent.autoform || !parent.autoform.group) &&
       fieldName;
   });
 
