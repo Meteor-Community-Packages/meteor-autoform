@@ -180,7 +180,7 @@ Maps:
 
 Ranges/Sliders:
 
-* [elevatedevdesign:autoform-nouislider](https://github.com/ElevateDev/meteor-autoform-nouislider)
+* [muqube:autoform-nouislider](https://github.com/muqube/meteor-autoform-nouislider)
 
 Payments
 
