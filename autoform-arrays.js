@@ -107,8 +107,12 @@ ArrayTracker.prototype.resetForm = function atResetForm(formId) {
 
 ArrayTracker.prototype.untrackForm = function atUntrackForm(formId) {
   var self = this;
-  if (self.info[formId][field].collection) {
-    self.info[formId][field].collection.remove({})
+  if (self.info[formId]) {
+    Object.keys(self.info[formId]).forEach(field => {
+      if (self.info[formId][field].collection) {
+        self.info[formId][field].collection.remove({})
+      }
+    })
   }
   self.info[formId] = {};
 };
