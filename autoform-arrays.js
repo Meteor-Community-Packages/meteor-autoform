@@ -61,12 +61,16 @@ ArrayTracker.prototype.initField = function atInitField(formId, field, ss, docCo
     childKeys = ss.objectKeys(AutoForm.Utility.makeKeyGeneric(field) + '.$');
 	}
 
+  let collection = new Mongo.Collection(null);
+
   var loopArray = [];
   for (var i = 0; i < arrayCount; i++) {
     var loopCtx = createLoopCtx(formId, field, i, childKeys, overrideMinCount, overrideMaxCount);
     loopArray.push(loopCtx);
+    collection.insert(loopCtx);
   }
 
+  self.info[formId][field].collection = collection;
   self.info[formId][field].array = loopArray;
   var count = loopArray.length;
   self.info[formId][field].count = count;
@@ -84,6 +88,10 @@ ArrayTracker.prototype.resetField = function atResetField(formId, field) {
 		};
 	}
 
+  if (self.info[formId][field].collection) {
+    self.info[formId][field].collection.remove({})
+  }
+  
   self.info[formId][field].array = null;
   self.info[formId][field].count = 0;
   self.info[formId][field].visibleCount = 0;
@@ -99,6 +107,9 @@ ArrayTracker.prototype.resetForm = function atResetForm(formId) {
 
 ArrayTracker.prototype.untrackForm = function atUntrackForm(formId) {
   var self = this;
+  if (self.info[formId][field].collection) {
+    self.info[formId][field].collection.remove({})
+  }
   self.info[formId] = {};
 };
 
@@ -112,8 +123,8 @@ ArrayTracker.prototype.tracksField = function atTracksField(formId, field) {
 ArrayTracker.prototype.getField = function atGetField(formId, field) {
   var self = this;
   self.ensureField(formId, field);
-  self.info[formId][field].deps.depend();
-  return self.info[formId][field].array;
+  //self.info[formId][field].deps.depend();  
+  return self.info[formId][field].collection.find({});
 };
 
 ArrayTracker.prototype.getCount = function atGetCount(formId, field) {
@@ -170,6 +181,7 @@ ArrayTracker.prototype.addOneToField = function atAddOneToField(formId, field, s
 
     var loopCtx = createLoopCtx(formId, field, i, childKeys, overrideMinCount, overrideMaxCount);
 
+    self.info[formId][field].collection.insert(loopCtx);
     self.info[formId][field].array.push(loopCtx);
     self.info[formId][field].count++;
     self.info[formId][field].visibleCount++;
@@ -187,6 +199,7 @@ ArrayTracker.prototype.removeFromFieldAtIndex = function atRemoveFromFieldAtInde
   var minCount = self.getMinMax(ss, field, overrideMinCount, overrideMaxCount).minCount;
 
   if (currentCount > minCount) {
+    self.info[formId][field].collection.update({index: index}, {$set: {removed: true}})
     self.info[formId][field].array[index].removed = true;
     self.info[formId][field].count--;
     self.info[formId][field].visibleCount--;

@@ -281,6 +281,6 @@ Template.registerHelper('afSelectOptionAtts', function afSelectOptionAtts() {
 });
 
 // Expects to be called with this.name available
-Template.registerHelper('afOptionsFromSchema', function afOptionsFromSchema() {
+Template.registerHelper('afOptionsFromSchema', function afOptionsFromSchema() {  
   return AutoForm._getOptionsForField(this.name);
 });
