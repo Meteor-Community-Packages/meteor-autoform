@@ -1,6 +1,10 @@
 /* global AutoForm */
 
 Template.afQuickField.helpers({
+  isReady: function afIsComponentContextReady() {
+    const context = AutoForm.Utility.getComponentContext(this, "afQuickField") || {};
+    return Object.keys(context).length > 0;
+  },
   isGroup: function afQuickFieldIsGroup() {
     var c = AutoForm.Utility.getComponentContext(this, "afQuickField");
     // Render a group of fields if we expect an Object and we don't have options

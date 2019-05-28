@@ -10,7 +10,7 @@ Template.quickForm.helpers({
     var simpleSchema = adjustedData._resolvedSchema;
     var sortedSchema = {};
     var fieldGroups = [];
-    var grouplessFieldContext;
+    var grouplessFieldContext;    
 
     // --------------- A. Schema --------------- //
 
@@ -76,6 +76,10 @@ Template.quickForm.helpers({
       fieldGroups: fieldGroups,
       grouplessFields: grouplessFieldContext
     };
+
+    console.log(context);
+    
+
     return context;
   }
 });
