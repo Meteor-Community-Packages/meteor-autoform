@@ -75,10 +75,7 @@ Template.quickForm.helpers({
       qfShouldRenderButton: qfShouldRenderButton,
       fieldGroups: fieldGroups,
       grouplessFields: grouplessFieldContext
-    };
-
-    console.log(context);
-    
+    };    
 
     return context;
   }
