@@ -252,7 +252,7 @@ AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templa
  * Returns an object representing the current values of all schema-based fields in the form.
  * The returned object is either a normal object or a MongoDB modifier, based on the `getModifier` argument. Return value may be `null` if the form is not currently rendered on screen.
  */
-AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, getModifier) {
+AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, getModifier, clean=true) {
   var insertDoc, updateDoc, transforms;
 
   template = template || AutoForm.templateInstanceForForm(formId);
@@ -343,14 +343,16 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
     // the wrong array indexes.
     AutoForm.Utility.compactArrays(insertDoc);
 
-    ss.clean(insertDoc, {
-      isModifier: false,
-      getAutoValues: false,
-      filter: filter,
-      autoConvert: autoConvert,
-      trimStrings: trimStrings,
-      mutate: true,
-    });
+    if (clean) {
+      ss.clean(insertDoc, {
+        isModifier: false,
+        getAutoValues: false,
+        filter: filter,
+        autoConvert: autoConvert,
+        trimStrings: trimStrings,
+        mutate: true,
+      });
+    }
 
     // Pass expanded doc through formToDoc hooks
     transforms = Hooks.getHooks(formId, 'formToDoc');
@@ -368,14 +370,16 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
       keepArrays: keepArrays,
     });
 
-    ss.clean(updateDoc, {
-      isModifier: true,
-      getAutoValues: false,
-      filter: filter,
-      autoConvert: autoConvert,
-      trimStrings: trimStrings,
-      mutate: true,
-    });
+    if (clean) {
+      ss.clean(updateDoc, {
+        isModifier: true,
+        getAutoValues: false,
+        filter: filter,
+        autoConvert: autoConvert,
+        trimStrings: trimStrings,
+        mutate: true,
+      });
+    }
 
     // Pass modifier through formToModifier hooks
     transforms = Hooks.getHooks(formId, 'formToModifier');
@@ -408,7 +412,7 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
  * Returns the value of the field (the value that would be used if the form were submitted right now).
  * This is a reactive method that will rerun whenever the current value of the requested field changes. Return value will be undefined if the field is not currently rendered.
  */
-AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
+AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean=true) {
   // find AutoForm template
   var template = Tracker.nonreactive(function () {
     return AutoForm.templateInstanceForForm(formId);
@@ -423,16 +427,28 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) {
 
   // reactive dependency
   template.formValues = template.formValues || {};
+
   if (!template.formValues[fieldName]) {
     template.formValues[fieldName] = new Tracker.Dependency();
+    template.formValues[fieldName].isMarkedChanged = true
   }
+
+  if (template.formValues[fieldName].isMarkedChanged === false) {
+    return template.formValues[fieldName].cachedValue
+  }
+
   template.formValues[fieldName].depend();
 
-  var doc = AutoForm.getFormValues(formId, template, null, false);
+  var doc = AutoForm.getFormValues(formId, template, null, false, clean);
   if (!doc) return;
 
   var mDoc = new MongoObject(doc);
-  return mDoc.getValueForKey(fieldName);
+  var value = mDoc.getValueForKey(fieldName);
+
+  template.formValues[fieldName].cachedValue = value
+  template.formValues[fieldName].isMarkedChanged = false
+
+  return value
 };
 
 /**

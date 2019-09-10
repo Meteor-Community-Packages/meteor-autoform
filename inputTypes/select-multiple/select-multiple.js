@@ -19,6 +19,7 @@ AutoForm.addInputType("select-multiple", {
             // See https://github.com/meteor/meteor/issues/2174
             _id: subOpt.value,
             selected: _.contains(context.value, subOpt.value),
+            disabled: !!opt.disabled,
             atts: context.atts
           };
         });
@@ -37,6 +38,7 @@ AutoForm.addInputType("select-multiple", {
           // See https://github.com/meteor/meteor/issues/2174
           _id: opt.value,
           selected: _.contains(context.value, opt.value),
+          disabled: !!opt.disabled,
           atts: context.atts
         };
       }

@@ -160,7 +160,17 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   return inputTypeContext;
 };
 
-function markChanged(template, fieldName) {
+function throttle(fn, limit) {
+  let timeout
+  return function (...args) {
+    clearTimeout(timeout)
+    timeout = setTimeout(function () {
+      fn(...args)
+    }, limit)
+  }
+}
+
+const markChanged = throttle(function (template, fieldName) {
   // We always want to be sure to wait for DOM updates to
   // finish before we indicate that values have changed.
   // Using a value of 0 here did not work, but 100 seems to
@@ -177,10 +187,11 @@ function markChanged(template, fieldName) {
 
       template.formValues[fieldName].changed();
       template.formValues[fieldName].requestInProgress = false;
+      template.formValues[fieldName].isMarkedChanged = true;
 
     }
-  }, 100);
-}
+  }, 0);
+}, 100);
 
 updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) {
   if (!template) return;
@@ -199,6 +210,7 @@ updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) 
   markChanged(template, fieldName);
 
   // To properly handle array fields, we'll mark the ancestors as changed, too
+  // FIX THIS
   // XXX Might be a more elegant way to handle this
   var dotPos = fieldName.lastIndexOf('.');
   while (dotPos !== -1) {

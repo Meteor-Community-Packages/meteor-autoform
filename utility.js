@@ -378,7 +378,7 @@ Utility = {
     var atts, defs = {}, formComponentAttributes, fieldAttributes, fieldAttributesForComponentType, ss;
 
     atts = _.clone(context || {});
-    ss = AutoForm.getFormSchema();    
+    ss = AutoForm.getFormSchema();
 
     defs = Utility.getFieldDefinition(ss, atts.name);
     if (!defs) return;

@@ -91,7 +91,7 @@ ArrayTracker.prototype.resetField = function atResetField(formId, field) {
   if (self.info[formId][field].collection) {
     self.info[formId][field].collection.remove({})
   }
-  
+
   self.info[formId][field].array = null;
   self.info[formId][field].count = 0;
   self.info[formId][field].visibleCount = 0;
@@ -127,7 +127,7 @@ ArrayTracker.prototype.tracksField = function atTracksField(formId, field) {
 ArrayTracker.prototype.getField = function atGetField(formId, field) {
   var self = this;
   self.ensureField(formId, field);
-  //self.info[formId][field].deps.depend();  
+  self.info[formId][field].deps.depend();
   return self.info[formId][field].collection.find({});
 };
 

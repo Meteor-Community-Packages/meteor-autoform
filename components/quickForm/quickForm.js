@@ -5,12 +5,13 @@ Template.quickForm.helpers({
     return AutoForm.getTemplateName('quickForm', this.template);
   },
   innerContext: function quickFormContext() {
+
     var atts = this;
     var adjustedData = AutoForm.parseData(_.clone(this));
     var simpleSchema = adjustedData._resolvedSchema;
     var sortedSchema = {};
     var fieldGroups = [];
-    var grouplessFieldContext;    
+    var grouplessFieldContext;
 
     // --------------- A. Schema --------------- //
 
@@ -75,7 +76,7 @@ Template.quickForm.helpers({
       qfShouldRenderButton: qfShouldRenderButton,
       fieldGroups: fieldGroups,
       grouplessFields: grouplessFieldContext
-    };    
+    };
 
     return context;
   }
