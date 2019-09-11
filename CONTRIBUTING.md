@@ -19,7 +19,7 @@
 
 ## Introduction
 
-First, thank you for considering contributing to AutoForm! It's identities like you that make the open source community such a great community! 😊
+First, thank you for considering contributing to AutoForm! It's people like you that make the open source community such a great community! 😊
 
 We welcome any type of contribution, not only code. You can help with
 - **QA**: file bug reports, the more details you can give the better (e.g. screenshots with the console open)
@@ -44,7 +44,7 @@ It is also always helpful to have some context for your pull request. What was t
 ## Financial contributions
 
 We also welcome financial contributions in full transparency on our [open collective](https://opencollective.com/autoform).
-Anyone can file an expense. If the expense makes sense for the development of the community, it will be "merged" in the ledger of our open collective by the core contributors and the identity who filed the expense will be reimbursed.
+Anyone can file an expense. If the expense makes sense for the development of the community, it will be "merged" in the ledger of our open collective by the core contributors and the person who filed the expense will be reimbursed.
 
 ## Questions
 
@@ -54,7 +54,7 @@ If you have any questions, create an [issue](issue) (protip: do a quick search f
 
 ### Contributors
 
-Thank you to all the identities who have already contributed to AutoForm!
+Thank you to all the people who have already contributed to AutoForm!
 <a href="graphs/contributors"><img src="https://opencollective.com/autoform/contributors.svg?width=890" /></a>
 
 

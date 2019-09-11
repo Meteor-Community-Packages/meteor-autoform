@@ -804,10 +804,10 @@ default values:
 
 ```js
 AutoForm.hooks({
-  identitiesForm: {
+  peopleForm: {
     onSubmit: function (doc) {
-      IdentitiesSchema.clean(doc);
-      console.log("Identities doc with auto values", doc);
+      PeopleSchema.clean(doc);
+      console.log("People doc with auto values", doc);
       this.done();
       return false;
     }
@@ -1685,7 +1685,7 @@ no errors, make sure the button's type is `submit`.
 
 ## Contributors
 
-This project exists thanks to all the identities who contribute. [[Contribute]](CONTRIBUTING.md).
+This project exists thanks to all the people who contribute. [[Contribute]](CONTRIBUTING.md).
 <a href="graphs/contributors"><img src="https://opencollective.com/autoform/contributors.svg?width=890" /></a>
 
 ## Backers
