@@ -433,8 +433,26 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean
     template.formValues[fieldName].isMarkedChanged = true
   }
 
-  if (template.formValues[fieldName].isMarkedChanged === false) {
-    return template.formValues[fieldName].cachedValue
+  // update field values if value changes in form
+
+  // mark changed if field value changes:
+  const formEl = document.getElementById(formId)
+  if (formEl) {
+    if(!template.formChangeHook) {
+      template.formChangeHook = event => {
+        const eventFieldName = template.$(event.target).closest(`[data-schema-key]`).data('schema-key')
+        console.log(`${eventFieldName} is changed`);
+        template.formValues[eventFieldName].isMarkedChanged = true
+        //template.formValues[eventFieldName].changed()
+      }
+      template.$(formEl).on('change', '[data-schema-key]', template.formChangeHook)
+    }
+  }
+
+  if (template.formValues[fieldName].hasOwnProperty('cachedValue')) {
+    if (template.formValues[fieldName].isMarkedChanged === false) {
+      return template.formValues[fieldName].cachedValue
+    }
   }
 
   template.formValues[fieldName].depend();
