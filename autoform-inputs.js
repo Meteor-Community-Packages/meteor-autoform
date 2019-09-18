@@ -185,9 +185,8 @@ const markChanged = throttle(function (template, fieldName) {
         !template.view.isDestroyed &&
         template.formValues[fieldName]) {
 
-      template.formValues[fieldName].changed();
-      template.formValues[fieldName].requestInProgress = false;
       template.formValues[fieldName].isMarkedChanged = true;
+      template.formValues[fieldName].changed();
 
     }
   }, 0);
@@ -200,18 +199,13 @@ updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) 
   if (!template.formValues[fieldName]) {
     template.formValues[fieldName] = new Tracker.Dependency();
   }
-  // In case we call updateTrackedFieldValue from multiple places at once,
-  // call .changed() only once
-  if (template.formValues[fieldName].requestInProgress) {
-    return;
-  }
-  template.formValues[fieldName].requestInProgress = true;
 
   markChanged(template, fieldName);
 
   // To properly handle array fields, we'll mark the ancestors as changed, too
   // FIX THIS
   // XXX Might be a more elegant way to handle this
+
   var dotPos = fieldName.lastIndexOf('.');
   while (dotPos !== -1) {
     fieldName = fieldName.slice(0, dotPos);

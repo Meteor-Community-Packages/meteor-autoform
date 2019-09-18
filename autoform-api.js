@@ -403,6 +403,26 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
 };
 
 /**
+ * @method AutoForm.resetValueCache
+ * @public
+ * @param {String} [formId] The `id` attribute of the `autoForm` you want current values for. Default is the closest form from the current context.
+ * @return {Any|undefined}
+ *
+ * Reset the cache and mark all fields as changed
+ */
+AutoForm.resetValueCache = function autoFormResetValueCache(formId) {
+  // find AutoForm template
+  var template = Tracker.nonreactive(function () {
+    return AutoForm.templateInstanceForForm(formId);
+  });
+  template.formValues = template.formValues || {};
+  template.formValues.forEach(fieldName => {
+    template.formValues[fieldName].isMarkedChanged = true
+    template.formValues[fieldName].changed()
+  })
+}
+
+/**
  * @method AutoForm.getFieldValue
  * @public
  * @param {String} fieldName The name of the field for which you want the current value.
@@ -433,29 +453,13 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean
     template.formValues[fieldName].isMarkedChanged = true
   }
 
-  // update field values if value changes in form
+  template.formValues[fieldName].depend();
 
-  // mark changed if field value changes:
-  const formEl = document.getElementById(formId)
-  if (formEl) {
-    if(!template.formChangeHook) {
-      template.formChangeHook = event => {
-        const eventFieldName = template.$(event.target).closest(`[data-schema-key]`).data('schema-key')
-        console.log(`${eventFieldName} is changed`);
-        template.formValues[eventFieldName].isMarkedChanged = true
-        //template.formValues[eventFieldName].changed()
-      }
-      template.$(formEl).on('change', '[data-schema-key]', template.formChangeHook)
-    }
-  }
-
-  if (template.formValues[fieldName].hasOwnProperty('cachedValue')) {
+  if (template.formValues[fieldName].cachedValue !== undefined) {
     if (template.formValues[fieldName].isMarkedChanged === false) {
       return template.formValues[fieldName].cachedValue
     }
   }
-
-  template.formValues[fieldName].depend();
 
   var doc = AutoForm.getFormValues(formId, template, null, false, clean);
   if (!doc) return;
