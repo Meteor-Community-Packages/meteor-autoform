@@ -161,10 +161,10 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
 };
 
 function throttle(fn, limit) {
-  let timeout
+  let timeouts = {}
   return function (...args) {
-    clearTimeout(timeout)
-    timeout = setTimeout(function () {
+    clearTimeout(timeouts[args])
+    timeouts[args] = setTimeout(function () {
       fn(...args)
     }, limit)
   }
