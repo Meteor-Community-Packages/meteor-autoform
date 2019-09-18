@@ -406,20 +406,31 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
  * @method AutoForm.resetValueCache
  * @public
  * @param {String} [formId] The `id` attribute of the `autoForm` you want current values for. Default is the closest form from the current context.
+ * @param {String} [fieldName] The field `name` you want to reset the cache of.
  * @return {Any|undefined}
  *
  * Reset the cache and mark all fields as changed
  */
-AutoForm.resetValueCache = function autoFormResetValueCache(formId) {
+AutoForm.resetValueCache = function autoFormResetValueCache(formId, fieldName) {
   // find AutoForm template
   var template = Tracker.nonreactive(function () {
     return AutoForm.templateInstanceForForm(formId);
   });
+
   template.formValues = template.formValues || {};
-  template.formValues.forEach(fieldName => {
-    template.formValues[fieldName].isMarkedChanged = true
-    template.formValues[fieldName].changed()
-  })
+
+  if (fieldName) {
+    if (template.formValues[fieldName]) {
+      template.formValues[fieldName].isMarkedChanged = true
+    }
+  }
+  else {
+    template.formValues.forEach(fieldName => {
+      if (template.formValues[fieldName]) {
+        template.formValues[fieldName].isMarkedChanged = true
+      }
+    })
+  }
 }
 
 /**
@@ -469,7 +480,6 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean
 
   template.formValues[fieldName].cachedValue = value
   template.formValues[fieldName].isMarkedChanged = false
-
   return value
 };
 
