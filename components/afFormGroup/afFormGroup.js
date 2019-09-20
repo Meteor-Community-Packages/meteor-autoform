@@ -4,7 +4,7 @@ Template.afFormGroup.helpers({
   getTemplateName: function () {
     return AutoForm.getTemplateName('afFormGroup', this.template, this.name);
   },
-  innerContext: function afFormGroupContext() {    
+  innerContext: function afFormGroupContext() {
     var c = AutoForm.Utility.getComponentContext(this, 'afFormGroup');
     var afFormGroupAtts = formGroupAtts(c.atts);
     var afFieldLabelAtts = formGroupLabelAtts(c.atts);
@@ -15,10 +15,17 @@ Template.afFormGroup.helpers({
     // supposed to be unique in the DOM and templates can be
     // included multiple times, it's best not to provide an `id`
     // and generate a random one here for accessibility reasons.
-    var id = c.atts.id || Random.id();
-    var idPrefix = c.atts['id-prefix'];
-    if (idPrefix && idPrefix.length > 0) {
-      id = idPrefix + '-' + id;
+    const instance = Template.instance;
+    instance.fieldIds = instance.fieldIds || {};
+    const name = c.atts['name'];
+    var id = instance.fieldIds[name];
+    if (!id) {
+      id = Random.id();
+      var idPrefix = c.atts['id-prefix'];
+      if (idPrefix && idPrefix.length > 0) {
+        id = idPrefix + '-' + id;
+      }
+      instance.fieldIds[name] = id;
     }
 
     // Set the input's `id` attribute and the label's `for` attribute to

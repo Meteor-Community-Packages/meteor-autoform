@@ -14,10 +14,14 @@ Performance
 * **Mongo collections for arrayTracker**:
     Improves the performance greatly. Blaze cannot diff the original
     AutoForm arrayTracker items, so I replaced it with Mongo collections.
-    
+
 * **Wait for context**:
     Instead of reactively re-rendering the entire form, we wait for the
     context before we render it for the first time.
+
+* **Cache field Ids**:
+    This prevents regenerating the field Id and rerendering the field
+    just because the Id is changed.
 
 * **`clean` option for `getFieldValue` and `getFieldValues`**:
     By default AutoForm cleans all the values fetched from the form,
@@ -27,14 +31,14 @@ Performance
     two functions, this defaults to true which is the normal AutoForm
     behavior. When set to false it won't clean the form data (clean
     function is really heavy and doesn't make much sense on our views).
-    
+
 * **`getFieldValue` is cached**:
     This function is reactive and recomputes its return value when
     there is a change in the value. Sometimes it's necessary to call
     this function several times and we do not want to recompute when
     the value hasn't been changed. This function now caches its results,
     then invalidates the cache when there's a change in the value.
-    
+
 * **`markChanged` function is throttled now**:
     This function gets called a million times when our form has too
     many reactive dependencies or too many fields. This isn't necessary,
