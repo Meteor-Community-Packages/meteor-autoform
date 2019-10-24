@@ -15,7 +15,7 @@ Utility = {
    */
   cleanNulls: function cleanNulls(doc, isArray, keepEmptyStrings) {
     var newDoc = isArray ? [] : {};
-    _.each(doc, function(val, key) {
+    _.each(doc, function (val, key) {
       if (!_.isArray(val) && isBasicObject(val)) {
         val = cleanNulls(val, false, keepEmptyStrings); // recurse into plain objects
         if (!_.isEmpty(val)) {
@@ -45,7 +45,7 @@ Utility = {
   reportNulls: function reportNulls(flatDoc, keepEmptyStrings) {
     var nulls = {};
     // Loop through the flat doc
-    _.each(flatDoc, function(val, key) {
+    _.each(flatDoc, function (val, key) {
       // If value is undefined, null, or an empty string, report this as null so it will be unset
       if (val === null) {
         nulls[key] = '';
@@ -124,7 +124,7 @@ Utility = {
 
     // Handle options="allowed"
     if (selectOptions === 'allowed') {
-      selectOptions = _.map(defs.allowedValues, function(v) {
+      selectOptions = _.map(defs.allowedValues, function (v) {
         var label = v;
         if (hash.capitalize && v.length > 0 && schemaType === String) {
           label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
@@ -136,7 +136,7 @@ Utility = {
 
     // Hashtable
     else if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
-      selectOptions = _.map(selectOptions, function(v, k) {
+      selectOptions = _.map(selectOptions, function (v, k) {
         return { label: v, value: schemaType(k) };
       });
     }
@@ -205,7 +205,7 @@ Utility = {
    */
   expandObj: function expandObj(doc) {
     var newDoc = {}, subkeys, subkey, subkeylen, nextPiece, current;
-    _.each(doc, function(val, key) {
+    _.each(doc, function (val, key) {
       subkeys = key.split('.');
       subkeylen = subkeys.length;
       current = newDoc;
@@ -461,9 +461,9 @@ Utility = {
   },
   checkTemplate: function checkTemplate(template) {
     return !!(template &&
-            template.view &&
-            template.view._domrange &&
-            !template.view.isDestroyed);
+      template.view &&
+      template.view._domrange &&
+      !template.view.isDestroyed);
   },
   // This is copied from mongo-object to avoid a direct dep on that package
   makeKeyGeneric(key) {
@@ -475,11 +475,11 @@ Utility = {
 // getPrototypeOf polyfill
 if (typeof Object.getPrototypeOf !== 'function') {
   if (typeof ''.__proto__ === 'object') {
-    Object.getPrototypeOf = function(object) {
+    Object.getPrototypeOf = function (object) {
       return object.__proto__;
     };
   } else {
-    Object.getPrototypeOf = function(object) {
+    Object.getPrototypeOf = function (object) {
       // May break if the constructor has been tampered with
       return object.constructor.prototype;
     };
@@ -492,6 +492,6 @@ if (typeof Object.getPrototypeOf !== 'function') {
  * @param {any} obj
  * @returns {Boolean}
  */
-var isBasicObject = function(obj) {
+var isBasicObject = function (obj) {
   return _.isObject(obj) && Object.getPrototypeOf(obj) === Object.prototype;
 };

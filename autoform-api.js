@@ -51,7 +51,7 @@ AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) {
  * form.
  */
 AutoForm.hooks = function autoFormHooks(hooks, replace) {
-  _.each(hooks, function(hooksObj, formId) {
+  _.each(hooks, function (hooksObj, formId) {
     AutoForm.addHooks(formId, hooksObj, replace);
   });
 };
@@ -252,14 +252,14 @@ AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templa
  * Returns an object representing the current values of all schema-based fields in the form.
  * The returned object is either a normal object or a MongoDB modifier, based on the `getModifier` argument. Return value may be `null` if the form is not currently rendered on screen.
  */
-AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, getModifier, clean=true) {
+AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, getModifier, clean = true) {
   var insertDoc, updateDoc, transforms;
 
   template = template || AutoForm.templateInstanceForForm(formId);
   if (!template ||
-      !template.view ||
-      // We check for domrange later in this function
-      template.view.isDestroyed) {
+    !template.view ||
+    // We check for domrange later in this function
+    template.view.isDestroyed) {
     return null;
   }
 
@@ -443,7 +443,7 @@ AutoForm.resetValueCache = function autoFormResetValueCache(formId, fieldName) {
  * Returns the value of the field (the value that would be used if the form were submitted right now).
  * This is a reactive method that will rerun whenever the current value of the requested field changes. Return value will be undefined if the field is not currently rendered.
  */
-AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean=true) {
+AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean = true) {
   // find AutoForm template
   var template = Tracker.nonreactive(function () {
     return AutoForm.templateInstanceForForm(formId);
@@ -466,11 +466,11 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean
 
   template.formValues[fieldName].depend();
 
-  if (template.formValues[fieldName].cachedValue !== undefined) {
-    if (template.formValues[fieldName].isMarkedChanged === false) {
-      return template.formValues[fieldName].cachedValue
-    }
+  //if (template.formValues[fieldName].cachedValue !== undefined) {
+  if (template.formValues[fieldName].isMarkedChanged === false) {
+    return template.formValues[fieldName].cachedValue
   }
+  //}
 
   var doc = AutoForm.getFormValues(formId, template, null, false, clean);
   if (!doc) return;
@@ -498,8 +498,8 @@ AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTempl
   // the template contains a block helper like if, with, each,
   // then look up the view chain until we arrive at a template
   while (view &&
-         view.name.indexOf('Template.') !== 0 &&
-         view.name.indexOf('BlazeComponent.') !== 0) {
+    view.name.indexOf('Template.') !== 0 &&
+    view.name.indexOf('BlazeComponent.') !== 0) {
     view = view.originalParentView || view.parentView;
   }
 
@@ -522,7 +522,7 @@ AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTempl
 AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   var field, fieldName, fieldType, fieldSchema, arrayItemFieldType, val, typeDef, inputTypeTemplate, dataContext, autoConvert;
 
-  Tracker.nonreactive(function() {
+  Tracker.nonreactive(function () {
     // don't rerun when data context of element changes, can cause infinite loops
 
     dataContext = Blaze.getData(element);
@@ -970,7 +970,7 @@ AutoForm.viewForForm = function (formId) {
   // If formElement is undefined, Blaze.getView returns the current view.
   try {
     view = Blaze.getView(formElement);
-  } catch (err) {}
+  } catch (err) { }
 
   while (view && view.name !== 'Template.autoForm') {
     view = view.originalParentView || view.parentView;

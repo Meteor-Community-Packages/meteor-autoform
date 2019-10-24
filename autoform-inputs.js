@@ -98,7 +98,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
     inputAtts.required = '';
   }
 
-   // Add data-schema-key to every type of element
+  // Add data-schema-key to every type of element
   inputAtts['data-schema-key'] = inputAtts.name;
 
   // Set placeholder to label from schema if requested.
@@ -180,10 +180,10 @@ const markChanged = throttle(function (template, fieldName) {
     // Template or view may have disappeared while
     // we waited to run this
     if (template &&
-        template.view &&
-        template.view._domrange &&
-        !template.view.isDestroyed &&
-        template.formValues[fieldName]) {
+      template.view &&
+      template.view._domrange &&
+      !template.view.isDestroyed &&
+      template.formValues[fieldName]) {
 
       template.formValues[fieldName].isMarkedChanged = true;
       template.formValues[fieldName].changed();
