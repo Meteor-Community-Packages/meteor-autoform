@@ -77,7 +77,7 @@ function getKeyForElement(element) {
 }
 
 // throttle autosave, at most autosave every 500ms
-var throttleAutosave = _.throttle(function(event) {
+var throttleAutosave = _.throttle(function (event) {
   lastAutoSaveElement = event.target;
   $(event.currentTarget).submit();
 }, 500, { leading: false });
@@ -367,11 +367,11 @@ Template.autoForm.events({
     var validationType = form.validation;
 
     if (validationType === 'keyup' ||
-        validationType === 'blur' ||
-        validationType === 'submitThenKeyup' ||
-        validationType === 'submitThenBlur') {
+      validationType === 'blur' ||
+      validationType === 'submitThenKeyup' ||
+      validationType === 'submitThenBlur') {
       var key = getKeyForElement(event.currentTarget);
-      if (!key) {return;}
+      if (!key) { return; }
 
       validateField(key, formId, false, onlyIfAlreadyInvalid(validationType));
 
@@ -385,7 +385,7 @@ Template.autoForm.events({
   },
   'change form': function autoFormChangeHandler(event, template) {
     var key = getKeyForElement(event.target);
-    if (!key) {return;}
+    if (!key) { return; }
 
     var formId = this.id;
 
@@ -424,9 +424,9 @@ Template.autoForm.events({
     var validationType = form.validation;
 
     if (validationType === 'keyup' ||
-        validationType === 'blur' ||
-        validationType === 'submitThenKeyup' ||
-        validationType === 'submitThenBlur') {
+      validationType === 'blur' ||
+      validationType === 'submitThenKeyup' ||
+      validationType === 'submitThenBlur') {
 
       validateField(key, formId, false, onlyIfAlreadyInvalid(validationType));
 

@@ -171,25 +171,30 @@ function throttle(fn, limit) {
 }
 
 const markChanged = throttle(function (template, fieldName) {
-  // We always want to be sure to wait for DOM updates to
-  // finish before we indicate that values have changed.
-  // Using a value of 0 here did not work, but 100 seems to
-  // work in testing. We'll need to keep an eye on this.
-  // Not an ideal solution.
-  setTimeout(function () {
-    // Template or view may have disappeared while
-    // we waited to run this
-    if (template &&
-      template.view &&
-      template.view._domrange &&
-      !template.view.isDestroyed &&
-      template.formValues[fieldName]) {
 
-      template.formValues[fieldName].isMarkedChanged = true;
-      template.formValues[fieldName].changed();
+  try {
+    const element = $(`[data-schema-key="${fieldName}"]`).get(0)
+    const fieldValue = AutoForm.getFieldValue(fieldName, template.data.id)
+    const elementValue = AutoForm.getInputValue(element)
 
+    if (fieldValue === undefined && elementValue === null) {
+      // DOM not ready
+      return markChanged(template, fieldName)
     }
-  }, 0);
+  } catch (error) {
+
+  }
+
+  if (template &&
+    template.view &&
+    template.view._domrange &&
+    !template.view.isDestroyed &&
+    template.formValues[fieldName]) {
+
+    template.formValues[fieldName].isMarkedChanged = true;
+    template.formValues[fieldName].changed();
+
+  }
 }, 100);
 
 updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) {
