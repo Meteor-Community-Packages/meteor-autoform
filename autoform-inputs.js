@@ -160,30 +160,22 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   return inputTypeContext;
 };
 
-function throttle(fn, limit) {
+function markChangedThrottle(fn, limit) {
   let timeouts = {}
-  return function (...args) {
-    clearTimeout(timeouts[args])
-    timeouts[args] = setTimeout(function () {
-      fn(...args)
+  return function (template, fieldName, fieldValue) {
+    clearTimeout(timeouts[fieldName])
+    timeouts[fieldName] = setTimeout(function () {
+      fn(template, fieldName, fieldValue)
     }, limit)
   }
 }
 
-const markChanged = throttle(function (template, fieldName) {
+const markChanged = markChangedThrottle(function (template, fieldName, fieldValue) {
 
-  try {
-    const element = $(`[data-schema-key="${fieldName}"]`).get(0)
-    const fieldValue = AutoForm.getFieldValue(fieldName, template.data.id)
-    const elementValue = AutoForm.getInputValue(element)
-
-    if (fieldValue === undefined && elementValue === null) {
-      // DOM not ready
-      return markChanged(template, fieldName)
-    }
-  } catch (error) {
-
-  }
+  // is it really changed?
+  if (fieldValue === template.formValues[fieldName].cachedValue) return
+  // is there really a value??
+  if (fieldValue === undefined) return
 
   if (template &&
     template.view &&
@@ -195,9 +187,10 @@ const markChanged = throttle(function (template, fieldName) {
     template.formValues[fieldName].changed();
 
   }
-}, 100);
 
-updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) {
+}, 50);
+
+updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName, fieldValue) {
   if (!template) return;
 
   template.formValues = template.formValues || {};
@@ -205,7 +198,7 @@ updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName) 
     template.formValues[fieldName] = new Tracker.Dependency();
   }
 
-  markChanged(template, fieldName);
+  markChanged(template, fieldName, fieldValue);
 
   // To properly handle array fields, we'll mark the ancestors as changed, too
   // FIX THIS

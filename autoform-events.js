@@ -407,8 +407,11 @@ Template.autoForm.events({
     }
     lastKeyVals[formId] = keyVal;
 
+    const value = event.target.type === 'checkbox' ?
+      $target.prop('checked') : $target.val()
+
     // Mark field value as changed for reactive updates
-    updateTrackedFieldValue(template, key);
+    updateTrackedFieldValue(template, key, value);
 
     // Get current form data context
     var form = AutoForm.getCurrentDataForForm(formId);

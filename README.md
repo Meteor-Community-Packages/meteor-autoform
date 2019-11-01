@@ -44,6 +44,12 @@ Performance
     many reactive dependencies or too many fields. This isn't necessary,
     we don't need to mark a field value changed when it hasn't been changed.
 
+* **Pass field value to `markChanged`**:
+    To prevent unnecessary `changed` events
+
+* **Refuse to change if value is undefined (`markChanged`)**:
+    To prevent unnecessary `changed` events
+
 Bugs Fixes
 -------------------------
 
