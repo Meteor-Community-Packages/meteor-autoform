@@ -36,7 +36,7 @@ Template.afFormGroup.helpers({
     // Get the field's schema definition
     var fieldSchema = AutoForm.getSchemaForField(c.atts.name);
 
-    return {
+    const innerContext = {
       skipLabel: (c.atts.label === false),
       afFormGroupClass: c.atts['formgroup-class'],
       afFormGroupAtts: afFormGroupAtts,
@@ -46,6 +46,8 @@ Template.afFormGroup.helpers({
       required: fieldSchema ? !fieldSchema.optional : false,
       labelText: (typeof c.atts.label === 'string') ? c.atts.label : null
     };
+
+    return innerContext
   }
 });
 
