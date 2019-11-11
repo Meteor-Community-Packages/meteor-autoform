@@ -188,7 +188,7 @@ const markChanged = markChangedThrottle(function (template, fieldName, fieldValu
 
   }
 
-}, 50);
+}, 150);
 
 updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName, fieldValue) {
   if (!template) return;

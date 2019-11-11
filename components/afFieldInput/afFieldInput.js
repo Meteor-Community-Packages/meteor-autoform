@@ -74,7 +74,7 @@ Template.afFieldInput.helpers({
       // No need to do this on first run because we'll rerun the value functions
       // once the form is rendered anyway
       instance.alreadyUpdatedTrackedFieldValue = true;
-      updateTrackedFieldValue(template, c.atts.name);
+      updateTrackedFieldValue(template, c.atts.name, value);
     }
 
     // Build input data context
