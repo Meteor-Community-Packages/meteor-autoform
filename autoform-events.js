@@ -387,7 +387,8 @@ Template.autoForm.events({
     var key = getKeyForElement(event.target);
     if (!key) { return; }
 
-    var formId = this.id;
+    const formId = event.target.closest('form').id
+    if (formId != this.id) return
 
     // Some plugins, like jquery.inputmask, can cause infinite
     // loops by continually saying the field changed when it did not,

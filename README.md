@@ -55,6 +55,7 @@ Bugs Fixes
 
 * **`disabled` in select options**: didn't work.
 * merged aldeed/meteor-autoform/pull/1289
+* Detects **nested forms** in `form change` event
 
 Features
 -------------------------
