@@ -438,6 +438,7 @@ AutoForm.resetValueCache = function autoFormResetValueCache(formId, fieldName) {
  * @public
  * @param {String} fieldName The name of the field for which you want the current value.
  * @param {String} [formId] The `id` attribute of the `autoForm` you want current values for. Default is the closest form from the current context.
+ * @param {Boolean} [clean] Indicates if the method should clean the values or not. Default is true.
  * @return {Any|undefined}
  *
  * Returns the value of the field (the value that would be used if the form were submitted right now).
@@ -481,6 +482,31 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean
   template.formValues[fieldName].cachedValue = value
   template.formValues[fieldName].isMarkedChanged = false
   return value
+};
+
+/**
+ * @method AutoForm.setFieldValue
+ * @public
+ * @param {String} fieldName The name of the field for which you want to set the current value.
+ * @param {Any} value Value of the field
+ * @param {String} [formId] The `id` attribute of the `autoForm` you want current values for. Default is the closest form from the current context.
+ * @return {Any|undefined}
+ *
+ * Sets the value for a field, resets the cache and emits changed events.
+ */
+AutoForm.setFieldValue = function autoFormSetFieldValue(fieldName, value, formId) {
+  // find AutoForm template
+  var template = Tracker.nonreactive(function () {
+    return AutoForm.templateInstanceForForm(formId);
+  });
+
+  if (!template) return;
+  if (!template.formValues) return;
+  if (!template.formValues[fieldName]) return;
+
+  template.formValues[fieldName].cachedValue = value
+  template.formValues[fieldName].isMarkedChanged = false
+  template.formValues[fieldName].changed();
 };
 
 /**

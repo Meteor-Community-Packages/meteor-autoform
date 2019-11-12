@@ -39,6 +39,8 @@ Template.afFieldInput.helpers({
     var formId = form.id;
     var ss = AutoForm.getFormSchema();
     var defs = c.defs;
+    const instance = Template.instance()
+    const template = AutoForm.templateInstanceForForm();
 
     // Get schema default value.
     // We must do this before adjusting defs for arrays.
@@ -60,7 +62,7 @@ Template.afFieldInput.helpers({
     var mDoc = AutoForm.reactiveFormData.sourceDoc(formId);
 
     // Get input value
-    var value = getInputValue(c.atts, c.atts.value, mDoc, schemaDefaultValue, c.atts.defaultValue, componentDef);
+    var value = getInputValue(c.atts, c.atts.value, mDoc, schemaDefaultValue, c.atts.defaultValue, componentDef, template);
 
     // Mark field value as changed for reactive updates
     // We need to defer this until the element will be
@@ -68,8 +70,6 @@ Template.afFieldInput.helpers({
     // will not pick up the new value when there are #if etc.
     // blocks involved.
     // See https://github.com/aldeed/meteor-autoform/issues/461
-    var template = AutoForm.templateInstanceForForm();
-    const instance = Template.instance()
     if (template.view.isRendered && !instance.alreadyUpdatedTrackedFieldValue) {
       // No need to do this on first run because we'll rerun the value functions
       // once the form is rendered anyway

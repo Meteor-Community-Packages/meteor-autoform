@@ -61,3 +61,4 @@ Features
 -------------------------
 
 * **`omit` can be a function now**
+* **`AutoForm.setFieldValue(fieldName, value, formId)` added**: aldeed/meteor-autoform/issues/452

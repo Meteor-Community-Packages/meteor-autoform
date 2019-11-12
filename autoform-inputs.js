@@ -25,7 +25,22 @@ getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
  * * The value that is set in the `doc` provided on the containing autoForm
  * * The `defaultValue` from the schema
  */
-getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fieldDefaultValue, typeDefs) {
+getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fieldDefaultValue, typeDefs, template) {
+
+  template.formValues = template.formValues || {};
+
+  const fieldName = atts.name
+
+  if (!template.formValues[fieldName]) {
+    template.formValues[fieldName] = new Tracker.Dependency();
+    template.formValues[fieldName].isMarkedChanged = true
+  }
+
+  template.formValues[fieldName].depend();
+
+  if (template.formValues[fieldName].cachedValue !== undefined) {
+    return template.formValues[fieldName].cachedValue
+  }
 
   if (typeof value === 'undefined') {
     // Get the value for this key in the current document
