@@ -501,14 +501,18 @@ AutoForm.setFieldValue = function autoFormSetFieldValue(fieldName, value, formId
   });
 
   if (!template) return;
-  if (!template.inputValues) return;
-  if (!template.inputValues[fieldName]) return;
+
+  if (!template.inputValues[fieldName]) {
+    template.inputValues[fieldName] = new Tracker.Dependency();
+  }
 
   template.inputValues[fieldName].cachedValue = value
   template.inputValues[fieldName].changed();
 
-  if (!template.formValues) return;
-  if (!template.formValues[fieldName]) return;
+  if (!template.formValues[fieldName]) {
+    template.formValues[fieldName] = new Tracker.Dependency();
+    template.formValues[fieldName].isMarkedChanged = true
+  }
 
   template.formValues[fieldName].cachedValue = value
   template.formValues[fieldName].isMarkedChanged = false
