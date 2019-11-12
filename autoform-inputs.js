@@ -27,19 +27,18 @@ getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
  */
 getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fieldDefaultValue, typeDefs, template) {
 
-  template.formValues = template.formValues || {};
+  template.inputValues = template.inputValues || {};
 
   const fieldName = atts.name
 
-  if (!template.formValues[fieldName]) {
-    template.formValues[fieldName] = new Tracker.Dependency();
-    template.formValues[fieldName].isMarkedChanged = true
+  if (!template.inputValues[fieldName]) {
+    template.inputValues[fieldName] = new Tracker.Dependency();
   }
 
-  template.formValues[fieldName].depend();
+  template.inputValues[fieldName].depend();
 
-  if (template.formValues[fieldName].cachedValue !== undefined) {
-    return template.formValues[fieldName].cachedValue
+  if (template.inputValues[fieldName].cachedValue !== undefined) {
+    return template.inputValues[fieldName].cachedValue
   }
 
   if (typeof value === 'undefined') {
@@ -199,7 +198,10 @@ const markChanged = markChangedThrottle(function (template, fieldName, fieldValu
     template.formValues[fieldName]) {
 
     template.formValues[fieldName].isMarkedChanged = true;
-    template.formValues[fieldName].changed();
+    template.formValues[fieldName].changed()
+
+    template.inputValues[fieldName].cachedValue = fieldValue
+    template.inputValues[fieldName].changed()
 
   }
 
