@@ -1326,14 +1326,14 @@ setDefaults = function setDefaults(data) {
 
 var waitingForForms = {};
 AutoForm.rerunWhenFormRenderedOrDestroyed = function (formId) {
-  if (!_.has(waitingForForms, formId)) {
+  if (!(formId in waitingForForms)) {
     waitingForForms[formId] = new Tracker.Dependency();
   }
   waitingForForms[formId].depend();
 };
 
 AutoForm.triggerFormRenderedDestroyedReruns = function (formId) {
-  if (!_.has(waitingForForms, formId)) {
+  if (!(formId in waitingForForms)) {
     waitingForForms[formId] = new Tracker.Dependency();
   }
   waitingForForms[formId].changed();

@@ -128,7 +128,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   // only if their value is `true`. That is, unlike in
   // HTML, their mere presence does not matter.
   _.each(['disabled', 'readonly', 'checked', 'required', 'autofocus'], function (booleanProp) {
-    if (!_.has(hash, booleanProp)) {
+    if (!booleanProp in hash) {
       return;
     }
 

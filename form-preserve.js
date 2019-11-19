@@ -8,7 +8,7 @@
  */
 FormPreserve = function formPreserveConstructor(migrationName) {
   var self = this;
-  if (! _.isString(migrationName))
+  if (!_.isString(migrationName))
     throw Error('You must define an unique migration name of type String');
   self.registeredForms = {};
   self.retrievedDocuments = {};
@@ -32,7 +32,7 @@ FormPreserve = function formPreserveConstructor(migrationName) {
 
 FormPreserve.prototype.getDocument = function (formId) {
   var self = this, doc;
-  if (! _.has(self.retrievedDocuments, formId)) {
+  if (!(formId in self.retrievedDocuments)) {
     return false;
   }
 
