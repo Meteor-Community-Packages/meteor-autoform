@@ -18,7 +18,7 @@ AutoForm.addInputType("select-multiple", {
             // #each uses to track unique list items when adding and removing them
             // See https://github.com/meteor/meteor/issues/2174
             _id: subOpt.value,
-            selected: context.value.contains(subOpt.value),
+            selected: context.value.includes(subOpt.value),
             disabled: !!opt.disabled,
             atts: context.atts
           };
@@ -37,7 +37,7 @@ AutoForm.addInputType("select-multiple", {
           // #each uses to track unique list items when adding and removing them
           // See https://github.com/meteor/meteor/issues/2174
           _id: opt.value,
-          selected: context.value.contains(opt.value),
+          selected: context.value.includes(opt.value),
           disabled: !!opt.disabled,
           atts: context.atts
         };

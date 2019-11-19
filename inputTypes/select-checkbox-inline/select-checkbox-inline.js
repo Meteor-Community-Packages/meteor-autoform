@@ -26,7 +26,7 @@ AutoForm.addInputType("select-checkbox-inline", {
         // #each uses to track unique list items when adding and removing them
         // See https://github.com/meteor/meteor/issues/2174
         _id: opt.value,
-        selected: (context.value.contains(opt.value)),
+        selected: (context.value.includes(opt.value)),
         atts: itemAtts
       });
     });

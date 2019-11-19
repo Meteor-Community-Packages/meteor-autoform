@@ -324,7 +324,7 @@ Template.autoForm.events({
     // Ignore enter/return, shift, ctrl, cmd, tab, arrows, etc.
     // Most of these are just optimizations, but without ignoring Enter, errors can fail to show up
     // because of conflicts between running onSubmit handlers and this around the same time.
-    if ([13, 9, 16, 20, 17, 91, 37, 38, 39, 40].contains(event.keyCode)) return;
+    if ([13, 9, 16, 20, 17, 91, 37, 38, 39, 40].includes(event.keyCode)) return;
 
     // validateField is throttled, so we need to get the nearest form's
     // ID here, while we're still in the correct context
