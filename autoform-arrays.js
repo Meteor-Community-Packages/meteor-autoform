@@ -50,16 +50,16 @@ ArrayTracker.prototype.initField = function atInitField(formId, field, ss, docCo
 
   if (self.info[formId][field].array != null) return;
 
-// If we have a doc: The count should be the maximum of docCount or schema minCount or field minCount or 1.
-// If we don't have a doc: The count should be the maximum of schema minCount or field minCount or 1.
+  // If we have a doc: The count should be the maximum of docCount or schema minCount or field minCount or 1.
+  // If we don't have a doc: The count should be the maximum of schema minCount or field minCount or 1.
   var range = self.getMinMax(ss, field, overrideMinCount, overrideMaxCount);
   var arrayCount = Math.max(range.minCount, (docCount == null) ? 1 : docCount);
 
-// If this is an array of objects, collect names of object props
+  // If this is an array of objects, collect names of object props
   var childKeys = [];
   if (AutoForm.Utility.getFieldDefinition(ss, field + '.$').type === Object) {
     childKeys = ss.objectKeys(AutoForm.Utility.makeKeyGeneric(field) + '.$');
-	}
+  }
 
   let collection = new Mongo.Collection(null);
 
@@ -85,8 +85,8 @@ ArrayTracker.prototype.resetField = function atResetField(formId, field) {
   if (!self.info[formId][field]) {
     self.info[formId][field] = {
       deps: new Tracker.Dependency()
-		};
-	}
+    };
+  }
 
   if (self.info[formId][field].collection) {
     self.info[formId][field].collection.remove({})
@@ -102,7 +102,7 @@ ArrayTracker.prototype.resetForm = function atResetForm(formId) {
   var self = this;
   _.each(self.info[formId], function (info, field) {
     self.resetField(formId, field);
-	});
+  });
 };
 
 ArrayTracker.prototype.untrackForm = function atUntrackForm(formId) {
@@ -149,19 +149,19 @@ ArrayTracker.prototype.isFirstFieldlVisible = function atIsFirstFieldlVisible(fo
   var self = this;
   self.ensureField(formId, field);
   self.info[formId][field].deps.depend();
-  var firstVisibleField = _.find(self.info[formId][field].array, function(currentField) {
+  var firstVisibleField = _.find(self.info[formId][field].array, function (currentField) {
     return !currentField.removed;
-	});
-	return (firstVisibleField && firstVisibleField.index === currentIndex);
+  });
+  return (firstVisibleField && firstVisibleField.index === currentIndex);
 };
 
 ArrayTracker.prototype.isLastFieldlVisible = function atIsLastFieldlVisible(formId, field, currentIndex) {
   var self = this;
   self.ensureField(formId, field);
   self.info[formId][field].deps.depend();
-  var lastVisibleField = _.last(_.filter(self.info[formId][field].array, function(currentField) {
+  var lastVisibleField = _.last(self.info[formId][field].array.filter(function (currentField) {
     return !currentField.removed;
-	}));
+  }));
   return (lastVisibleField && lastVisibleField.index === currentIndex);
 };
 
@@ -181,7 +181,7 @@ ArrayTracker.prototype.addOneToField = function atAddOneToField(formId, field, s
     var childKeys = [];
     if (AutoForm.Utility.getFieldDefinition(ss, field + '.$').type === Object) {
       childKeys = ss.objectKeys(AutoForm.Utility.makeKeyGeneric(field) + '.$');
-	  }
+    }
 
     var loopCtx = createLoopCtx(formId, field, i, childKeys, overrideMinCount, overrideMaxCount);
 
@@ -203,7 +203,7 @@ ArrayTracker.prototype.removeFromFieldAtIndex = function atRemoveFromFieldAtInde
   var minCount = self.getMinMax(ss, field, overrideMinCount, overrideMaxCount).minCount;
 
   if (currentCount > minCount) {
-    self.info[formId][field].collection.update({index: index}, {$set: {removed: true}})
+    self.info[formId][field].collection.update({ index: index }, { $set: { removed: true } })
     self.info[formId][field].array[index].removed = true;
     self.info[formId][field].count--;
     self.info[formId][field].visibleCount--;
@@ -214,14 +214,14 @@ ArrayTracker.prototype.removeFromFieldAtIndex = function atRemoveFromFieldAtInde
 /*
  * PRIVATE
  */
-var createLoopCtx = function(formId, field, index, childKeys, overrideMinCount, overrideMaxCount) {
+var createLoopCtx = function (formId, field, index, childKeys, overrideMinCount, overrideMaxCount) {
   var loopCtx = {
-    formId:         formId,
+    formId: formId,
     arrayFieldName: field,
-    name:           field + '.' + index,
-    index:          index,
-    minCount:       overrideMinCount,
-    maxCount:       overrideMaxCount
+    name: field + '.' + index,
+    index: index,
+    minCount: overrideMinCount,
+    maxCount: overrideMaxCount
   };
 
   // If this is an array of objects, add child key names under loopCtx.current[childName] = fullKeyName

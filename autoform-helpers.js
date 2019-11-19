@@ -166,14 +166,14 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
         });
       }
 
-      fieldList = _.filter(fieldList, function filterFieldsByName(field) {
+      fieldList = fieldList.filter(function filterFieldsByName(field) {
         return field.indexOf(namePlusDot) === 0;
       });
     }
 
     // If top level fields, be sure to remove any with $ in them
     else {
-      fieldList = _.filter(fieldList, function filterArrayFields(field) {
+      fieldList = fieldList.filter(function filterArrayFields(field) {
         return (field.slice(-2) !== '.$' && field.indexOf('.$.') === -1);
       });
     }
@@ -227,7 +227,7 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
   }
 
   // Filter out fields we never want
-  fieldList = _.filter(fieldList, function shouldIncludeField(field) {
+  fieldList = fieldList.filter(function shouldIncludeField(field) {
     var fieldDefs = AutoForm.Utility.getFieldDefinition(ss, field);
 
     // Don't include fields that are not in the schema
