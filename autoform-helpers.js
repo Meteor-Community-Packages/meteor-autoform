@@ -107,7 +107,7 @@ Template.registerHelper('afFieldValueContains', function autoFormFieldValueConta
   options = parseOptions(options, 'afFieldValueContains');
 
   var currentValue = AutoForm.getFieldValue(options.name, options.formId);
-  return _.isArray(currentValue) && (_.contains(currentValue, options.value) || options.values && _.intersection(currentValue, options.values.split(',')));
+  return _.isArray(currentValue) && (currentValue.contains(options.value) || options.values && _.intersection(currentValue, options.values.split(',')));
 });
 
 /*
@@ -196,7 +196,7 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
       if (parentField.slice(-2) === '.$') {
         parentField = parentField.slice(0, -2);
       }
-      return _.contains(fieldList, parentField) && parentField !== name && parentField !== genericName;
+      return fieldList.contains(parentField) && parentField !== name && parentField !== genericName;
     });
   }
 
@@ -222,7 +222,7 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
     fieldList = _.difference(fieldList, omitFields);
     // If omitFields contains generic field names (with $) we omit those too
     fieldList = _.reject(fieldList, function (f) {
-      return _.contains(omitFields, AutoForm.Utility.makeKeyGeneric(f));
+      return omitFields.contains(AutoForm.Utility.makeKeyGeneric(f));
     });
   }
 

@@ -6,9 +6,9 @@ AutoForm.addInputType("select-multiple", {
   },
   contextAdjust: function (context) {
     // build items list
-    context.items = _.map(context.selectOptions, function(opt) {
+    context.items = _.map(context.selectOptions, function (opt) {
       if (opt.optgroup) {
-        var subItems = _.map(opt.options, function(subOpt) {
+        var subItems = _.map(opt.options, function (subOpt) {
           return {
             name: context.name,
             label: subOpt.label,
@@ -18,7 +18,7 @@ AutoForm.addInputType("select-multiple", {
             // #each uses to track unique list items when adding and removing them
             // See https://github.com/meteor/meteor/issues/2174
             _id: subOpt.value,
-            selected: _.contains(context.value, subOpt.value),
+            selected: context.value.contains(subOpt.value),
             disabled: !!opt.disabled,
             atts: context.atts
           };
@@ -37,7 +37,7 @@ AutoForm.addInputType("select-multiple", {
           // #each uses to track unique list items when adding and removing them
           // See https://github.com/meteor/meteor/issues/2174
           _id: opt.value,
-          selected: _.contains(context.value, opt.value),
+          selected: context.value.contains(opt.value),
           disabled: !!opt.disabled,
           atts: context.atts
         };

@@ -35,7 +35,7 @@ Template.autoForm.helpers({
     // HTML attributes.
     for (var prop in context) {
       if (context.hasOwnProperty(prop) &&
-        !_.contains(removeProps, prop) &&
+        !removeProps.contains(prop) &&
         !hasComponentPrefix(prop)) {
         val = context[prop];
         if (!_.isArray(val) && !_.isObject(val)) {
