@@ -191,7 +191,7 @@ const markChanged = markChangedThrottle(function (template, fieldName, fieldValu
   // is there really a value??
   if (fieldValue === undefined) return
   // is the form rendered???
-  if (template.$(`[data-schema-key=${fieldName}]`).val() == null)
+  if (template.$(`[data-schema-key="${fieldName}"]`).val() == null)
     return markChanged(template, fieldName, fieldValue)
 
   if (template &&
