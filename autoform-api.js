@@ -1090,7 +1090,7 @@ AutoForm.getCurrentDataForForm = function (formId) {
 AutoForm.getCurrentDataPlusExtrasForForm = function (formId) {
   var data = AutoForm.getCurrentDataForForm(formId);
 
-  data = _.clone(data);
+  data = { ...data }
 
   // add form type definition
   var formType = data.type || 'normal';
@@ -1223,7 +1223,7 @@ AutoForm._validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss
   // Get a version of the doc that has auto values to validate here. We
   // don't want to actually send any auto values to the server because
   // we ultimately want them generated on the server
-  var docForValidation = _.clone(doc);
+  var docForValidation = { ...doc };
   ss.clean(docForValidation, {
     isModifier: isModifier,
     filter: false,

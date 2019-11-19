@@ -10,7 +10,7 @@ AutoForm.addInputType("select-radio-inline", {
     context.items = [];
 
     // Add all defined options
-    _.each(context.selectOptions, function(opt) {
+    _.each(context.selectOptions, function (opt) {
       context.items.push({
         name: context.name,
         label: opt.label,
@@ -30,7 +30,7 @@ AutoForm.addInputType("select-radio-inline", {
 
 Template.afRadioGroupInline.helpers({
   atts: function selectedAttsAdjust() {
-    var atts = _.clone(this.atts);
+    var atts = { ...this.atts };
     if (this.selected) {
       atts.checked = "";
     }

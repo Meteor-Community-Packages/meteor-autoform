@@ -5,14 +5,14 @@
  */
 
 Template.registerHelper('attsPlusFormControlClass', function attsPlusFormControlClass() {
-  var atts = _.clone(this.atts);
+  var atts = { ...this.atts };
   // Add bootstrap class
   atts = AutoForm.Utility.addClass(atts, "form-control");
   return atts;
 });
 
 Template.registerHelper('attsPlusBtnClass', function attsPlusBtnClass() {
-  var atts = _.clone(this.atts);
+  var atts = { ...this.atts };
   // Add bootstrap class
   atts = AutoForm.Utility.addClass(atts, "btn");
   return atts;

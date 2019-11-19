@@ -6,7 +6,7 @@ Template.afFormGroup_bootstrap3.helpers({
     return (self.skipLabel || type === "boolean-checkbox");
   },
   bsFieldLabelAtts: function bsFieldLabelAtts() {
-    var atts = _.clone(this.afFieldLabelAtts);
+    var atts = { ...this.afFieldLabelAtts };
     // Add bootstrap class
     atts = AutoForm.Utility.addClass(atts, "control-label");
     return atts;

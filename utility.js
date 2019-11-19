@@ -380,7 +380,7 @@ Utility = {
   getComponentContext: function autoFormGetComponentContext(context, name) {
     var atts, defs = {}, formComponentAttributes, fieldAttributes, fieldAttributesForComponentType, ss;
 
-    atts = _.clone(context || {});
+    atts = { ...context };
     ss = AutoForm.getFormSchema();
 
     defs = Utility.getFieldDefinition(ss, atts.name);
@@ -393,7 +393,7 @@ Utility = {
     // Get any field-specific attributes defined in the schema.
     // They can be in autoform.attrName or autoform.componentType.attrName, with
     // the latter overriding the former.
-    fieldAttributes = _.clone(defs.autoform) || {};
+    fieldAttributes = { ...defs.autoform };
     fieldAttributesForComponentType = fieldAttributes[name] || {};
     fieldAttributes = _.omit(fieldAttributes, Utility.componentTypeList);
     fieldAttributes = _.extend({}, fieldAttributes, fieldAttributesForComponentType);

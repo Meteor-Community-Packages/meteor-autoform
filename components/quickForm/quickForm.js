@@ -7,7 +7,7 @@ Template.quickForm.helpers({
   innerContext: function quickFormContext() {
 
     var atts = this;
-    var adjustedData = AutoForm.parseData(_.clone(this));
+    var adjustedData = AutoForm.parseData({ ...this });
     var simpleSchema = adjustedData._resolvedSchema;
     var sortedSchema = {};
     var fieldGroups = [];
@@ -33,7 +33,7 @@ Template.quickForm.helpers({
     var grouplessFields = getFieldsWithNoGroup(sortedSchema);
     if (grouplessFields.length > 0) {
       grouplessFieldContext = {
-        atts: _.extend({}, atts, {fields: grouplessFields}),
+        atts: _.extend({}, atts, { fields: grouplessFields }),
         fields: grouplessFields
       };
     }
@@ -50,7 +50,7 @@ Template.quickForm.helpers({
       if (fieldsForGroup.length > 0) {
         fieldGroups.push({
           name: fieldGroupName,
-          atts: _.extend({}, atts, {fields: fieldsForGroup}),
+          atts: _.extend({}, atts, { fields: fieldsForGroup }),
           fields: fieldsForGroup
         });
       }
@@ -61,11 +61,11 @@ Template.quickForm.helpers({
     // Pass along quickForm context to autoForm context, minus a few
     // properties that are specific to quickForms.
     var qfAutoFormContext = _.omit(atts,
-                                   'buttonContent',
-                                   'buttonClasses',
-                                   'fields',
-                                   'omitFields',
-                                   'id-prefix');
+      'buttonContent',
+      'buttonClasses',
+      'fields',
+      'omitFields',
+      'id-prefix');
 
     // Determine whether we want to render a submit button
     var qfShouldRenderButton = (atts.buttonContent !== false && atts.type !== 'readonly' && atts.type !== 'disabled');

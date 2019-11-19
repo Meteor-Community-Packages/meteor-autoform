@@ -9,7 +9,7 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
     var name = this.name;
 
     // if field group name is of the form XY_abcde where "XY" is a number, remove prefix
-    if (!isNaN(parseInt(name.substr(0,2), 10)) && name.charAt(2) === "_") {
+    if (!isNaN(parseInt(name.substr(0, 2), 10)) && name.charAt(2) === "_") {
       name = name.substr(3);
     }
 
@@ -37,7 +37,7 @@ Template['quickForm_bootstrap3-horizontal'].helpers({
     return atts;
   },
   qfAutoFormContext: function () {
-    var ctx = _.clone(this.qfAutoFormContext || {});
+    var ctx = { ...this.qfAutoFormContext };
     ctx = AutoForm.Utility.addClass(ctx, 'form-horizontal');
 
     // input-col-class and label-class attributes are unique to this template so they will

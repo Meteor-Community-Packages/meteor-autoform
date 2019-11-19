@@ -11,7 +11,7 @@ Template["afFormGroup_bootstrap3-horizontal"].helpers({
     return atts;
   },
   afFieldLabelAtts: function () {
-    var atts = _.clone(this.afFieldLabelAtts || {});
+    var atts = { ...this.afFieldLabelAtts };
     // Add bootstrap class
     atts = AutoForm.Utility.addClass(atts, "control-label");
     return atts;

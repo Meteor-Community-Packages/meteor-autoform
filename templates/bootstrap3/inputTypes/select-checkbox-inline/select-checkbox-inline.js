@@ -1,6 +1,6 @@
 Template.afCheckboxGroupInline_bootstrap3.helpers({
   atts: function selectedAttsAdjust() {
-    var atts = _.clone(this.atts);
+    var atts = { ...this.atts };
     if (this.selected) {
       atts.checked = "";
     }

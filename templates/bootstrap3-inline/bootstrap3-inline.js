@@ -12,7 +12,7 @@ Template['quickForm_bootstrap3-inline'].helpers({
     return atts;
   },
   qfAutoFormContext: function () {
-    var ctx = _.clone(this.qfAutoFormContext || {});
+    var ctx = { ...this.qfAutoFormContext };
     ctx = AutoForm.Utility.addClass(ctx, 'form-inline');
 
     // label-class attribute is unique to this template so it will
@@ -32,7 +32,7 @@ Template['quickForm_bootstrap3-inline'].helpers({
 
 Template['afFormGroup_bootstrap3-inline'].helpers({
   afFieldInputAtts: function () {
-    var atts = _.clone(this.afFieldInputAtts || {});
+    var atts = { ...this.afFieldInputAtts };
     // Use the same templates as those defined for bootstrap3 template.
     atts.template = 'bootstrap3';
     return atts;
