@@ -190,6 +190,9 @@ const markChanged = markChangedThrottle(function (template, fieldName, fieldValu
   if (fieldValue === template.formValues[fieldName].cachedValue) return
   // is there really a value??
   if (fieldValue === undefined) return
+  // is the form rendered???
+  if (template.$(`[data-schema-key=${fieldName}]`).val() == null)
+    return markChanged(template, fieldName, fieldValue)
 
   if (template &&
     template.view &&
