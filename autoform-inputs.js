@@ -128,7 +128,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   // only if their value is `true`. That is, unlike in
   // HTML, their mere presence does not matter.
   _.each(['disabled', 'readonly', 'checked', 'required', 'autofocus'], function (booleanProp) {
-    if (!booleanProp in hash) {
+    if (!(booleanProp in hash)) {
       return;
     }
 
@@ -162,7 +162,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
    * Merge data property from the field schema with the context.
    * We do not want these turned into HTML attributes.
    */
-  if (hash.data) _.extend(inputTypeContext, hash.data);
+  if (hash.data) Object.assign(inputTypeContext, hash.data);
 
   // Before returning the context, we allow the registered form type to
   // adjust it if necessary.

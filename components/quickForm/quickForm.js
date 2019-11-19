@@ -33,7 +33,7 @@ Template.quickForm.helpers({
     var grouplessFields = getFieldsWithNoGroup(sortedSchema);
     if (grouplessFields.length > 0) {
       grouplessFieldContext = {
-        atts: _.extend({}, atts, { fields: grouplessFields }),
+        atts: { ...atts, fields: grouplessFields },
         fields: grouplessFields
       };
     }
@@ -50,7 +50,7 @@ Template.quickForm.helpers({
       if (fieldsForGroup.length > 0) {
         fieldGroups.push({
           name: fieldGroupName,
-          atts: _.extend({}, atts, { fields: fieldsForGroup }),
+          atts: { ...atts, fields: fieldsForGroup },
           fields: fieldsForGroup
         });
       }

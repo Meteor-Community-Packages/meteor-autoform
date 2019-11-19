@@ -15,7 +15,7 @@ __File: ["utility.js"](utility.js) Where: {client}__
 
 __Arguments__
 
-* __doc__ *{Object}*  
+* __doc__ *{Object}*
 
  Source object
 
@@ -38,7 +38,7 @@ string values have been removed, recursively.
 
 __Arguments__
 
-* __flatDoc__ *{Object}*  
+* __flatDoc__ *{Object}*
 
  An object with no properties that are also objects.
 
@@ -61,7 +61,7 @@ of each key is "".
 
 __Arguments__
 
-* __doc__ *{Object}*  
+* __doc__ *{Object}*
 
  An object to be converted into a MongoDB modifier
 
@@ -98,7 +98,7 @@ putting the rest of the keys into `modifier.$set`.
 
 __Arguments__
 
-* __select__ *{[Element](#Element)}*  
+* __select__ *{[Element](#Element)}*
 
  DOM Element from which to get current values
 
@@ -120,7 +120,7 @@ Gets a string array of all the selected values in a given `select` DOM element.
 
 __Arguments__
 
-* __obj__ *{Any}*  
+* __obj__ *{Any}*
 
 __Returns__  *{Any}*
 
@@ -140,8 +140,8 @@ name on the `window` object. Otherwise returns `obj`.
 
 __Arguments__
 
-* __ss__ *{[SimpleSchema](#SimpleSchema)}*  
-* __name__ *{String}*  
+* __ss__ *{[SimpleSchema](#SimpleSchema)}*
+* __name__ *{String}*
 
 __Returns__  *{Object}*
 Schema definitions object
@@ -162,11 +162,11 @@ type definition out of potentially multiple.
 
 __Arguments__
 
-* __{Object}__ *{any}*  
+* __{Object}__ *{any}*
 
  obj
 
-* __{String}__ *{any}*  
+* __{String}__ *{any}*
 
  key
 
@@ -191,7 +191,7 @@ __TODO__
 
 __Arguments__
 
-* __{Object}__ *{any}*  
+* __{Object}__ *{any}*
 
  doc
 
@@ -213,7 +213,7 @@ Takes a flat object and returns an expanded version of it.
 
 __Arguments__
 
-* __{Object}__ *{any}*  
+* __{Object}__ *{any}*
 
  obj
 
@@ -235,7 +235,7 @@ Edits the object by reference, compacting any arrays at any level recursively.
 
 __Arguments__
 
-* __{Object}__ *{any}*  
+* __{Object}__ *{any}*
 
  obj
 
@@ -257,7 +257,7 @@ Edits the object by reference.
 
 __Arguments__
 
-* __{Any}__ *{any}*  
+* __{Any}__ *{any}*
 
  val
 
@@ -279,7 +279,7 @@ Returns `true` if the value is null, undefined, or an empty string
 
 __Arguments__
 
-* __{String}__ *{any}*  
+* __{String}__ *{any}*
 
  dateString
 
@@ -301,7 +301,7 @@ Returns `true` if dateString is a "valid date string"
 
 __Arguments__
 
-* __{String}__ *{any}*  
+* __{String}__ *{any}*
 
  timeString
 
@@ -322,7 +322,7 @@ Returns `true` if timeString is a "valid time string"
 
 __Arguments__
 
-* __{String}__ *{any}*  
+* __{String}__ *{any}*
 
  dateString
 
@@ -343,7 +343,7 @@ Returns true if dateString is a "valid normalized forced-UTC global date and tim
 
 __Arguments__
 
-* __{String}__ *{any}*  
+* __{String}__ *{any}*
 
  dtString
 
@@ -365,11 +365,11 @@ Returns true if dtString is a "valid normalized local date and time string"
 
 __Arguments__
 
-* __{Object}__ *{any}*  
+* __{Object}__ *{any}*
 
  context A context (`this`) object
 
-* __name__ *{String}*  
+* __name__ *{String}*
 
  The name of the helper or component we're calling from.
 
@@ -395,11 +395,11 @@ an error if we can't find an autoform context.
 
 __Arguments__
 
-* __s__ *{String|Array}*  
+* __s__ *{String|Array}*
 
  A variable that might be a string or an array.
 
-* __errorMessage__ *{String}*  
+* __errorMessage__ *{String}*
 
  Error message to use if it's not a string or an array.
 
@@ -420,11 +420,11 @@ The array, building it from a comma-delimited string if necessary.
 
 __Arguments__
 
-* __atts__ *{Object}*  
+* __atts__ *{Object}*
 
  An object that might have a "class" property
 
-* __klass__ *{String}*  
+* __klass__ *{String}*
 
  The class string to add
 
@@ -445,7 +445,7 @@ The object with klass added to the "class" property, creating the property if ne
 
 __Arguments__
 
-* __formType__ *{String}*  
+* __formType__ *{String}*
 
  The form type
 
@@ -469,7 +469,7 @@ something that inherits from Object
 
 __Arguments__
 
-* __obj__ *{any}*  
+* __obj__ *{any}*
 
 __Returns__  *{Boolean}*
 
@@ -489,7 +489,7 @@ __File: ["form-preserve.js"](form-preserve.js) Where: {client}__
 
 __Arguments__
 
-* __migrationName__ *{String}*  
+* __migrationName__ *{String}*
 
 
 Internal helper object to preserve form inputs across Hot Code Push
@@ -526,7 +526,7 @@ Initializes tracking for a given form, if not already done.
 
 __Arguments__
 
-* __formId__ *{String}*  
+* __formId__ *{String}*
 
  The form's `id` attribute
 
@@ -546,7 +546,7 @@ Initializes tracking for a given form, if not already done.
 
 __Arguments__
 
-* __formId__ *{String}*  
+* __formId__ *{String}*
 
  The form's `id` attribute
 
@@ -566,11 +566,11 @@ Gets or sets a source doc for the given form. Reactive.
 
 __Arguments__
 
-* ____ *{any}*  
+* ____ *{any}*
 
  {String}                formId    The form's `id` attribute
 
-* ____ *{any}*  
+* ____ *{any}*
 
  {MongoObject|null}      sourceDoc The mDoc for the form or `null` if no doc.
 
@@ -624,7 +624,7 @@ Merge data property from the field schema with the context.
 We do not want these turned into HTML attributes.
 ```
 
-> ```if (hash.data) _.extend(inputTypeContext, hash.data);``` [autoform-inputs.js:151](autoform-inputs.js#L151)
+> ```if (hash.data) Object.assign(inputTypeContext, hash.data);``` [autoform-inputs.js:165](autoform-inputs.js#L151)
 
 
 ***
@@ -649,11 +649,11 @@ __File: ["autoform-api.js"](autoform-api.js) Where: {client}__
 
 __Arguments__
 
-* __formIds__ *{[String[]](#String[])|String|null}*  
+* __formIds__ *{[String[]](#String[])|String|null}*
 
  Form `id` or array of form IDs to which these hooks apply. Specify `null` to add hooks that will run for every form.
 
-* __hooks__ *{Object}*  
+* __hooks__ *{Object}*
 
  Hooks to add, where supported names are "before", "after", "formToDoc", "docToForm", "onSubmit", "onSuccess", and "onError".
 
@@ -675,7 +675,7 @@ form.
 
 __Arguments__
 
-* __hooks__ *{Object}*  
+* __hooks__ *{Object}*
 
 __Returns__  *{undefined}*
 
@@ -718,7 +718,7 @@ Global hooks list to aid automated testing
 
 __Arguments__
 
-* __formId__ *{String}*  
+* __formId__ *{String}*
 
 __Returns__  *{undefined}*
 
@@ -737,7 +737,7 @@ See https:
 
 __Arguments__
 
-* __formId__ *{String}*  
+* __formId__ *{String}*
 * __template__ *{[TemplateInstance](#TemplateInstance)}*  (Optional)
 
  Looked up if not provided. Pass in for efficiency.
@@ -759,7 +759,7 @@ Resets an autoform, including resetting validation errors. The same as clicking 
 
 __Arguments__
 
-* __template__ *{String}*  
+* __template__ *{String}*
 
 
 > ```AutoForm.setDefaultTemplate = function autoFormSetDefaultTemplate(template) { ...``` [autoform-api.js:113](autoform-api.js#L113)
@@ -785,8 +785,8 @@ Reactive.
 
 __Arguments__
 
-* __type__ *{String}*  
-* __template__ *{String}*  
+* __type__ *{String}*
+* __template__ *{String}*
 
 
 > ```AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(type, template) { ...``` [autoform-api.js:135](autoform-api.js#L135)
@@ -800,7 +800,7 @@ __Arguments__
 
 __Arguments__
 
-* __type__ *{String}*  
+* __type__ *{String}*
 
 __Returns__  *{String}*
 Template name
@@ -819,8 +819,8 @@ Reactive.
 
 __Arguments__
 
-* __templateType__ *{String}*  
-* __templateName__ *{String}*  
+* __templateType__ *{String}*
+* __templateName__ *{String}*
 * __fieldName__ *{String}*  (Optional)
 * __skipExistsCheck__ *{Boolean}*  (Optional)
 
@@ -854,7 +854,7 @@ manner:
 
 __Arguments__
 
-* __formId__ *{String}*  
+* __formId__ *{String}*
 
  The `id` attribute of the `autoForm` you want current values for.
 
@@ -888,7 +888,7 @@ The returned object is either a normal object or a MongoDB modifier, based on th
 
 __Arguments__
 
-* __fieldName__ *{String}*  
+* __fieldName__ *{String}*
 
  The name of the field for which you want the current value.
 
@@ -914,7 +914,7 @@ This is a reactive method that will rerun whenever the current value of the requ
 
 __Arguments__
 
-* __element__ *{[DOMElement](#DOMElement)}*  
+* __element__ *{[DOMElement](#DOMElement)}*
 
  The input DOM element, generated by an autoform input control
 
@@ -935,7 +935,7 @@ Returns the name of the template used to render the element.
 
 __Arguments__
 
-* __element__ *{[DOMElement](#DOMElement)}*  
+* __element__ *{[DOMElement](#DOMElement)}*
 
  The input DOM element, generated by an autoform input control, which must have a `data-schema-key` attribute set to the correct schema key name.
 
@@ -961,15 +961,15 @@ Unlike `AutoForm.getFieldValue`, this function is not reactive.
 
 __Arguments__
 
-* __name__ *{String}*  
+* __name__ *{String}*
 
  The type string that this definition is for.
 
-* __definition__ *{Object}*  
+* __definition__ *{Object}*
 
  Defines how the input type should be rendered.
 
-    * __componentName__ *{String}*  
+    * __componentName__ *{String}*
 
     The component name. A template with the name <componentName>_bootstrap3, and potentially others, must be defined.
 
@@ -990,11 +990,11 @@ Use this method to add custom input components.
 
 __Arguments__
 
-* __name__ *{String}*  
+* __name__ *{String}*
 
  The type string that this definition is for.
 
-* __definition__ *{Object}*  
+* __definition__ *{Object}*
 
  Defines how the submit type should work
 
@@ -1010,7 +1010,7 @@ __Arguments__
 
     Set to `true` if this form type should not show buttons for adding and removing items in an array field. The "disabled" and "readonly" form types do this.
 
-    * __onSubmit__ *{Function}*  
+    * __onSubmit__ *{Function}*
 
     A function that does whatever should happen upon submission of this form type. When this function is called, `this` contains useful information about the form. At a minimum, you probably want to call `this.event.preventDefault()` to prevent the browser from submitting the form. Your submission logic may want to rely on additional custom form attributes, which will be available in `this.formAttributes`. If you do any additional validation and it fails, you should call `this.failedValidation()`. When your logic is done, you should call `this.result(error, result)`. If you want to end the submission process without providing a result, call `this.endSubmission()`. If you don't call `this.result()` or `this.endSubmission()`, `endSubmit` hooks won't be called, so for example the submit button might remain disabled. `onError` hooks will be called only if you pass an error to `this.result()`. `onSuccess` hooks will be called only if you do not pass an error to `this.result()`.
 
@@ -1018,7 +1018,7 @@ __Arguments__
 
     A function that returns `true` if validation against the form schema should happen before the `onSubmit` function is called, or `false` if not. When this function is called, `this` contains useful information about the form. If this function is not provided for a form type, the default is `true`.
 
-    * __validateForm__ *{Function}*  
+    * __validateForm__ *{Function}*
 
     A function that validates the form and returns `true` if valid or `false` if not. This can happen during submission but also at other times. When this function is called, `this` contains useful information about the form and the validation options.
 
@@ -1039,11 +1039,11 @@ Use this method to add custom form types.
 
 __Arguments__
 
-* __formId__ *{String}*  
+* __formId__ *{String}*
 
  The `id` attribute of the `autoForm` you want to validate.
 
-* __fieldName__ *{String}*  
+* __fieldName__ *{String}*
 
  The name of the field within the `autoForm` you want to validate.
 
@@ -1070,7 +1070,7 @@ this method causes the reactive validation messages to appear.
 
 __Arguments__
 
-* __formId__ *{String}*  
+* __formId__ *{String}*
 
  The `id` attribute of the `autoForm` you want to validate.
 
@@ -1116,7 +1116,7 @@ the current invalid fields, manually invalidate fields, etc.
 
 __Arguments__
 
-* __attrName__ *{String}*  
+* __attrName__ *{String}*
 
  Attribute name
 
@@ -1138,7 +1138,7 @@ Call this method from a UI helper. Might return undefined.
 
 __Arguments__
 
-* __prefix__ *{String}*  
+* __prefix__ *{String}*
 
  Attribute prefix
 
@@ -1183,7 +1183,7 @@ You need to call it just one time, usually in top level client code.
 
 __Arguments__
 
-* __atts__ *{Object}*  
+* __atts__ *{Object}*
 
  The attributes provided to afFieldInput.
 
@@ -1205,7 +1205,7 @@ Call this method from a UI helper to get the type string for the input control.
 
 __Arguments__
 
-* __name__ *{String}*  
+* __name__ *{String}*
 
  The field name attribute / schema key.
 
@@ -1226,7 +1226,7 @@ Call this method from a UI helper to get the field definitions based on the sche
 
 __Arguments__
 
-* __name__ *{String}*  
+* __name__ *{String}*
 
  The field name attribute / schema key.
 
@@ -1247,7 +1247,7 @@ Call this method from a UI helper to get the select options for the field. Might
 
 __Arguments__
 
-* __name__ *{String}*  
+* __name__ *{String}*
 
  The field name attribute / schema key.
 
@@ -1312,11 +1312,11 @@ Gets the `Blaze.View` instance for the form with formId or the closest form to t
 
 __Arguments__
 
-* __formId__ *{String}*  
+* __formId__ *{String}*
 
  The form's `id` attribute
 
-* __field__ *{String}*  
+* __field__ *{String}*
 
  The field name (schema key)
 
@@ -1340,7 +1340,7 @@ length (count) of the array. Otherwise returns undefined.
 
 __Arguments__
 
-* __data__ *{Object}*  
+* __data__ *{Object}*
 
  Current data context for the form, or an empty object. Usually this is used from a quickForm, since the autoForm won't be rendered yet. Otherwise you should use AutoForm.getCurrentDataForForm if you can.
 
@@ -1362,7 +1362,7 @@ Parses and alters the current data context for a form. It will have default valu
 
 __Arguments__
 
-* __formId__ *{String}*  
+* __formId__ *{String}*
 
  The form's `id` attribute
 
@@ -1386,7 +1386,7 @@ the data for the nearest containing form will be returned.
 
 __Arguments__
 
-* ____ *{any}*  
+* ____ *{any}*
 
  {String} [formId] The form's `id` attribute
 
@@ -1410,7 +1410,7 @@ the data for the nearest containing form will be returned.
 
 __Arguments__
 
-* __formId__ *{String}*  
+* __formId__ *{String}*
 
  The form's `id` attribute
 
@@ -1476,11 +1476,11 @@ Call in a helper to get the containing form's `id` attribute. Reactive.
 
 __Arguments__
 
-* __formId__ *{String}*  
+* __formId__ *{String}*
 
  The `id` attribute of the form
 
-* __ss__ *{[SimpleSchema](#SimpleSchema)}*  
+* __ss__ *{[SimpleSchema](#SimpleSchema)}*
 
  The SimpleSchema instance that was used to create the form's validation context.
 
@@ -1501,23 +1501,23 @@ Selects the focus the first field (in DOM order) with an error.
 
 __Arguments__
 
-* __doc__ *{Object}*  
+* __doc__ *{Object}*
 
  The document with the gathered form values to validate.
 
-* __isModifier__ *{Boolean}*  
+* __isModifier__ *{Boolean}*
 
  Is `doc` actually a mongo modifier object?
 
-* __formId__ *{String}*  
+* __formId__ *{String}*
 
  The form `id` attribute
 
-* __ss__ *{[SimpleSchema](#SimpleSchema)}*  
+* __ss__ *{[SimpleSchema](#SimpleSchema)}*
 
  The SimpleSchema instance against which to validate.
 
-* __form__ *{Object}*  
+* __form__ *{Object}*
 
  The form context object
 
@@ -1564,7 +1564,7 @@ __File: ["inputTypes/value-converters.js"](inputTypes/value-converters.js) Where
 
 __Arguments__
 
-* __{Date}__ *{any}*  
+* __{Date}__ *{any}*
 
  date
 
@@ -1585,7 +1585,7 @@ Returns a "valid date string" representing the local date.
 
 __Arguments__
 
-* __{Date}__ *{any}*  
+* __{Date}__ *{any}*
 
  date
 
@@ -1606,7 +1606,7 @@ Returns a "valid date string" representing the date converted to the UTC time zo
 
 __Arguments__
 
-* __{Date}__ *{any}*  
+* __{Date}__ *{any}*
 
  date
 
@@ -1633,7 +1633,7 @@ http:
 
 __Arguments__
 
-* __date__ *{[Date](#Date)}*  
+* __date__ *{[Date](#Date)}*
 
  The Date object
 
@@ -1658,7 +1658,7 @@ Returns a "valid normalized local date and time string".
 
 __Arguments__
 
-* __val__ *{String}*  
+* __val__ *{String}*
 
  A string or null or undefined.
 
@@ -1681,7 +1681,7 @@ For strings, returns Number(val) unless the result is NaN. Otherwise returns val
 
 __Arguments__
 
-* __val__ *{String}*  
+* __val__ *{String}*
 
  A string or null or undefined.
 
@@ -1704,7 +1704,7 @@ If the string is "true" or "1", returns `true`. If the string is "false" or "0",
 
 __Arguments__
 
-* __val__ *{String}*  
+* __val__ *{String}*
 
  A string or null or undefined.
 
@@ -1733,7 +1733,7 @@ Takes a schema object and returns a sorted array of field group names for it
 
 __Arguments__
 
-* ____ *{any}*  
+* ____ *{any}*
 
  {Object}   schemaObj Like from mySimpleSchema.schema()
 
@@ -1755,11 +1755,11 @@ Returns the schema field names that belong in the group.
 
 __Arguments__
 
-* ____ *{any}*  
+* ____ *{any}*
 
  {String}   groupName The group name
 
-* ____ *{any}*  
+* ____ *{any}*
 
  {Object}   schemaObj Like from mySimpleSchema.schema()
 
@@ -1782,7 +1782,7 @@ Returns the schema field names that don't belong to a group
 
 __Arguments__
 
-* ____ *{any}*  
+* ____ *{any}*
 
  {Object}   schemaObj Like from mySimpleSchema.schema()
 
@@ -1810,7 +1810,7 @@ be revalidated only when the form is already invalid.
 
 __Arguments__
 
-* __validationType__ *{String}*  
+* __validationType__ *{String}*
 
  The validation type string.
 
@@ -1831,7 +1831,7 @@ element that has one.
 
 __Arguments__
 
-* ____ *{any}*  
+* ____ *{any}*
 
  {Element}          element The DOM element
 

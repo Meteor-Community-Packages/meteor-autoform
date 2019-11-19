@@ -223,9 +223,7 @@ Template.autoForm.events({
         };
 
         // Add the `result` function to the before hook context
-        var ctx = _.extend({
-          result: _.once(cb)
-        }, hookContext);
+        var ctx = { result: _.once(cb), ...hookContext }
 
         var result = hook.call(ctx, doc);
 
@@ -312,14 +310,15 @@ Template.autoForm.events({
     }
 
     // Call onSubmit from the form type definition
-    ftd.onSubmit.call(_.extend({
+    ftd.onSubmit.call({
       runBeforeHooks: runBeforeHooks,
       result: resultCallback,
       endSubmission: endSubmission,
       failedValidation: failedValidation,
       validationOptions: validationOptions,
-      hookContext: hookContext
-    }, hookContext));
+      hookContext: hookContext,
+      ...hookContext
+    });
   },
   'keyup [data-schema-key]': function autoFormKeyUpHandler(event) {
     // Ignore enter/return, shift, ctrl, cmd, tab, arrows, etc.

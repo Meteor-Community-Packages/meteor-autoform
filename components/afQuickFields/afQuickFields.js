@@ -18,6 +18,6 @@ Template.afQuickFields.helpers({
       atts.options = defaultOptions;
     }
 
-    return _.extend(atts, afQuickFieldsComponentAtts, this);
+    return { ...atts, ...afQuickFieldsComponentAtts, ...this };
   }
 });

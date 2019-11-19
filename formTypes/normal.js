@@ -21,7 +21,7 @@ AutoForm.addFormType('normal', {
     }
 
     // Set up onSubmit hook context
-    var ctx = _.extend({
+    var ctx = {
       done: function (error, result) {
         doneCount++;
         if (!submitError && error) {
@@ -34,8 +34,9 @@ AutoForm.addFormType('normal', {
           // run onError, onSuccess, endSubmit
           c.result(submitError, submitResult);
         }
-      }
-    }, this.hookContext);
+      },
+      ...this.hookContext
+    }
 
     // Call all hooks at once.
     // Pass both types of doc plus the doc attached to the form.

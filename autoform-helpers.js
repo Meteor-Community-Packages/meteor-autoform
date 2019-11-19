@@ -4,7 +4,7 @@ function parseOptions(options) {
   var hash = (options || {}).hash || {};
   // Find the form's schema
   var ss = AutoForm.getFormSchema();
-  return _.extend({}, hash, { ss: ss });
+  return { ...hash, ss }
 }
 
 /*
@@ -279,7 +279,7 @@ Template.registerHelper('afSelectOptionAtts', function afSelectOptionAtts() {
     atts.selected = '';
   }
   if (this.htmlAtts) {
-    _.extend(atts, this.htmlAtts);
+    Object.assign(atts, this.htmlAtts);
   }
   return atts;
 });

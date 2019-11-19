@@ -396,10 +396,10 @@ Utility = {
     fieldAttributes = { ...defs.autoform };
     fieldAttributesForComponentType = fieldAttributes[name] || {};
     fieldAttributes = _.omit(fieldAttributes, Utility.componentTypeList);
-    fieldAttributes = _.extend({}, fieldAttributes, fieldAttributesForComponentType);
+    fieldAttributes = { ...fieldAttributes, ...fieldAttributesForComponentType };
 
     // "autoform" option in the schema provides default atts
-    atts = _.extend({}, formComponentAttributes, fieldAttributes, atts);
+    atts = { ...formComponentAttributes, ...fieldAttributes, ...atts };
 
     // eval any attribute that is provided as a function
     var evaluatedAtts = {};

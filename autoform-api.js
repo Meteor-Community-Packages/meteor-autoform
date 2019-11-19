@@ -626,7 +626,7 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
 AutoForm.addInputType = function afAddInputType(name, definition) {
   var obj = {};
   obj[name] = definition;
-  _.extend(AutoForm._inputTypeDefinitions, obj);
+  Object.assign(AutoForm._inputTypeDefinitions, obj);
 };
 
 /**
@@ -647,7 +647,7 @@ AutoForm.addInputType = function afAddInputType(name, definition) {
 AutoForm.addFormType = function afAddFormType(name, definition) {
   var obj = {};
   obj[name] = definition;
-  _.extend(AutoForm._formTypeDefinitions, obj);
+  Object.assign(AutoForm._formTypeDefinitions, obj);
 };
 
 /**

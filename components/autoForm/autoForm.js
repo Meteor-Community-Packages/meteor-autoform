@@ -35,8 +35,8 @@ Template.autoForm.helpers({
     // HTML attributes.
     for (var prop in context) {
       if (context.hasOwnProperty(prop) &&
-          !_.contains(removeProps, prop) &&
-          !hasComponentPrefix(prop)) {
+        !_.contains(removeProps, prop) &&
+        !hasComponentPrefix(prop)) {
         val = context[prop];
         if (!_.isArray(val) && !_.isObject(val)) {
           htmlAttributes[prop] = val;
@@ -105,13 +105,13 @@ Template.autoForm.created = function autoFormCreated() {
       var retrievedDoc = AutoForm.formPreserve.getDocument(formId);
       if (retrievedDoc !== false) {
         // Ensure we keep the _id property which may not be present in retrievedDoc.
-        doc = _.extend(doc || {}, retrievedDoc || {});
+        doc = { ...doc, ...retrievedDoc }
       }
     }
 
     var mDoc;
     if (doc && !_.isEmpty(doc)) {
-      var hookCtx = {formId: formId};
+      var hookCtx = { formId: formId };
       // Pass doc through docToForm hooks
       _.each(Hooks.getHooks(formId, 'docToForm'), function autoFormEachDocToForm(hook) {
         doc = hook.call(hookCtx, doc, data._resolvedSchema);
