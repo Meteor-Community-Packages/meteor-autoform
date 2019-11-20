@@ -158,7 +158,7 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
       // with $ apply to all array items. Field list will now have the
       // correct array field item number instead of $.
       if (genericName !== name) {
-        fieldList = _.map(fieldList, function (field) {
+        fieldList = fieldList.map(function (field) {
           if (field.indexOf(genericNamePlusDot) === 0) {
             return namePlusDot + field.slice(genericNamePlusDot.length);
           }
@@ -209,7 +209,7 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
     if (name) {
       // Tack child field name on to end of parent field name. This
       // ensures that we keep the desired array index for array items.
-      fieldList = _.map(fieldList, function (field) {
+      fieldList = fieldList.map(function (field) {
         return name + '.' + field;
       });
     }
@@ -262,7 +262,7 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
 
   // We return it as an array of objects because that
   // works better with Blaze contexts
-  fieldList = _.map(fieldList, function (name) {
+  fieldList = fieldList.map(function (name) {
     return { name: name };
   });
 

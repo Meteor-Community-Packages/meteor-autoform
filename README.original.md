@@ -1618,7 +1618,7 @@ Since `autoform.options` is in the schema, that will be used instead of `allowed
     allowedValues: ['red', 'green', 'blue'],
     autoform: {
       options: function () {
-        return _.map(['red', 'green', 'blue'], function (c, i) {
+        return ['red', 'green', 'blue'].map(function (c, i) {
           return {label: "Color " + i + ": " + c, value: c};
         });
       }

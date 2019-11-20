@@ -6,9 +6,9 @@ AutoForm.addInputType("select-multiple", {
   },
   contextAdjust: function (context) {
     // build items list
-    context.items = _.map(context.selectOptions, function (opt) {
+    context.items = context.selectOptions.map(function (opt) {
       if (opt.optgroup) {
-        var subItems = _.map(opt.options, function (subOpt) {
+        var subItems = opt.options.map(function (subOpt) {
           return {
             name: context.name,
             label: subOpt.label,

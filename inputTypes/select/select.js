@@ -24,7 +24,7 @@ AutoForm.addInputType("select", {
 
     // If a firstOption was provided, add that to the items list first
     if (firstOption !== false) {
-      if (typeof firstOption === 'function'){
+      if (typeof firstOption === 'function') {
         firstOption = firstOption();
       }
       context.items.push({
@@ -46,9 +46,9 @@ AutoForm.addInputType("select", {
     }
 
     // Add all defined options
-    _.each(context.selectOptions, function(opt) {
+    _.each(context.selectOptions, function (opt) {
       if (opt.optgroup) {
-        var subItems = _.map(opt.options, function(subOpt) {
+        var subItems = opt.options.map(function (subOpt) {
           return {
             name: context.name,
             label: subOpt.label,

@@ -127,7 +127,7 @@ Utility = {
 
     // Handle options="allowed"
     if (selectOptions === 'allowed') {
-      selectOptions = _.map(defs.allowedValues, function (v) {
+      selectOptions = defs.allowedValues.map(function (v) {
         var label = v;
         if (hash.capitalize && v.length > 0 && schemaType === String) {
           label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
@@ -139,7 +139,7 @@ Utility = {
 
     // Hashtable
     else if (_.isObject(selectOptions) && !Array.isArray(selectOptions)) {
-      selectOptions = _.map(selectOptions, function (v, k) {
+      selectOptions = Object.entries(selectOptions).map(function ([k, v]) {
         return { label: v, value: schemaType(k) };
       });
     }

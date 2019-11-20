@@ -13,7 +13,7 @@ AutoForm.addInputType("textarea", {
     "booleanArray": function (val) {
       if (typeof val === "string" && val.length > 0) {
         var arr = linesToArray(val);
-        return _.map(arr, function (item) {
+        return arr.map(function (item) {
           return AutoForm.valueConverters.stringToBoolean(item);
         });
       }
@@ -23,7 +23,7 @@ AutoForm.addInputType("textarea", {
     "dateArray": function (val) {
       if (typeof val === "string" && val.length > 0) {
         var arr = linesToArray(val);
-        return _.map(arr, function (item) {
+        return arr.map(function (item) {
           return AutoForm.valueConverters.stringToDate(item);
         });
       }

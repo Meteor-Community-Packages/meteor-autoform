@@ -91,7 +91,7 @@ Template.quickForm.helpers({
  * @returns {String[]} Array of field group names
  */
 function getSortedFieldGroupNames(schemaObj) {
-  var names = _.map(schemaObj, function (field) {
+  var names = Object.values(schemaObj).map(function (field) {
     return field.autoform && field.autoform.group;
   });
 
@@ -112,7 +112,7 @@ function getSortedFieldGroupNames(schemaObj) {
  * @returns {String[]} Array of field names (schema keys)
  */
 function getFieldsForGroup(groupName, schemaObj) {
-  var fields = _.map(schemaObj, function (field, fieldName) {
+  var fields = Object.entries(schemaObj).map(function ([fieldName, field]) {
     return (fieldName.slice(-2) !== '.$') &&
       field.autoform &&
       field.autoform.group === groupName &&
@@ -132,7 +132,7 @@ function getFieldsForGroup(groupName, schemaObj) {
  * @returns {String[]} Array of field names (schema keys)
  */
 function getFieldsWithNoGroup(schemaObj) {
-  var fields = _.map(schemaObj, function (field, fieldName) {
+  var fields = Object.entries(schemaObj).map(function ([fieldName, field]) {
     return (fieldName.slice(-2) !== '.$') &&
       (!field.autoform || !field.autoform.group) &&
       fieldName;

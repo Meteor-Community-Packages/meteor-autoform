@@ -1263,7 +1263,7 @@ AutoForm._validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss
     var stickyErrors = AutoForm.templateInstanceForForm(formId)._stickyErrors;
     if (!_.isEmpty(stickyErrors)) {
       isValid = false;
-      stickyErrors = _.map(stickyErrors, function (obj, k) {
+      stickyErrors = Object.entries(stickyErrors).map(function ([k, obj]) {
         return { name: k, type: obj.type, value: obj.value };
       });
       vc.addValidationErrors(stickyErrors);

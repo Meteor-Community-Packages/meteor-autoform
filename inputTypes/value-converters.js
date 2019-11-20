@@ -124,7 +124,7 @@ AutoForm.valueConverters = {
   stringToStringArray: function stringToStringArray(val) {
     if (typeof val === "string") {
       val = val.split(",");
-      return _.map(val, function (item) {
+      return val.map(function (item) {
         return $.trim(item);
       });
     }
@@ -150,7 +150,7 @@ AutoForm.valueConverters = {
   stringToNumberArray: function stringToNumberArray(val) {
     if (typeof val === "string") {
       val = val.split(",");
-      return _.map(val, function (item) {
+      return val.map(function (item) {
         item = $.trim(item);
         return AutoForm.valueConverters.stringToNumber(item);
       });
@@ -179,7 +179,7 @@ AutoForm.valueConverters = {
   stringToBooleanArray: function stringToBooleanArray(val) {
     if (typeof val === "string") {
       val = val.split(",");
-      return _.map(val, function (item) {
+      return val.map(function (item) {
         item = $.trim(item);
         return AutoForm.valueConverters.stringToBoolean(item);
       });
@@ -203,7 +203,7 @@ AutoForm.valueConverters = {
   stringToDateArray: function stringToDateArray(val) {
     if (typeof val === "string") {
       val = val.split(",");
-      return _.map(val, function (item) {
+      return val.map(function (item) {
         item = $.trim(item);
         return AutoForm.valueConverters.stringToDate(item);
       });
