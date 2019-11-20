@@ -16,12 +16,12 @@ Utility = {
   cleanNulls: function cleanNulls(doc, isArray, keepEmptyStrings) {
     var newDoc = isArray ? [] : {};
     _.each(doc, function (val, key) {
-      if (!_.isArray(val) && isBasicObject(val)) {
+      if (!Array.isArray(val) && isBasicObject(val)) {
         val = cleanNulls(val, false, keepEmptyStrings); // recurse into plain objects
         if (!_.isEmpty(val)) {
           newDoc[key] = val;
         }
-      } else if (_.isArray(val)) {
+      } else if (Array.isArray(val)) {
         if (!keepEmptyStrings) {
           val = val.filter(Boolean);
         }
@@ -58,7 +58,7 @@ Utility = {
         nulls[key] = '';
       }
       // If value is an array in which all the values recursively are undefined, null, or an empty string, report this as null so it will be unset
-      else if (_.isArray(val) && Utility.cleanNulls(val, true, keepEmptyStrings).length === 0) {
+      else if (Array.isArray(val) && Utility.cleanNulls(val, true, keepEmptyStrings).length === 0) {
         nulls[key] = '';
       }
     });
@@ -138,7 +138,7 @@ Utility = {
     }
 
     // Hashtable
-    else if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
+    else if (_.isObject(selectOptions) && !Array.isArray(selectOptions)) {
       selectOptions = _.map(selectOptions, function (v, k) {
         return { label: v, value: schemaType(k) };
       });
@@ -226,7 +226,7 @@ Utility = {
           nextPiece = parseInt(nextPiece, 10);
           if (isNaN(nextPiece) && !_.isObject(current[subkey])) {
             current[subkey] = {};
-          } else if (!isNaN(nextPiece) && !_.isArray(current[subkey])) {
+          } else if (!isNaN(nextPiece) && !Array.isArray(current[subkey])) {
             current[subkey] = [];
           }
         }
@@ -246,7 +246,7 @@ Utility = {
   compactArrays: function compactArrays(obj) {
     if (_.isObject(obj)) {
       _.each(obj, function (val, key) {
-        if (_.isArray(val)) {
+        if (Array.isArray(val)) {
           obj[key] = _.without(val, void 0, null);
           _.each(obj[key], function (arrayItem) {
             compactArrays(arrayItem);
@@ -269,7 +269,7 @@ Utility = {
   bubbleEmpty: function bubbleEmpty(obj, keepEmptyStrings) {
     if (_.isObject(obj)) {
       _.each(obj, function (val, key) {
-        if (_.isArray(val)) {
+        if (Array.isArray(val)) {
           _.each(val, function (arrayItem) {
             bubbleEmpty(arrayItem);
           });
@@ -428,7 +428,7 @@ Utility = {
   stringToArray: function stringToArray(s, errorMessage) {
     if (typeof s === 'string') {
       return s.replace(/ /g, '').split(',');
-    } else if (!_.isArray(s)) {
+    } else if (!Array.isArray(s)) {
       throw new Error(errorMessage);
     } else {
       return s;

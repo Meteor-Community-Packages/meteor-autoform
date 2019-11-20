@@ -1162,7 +1162,7 @@ Then in client code, add the hooks:
 AutoForm.hooks({
   postsForm: {
     docToForm: function(doc) {
-      if (_.isArray(doc.tags)) {
+      if (Array.isArray(doc.tags)) {
         doc.tags = doc.tags.join(", ");
       }
       return doc;

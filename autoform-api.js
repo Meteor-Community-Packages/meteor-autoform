@@ -781,7 +781,7 @@ AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(pr
       searchObj = viewData;
     }
     // We need an isArray check, too because _.isObject([{}]) comes back true
-    if (_.isObject(searchObj) && !_.isArray(searchObj)) {
+    if (_.isObject(searchObj) && !Array.isArray(searchObj)) {
       _.each(searchObj, function (v, k) {
         if (k.indexOf(prefix) === 0) {
           result[k.slice(prefix.length)] = v;
@@ -1036,7 +1036,7 @@ AutoForm.getArrayCountFromDocForField = function (formId, field) {
   var docCount;
   if (mDoc) {
     var keyInfo = mDoc.getInfoForKey(field);
-    if (keyInfo && _.isArray(keyInfo.value)) {
+    if (keyInfo && Array.isArray(keyInfo.value)) {
       docCount = keyInfo.value.length;
     }
   }

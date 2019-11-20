@@ -69,7 +69,7 @@ getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fi
   value = (value === null || value === void 0) ? '' : value;
 
   // If the component expects the value to be an array, and it's not, make it one
-  if (typeDefs.valueIsArray && !_.isArray(value)) {
+  if (typeDefs.valueIsArray && !Array.isArray(value)) {
     if (typeof value === 'string') {
       value = value.split(',');
     } else {
