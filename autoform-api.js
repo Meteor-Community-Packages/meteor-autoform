@@ -587,7 +587,7 @@ AutoForm.getInputValue = function autoFormGetInputValue(element, ss) {
   }
 
   // Figure out what registered input type was used to render this element
-  typeDef = AutoForm._inputTypeDefinitions.filter(def => def.template == inputTypeTemplate)[0];
+  typeDef = Object.values(AutoForm._inputTypeDefinitions).filter(def => def.template == inputTypeTemplate)[0];
 
   // If field has a "data-null-value" attribute, value should always be null
   if (field.attr('data-null-value') !== void 0) {
