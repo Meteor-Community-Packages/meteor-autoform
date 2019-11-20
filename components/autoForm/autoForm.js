@@ -26,7 +26,7 @@ Template.autoForm.helpers({
 
     // Filter out any attributes that have a component prefix
     function hasComponentPrefix(prop) {
-      return _.any(Utility.componentTypeList, function (componentType) {
+      return Utility.componentTypeList.some(function (componentType) {
         return prop.indexOf(componentType + '-') === 0;
       });
     }
