@@ -96,7 +96,7 @@ function getSortedFieldGroupNames(schemaObj) {
   });
 
   // Remove undefined
-  names = _.compact(names);
+  names = names.filter(Boolean);
 
   // Remove duplicate names
   names = [...new Set(names)];
@@ -120,7 +120,7 @@ function getFieldsForGroup(groupName, schemaObj) {
   });
 
   // Remove undefined
-  fields = _.compact(fields);
+  fields = fields.filter(Boolean);
 
   return fields;
 }
@@ -139,7 +139,7 @@ function getFieldsWithNoGroup(schemaObj) {
   });
 
   // Remove undefined
-  fields = _.compact(fields);
+  fields = fields.filter(Boolean);
 
   return fields;
 }
