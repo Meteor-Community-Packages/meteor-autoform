@@ -76,11 +76,21 @@ function getKeyForElement(element) {
   return key;
 }
 
+function throttle(fn, limit) {
+  let timeout
+  return function (...args) {
+    clearTimeout(timeout)
+    timeout = setTimeout(function () {
+      fn(...args)
+    }, limit)
+  }
+}
+
 // throttle autosave, at most autosave every 500ms
-var throttleAutosave = _.throttle(function (event) {
+var throttleAutosave = throttle(function (event) {
   lastAutoSaveElement = event.target;
   $(event.currentTarget).submit();
-}, 500, { leading: false });
+}, 500);
 
 Template.autoForm.events({
   'submit form': function autoFormSubmitHandler(event, template) {
