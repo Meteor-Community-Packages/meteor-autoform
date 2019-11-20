@@ -99,7 +99,7 @@ function getSortedFieldGroupNames(schemaObj) {
   names = _.compact(names);
 
   // Remove duplicate names
-  names = _.unique(names);
+  names = [...new Set(names)];
 
   return names.sort();
 }
