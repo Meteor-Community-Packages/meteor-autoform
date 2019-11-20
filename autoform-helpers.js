@@ -186,17 +186,17 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
     // "city" field within that, but if you instead do `fields="address.city"`
     // we will use a single field for the city, with no afObjectField
     // template around it.
-    fieldList = _.reject(fieldList, function (field) {
+    fieldList = fieldList.filter(function (field) {
       var lastDotPos = field.lastIndexOf('.');
       if (lastDotPos === -1) {
-        return false; // keep
+        return true; // keep
       }
 
       var parentField = field.slice(0, lastDotPos);
       if (parentField.slice(-2) === '.$') {
         parentField = parentField.slice(0, -2);
       }
-      return fieldList.includes(parentField) && parentField !== name && parentField !== genericName;
+      return !fieldList.includes(parentField) || parentField === name || parentField === genericName
     });
   }
 
@@ -221,8 +221,8 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
     omitFields = AutoForm.Utility.stringToArray(omitFields, 'AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
     fieldList = _.difference(fieldList, omitFields);
     // If omitFields contains generic field names (with $) we omit those too
-    fieldList = _.reject(fieldList, function (f) {
-      return omitFields.includes(AutoForm.Utility.makeKeyGeneric(f));
+    fieldList = fieldList.filter(function (f) {
+      return !omitFields.includes(AutoForm.Utility.makeKeyGeneric(f));
     });
   }
 
