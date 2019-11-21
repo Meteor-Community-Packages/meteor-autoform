@@ -107,7 +107,10 @@ Template.registerHelper('afFieldValueContains', function autoFormFieldValueConta
   options = parseOptions(options, 'afFieldValueContains');
 
   var currentValue = AutoForm.getFieldValue(options.name, options.formId);
-  return Array.isArray(currentValue) && (currentValue.includes(options.value) || options.values && _.intersection(currentValue, options.values.split(',')));
+  return Array.isArray(currentValue)
+    && (currentValue.includes(options.value)
+      || options.values
+      && options.values.split(',').filter(item => currentValue.includes(item)));
 });
 
 /*
