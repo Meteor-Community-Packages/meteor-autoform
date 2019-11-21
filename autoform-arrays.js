@@ -149,7 +149,7 @@ ArrayTracker.prototype.isFirstFieldlVisible = function atIsFirstFieldlVisible(fo
   var self = this;
   self.ensureField(formId, field);
   self.info[formId][field].deps.depend();
-  var firstVisibleField = _.find(self.info[formId][field].array, function (currentField) {
+  var firstVisibleField = self.info[formId][field].array.find(function (currentField) {
     return !currentField.removed;
   });
   return (firstVisibleField && firstVisibleField.index === currentIndex);
