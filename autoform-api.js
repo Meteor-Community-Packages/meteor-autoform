@@ -1261,7 +1261,7 @@ AutoForm._validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss
 
     // Add sticky errors for all keys if any
     var stickyErrors = AutoForm.templateInstanceForForm(formId)._stickyErrors;
-    if (!_.isEmpty(stickyErrors)) {
+    if (Object.keys(stickyErrors).length) {
       isValid = false;
       stickyErrors = Object.entries(stickyErrors).map(function ([k, obj]) {
         return { name: k, type: obj.type, value: obj.value };

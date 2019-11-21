@@ -110,7 +110,7 @@ Template.autoForm.created = function autoFormCreated() {
     }
 
     var mDoc;
-    if (doc && !_.isEmpty(doc)) {
+    if (doc && Object.keys(doc).length) {
       var hookCtx = { formId: formId };
       // Pass doc through docToForm hooks
       _.each(Hooks.getHooks(formId, 'docToForm'), function autoFormEachDocToForm(hook) {

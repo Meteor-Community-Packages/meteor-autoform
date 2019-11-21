@@ -18,7 +18,7 @@ Utility = {
     _.each(doc, function (val, key) {
       if (!Array.isArray(val) && isBasicObject(val)) {
         val = cleanNulls(val, false, keepEmptyStrings); // recurse into plain objects
-        if (!_.isEmpty(val)) {
+        if (Object.keys(val).length) {
           newDoc[key] = val;
         }
       } else if (Array.isArray(val)) {
@@ -26,7 +26,7 @@ Utility = {
           val = val.filter(Boolean);
         }
         val = cleanNulls(val, true, keepEmptyStrings); // recurse into non-typed arrays
-        if (!_.isEmpty(val)) {
+        if (Object.keys(val).length) {
           newDoc[key] = val;
         }
       } else if (!Utility.isNullUndefinedOrEmptyString(val)) {
@@ -88,10 +88,10 @@ Utility = {
     nulls = Utility.reportNulls(flatDoc, !!options.keepEmptyStrings);
     flatDoc = Utility.cleanNulls(flatDoc, false, !!options.keepEmptyStrings);
 
-    if (!_.isEmpty(flatDoc)) {
+    if (Object.keys(flatDoc).length) {
       modifier.$set = flatDoc;
     }
-    if (!_.isEmpty(nulls)) {
+    if (Object.keys(nulls).length) {
       modifier.$unset = nulls;
     }
     return modifier;
@@ -277,7 +277,7 @@ Utility = {
           var allEmpty = _.all(val, function (prop) {
             return (prop === void 0 || prop === null || (!keepEmptyStrings && typeof prop === 'string' && prop.length === 0));
           });
-          if (_.isEmpty(val) || allEmpty) {
+          if (!Object.keys(val).length || allEmpty) {
             obj[key] = null;
           } else {
             // recurse into objects
