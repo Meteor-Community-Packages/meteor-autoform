@@ -247,7 +247,7 @@ Utility = {
     if (_.isObject(obj)) {
       _.each(obj, function (val, key) {
         if (Array.isArray(val)) {
-          obj[key] = _.without(val, void 0, null);
+          obj[key] = val.filter(item => ![void 0, null].includes(item));
           _.each(obj[key], function (arrayItem) {
             compactArrays(arrayItem);
           });
