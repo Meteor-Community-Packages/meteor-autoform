@@ -8,7 +8,7 @@
  */
 FormPreserve = function formPreserveConstructor(migrationName) {
   var self = this;
-  if (!_.isString(migrationName))
+  if ('string' !== typeof migrationName)
     throw Error('You must define an unique migration name of type String');
   self.registeredForms = {};
   self.retrievedDocuments = {};
