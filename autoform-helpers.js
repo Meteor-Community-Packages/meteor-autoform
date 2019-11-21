@@ -222,7 +222,7 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
   var omitFields = options.omitFields || AutoForm.findAttribute('omitFields');
   if (omitFields) {
     omitFields = AutoForm.Utility.stringToArray(omitFields, 'AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
-    fieldList = _.difference(fieldList, omitFields);
+    fieldList = fieldList.filter(field => !omitFields.includes(field))
     // If omitFields contains generic field names (with $) we omit those too
     fieldList = fieldList.filter(function (f) {
       return !omitFields.includes(AutoForm.Utility.makeKeyGeneric(f));
