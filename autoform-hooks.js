@@ -6,14 +6,14 @@ Hooks = {
 
 // The names of all supported hooks, excluding "before" and "after".
 var hookNames = ['formToDoc', 'formToModifier', 'docToForm', 'onSubmit', 'onSuccess', 'onError',
-    'beginSubmit', 'endSubmit'];
+  'beginSubmit', 'endSubmit'];
 
-Hooks.getDefault = function() {
+Hooks.getDefault = function () {
   var hooks = {
     before: {},
     after: {}
   };
-  _.each(hookNames, function(hookName) {
+  hookNames.forEach(function (hookName) {
     hooks[hookName] = [];
   });
   return hooks;
@@ -23,7 +23,7 @@ Hooks.global = Hooks.getDefault();
 
 Hooks.addHooksToList = function addHooksToList(hooksList, hooks, replace) {
   // Add before hooks
-  hooks.before && _.each(hooks.before, function autoFormBeforeHooksEach(func, type) {
+  hooks.before && Object.entries(hooks.before).forEach(function autoFormBeforeHooksEach([type, func]) {
     if (typeof func !== 'function') {
       throw new Error('AutoForm before hook must be a function, not ' + typeof func);
     }
@@ -32,7 +32,7 @@ Hooks.addHooksToList = function addHooksToList(hooksList, hooks, replace) {
   });
 
   // Add after hooks
-  hooks.after && _.each(hooks.after, function autoFormAfterHooksEach(func, type) {
+  hooks.after && Object.entries(hooks.after).forEach(function autoFormAfterHooksEach([type, func]) {
     if (typeof func !== 'function') {
       throw new Error('AutoForm after hook must be a function, not ' + typeof func);
     }
@@ -41,7 +41,7 @@ Hooks.addHooksToList = function addHooksToList(hooksList, hooks, replace) {
   });
 
   // Add all other hooks
-  _.each(hookNames, function autoFormHooksEach(name) {
+  hookNames.forEach(function autoFormHooksEach(name) {
     if (hooks[name]) {
       if (typeof hooks[name] !== 'function') {
         throw new Error('AutoForm ' + name + ' hook must be a function, not ' + typeof hooks[name]);

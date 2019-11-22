@@ -32,7 +32,7 @@ AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) {
   if (!formIds) {
     Hooks.addHooksToList(Hooks.global, hooks, replace);
   } else {
-    _.each(formIds, function (formId) {
+    formIds.forEach(function (formId) {
 
       // Init the hooks object if not done yet
       Hooks.form[formId] = Hooks.form[formId] || Hooks.getDefault();
@@ -52,7 +52,7 @@ AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) {
  * form.
  */
 AutoForm.hooks = function autoFormHooks(hooks, replace) {
-  _.each(hooks, function (hooksObj, formId) {
+  Object.entries(hooks).forEach(function ([formId, hooksObj]) {
     AutoForm.addHooks(formId, hooksObj, replace);
   });
 };
@@ -357,7 +357,7 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
 
     // Pass expanded doc through formToDoc hooks
     transforms = Hooks.getHooks(formId, 'formToDoc');
-    _.each(transforms, function formValuesTransform(transform) {
+    transforms.forEach(function formValuesTransform(transform) {
       insertDoc = transform.call(hookCtx, insertDoc, ss);
     });
   }
@@ -384,7 +384,7 @@ AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, ge
 
     // Pass modifier through formToModifier hooks
     transforms = Hooks.getHooks(formId, 'formToModifier');
-    _.each(transforms, function formValuesTransform(transform) {
+    transforms.forEach(function formValuesTransform(transform) {
       updateDoc = transform.call(hookCtx, updateDoc);
     });
   }
@@ -783,7 +783,7 @@ AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(pr
     }
     // We need an isArray check, too because isObject([{}]) comes back true
     if (isObject(searchObj) && !Array.isArray(searchObj)) {
-      _.each(searchObj, function (v, k) {
+      Object.entries(searchObj).forEach(function ([k, v]) {
         if (k.indexOf(prefix) === 0) {
           result[k.slice(prefix.length)] = v;
         }

@@ -45,7 +45,7 @@ AutoForm.addInputType("select", {
     }
 
     // Add all defined options
-    _.each(context.selectOptions, function (opt) {
+    context.selectOptions.forEach(function (opt) {
       if (opt.optgroup) {
         var subItems = opt.options.map(function (subOpt) {
           const { label, value, ...htmlAtts } = subOpt

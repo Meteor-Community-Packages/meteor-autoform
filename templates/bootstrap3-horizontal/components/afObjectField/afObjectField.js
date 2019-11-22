@@ -7,7 +7,7 @@ Template["afObjectField_bootstrap3-horizontal"].helpers({
   afFieldLabelAtts: function () {
     // Use only atts beginning with label-
     var labelAtts = {};
-    _.each(this, function (val, key) {
+    Object.entries(this).forEach(function ([key, val]) {
       if (key.indexOf("label-") === 0) {
         labelAtts[key.substring(6)] = val;
       }

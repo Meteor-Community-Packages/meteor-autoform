@@ -44,7 +44,7 @@ Template.quickForm.helpers({
     var fieldGroupNames = getSortedFieldGroupNames(sortedSchema);
 
     // Loop through the list and make a field group context for each
-    _.each(fieldGroupNames, function (fieldGroupName) {
+    fieldGroupNames.forEach(function (fieldGroupName) {
       var fieldsForGroup = getFieldsForGroup(fieldGroupName, sortedSchema);
 
       if (fieldsForGroup.length > 0) {

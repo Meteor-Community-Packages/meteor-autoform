@@ -120,7 +120,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   // in a simple way, we add the attributes to the HTML
   // only if their value is `true`. That is, unlike in
   // HTML, their mere presence does not matter.
-  _.each(['disabled', 'readonly', 'checked', 'required', 'autofocus'], function (booleanProp) {
+  ['disabled', 'readonly', 'checked', 'required', 'autofocus'].forEach(function (booleanProp) {
     if (!(booleanProp in hash)) {
       return;
     }
@@ -233,7 +233,7 @@ updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName, 
 
 updateAllTrackedFieldValues = function updateAllTrackedFieldValues(template) {
   if (template && template.formValues) {
-    _.each(template.formValues, function (o, fieldName) {
+    Object.keys(template.formValues).forEach(function (fieldName) {
       updateTrackedFieldValue(template, fieldName);
     });
   }

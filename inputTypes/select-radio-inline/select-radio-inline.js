@@ -10,7 +10,7 @@ AutoForm.addInputType("select-radio-inline", {
     context.items = [];
 
     // Add all defined options
-    _.each(context.selectOptions, function (opt) {
+    context.selectOptions.forEach(function (opt) {
       context.items.push({
         name: context.name,
         label: opt.label,

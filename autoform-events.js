@@ -12,7 +12,7 @@ function beginSubmit(formId, template, hookContext) {
   // Get user-defined hooks
   var hooks = Hooks.getHooks(formId, 'beginSubmit');
   if (hooks.length) {
-    _.each(hooks, function beginSubmitHooks(hook) {
+    hooks.forEach(function beginSubmitHooks(hook) {
       hook.call(hookContext);
     });
   } else {
@@ -32,7 +32,7 @@ function endSubmit(formId, template, hookContext) {
   // Get user-defined hooks
   var hooks = Hooks.getHooks(formId, 'endSubmit');
   if (hooks.length) {
-    _.each(hooks, function endSubmitHooks(hook) {
+    hooks.forEach(function endSubmitHooks(hook) {
       hook.call(hookContext);
     });
   } else {
@@ -190,7 +190,7 @@ Template.autoForm.events({
       } else {
         error = new Error('form failed validation');
       }
-      _.each(onErrorHooks, function onErrorEach(hook) {
+      onErrorHooks.forEach(function onErrorEach(hook) {
         hook.call(hookContext, 'pre-submit validation', error);
       });
       event.preventDefault();
@@ -253,7 +253,7 @@ Template.autoForm.events({
     function resultCallback(error, result) {
       if (error) {
         if (onErrorHooks && onErrorHooks.length) {
-          _.each(onErrorHooks, function onErrorEach(hook) {
+          onErrorHooks.forEach(function onErrorEach(hook) {
             hook.call(hookContext, formType, error);
           });
         } else if ((!afterHooks || !afterHooks.length) && ss.namedContext(formId).isValid()) {
@@ -272,11 +272,11 @@ Template.autoForm.events({
         if (formType === 'insert') {
           hookContext.docId = result;
         }
-        _.each(onSuccessHooks, function onSuccessEach(hook) {
+        onSuccessHooks.forEach(function onSuccessEach(hook) {
           hook.call(hookContext, formType, result);
         });
       }
-      _.each(afterHooks, function afterHooksEach(hook) {
+      afterHooks.forEach(function afterHooksEach(hook) {
         hook.call(hookContext, error, result);
       });
       endSubmission();

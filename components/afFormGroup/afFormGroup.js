@@ -58,7 +58,7 @@ Template.afFormGroup.helpers({
 function formGroupAtts(atts) {
   // Separate formgroup options from input options; formgroup items begin with 'formgroup-'
   var labelAtts = {};
-  _.each(atts, function autoFormLabelAttsEach(val, key) {
+  Object.entries(atts).forEach(function autoFormLabelAttsEach([key, val]) {
     if (key.indexOf('formgroup-') === 0 && key != 'formgroup-class') {
       labelAtts[key.substring(10)] = val;
     }
@@ -69,7 +69,7 @@ function formGroupAtts(atts) {
 function formGroupLabelAtts(atts) {
   // Separate label options from input options; label items begin with 'label-'
   var labelAtts = {};
-  _.each(atts, function autoFormLabelAttsEach(val, key) {
+  Object.entries(atts).forEach(function autoFormLabelAttsEach([key, val]) {
     if (key.indexOf('label-') === 0) {
       labelAtts[key.substring(6)] = val;
     }
@@ -81,7 +81,7 @@ function formGroupInputAtts(atts) {
   // Separate input options from label and formgroup options
   // We also don't want the 'label' option
   var inputAtts = {};
-  _.each(atts, function autoFormLabelAttsEach(val, key) {
+  Object.entries(atts).forEach(function autoFormLabelAttsEach([key, val]) {
     if (['id-prefix', 'id', 'label'].indexOf(key) === -1 && key.indexOf('label-') !== 0 && key.indexOf('formgroup-') !== 0) {
       inputAtts[key] = val;
     }

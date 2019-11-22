@@ -100,7 +100,7 @@ ArrayTracker.prototype.resetField = function atResetField(formId, field) {
 
 ArrayTracker.prototype.resetForm = function atResetForm(formId) {
   var self = this;
-  _.each(self.info[formId], function (info, field) {
+  Object.keys(self.info[formId] || {}).forEach(function (field) {
     self.resetField(formId, field);
   });
 };
@@ -227,7 +227,7 @@ var createLoopCtx = function (formId, field, index, childKeys, overrideMinCount,
   // If this is an array of objects, add child key names under loopCtx.current[childName] = fullKeyName
   if (childKeys.length) {
     loopCtx.current = {};
-    _.each(childKeys, function (k) {
+    childKeys.forEach(function (k) {
       loopCtx.current[k] = field + '.' + index + '.' + k;
     });
   }

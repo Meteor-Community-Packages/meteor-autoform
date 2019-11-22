@@ -65,7 +65,7 @@ FormPreserve.prototype.unregisterAllForms = function () {
 FormPreserve.prototype._retrieveRegisteredDocuments = function () {
   var self = this;
   res = {};
-  _.each(self.registeredForms, function (retrieveFunc, formId) {
+  Object.entries(self.registeredForms).forEach(function ([formId, retrieveFunc]) {
     res[formId] = retrieveFunc();
   });
   return res;

@@ -16,7 +16,7 @@ Utility = {
    */
   cleanNulls: function cleanNulls(doc, isArray, keepEmptyStrings) {
     var newDoc = isArray ? [] : {};
-    _.each(doc, function (val, key) {
+    Object.entries(doc).forEach(function ([key, val]) {
       if (!Array.isArray(val) && isBasicObject(val)) {
         val = cleanNulls(val, false, keepEmptyStrings); // recurse into plain objects
         if (Object.keys(val).length) {
@@ -49,7 +49,7 @@ Utility = {
   reportNulls: function reportNulls(flatDoc, keepEmptyStrings) {
     var nulls = {};
     // Loop through the flat doc
-    _.each(flatDoc, function (val, key) {
+    Object.entries(flatDoc).forEach(function ([key, val]) {
       // If value is undefined, null, or an empty string, report this as null so it will be unset
       if (val === null) {
         nulls[key] = '';
@@ -209,7 +209,7 @@ Utility = {
    */
   expandObj: function expandObj(doc) {
     var newDoc = {}, subkeys, subkey, subkeylen, nextPiece, current;
-    _.each(doc, function (val, key) {
+    Object.entries(doc).forEach(function ([key, val]) {
       subkeys = key.split('.');
       subkeylen = subkeys.length;
       current = newDoc;
@@ -246,12 +246,10 @@ Utility = {
    */
   compactArrays: function compactArrays(obj) {
     if (isObject(obj)) {
-      _.each(obj, function (val, key) {
+      Object.entries(obj).forEach(function ([key, val]) {
         if (Array.isArray(val)) {
           obj[key] = val.filter(item => ![void 0, null].includes(item));
-          _.each(obj[key], function (arrayItem) {
-            compactArrays(arrayItem);
-          });
+          obj[key].forEach(compactArrays);
         } else if (!(val instanceof Date) && isObject(val)) {
           // recurse into objects
           compactArrays(val);
@@ -269,11 +267,9 @@ Utility = {
    */
   bubbleEmpty: function bubbleEmpty(obj, keepEmptyStrings) {
     if (isObject(obj)) {
-      _.each(obj, function (val, key) {
+      Object.entries(obj).forEach(function ([key, val]) {
         if (Array.isArray(val)) {
-          _.each(val, function (arrayItem) {
-            bubbleEmpty(arrayItem);
-          });
+          val.forEach(bubbleEmpty);
         } else if (isBasicObject(val)) {
           var allEmpty = val.every(function (prop) {
             return (prop === void 0 || prop === null || (!keepEmptyStrings && typeof prop === 'string' && prop.length === 0));
@@ -408,7 +404,7 @@ Utility = {
 
     // eval any attribute that is provided as a function
     var evaluatedAtts = {};
-    _.each(atts, function (v, k) {
+    Object.entries(atts).forEach(function ([k, v]) {
       if (typeof v === 'function') {
         evaluatedAtts[k] = v.call({
           name: atts.name

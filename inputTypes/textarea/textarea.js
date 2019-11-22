@@ -41,7 +41,7 @@ AutoForm.addInputType("textarea", {
 function linesToArray(text) {
   text = text.split('\n');
   var lines = [];
-  _.each(text, function (line) {
+  text.forEach(function (line) {
     line = $.trim(line);
     if (line.length) {
       lines.push(line);
