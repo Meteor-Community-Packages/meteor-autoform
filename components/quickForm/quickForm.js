@@ -60,12 +60,7 @@ Template.quickForm.helpers({
 
     // Pass along quickForm context to autoForm context, minus a few
     // properties that are specific to quickForms.
-    var qfAutoFormContext = _.omit(atts,
-      'buttonContent',
-      'buttonClasses',
-      'fields',
-      'omitFields',
-      'id-prefix');
+    const { buttonContent, buttonClasses, fields, omitFields, 'id-prefix': idPrefix, ...qfAutoFormContext } = atts
 
     // Determine whether we want to render a submit button
     var qfShouldRenderButton = (atts.buttonContent !== false && atts.type !== 'readonly' && atts.type !== 'disabled');

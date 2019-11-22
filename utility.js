@@ -396,7 +396,11 @@ Utility = {
     // the latter overriding the former.
     fieldAttributes = { ...defs.autoform };
     fieldAttributesForComponentType = fieldAttributes[name] || {};
-    fieldAttributes = _.omit(fieldAttributes, Utility.componentTypeList);
+    fieldAttributes = Object.entries(fieldAttributes)
+      .reduce((result, [key, value]) => {
+        if (!Utility.componentTypeList.includes(key)) result[key] = value
+        return result
+      }, {})
     fieldAttributes = { ...fieldAttributes, ...fieldAttributesForComponentType };
 
     // "autoform" option in the schema provides default atts

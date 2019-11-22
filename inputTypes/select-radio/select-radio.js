@@ -4,7 +4,7 @@ AutoForm.addInputType("select-radio", {
     return this.find('input[type=radio]:checked').val();
   },
   contextAdjust: function (context) {
-    var itemAtts = _.omit(context.atts);
+    var itemAtts = { ...context.atts };
 
     // build items list
     context.items = [];

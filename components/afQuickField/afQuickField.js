@@ -21,7 +21,8 @@ Template.afQuickField.helpers({
   groupAtts: function afQuickFieldGroupAtts() {
     // afQuickField passes `fields` and `omitFields` on to `afObjectField`
     // and `afArrayField`, but not to `afFormGroup`
-    return _.omit(this, 'fields', 'omitFields');
+    const { fields, omitFields, ...rest } = this
+    return rest
   },
   isHiddenInput: function afQuickFieldIsHiddenInput() {
     var c = AutoForm.Utility.getComponentContext(this, "afQuickField");

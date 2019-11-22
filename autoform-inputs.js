@@ -98,14 +98,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
 
   // We don't want to alter the original hash, so we clone it and
   // remove some stuff that should not be HTML attributes.
-  var inputAtts = _.omit(hash,
-    'type',
-    'value',
-    'noselect',
-    'options',
-    'template',
-    'defaultValue',
-    'data');
+  const { type, value: hashValue, noselect, options, template, defaultValue, data, ...inputAtts } = hash
 
   // Add required if required
   if (typeof inputAtts.required === 'undefined' && !defs.optional) {

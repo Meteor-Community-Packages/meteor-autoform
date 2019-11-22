@@ -16,8 +16,7 @@ AutoForm.addInputType("select", {
     //can fix issues with some browsers selecting the firstOption instead of the selected option
     context.atts.autocomplete = "off";
 
-    var itemAtts = _.omit(context.atts, 'firstOption');
-    var firstOption = context.atts.firstOption;
+    let { firstOption, ...itemAtts } = context.atts
 
     // build items list
     context.items = [];
@@ -49,11 +48,12 @@ AutoForm.addInputType("select", {
     _.each(context.selectOptions, function (opt) {
       if (opt.optgroup) {
         var subItems = opt.options.map(function (subOpt) {
+          const { label, value, ...htmlAtts } = subOpt
           return {
             name: context.name,
-            label: subOpt.label,
-            value: subOpt.value,
-            htmlAtts: _.omit(subOpt, 'label', 'value'),
+            label,
+            value,
+            htmlAtts,
             // _id must be included because it is a special property that
             // #each uses to track unique list items when adding and removing them
             // See https://github.com/meteor/meteor/issues/2174
@@ -72,11 +72,12 @@ AutoForm.addInputType("select", {
           items: subItems
         });
       } else {
+        const { label, value, ...htmlAtts } = opt
         context.items.push({
           name: context.name,
-          label: opt.label,
-          value: opt.value,
-          htmlAtts: _.omit(opt, 'label', 'value'),
+          label,
+          value,
+          htmlAtts,
           // _id must be included because it is a special property that
           // #each uses to track unique list items when adding and removing them
           // See https://github.com/meteor/meteor/issues/2174
