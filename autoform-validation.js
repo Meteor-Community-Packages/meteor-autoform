@@ -1,3 +1,5 @@
+import { throttle } from './common'
+
 /* global AutoForm, validateField:true */
 
 function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
@@ -40,16 +42,6 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
   }
 
   return AutoForm._validateFormDoc(docToValidate, !!ftd.usesModifier, formId, ss, form, key);
-}
-
-function throttle(fn, limit) {
-  let timeout
-  return function (...args) {
-    clearTimeout(timeout)
-    timeout = setTimeout(function () {
-      fn(...args)
-    }, limit)
-  }
 }
 
 // Throttle field validation to occur at most every 300ms,

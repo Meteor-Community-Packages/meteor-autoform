@@ -1,4 +1,4 @@
-import { isObject } from './common'
+import { isObject, throttle } from './common'
 
 /* global AutoForm, Hooks, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues */
 
@@ -76,16 +76,6 @@ function getKeyForElement(element) {
     key = $(element).closest('[data-schema-key]').attr('data-schema-key');
   }
   return key;
-}
-
-function throttle(fn, limit) {
-  let timeout
-  return function (...args) {
-    clearTimeout(timeout)
-    timeout = setTimeout(function () {
-      fn(...args)
-    }, limit)
-  }
 }
 
 // throttle autosave, at most autosave every 500ms
