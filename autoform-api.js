@@ -466,7 +466,7 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean
     template.formValues[fieldName].isMarkedChanged = true
   }
 
-  const { isMarkedChanged, cachedValue } = template.formValues[fieldName]
+  let { isMarkedChanged, cachedValue } = template.formValues[fieldName]
   template.formValues[fieldName].depend();
 
   // if the field does not have value, but a child node has
@@ -478,6 +478,7 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean
     if (someChildHasValue) {
       template.formValues[fieldName].isMarkedChanged = true
       template.formValues[fieldName].changed()
+      isMarkedChanged = true
     }
   }
 
