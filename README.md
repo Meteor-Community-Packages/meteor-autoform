@@ -11,6 +11,9 @@ A lot. Here's a summary:
 Performance
 -------------------------
 
+* **No underscore.js**:
+    Underscore dependency was removed.
+
 * **Mongo collections for arrayTracker**:
     Improves the performance greatly. Blaze cannot diff the original
     AutoForm arrayTracker items, so I replaced it with Mongo collections.
@@ -62,3 +65,13 @@ Features
 
 * **`omit` can be a function now**
 * **`AutoForm.setFieldValue(fieldName, value, formId)` added**: aldeed/meteor-autoform/issues/452
+
+Other
+-------------------------
+
+* **No templates in main package**:
+    BS3 is deprecated. These templates are rarely used, including them in the main package and
+    supporting them makes the code unnecessarily huge and difficult to maintain.
+    These were moved to their own packages:
+    [autoform-bootstrap3](https://github.com/pouya-eghbali/autoform-bootstrap3),
+    [autoform-plain](https://github.com/pouya-eghbali/autoform-plain)
