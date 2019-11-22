@@ -466,13 +466,22 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean
     template.formValues[fieldName].isMarkedChanged = true
   }
 
+  const { isMarkedChanged, cachedValue } = template.formValues[fieldName]
   template.formValues[fieldName].depend();
 
-  //if (template.formValues[fieldName].cachedValue !== undefined) {
-  if (template.formValues[fieldName].isMarkedChanged === false) {
-    return template.formValues[fieldName].cachedValue
+  // if the field does not have value, but a child node has
+  if (isMarkedChanged === false && cachedValue === undefined) {
+    const someChildHasValue = Object.keys(template.formValues)
+      .filter(key => key.startsWith(fieldName + '.'))
+      .map(key => template.formValues[key].cachedValue)
+      .some(value => value !== undefined)
+    if (someChildHasValue) {
+      template.formValues[fieldName].isMarkedChanged = true
+      template.formValues[fieldName].changed()
+    }
   }
-  //}
+
+  if (isMarkedChanged === false) return cachedValue
 
   var doc = AutoForm.getFormValues(formId, template, null, false, clean);
   if (!doc) return;
@@ -482,6 +491,29 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean
 
   template.formValues[fieldName].cachedValue = value
   template.formValues[fieldName].isMarkedChanged = false
+
+  /*// Not sure if this is needed
+  // if node has value, but a parent node doesn't have
+  if (value !== undefined) {
+    const { ancestors } = fieldName.split('.').slice(0, -1)
+      .reduce(({ ancestors, current }, field) => {
+        current = current ? current + '.' + field : field
+        ancestors.unshift(current)
+        return { ancestors, current }
+      }, { ancestors: [] })
+    // get first initialized ancestor
+    const ancestor = ancestors
+      .filter(ancestor => !!template.formValues[ancestor]).shift()
+    if (ancestor) {
+      const { isMarkedChanged, cachedValue } = template.formValues[ancestor] || {}
+      if (isMarkedChanged === false && cachedValue === undefined) {
+        template.formValues[ancestor].isMarkedChanged = true
+        template.formValues[ancestor].changed()
+      }
+    }
+  }
+  */
+
   return value
 };
 

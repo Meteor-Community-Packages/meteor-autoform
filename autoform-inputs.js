@@ -177,42 +177,7 @@ function markChangedThrottle(fn, limit) {
   }
 }
 
-const markChanged = markChangedThrottle(function (template, fieldName, fieldValue) {
-
-  // is it really changed?
-  if (fieldValue === template.formValues[fieldName].cachedValue) return
-  // is there really a value??
-  if (fieldValue === undefined) return
-  // is the form rendered???
-  if (template.$(`[data-schema-key="${fieldName}"]`).val() == null)
-    return markChanged(template, fieldName, fieldValue)
-
-  if (template &&
-    template.view &&
-    template.view._domrange &&
-    !template.view.isDestroyed &&
-    template.formValues[fieldName]) {
-
-    template.formValues[fieldName].isMarkedChanged = true;
-    template.formValues[fieldName].changed()
-
-    template.inputValues[fieldName].cachedValue = fieldValue
-    template.inputValues[fieldName].changed()
-
-  }
-
-}, 150);
-
-updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName, fieldValue) {
-  if (!template) return;
-
-  template.formValues = template.formValues || {};
-  if (!template.formValues[fieldName]) {
-    template.formValues[fieldName] = new Tracker.Dependency();
-  }
-
-  markChanged(template, fieldName, fieldValue);
-
+const markChangedAncestors = (template, fieldName, fieldValue) => {
   // To properly handle array fields, we'll mark the ancestors as changed, too
   // FIX THIS
   // XXX Might be a more elegant way to handle this
@@ -225,10 +190,53 @@ updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName, 
       template.formValues[fieldName] = new Tracker.Dependency();
     }
 
-    markChanged(template, fieldName);
+    template.formValues[fieldName].isMarkedChanged = true;
+    template.formValues[fieldName].changed()
 
     dotPos = fieldName.lastIndexOf('.');
   }
+}
+
+const doMarkChanged = (template, fieldName, fieldValue) => {
+  if (template &&
+    template.view &&
+    template.view._domrange &&
+    !template.view.isDestroyed &&
+    template.formValues[fieldName]) {
+
+    template.formValues[fieldName].isMarkedChanged = true;
+    template.formValues[fieldName].changed()
+
+    template.inputValues[fieldName].cachedValue = fieldValue
+    template.inputValues[fieldName].changed()
+
+    markChangedAncestors(template, fieldName)
+
+  }
+}
+
+const markChanged = markChangedThrottle(function (template, fieldName, fieldValue) {
+  // is it really changed?
+  if (fieldValue === template.formValues[fieldName].cachedValue) return
+  // is there really a value??
+  if (fieldValue === undefined) return
+  // is the form rendered???
+  if (template.$(`[data-schema-key="${fieldName}"]`).val() == null)
+    return markChanged(template, fieldName, fieldValue)
+
+  doMarkChanged(template, fieldName, fieldValue)
+
+}, 150);
+
+updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName, fieldValue) {
+  if (!template) return;
+
+  template.formValues = template.formValues || {};
+  if (!template.formValues[fieldName]) {
+    template.formValues[fieldName] = new Tracker.Dependency();
+  }
+
+  markChanged(template, fieldName, fieldValue);
 };
 
 updateAllTrackedFieldValues = function updateAllTrackedFieldValues(template) {
