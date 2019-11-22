@@ -5,13 +5,12 @@ Package.describe({
   version: '6.3.0'
 });
 
-Package.onUse(function(api) {
+Package.onUse(function (api) {
   api.versionsFrom('METEOR@1.3');
 
   // Dependencies
   api.use([
     'livedata',
-    'underscore',
     'deps',
     'templating',
     'ui',
