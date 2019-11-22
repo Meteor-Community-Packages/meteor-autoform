@@ -26,7 +26,8 @@ Template['quickForm_bootstrap3-inline'].helpers({
   quickFieldsAtts: function () {
     // These are the quickForm attributes that we want to forward to
     // the afQuickFields component.
-    return _.pick(this.atts, 'id-prefix', 'label-class');
+    const { 'id-prefix': IdPrefix, 'label-class': labelClass } = this.atts
+    return { 'id-prefix': IdPrefix, 'label-class': labelClass }
   }
 });
 

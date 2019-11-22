@@ -17,7 +17,8 @@ Template["afObjectField_bootstrap3-horizontal"].helpers({
     return labelAtts;
   },
   quickFieldsAtts: function () {
-    var atts = _.pick(this, 'name', 'id-prefix');
+    const { name, 'id-prefix': IdPrefix } = this
+    var atts = { name, 'id-prefix': IdPrefix }
     // We want to default to using bootstrap3 template below this point
     // because we don't want horizontal within horizontal
     atts.template = 'bootstrap3';

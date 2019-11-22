@@ -3,7 +3,7 @@ Template.quickForm_bootstrap3.helpers({
     var name = this.name;
 
     // if field group name is of the form XY_abcde where "XY" is a number, remove prefix
-    if (!isNaN(parseInt(name.substr(0,2), 10)) && name.charAt(2) === "_") {
+    if (!isNaN(parseInt(name.substr(0, 2), 10)) && name.charAt(2) === "_") {
       name = name.substr(3);
     }
 
@@ -18,7 +18,8 @@ Template.quickForm_bootstrap3.helpers({
   quickFieldsAtts: function () {
     // These are the quickForm attributes that we want to forward to
     // the afQuickFields component.
-    return _.pick(this.atts, 'fields', 'id-prefix', 'input-col-class', 'label-class');
+    const { fields, 'id-prefix': IdPrefix, 'input-col-class': inputColClass, 'label-class': labelClass } = this.atts
+    return { fields, 'id-prefix': IdPrefix, 'input-col-class': inputColClass, 'label-class': labelClass }
   },
   submitButtonAtts: function bsQuickFormSubmitButtonAtts() {
     var qfAtts = this.atts;
