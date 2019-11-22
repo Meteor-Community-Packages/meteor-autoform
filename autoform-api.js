@@ -518,6 +518,14 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean
   return value
 };
 
+const setChildValues = (fieldName, value, formId) => {
+  if (!isObject(value)) return;
+  Object.entries(value).forEach(([key, value]) => {
+    const subField = fieldName + '.' + key
+    AutoForm.setFieldValue(subField, value, formId)
+  })
+}
+
 /**
  * @method AutoForm.setFieldValue
  * @public
@@ -545,13 +553,13 @@ AutoForm.setFieldValue = function autoFormSetFieldValue(fieldName, value, formId
 
   if (!template.formValues[fieldName]) {
     template.formValues[fieldName] = new Tracker.Dependency();
-    template.formValues[fieldName].isMarkedChanged = true
   }
 
   template.formValues[fieldName].cachedValue = value
   template.formValues[fieldName].isMarkedChanged = false
   template.formValues[fieldName].changed();
 
+  setChildValues(fieldName, value, formId)
 };
 
 /**
