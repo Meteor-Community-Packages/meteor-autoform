@@ -232,8 +232,17 @@ Template.autoForm.events({
           }
         };
 
+        const cbOnce = () => {
+          let alreadyRan = false
+          return d => {
+            if (alreadyRan) return
+            alreadyRan = true
+            return cb(d)
+          }
+        }
+
         // Add the `result` function to the before hook context
-        var ctx = { result: _.once(cb), ...hookContext }
+        var ctx = { result: cbOnce(), ...hookContext }
 
         var result = hook.call(ctx, doc);
 
