@@ -1,5 +1,5 @@
 import MongoObject from 'mongo-object';
-import { isObject } from './common'
+import { isObject } from '../../common'
 
 /* global AutoForm, ReactiveVar, arrayTracker, Hooks, Utility, setDefaults */
 
