@@ -1,3 +1,5 @@
+import { isObject } from './common'
+
 /* global AutoForm, Hooks, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues */
 
 // all form events handled here
@@ -225,7 +227,7 @@ Template.autoForm.events({
           // If the hook returns false, we cancel
           if (d === false) {
             endSubmission();
-          } else if (!_.isObject(d)) {
+          } else if (!isObject(d)) {
             throw new Error("A 'before' hook must return an object");
           } else {
             runHook(i + 1, d);

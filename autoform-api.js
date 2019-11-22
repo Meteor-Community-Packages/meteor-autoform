@@ -1,4 +1,5 @@
 import MongoObject from 'mongo-object';
+import { isObject } from './common'
 
 /* global AutoForm:true, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, validateField, arrayTracker, ReactiveVar, getAllFieldsInForm, setDefaults:true, getFlatDocOfFieldValues */
 
@@ -780,8 +781,8 @@ AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(pr
     } else {
       searchObj = viewData;
     }
-    // We need an isArray check, too because _.isObject([{}]) comes back true
-    if (_.isObject(searchObj) && !Array.isArray(searchObj)) {
+    // We need an isArray check, too because isObject([{}]) comes back true
+    if (isObject(searchObj) && !Array.isArray(searchObj)) {
       _.each(searchObj, function (v, k) {
         if (k.indexOf(prefix) === 0) {
           result[k.slice(prefix.length)] = v;

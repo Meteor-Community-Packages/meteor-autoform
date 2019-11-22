@@ -1,4 +1,5 @@
 import MongoObject from 'mongo-object';
+import { isObject } from './common'
 
 /* global Utility:true, AutoForm, moment */
 
@@ -138,7 +139,7 @@ Utility = {
     }
 
     // Hashtable
-    else if (_.isObject(selectOptions) && !Array.isArray(selectOptions)) {
+    else if (isObject(selectOptions) && !Array.isArray(selectOptions)) {
       selectOptions = Object.entries(selectOptions).map(function ([k, v]) {
         return { label: v, value: schemaType(k) };
       });
@@ -214,7 +215,7 @@ Utility = {
       current = newDoc;
       for (var i = 0; i < subkeylen; i++) {
         subkey = subkeys[i];
-        if (typeof current[subkey] !== 'undefined' && !_.isObject(current[subkey])) {
+        if (typeof current[subkey] !== 'undefined' && !isObject(current[subkey])) {
           break; // already set for some reason; leave it alone
         }
         if (i === subkeylen - 1) {
@@ -224,7 +225,7 @@ Utility = {
           // see if the next piece is a number
           nextPiece = subkeys[i + 1];
           nextPiece = parseInt(nextPiece, 10);
-          if (isNaN(nextPiece) && !_.isObject(current[subkey])) {
+          if (isNaN(nextPiece) && !isObject(current[subkey])) {
             current[subkey] = {};
           } else if (!isNaN(nextPiece) && !Array.isArray(current[subkey])) {
             current[subkey] = [];
@@ -244,14 +245,14 @@ Utility = {
    * Edits the object by reference, compacting any arrays at any level recursively.
    */
   compactArrays: function compactArrays(obj) {
-    if (_.isObject(obj)) {
+    if (isObject(obj)) {
       _.each(obj, function (val, key) {
         if (Array.isArray(val)) {
           obj[key] = val.filter(item => ![void 0, null].includes(item));
           _.each(obj[key], function (arrayItem) {
             compactArrays(arrayItem);
           });
-        } else if (!(val instanceof Date) && _.isObject(val)) {
+        } else if (!(val instanceof Date) && isObject(val)) {
           // recurse into objects
           compactArrays(val);
         }
@@ -267,7 +268,7 @@ Utility = {
    * Edits the object by reference.
    */
   bubbleEmpty: function bubbleEmpty(obj, keepEmptyStrings) {
-    if (_.isObject(obj)) {
+    if (isObject(obj)) {
       _.each(obj, function (val, key) {
         if (Array.isArray(val)) {
           _.each(val, function (arrayItem) {
@@ -496,5 +497,5 @@ if (typeof Object.getPrototypeOf !== 'function') {
  * @returns {Boolean}
  */
 var isBasicObject = function (obj) {
-  return _.isObject(obj) && Object.getPrototypeOf(obj) === Object.prototype;
+  return isObject(obj) && Object.getPrototypeOf(obj) === Object.prototype;
 };

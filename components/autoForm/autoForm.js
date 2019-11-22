@@ -1,4 +1,5 @@
 import MongoObject from 'mongo-object';
+import { isObject } from './common'
 
 /* global AutoForm, ReactiveVar, arrayTracker, Hooks, Utility, setDefaults */
 
@@ -38,7 +39,7 @@ Template.autoForm.helpers({
         !removeProps.includes(prop) &&
         !hasComponentPrefix(prop)) {
         val = context[prop];
-        if (!Array.isArray(val) && !_.isObject(val)) {
+        if (!Array.isArray(val) && !isObject(val)) {
           htmlAttributes[prop] = val;
         }
       }
