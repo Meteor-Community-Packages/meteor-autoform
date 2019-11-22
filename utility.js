@@ -271,7 +271,7 @@ Utility = {
         if (Array.isArray(val)) {
           val.forEach(bubbleEmpty);
         } else if (isBasicObject(val)) {
-          var allEmpty = val.every(function (prop) {
+          var allEmpty = Object.values(val).every(function (prop) {
             return (prop === void 0 || prop === null || (!keepEmptyStrings && typeof prop === 'string' && prop.length === 0));
           });
           if (!Object.keys(val).length || allEmpty) {
