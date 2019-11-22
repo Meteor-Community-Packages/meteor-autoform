@@ -275,7 +275,7 @@ Utility = {
             bubbleEmpty(arrayItem);
           });
         } else if (isBasicObject(val)) {
-          var allEmpty = _.all(val, function (prop) {
+          var allEmpty = val.every(function (prop) {
             return (prop === void 0 || prop === null || (!keepEmptyStrings && typeof prop === 'string' && prop.length === 0));
           });
           if (!Object.keys(val).length || allEmpty) {
