@@ -1,3 +1,5 @@
+import { isFunction } from './common'
+
 /* global arrayTracker, AutoForm */
 
 function parseOptions(options) {
@@ -243,7 +245,7 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
       return false;
     }
 
-    if (fieldDefs.autoform && _.isFunction(fieldDefs.autoform.omit) && fieldDefs.autoform.omit(field) === true) {
+    if (fieldDefs.autoform && isFunction(fieldDefs.autoform.omit) && fieldDefs.autoform.omit(field) === true) {
       return false;
     }
 
