@@ -24,7 +24,7 @@ Utility = {
         }
       } else if (Array.isArray(val)) {
         if (!keepEmptyStrings) {
-          val = val.filter(Boolean);
+          val = val.filter(v => ![null, undefined, ''].includes(v));
         }
         val = cleanNulls(val, true, keepEmptyStrings); // recurse into non-typed arrays
         if (Object.keys(val).length) {

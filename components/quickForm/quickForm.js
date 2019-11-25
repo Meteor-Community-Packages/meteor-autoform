@@ -91,7 +91,7 @@ function getSortedFieldGroupNames(schemaObj) {
   });
 
   // Remove undefined
-  names = names.filter(Boolean);
+  names = names.filter(n => ![null, undefined, ''].includes(n));
 
   // Remove duplicate names
   names = [...new Set(names)];
@@ -115,7 +115,7 @@ function getFieldsForGroup(groupName, schemaObj) {
   });
 
   // Remove undefined
-  fields = fields.filter(Boolean);
+  fields = fields.filter(f => ![null, undefined, ''].includes(f));
 
   return fields;
 }
@@ -134,7 +134,7 @@ function getFieldsWithNoGroup(schemaObj) {
   });
 
   // Remove undefined
-  fields = fields.filter(Boolean);
+  fields = fields.filter(f => ![null, undefined, ''].includes(f));
 
   return fields;
 }
