@@ -1,5 +1,11 @@
 /* global AutoForm, getInputValue, getInputData, updateTrackedFieldValue */
 
+Template.afFieldInput.onRendered(() => {
+  const template = AutoForm.templateInstanceForForm();
+  const instance = Template.instance();
+  updateTrackedFieldValue(template, instance.afFieldName, instance.afFieldValue);
+})
+
 Template.afFieldInput.helpers({
   // similar to AutoForm.getTemplateName, but we have fewer layers of fallback, and we fall back
   // lastly to a template without an _ piece at the end
@@ -64,21 +70,13 @@ Template.afFieldInput.helpers({
     // Get input value
     var value = getInputValue(c.atts, c.atts.value, mDoc, schemaDefaultValue, c.atts.defaultValue, componentDef, template);
 
-    // Mark field value as changed for reactive updates
-    // We need to defer this until the element will be
-    // added to the DOM. Otherwise, AutoForm.getFieldValue
-    // will not pick up the new value when there are #if etc.
-    // blocks involved.
-    // See https://github.com/aldeed/meteor-autoform/issues/461
-    if (template.view.isRendered && !instance.alreadyUpdatedTrackedFieldValue) {
-      // No need to do this on first run because we'll rerun the value functions
-      // once the form is rendered anyway
-      instance.alreadyUpdatedTrackedFieldValue = true;
-      updateTrackedFieldValue(template, c.atts.name, value);
-    }
-
     // Build input data context
     var iData = getInputData(defs, c.atts, value, ss.label(c.atts.name), form.type);
+
+    // These are needed for onRendered
+
+    instance.afFieldName = c.atts.name
+    instance.afFieldValue = value
 
     // Adjust and return context
     return (typeof componentDef.contextAdjust === "function") ? componentDef.contextAdjust(iData) : iData;
