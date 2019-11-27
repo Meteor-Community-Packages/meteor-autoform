@@ -27,20 +27,6 @@ getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
  */
 getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fieldDefaultValue, typeDefs, template) {
 
-  template.inputValues = template.inputValues || {};
-
-  const fieldName = atts.name
-
-  if (!template.inputValues[fieldName]) {
-    template.inputValues[fieldName] = new Tracker.Dependency();
-  }
-
-  template.inputValues[fieldName].depend();
-
-  if (template.inputValues[fieldName].cachedValue !== undefined) {
-    return template.inputValues[fieldName].cachedValue
-  }
-
   if (typeof value === 'undefined') {
     // Get the value for this key in the current document
     if (mDoc) {
@@ -206,9 +192,6 @@ const doMarkChanged = (template, fieldName, fieldValue) => {
 
     template.formValues[fieldName].isMarkedChanged = true;
     template.formValues[fieldName].changed()
-
-    template.inputValues[fieldName].cachedValue = fieldValue
-    template.inputValues[fieldName].changed()
 
     markChangedAncestors(template, fieldName)
 

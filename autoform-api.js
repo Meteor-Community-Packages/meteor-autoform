@@ -424,6 +424,16 @@ AutoForm.resetValueCache = function autoFormResetValueCache(formId, fieldName) {
     if (template.formValues[fieldName]) {
       template.formValues[fieldName].isMarkedChanged = true
     }
+    // reset ancestors
+    const { ancestors } = fieldName.split('.').slice(0, -1).reduce(({ ancestors, parent }, sub) => {
+      parent = parent ? parent + '.' + sub : sub
+      ancestors.push(parent)
+      return { ancestors, parent }
+    }, { ancestors: [], parent: '' })
+
+    for (ancestor of ancestors) {
+      template.formValues[fieldName].isMarkedChanged = true
+    }
   }
   else {
     template.formValues.forEach(fieldName => {
@@ -483,14 +493,6 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean
   return value
 };
 
-const setChildValues = (fieldName, value, formId) => {
-  if (!isObject(value)) return;
-  Object.entries(value).forEach(([key, value]) => {
-    const subField = fieldName + '.' + key
-    AutoForm.setFieldValue(subField, value, formId)
-  })
-}
-
 /**
  * @method AutoForm.setFieldValue
  * @public
@@ -509,22 +511,18 @@ AutoForm.setFieldValue = function autoFormSetFieldValue(fieldName, value, formId
 
   if (!template) return;
 
-  if (!template.inputValues[fieldName]) {
-    template.inputValues[fieldName] = new Tracker.Dependency();
-  }
+  const update = { $set: {} }
+  update.$set[fieldName] = value
 
-  template.inputValues[fieldName].cachedValue = value
-  template.inputValues[fieldName].changed();
+  const col = new Mongo.Collection(null)
+  const id = col.insert(template.docTracker.doc || {})
+  col.update(id, update)
+  const newDoc = col.findOne()
 
-  if (!template.formValues[fieldName]) {
-    template.formValues[fieldName] = new Tracker.Dependency();
-  }
+  template.docTracker.doc = newDoc
+  template.docTracker.modified = true
+  template.docTracker.changed()
 
-  template.formValues[fieldName].cachedValue = value
-  template.formValues[fieldName].isMarkedChanged = false
-  template.formValues[fieldName].changed();
-
-  setChildValues(fieldName, value, formId)
 };
 
 /**
