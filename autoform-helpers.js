@@ -279,7 +279,8 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
  * afSelectOptionAtts
  */
 Template.registerHelper('afSelectOptionAtts', function afSelectOptionAtts() {
-  var atts = this.value ? { value: this.value } : {}
+  if (this.value === false) this.value = 'false'
+  var atts = 'value' in this ? { value: this.value } : {}
   if (this.selected) {
     atts.selected = '';
   }
