@@ -523,6 +523,11 @@ AutoForm.setFieldValue = function autoFormSetFieldValue(fieldName, value, formId
   template.docTracker.modified = true
   template.docTracker.changed()
 
+  setTimeout(() => {
+    template.formValues[fieldName].isMarkedChanged = true;
+    template.formValues[fieldName].changed();
+  }, 300)
+
 };
 
 /**
