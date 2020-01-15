@@ -504,34 +504,23 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId, clean
  * Sets the value for a field, resets the cache and emits changed events.
  */
 AutoForm.setFieldValue = function autoFormSetFieldValue(fieldName, value, formId) {
-  // find AutoForm template
-  var template = Tracker.nonreactive(function () {
-    return AutoForm.templateInstanceForForm(formId);
-  });
+  
+  const mDoc = Tracker.nonreactive(function() {
+    return AutoForm.reactiveFormData.sourceDoc(formId);
+  }) || new MongoObject({});  
 
-  if (!template) return;
+  const keyExists = Boolean(mDoc.getInfoForKey(fieldName));
 
-  const update = { $set: {} }
-  update.$set[fieldName] = value
-
-  const col = new Mongo.Collection(null)
-  const id = col.insert(template.docTracker.doc || {})
-  col.update(id, update)
-  const newDoc = col.findOne()
-
-  template.docTracker.doc = newDoc
-  template.docTracker.modified = true
-  template.docTracker.changed()
-
-  setTimeout(() => {
-    template.formValues[fieldName].isMarkedChanged = true;
-    template.formValues[fieldName].changed();
-  }, 300)
+  keyExists ?
+    mDoc.setValueForKey(fieldName, value) :
+    mDoc.addKey(fieldName, value);
+  
+  AutoForm.reactiveFormData.sourceDoc(formId, mDoc);
 
 };
 
 /**
- * @method AutoForm.setFieldValue
+ * @method AutoForm.setFormValues
  * @public
  * @param {Any} value Value of the form
  * @param {String} [formId] The `id` attribute of the `autoForm` you want current values for. Default is the closest form from the current context.
@@ -540,24 +529,7 @@ AutoForm.setFieldValue = function autoFormSetFieldValue(fieldName, value, formId
  * Sets the value for a field, resets the cache and emits changed events.
  */
 AutoForm.setFormValues = function autoFormSetFormValues(value, formId) {
-  // find AutoForm template
-  var template = Tracker.nonreactive(function () {
-    return AutoForm.templateInstanceForForm(formId);
-  });
-
-  if (!template) return;
-
-  const update = { $set: { ...value } }
-
-  const col = new Mongo.Collection(null)
-  const id = col.insert(template.docTracker.doc || {})
-  col.update(id, update)
-  const newDoc = col.findOne()
-
-  template.docTracker.doc = newDoc
-  template.docTracker.modified = true
-  template.docTracker.changed()
-
+  AutoForm.reactiveFormData.sourceDoc(formId, new MongoObject(value));
 };
 
 /**

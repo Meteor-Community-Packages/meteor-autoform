@@ -71,12 +71,8 @@ Template.autoForm.created = function autoFormCreated() {
   // be wiped out by further client validation.
   template._stickyErrors = {};
 
-  template.docTracker = new Tracker.Dependency()
-  template.docTracker.modified = false
-
   template.autorun(function (c) {
     var data = Template.currentData(); // rerun when current data changes
-    template.docTracker.depend(); // rerun when docTracker changes
     var formId = data.id;
 
     if (!formId) {
@@ -92,13 +88,6 @@ Template.autoForm.created = function autoFormCreated() {
     // Clone the doc so that docToForm and other modifications do not change
     // the original referenced object.
     var doc = data.doc ? EJSON.clone(data.doc) : null;
-
-    if (template.docTracker.modified) {
-      template.docTracker.modified = false
-      doc = EJSON.clone(template.docTracker.doc)
-    } else {
-      template.docTracker.doc = template.data.doc
-    }
 
     // Update cached form values for hot code reload persistence
     if (data.preserveForm === false) {

@@ -6,7 +6,7 @@
  * keep their type upon retrieval.
  */
 
-FormData = function () {
+FormData = function() {
   var self = this;
   self.forms = {};
 };
@@ -15,7 +15,7 @@ FormData = function () {
  * Initializes tracking for a given form, if not already done.
  * @param {String} formId The form's `id` attribute
  */
-FormData.prototype.initForm = function (formId) {
+FormData.prototype.initForm = function(formId) {
   var self = this;
 
   if (self.forms[formId]) {
@@ -41,7 +41,7 @@ FormData.prototype.initForm = function (formId) {
  * @param   {MongoObject|null}      sourceDoc The mDoc for the form or `null` if no doc.
  * @returns {MongoObject|undefined} Returns the form's MongoObject if getting.
  */
-FormData.prototype.sourceDoc = function (formId, sourceDoc) {
+FormData.prototype.sourceDoc = function(formId, sourceDoc) {
   var self = this;
   self.initForm(formId);
 
