@@ -1,5 +1,6 @@
 import MongoObject from 'mongo-object';
 import { isObject } from './common'
+import { markChanged } from './autoform-inputs';
 
 /* global AutoForm:true, Utility, Hooks, deps, globalDefaultTemplate:true, defaultTypeTemplates:true, validateField, arrayTracker, ReactiveVar, getAllFieldsInForm, setDefaults:true, getFlatDocOfFieldValues */
 
@@ -516,6 +517,11 @@ AutoForm.setFieldValue = function autoFormSetFieldValue(fieldName, value, formId
     mDoc.addKey(fieldName, value);
   
   AutoForm.reactiveFormData.sourceDoc(formId, mDoc);
+  
+  const template = Tracker.nonreactive(function () {
+    return AutoForm.templateInstanceForForm(formId);
+  })
+  markChanged(template, fieldName, value);
 
 };
 

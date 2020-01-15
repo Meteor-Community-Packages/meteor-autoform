@@ -187,7 +187,7 @@ const doMarkChanged = (template, fieldName, fieldValue) => {
   markChangedAncestors(template, fieldName);
 }
 
-const markChanged = markChangedThrottle(function (template, fieldName, fieldValue) {
+export const markChanged = markChangedThrottle(function (template, fieldName, fieldValue) {
   // is it really changed?
   if (fieldValue === template.formValues[fieldName].cachedValue) return
   // is there really a value??
