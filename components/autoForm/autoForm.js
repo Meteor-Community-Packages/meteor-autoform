@@ -126,7 +126,7 @@ Template.autoForm.created = function autoFormCreated() {
       mDoc = new MongoObject(doc);
       AutoForm.reactiveFormData.sourceDoc(formId, mDoc);
     } else {
-      AutoForm.reactiveFormData.sourceDoc(formId, null);
+      AutoForm.reactiveFormData.sourceDoc(formId);
     }
   });
 };
