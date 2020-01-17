@@ -1,5 +1,5 @@
-import MongoObject from 'mongo-object';
-import { isObject } from '../../common'
+import MongoObject from "mongo-object";
+import { isObject } from "../../common";
 
 /* global AutoForm, ReactiveVar, arrayTracker, Hooks, Utility, setDefaults */
 
@@ -7,7 +7,9 @@ Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
     // After removing all of the props we know about, everything else should
     // become a form attribute unless it's an array or object.
-    var val, htmlAttributes = {}, context = this;
+    var val,
+      htmlAttributes = {},
+      context = this;
     var removeProps = [
       "schema",
       "collection",
@@ -19,6 +21,7 @@ Template.autoForm.helpers({
       "autosave",
       "autosaveOnKeyup",
       "meteormethod",
+      "methodargs",
       "filter",
       "autoConvert",
       "removeEmptyStrings",
@@ -27,17 +30,19 @@ Template.autoForm.helpers({
 
     // Filter out any attributes that have a component prefix
     function hasComponentPrefix(prop) {
-      return Utility.componentTypeList.some(function (componentType) {
-        return prop.indexOf(componentType + '-') === 0;
+      return Utility.componentTypeList.some(function(componentType) {
+        return prop.indexOf(componentType + "-") === 0;
       });
     }
 
     // Filter out arrays and objects, which are obviously not meant to be
     // HTML attributes.
     for (var prop in context) {
-      if (context.hasOwnProperty(prop) &&
+      if (
+        context.hasOwnProperty(prop) &&
         !removeProps.includes(prop) &&
-        !hasComponentPrefix(prop)) {
+        !hasComponentPrefix(prop)
+      ) {
         val = context[prop];
         if (!Array.isArray(val) && !isObject(val)) {
           htmlAttributes[prop] = val;
@@ -53,8 +58,9 @@ Template.autoForm.helpers({
 
     return htmlAttributes;
   },
-  afDestroyUpdateForm: function (formId) {
-    AutoForm._destroyForm[formId] = AutoForm._destroyForm[formId] || new ReactiveVar(false);
+  afDestroyUpdateForm: function(formId) {
+    AutoForm._destroyForm[formId] =
+      AutoForm._destroyForm[formId] || new ReactiveVar(false);
     return AutoForm._destroyForm[formId].get();
   }
 });
@@ -71,12 +77,14 @@ Template.autoForm.created = function autoFormCreated() {
   // be wiped out by further client validation.
   template._stickyErrors = {};
 
-  template.autorun(function (c) {
+  template.autorun(function(c) {
     var data = Template.currentData(); // rerun when current data changes
     var formId = data.id;
 
     if (!formId) {
-      throw new Error('Every autoForm and quickForm must have an "id" attribute set to a unique string.');
+      throw new Error(
+        'Every autoForm and quickForm must have an "id" attribute set to a unique string.'
+      );
     }
 
     // When we change the form, loading a different doc, reloading the current doc, etc.,
@@ -96,9 +104,17 @@ Template.autoForm.created = function autoFormCreated() {
       // Even if we have already registered, we reregister to ensure that the
       // closure values of template, formId, and ss remain correct after each
       // reaction
-      AutoForm.formPreserve.registerForm(formId, function autoFormRegFormCallback() {
-        return AutoForm.getFormValues(formId, template, data._resolvedSchema, false);
-      });
+      AutoForm.formPreserve.registerForm(
+        formId,
+        function autoFormRegFormCallback() {
+          return AutoForm.getFormValues(
+            formId,
+            template,
+            data._resolvedSchema,
+            false
+          );
+        }
+      );
     }
 
     // Retain doc values after a "hot code push", if possible
@@ -106,7 +122,7 @@ Template.autoForm.created = function autoFormCreated() {
       var retrievedDoc = AutoForm.formPreserve.getDocument(formId);
       if (retrievedDoc !== false) {
         // Ensure we keep the _id property which may not be present in retrievedDoc.
-        doc = { ...doc, ...retrievedDoc }
+        doc = { ...doc, ...retrievedDoc };
       }
     }
 
@@ -114,12 +130,18 @@ Template.autoForm.created = function autoFormCreated() {
     if (doc && Object.keys(doc).length) {
       var hookCtx = { formId: formId };
       // Pass doc through docToForm hooks
-      Hooks.getHooks(formId, 'docToForm').forEach(function autoFormEachDocToForm(hook) {
-        doc = hook.call(hookCtx, doc, data._resolvedSchema);
-        if (!doc) {
-          throw new Error('Oops! Did you forget to return the modified document from your docToForm hook for the ' + formId + ' form?');
+      Hooks.getHooks(formId, "docToForm").forEach(
+        function autoFormEachDocToForm(hook) {
+          doc = hook.call(hookCtx, doc, data._resolvedSchema);
+          if (!doc) {
+            throw new Error(
+              "Oops! Did you forget to return the modified document from your docToForm hook for the " +
+                formId +
+                " form?"
+            );
+          }
         }
-      });
+      );
 
       // Create a "flat doc" that can be used to easily get values for corresponding
       // form fields.
@@ -133,7 +155,7 @@ Template.autoForm.created = function autoFormCreated() {
 
 Template.autoForm.rendered = function autoFormRendered() {
   var lastId;
-  this.autorun(function () {
+  this.autorun(function() {
     var data = Template.currentData(); // rerun when current data changes
 
     if (data.id === lastId) return;
