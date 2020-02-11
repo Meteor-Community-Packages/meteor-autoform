@@ -2,11 +2,12 @@
 
 getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
   var doc = {};
-  fields.each(function () {
-    var fieldName, val = AutoForm.getInputValue(this, ss);
+  fields.each(function() {
+    var fieldName,
+      val = AutoForm.getInputValue(this, ss);
     if (val !== void 0) {
       // Get the field/schema key name
-      fieldName = $(this).attr('data-schema-key');
+      fieldName = $(this).attr("data-schema-key");
       doc[fieldName] = val;
     }
   });
@@ -25,9 +26,16 @@ getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
  * * The value that is set in the `doc` provided on the containing autoForm
  * * The `defaultValue` from the schema
  */
-getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fieldDefaultValue, typeDefs, template) {
-
-  if (typeof value === 'undefined') {
+getInputValue = function getInputValue(
+  atts,
+  value,
+  mDoc,
+  schemaDefaultValue,
+  fieldDefaultValue,
+  typeDefs,
+  template
+) {
+  if (typeof value === "undefined") {
     // Get the value for this key in the current document
     if (mDoc) {
       var valueInfo = mDoc.getInfoForKey(atts.name);
@@ -41,7 +49,7 @@ getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fi
     // Only if there is no current document, use the schema defaultValue
     else {
       // Use the field default value if provided
-      if (typeof fieldDefaultValue !== 'undefined') {
+      if (typeof fieldDefaultValue !== "undefined") {
         value = fieldDefaultValue;
       }
       // Or use the defaultValue in the schema
@@ -52,12 +60,12 @@ getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fi
   }
 
   // Change null or undefined to an empty string
-  value = (value === null || value === void 0) ? '' : value;
+  value = value === null || value === void 0 ? "" : value;
 
   // If the component expects the value to be an array, and it's not, make it one
   if (typeDefs.valueIsArray && !Array.isArray(value)) {
-    if (typeof value === 'string') {
-      value = value.split(',');
+    if (typeof value === "string") {
+      value = value.split(",");
     } else {
       value = [value];
     }
@@ -66,7 +74,7 @@ getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fi
   // At this point we have a value or an array of values.
   // Run through the components valueIn function if we have one.
   // It should then be in whatever format the component expects.
-  if (typeof typeDefs.valueIn === 'function') {
+  if (typeof typeDefs.valueIn === "function") {
     value = typeDefs.valueIn(value, atts);
   }
 
@@ -77,28 +85,36 @@ getInputValue = function getInputValue(atts, value, mDoc, schemaDefaultValue, fi
  * Builds the data context that the input component will have.
  */
 getInputData = function getInputData(defs, hash, value, label, formType) {
-
   /*
    * Get HTML attributes
    */
 
   // We don't want to alter the original hash, so we clone it and
   // remove some stuff that should not be HTML attributes.
-  const { type, value: hashValue, noselect, options, template, defaultValue, data, ...inputAtts } = hash
+  const {
+    type,
+    value: hashValue,
+    noselect,
+    options,
+    template,
+    defaultValue,
+    data,
+    ...inputAtts
+  } = hash;
 
   // Add required if required
-  if (typeof inputAtts.required === 'undefined' && !defs.optional) {
-    inputAtts.required = '';
+  if (typeof inputAtts.required === "undefined" && !defs.optional) {
+    inputAtts.required = "";
   }
 
   // Add data-schema-key to every type of element
-  inputAtts['data-schema-key'] = inputAtts.name;
+  inputAtts["data-schema-key"] = inputAtts.name;
 
   // Set placeholder to label from schema if requested.
   // We check hash.placeholder instead of inputAtts.placeholder because
   // we're setting inputAtts.placeholder, so it wouldn't be the same on
   // subsequent reactive runs of this function.
-  if (hash.placeholder === 'schemaLabel') {
+  if (hash.placeholder === "schemaLabel") {
     inputAtts.placeholder = label;
   }
 
@@ -106,7 +122,9 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   // in a simple way, we add the attributes to the HTML
   // only if their value is `true`. That is, unlike in
   // HTML, their mere presence does not matter.
-  ['disabled', 'readonly', 'checked', 'required', 'autofocus'].forEach(function (booleanProp) {
+  ["disabled", "readonly", "checked", "required", "autofocus"].forEach(function(
+    booleanProp
+  ) {
     if (!(booleanProp in hash)) {
       return;
     }
@@ -114,8 +132,12 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
     // For historical reasons, we treat the string "true" and an empty string as `true`, too.
     // But an empty string value results in the cleanest rendered output for boolean props,
     // so we standardize as that.
-    if (hash[booleanProp] === true || hash[booleanProp] === 'true' || hash[booleanProp] === '') {
-      inputAtts[booleanProp] = '';
+    if (
+      hash[booleanProp] === true ||
+      hash[booleanProp] === "true" ||
+      hash[booleanProp] === ""
+    ) {
+      inputAtts[booleanProp] = "";
     } else {
       // If the value is anything else, we don't render it
       delete inputAtts[booleanProp];
@@ -146,7 +168,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
   // Before returning the context, we allow the registered form type to
   // adjust it if necessary.
   var ftd = Utility.getFormTypeDef(formType);
-  if (typeof ftd.adjustInputContext === 'function') {
+  if (typeof ftd.adjustInputContext === "function") {
     inputTypeContext = ftd.adjustInputContext(inputTypeContext);
   }
 
@@ -154,13 +176,13 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
 };
 
 function markChangedThrottle(fn, limit) {
-  let timeouts = {}
-  return function (template, fieldName, fieldValue) {
-    clearTimeout(timeouts[fieldName])
-    timeouts[fieldName] = setTimeout(function () {
-      fn(template, fieldName, fieldValue)
-    }, limit)
-  }
+  let timeouts = {};
+  return function(template, fieldName, fieldValue) {
+    clearTimeout(timeouts[fieldName]);
+    timeouts[fieldName] = setTimeout(function() {
+      fn(template, fieldName, fieldValue);
+    }, limit);
+  };
 }
 
 const markChangedAncestors = (template, fieldName) => {
@@ -168,39 +190,48 @@ const markChangedAncestors = (template, fieldName) => {
   // FIX THIS
   // XXX Might be a more elegant way to handle this
 
-  var dotPos = fieldName.lastIndexOf('.');
+  var dotPos = fieldName.lastIndexOf(".");
   if (dotPos == -1) return;
   fieldName = fieldName.slice(0, dotPos);
   doMarkChanged(template, fieldName);
-
-}
+};
 
 const doMarkChanged = (template, fieldName, fieldValue) => {
-  if (template &&
+  if (
+    template &&
     template.view &&
     template.view._domrange &&
     !template.view.isDestroyed &&
-    template.formValues[fieldName]) {
+    template.formValues[fieldName]
+  ) {
     template.formValues[fieldName].isMarkedChanged = true;
-    template.formValues[fieldName].changed()
+    template.formValues[fieldName].changed();
   }
   markChangedAncestors(template, fieldName);
-}
+};
 
-export const markChanged = markChangedThrottle(function (template, fieldName, fieldValue) {
+export const markChanged = markChangedThrottle(function(
+  template,
+  fieldName,
+  fieldValue
+) {
   // is it really changed?
-  if (fieldValue === template.formValues[fieldName].cachedValue) return
+  if (fieldValue === template.formValues[fieldName].cachedValue) return;
   // is there really a value??
-  if (fieldValue === undefined) return
+  if (fieldValue === undefined) return;
   // is the form rendered???
   if (template.$(`[data-schema-key="${fieldName}"]`).val() == null)
-    return markChanged(template, fieldName, fieldValue)
+    return markChanged(template, fieldName, fieldValue);
 
-  doMarkChanged(template, fieldName, fieldValue)
+  doMarkChanged(template, fieldName, fieldValue);
+},
+150);
 
-}, 150);
-
-updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName, fieldValue) {
+updateTrackedFieldValue = function updateTrackedFieldValue(
+  template,
+  fieldName,
+  fieldValue
+) {
   if (!template) return;
 
   template.formValues = template.formValues || {};
@@ -213,15 +244,16 @@ updateTrackedFieldValue = function updateTrackedFieldValue(template, fieldName, 
 
 updateAllTrackedFieldValues = function updateAllTrackedFieldValues(template) {
   if (template && template.formValues) {
-    Object.keys(template.formValues).forEach(function (fieldName) {
+    Object.keys(template.formValues).forEach(function(fieldName) {
       updateTrackedFieldValue(template, fieldName);
     });
   }
 };
 
-getAllFieldsInForm = function getAllFieldsInForm(template) {
+getAllFieldsInForm = function getAllFieldsInForm(template, disabled = false) {
   // Get all elements with `data-schema-key` attribute, unless disabled
-  return template.$('[data-schema-key]').not('[disabled]');
+  const allFields = template.$("[data-schema-key]");
+  return disabled ? allFields : allFields.not("[disabled]");
   // Exclude fields in sub-forms, since they will belong to a different AutoForm and schema.
   // TODO need some selector/filter that actually works correctly for excluding subforms
   // return template.$('[data-schema-key]').not("[disabled]").not(template.$('form form [data-schema-key]'));
