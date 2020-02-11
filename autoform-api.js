@@ -306,7 +306,8 @@ AutoForm.getFormValues = function autoFormGetFormValues(
   template,
   ss,
   getModifier,
-  clean = true
+  clean = true,
+  disabled = false
 ) {
   var insertDoc, updateDoc, transforms;
 
@@ -368,7 +369,7 @@ AutoForm.getFormValues = function autoFormGetFormValues(
 
   if (template.view._domrange) {
     // Build a flat document from field values
-    doc = getFlatDocOfFieldValues(getAllFieldsInForm(template, true), ss);
+    doc = getFlatDocOfFieldValues(getAllFieldsInForm(template, disabled), ss);
 
     // Expand the flat document
     doc = AutoForm.Utility.expandObj(doc);
@@ -546,7 +547,7 @@ AutoForm.getFieldValue = function autoFormGetFieldValue(
 
   if (isMarkedChanged === false) return cachedValue;
 
-  var doc = AutoForm.getFormValues(formId, template, null, false, clean);
+  var doc = AutoForm.getFormValues(formId, template, null, false, clean, true);
   if (!doc) return;
 
   var mDoc = new MongoObject(doc);
