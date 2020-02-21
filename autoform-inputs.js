@@ -197,12 +197,14 @@ const markChangedAncestors = (template, fieldName) => {
 };
 
 const doMarkChanged = (template, fieldName, fieldValue) => {
+  if (!template.formValues[fieldName]) {
+    template.formValues[fieldName] = new Tracker.Dependency();
+  }
   if (
     template &&
     template.view &&
     template.view._domrange &&
-    !template.view.isDestroyed &&
-    template.formValues[fieldName]
+    !template.view.isDestroyed
   ) {
     template.formValues[fieldName].isMarkedChanged = true;
     template.formValues[fieldName].changed();
