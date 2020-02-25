@@ -218,12 +218,17 @@ export const markChanged = markChangedThrottle(function(
   fieldValue
 ) {
   // is it really changed?
-  if (fieldValue === template.formValues[fieldName].cachedValue) return;
+  const { cachedValue } = template.formValues[fieldName] || {};
+  if (fieldValue === cachedValue) return;
   // is there really a value??
   if (fieldValue === undefined) return;
   // is the form rendered???
-  if (template.$(`[data-schema-key="${fieldName}"]`).val() == null)
-    return markChanged(template, fieldName, fieldValue);
+  const rendered =
+    template &&
+    template.view &&
+    template.view._domrange &&
+    !template.view.isDestroyed;
+  if (!rendered) return markChanged(template, fieldName, fieldValue);
 
   doMarkChanged(template, fieldName, fieldValue);
 },
