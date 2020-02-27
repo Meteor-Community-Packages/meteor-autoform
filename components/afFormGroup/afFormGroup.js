@@ -1,11 +1,11 @@
 /* global AutoForm */
 
 Template.afFormGroup.helpers({
-  getTemplateName: function () {
-    return AutoForm.getTemplateName('afFormGroup', this.template, this.name);
+  getTemplateName: function() {
+    return AutoForm.getTemplateName("afFormGroup", this.template, this.name);
   },
   innerContext: function afFormGroupContext() {
-    var c = AutoForm.Utility.getComponentContext(this, 'afFormGroup');
+    var c = AutoForm.Utility.getComponentContext(this, "afFormGroup");
     var afFormGroupAtts = formGroupAtts(c.atts);
     var afFieldLabelAtts = formGroupLabelAtts(c.atts);
     var afFieldInputAtts = formGroupInputAtts(c.atts);
@@ -15,15 +15,15 @@ Template.afFormGroup.helpers({
     // supposed to be unique in the DOM and templates can be
     // included multiple times, it's best not to provide an `id`
     // and generate a random one here for accessibility reasons.
-    const instance = Template.instance;
+    const instance = Template.instance();
     instance.fieldIds = instance.fieldIds || {};
-    const name = c.atts['name'];
+    const name = c.atts["name"];
     var id = instance.fieldIds[name];
     if (!id) {
       id = Random.id();
-      var idPrefix = c.atts['id-prefix'];
+      var idPrefix = c.atts["id-prefix"];
       if (idPrefix && idPrefix.length > 0) {
-        id = idPrefix + '-' + id;
+        id = idPrefix + "-" + id;
       }
       instance.fieldIds[name] = id;
     }
@@ -31,23 +31,23 @@ Template.afFormGroup.helpers({
     // Set the input's `id` attribute and the label's `for` attribute to
     // the same ID.
     // NOTE: `afFieldLabelAtts.for` causes exception in IE8
-    afFieldLabelAtts['for'] = afFieldInputAtts.id = id;
+    afFieldLabelAtts["for"] = afFieldInputAtts.id = id;
 
     // Get the field's schema definition
     var fieldSchema = AutoForm.getSchemaForField(c.atts.name);
 
     const innerContext = {
-      skipLabel: (c.atts.label === false),
-      afFormGroupClass: c.atts['formgroup-class'],
+      skipLabel: c.atts.label === false,
+      afFormGroupClass: c.atts["formgroup-class"],
       afFormGroupAtts: afFormGroupAtts,
       afFieldLabelAtts: afFieldLabelAtts,
       afFieldInputAtts: afFieldInputAtts,
       name: c.atts.name,
       required: fieldSchema ? !fieldSchema.optional : false,
-      labelText: (typeof c.atts.label === 'string') ? c.atts.label : null
+      labelText: typeof c.atts.label === "string" ? c.atts.label : null
     };
 
-    return innerContext
+    return innerContext;
   }
 });
 
@@ -59,7 +59,7 @@ function formGroupAtts(atts) {
   // Separate formgroup options from input options; formgroup items begin with 'formgroup-'
   var labelAtts = {};
   Object.entries(atts).forEach(function autoFormLabelAttsEach([key, val]) {
-    if (key.indexOf('formgroup-') === 0 && key != 'formgroup-class') {
+    if (key.indexOf("formgroup-") === 0 && key != "formgroup-class") {
       labelAtts[key.substring(10)] = val;
     }
   });
@@ -70,7 +70,7 @@ function formGroupLabelAtts(atts) {
   // Separate label options from input options; label items begin with 'label-'
   var labelAtts = {};
   Object.entries(atts).forEach(function autoFormLabelAttsEach([key, val]) {
-    if (key.indexOf('label-') === 0) {
+    if (key.indexOf("label-") === 0) {
       labelAtts[key.substring(6)] = val;
     }
   });
@@ -82,7 +82,11 @@ function formGroupInputAtts(atts) {
   // We also don't want the 'label' option
   var inputAtts = {};
   Object.entries(atts).forEach(function autoFormLabelAttsEach([key, val]) {
-    if (['id-prefix', 'id', 'label'].indexOf(key) === -1 && key.indexOf('label-') !== 0 && key.indexOf('formgroup-') !== 0) {
+    if (
+      ["id-prefix", "id", "label"].indexOf(key) === -1 &&
+      key.indexOf("label-") !== 0 &&
+      key.indexOf("formgroup-") !== 0
+    ) {
       inputAtts[key] = val;
     }
   });
