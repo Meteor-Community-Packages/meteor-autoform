@@ -259,7 +259,13 @@ updateAllTrackedFieldValues = function updateAllTrackedFieldValues(template) {
 
 getAllFieldsInForm = function getAllFieldsInForm(template, disabled = false) {
   // Get all elements with `data-schema-key` attribute, unless disabled
-  const allFields = template.$("[data-schema-key]");
+  const formId = template.data.id;
+  const allFields = template.$("[data-schema-key]").filter(function() {
+    const fieldForm = $(this)
+      .closest("form")
+      .attr("id");
+    return fieldForm == formId;
+  });
   return disabled ? allFields : allFields.not("[disabled]");
   // Exclude fields in sub-forms, since they will belong to a different AutoForm and schema.
   // TODO need some selector/filter that actually works correctly for excluding subforms
