@@ -1,10 +1,12 @@
+import { isFunction } from './common'
+
 /* global arrayTracker, AutoForm */
 
 function parseOptions(options) {
   var hash = (options || {}).hash || {};
   // Find the form's schema
   var ss = AutoForm.getFormSchema();
-  return _.extend({}, hash, { ss: ss });
+  return { ...hash, ss }
 }
 
 /*
@@ -107,7 +109,10 @@ Template.registerHelper('afFieldValueContains', function autoFormFieldValueConta
   options = parseOptions(options, 'afFieldValueContains');
 
   var currentValue = AutoForm.getFieldValue(options.name, options.formId);
-  return _.isArray(currentValue) && (_.contains(currentValue, options.value) || options.values && _.intersection(currentValue, options.values.split(',')));
+  return Array.isArray(currentValue)
+    && (currentValue.includes(options.value)
+      || options.values
+      && options.values.split(',').filter(item => currentValue.includes(item)));
 });
 
 /*
@@ -158,7 +163,7 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
       // with $ apply to all array items. Field list will now have the
       // correct array field item number instead of $.
       if (genericName !== name) {
-        fieldList = _.map(fieldList, function (field) {
+        fieldList = fieldList.map(function (field) {
           if (field.indexOf(genericNamePlusDot) === 0) {
             return namePlusDot + field.slice(genericNamePlusDot.length);
           }
@@ -166,14 +171,14 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
         });
       }
 
-      fieldList = _.filter(fieldList, function filterFieldsByName(field) {
+      fieldList = fieldList.filter(function filterFieldsByName(field) {
         return field.indexOf(namePlusDot) === 0;
       });
     }
 
     // If top level fields, be sure to remove any with $ in them
     else {
-      fieldList = _.filter(fieldList, function filterArrayFields(field) {
+      fieldList = fieldList.filter(function filterArrayFields(field) {
         return (field.slice(-2) !== '.$' && field.indexOf('.$.') === -1);
       });
     }
@@ -186,17 +191,17 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
     // "city" field within that, but if you instead do `fields="address.city"`
     // we will use a single field for the city, with no afObjectField
     // template around it.
-    fieldList = _.reject(fieldList, function (field) {
+    fieldList = fieldList.filter(function (field) {
       var lastDotPos = field.lastIndexOf('.');
       if (lastDotPos === -1) {
-        return false; // keep
+        return true; // keep
       }
 
       var parentField = field.slice(0, lastDotPos);
       if (parentField.slice(-2) === '.$') {
         parentField = parentField.slice(0, -2);
       }
-      return _.contains(fieldList, parentField) && parentField !== name && parentField !== genericName;
+      return !fieldList.includes(parentField) || parentField === name || parentField === genericName
     });
   }
 
@@ -209,7 +214,7 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
     if (name) {
       // Tack child field name on to end of parent field name. This
       // ensures that we keep the desired array index for array items.
-      fieldList = _.map(fieldList, function (field) {
+      fieldList = fieldList.map(function (field) {
         return name + '.' + field;
       });
     }
@@ -219,15 +224,15 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
   var omitFields = options.omitFields || AutoForm.findAttribute('omitFields');
   if (omitFields) {
     omitFields = AutoForm.Utility.stringToArray(omitFields, 'AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields');
-    fieldList = _.difference(fieldList, omitFields);
+    fieldList = fieldList.filter(field => !omitFields.includes(field))
     // If omitFields contains generic field names (with $) we omit those too
-    fieldList = _.reject(fieldList, function (f) {
-      return _.contains(omitFields, AutoForm.Utility.makeKeyGeneric(f));
+    fieldList = fieldList.filter(function (f) {
+      return !omitFields.includes(AutoForm.Utility.makeKeyGeneric(f));
     });
   }
 
   // Filter out fields we never want
-  fieldList = _.filter(fieldList, function shouldIncludeField(field) {
+  fieldList = fieldList.filter(function shouldIncludeField(field) {
     var fieldDefs = AutoForm.Utility.getFieldDefinition(ss, field);
 
     // Don't include fields that are not in the schema
@@ -237,6 +242,10 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
 
     // Don't include fields with autoform.omit=true
     if (fieldDefs.autoform && fieldDefs.autoform.omit === true) {
+      return false;
+    }
+
+    if (fieldDefs.autoform && isFunction(fieldDefs.autoform.omit) && fieldDefs.autoform.omit(field) === true) {
       return false;
     }
 
@@ -254,11 +263,11 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
   });
 
   // Ensure fields are not added more than once
-  fieldList = _.unique(fieldList);
+  fieldList = [...new Set(fieldList)];
 
   // We return it as an array of objects because that
   // works better with Blaze contexts
-  fieldList = _.map(fieldList, function (name) {
+  fieldList = fieldList.map(function (name) {
     return { name: name };
   });
 
@@ -270,12 +279,13 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
  * afSelectOptionAtts
  */
 Template.registerHelper('afSelectOptionAtts', function afSelectOptionAtts() {
-  var atts = _.pick(this, 'value');
+  if (this.value === false) this.value = 'false'
+  var atts = 'value' in this ? { value: this.value } : {}
   if (this.selected) {
     atts.selected = '';
   }
   if (this.htmlAtts) {
-    _.extend(atts, this.htmlAtts);
+    Object.assign(atts, this.htmlAtts);
   }
   return atts;
 });

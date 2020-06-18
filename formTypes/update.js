@@ -15,12 +15,12 @@ AutoForm.addFormType('update', {
 
     // Run "before.update" hooks
     this.runBeforeHooks(this.updateDoc, function (modifier) {
-      if (_.isEmpty(modifier)) { // make sure this check stays after the before hooks
+      if (!Object.keys(modifier).length) { // make sure this check stays after the before hooks
         // Nothing to update. Just treat it as a successful update.
         c.result(null, 0);
       } else {
         // Perform update
-        collection.update({_id: c.docId}, modifier, c.validationOptions, c.result);
+        collection.update({ _id: c.docId }, modifier, c.validationOptions, c.result);
       }
     });
   },

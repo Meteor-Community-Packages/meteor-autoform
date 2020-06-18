@@ -21,7 +21,7 @@ AutoForm.addFormType('normal', {
     }
 
     // Set up onSubmit hook context
-    var ctx = _.extend({
+    var ctx = {
       done: function (error, result) {
         doneCount++;
         if (!submitError && error) {
@@ -34,15 +34,16 @@ AutoForm.addFormType('normal', {
           // run onError, onSuccess, endSubmit
           c.result(submitError, submitResult);
         }
-      }
-    }, this.hookContext);
+      },
+      ...this.hookContext
+    }
 
     // Call all hooks at once.
     // Pass both types of doc plus the doc attached to the form.
     // If any return false, we stop normal submission, but we don't
     // run onError, onSuccess, endSubmit hooks until they all call this.done().
     var shouldStop = false;
-    _.each(hooks, function eachOnSubmit(hook) {
+    hooks.forEach(function eachOnSubmit(hook) {
       var result = hook.call(ctx, c.insertDoc, c.updateDoc, c.currentDoc);
       if (shouldStop === false && result === false) {
         shouldStop = true;

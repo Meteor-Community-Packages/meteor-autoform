@@ -11,13 +11,13 @@ AutoForm.addInputType("select-checkbox", {
     return val;
   },
   contextAdjust: function (context) {
-    var itemAtts = _.omit(context.atts);
+    var itemAtts = { ...context.atts };
 
     // build items list
     context.items = [];
 
     // Add all defined options
-    _.each(context.selectOptions, function(opt) {
+    context.selectOptions.forEach(function (opt) {
       context.items.push({
         name: context.name,
         label: opt.label,
@@ -26,7 +26,7 @@ AutoForm.addInputType("select-checkbox", {
         // #each uses to track unique list items when adding and removing them
         // See https://github.com/meteor/meteor/issues/2174
         _id: opt.value,
-        selected: (_.contains(context.value, opt.value)),
+        selected: (context.value.includes(opt.value)),
         atts: itemAtts
       });
     });
@@ -37,7 +37,7 @@ AutoForm.addInputType("select-checkbox", {
 
 Template.afCheckboxGroup.helpers({
   atts: function selectedAttsAdjust() {
-    var atts = _.clone(this.atts);
+    var atts = { ...this.atts };
     if (this.selected) {
       atts.checked = "";
     }

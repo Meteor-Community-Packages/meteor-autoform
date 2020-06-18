@@ -1,3 +1,5 @@
+import { isObject, throttle } from "./common";
+
 /* global AutoForm, Hooks, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues */
 
 // all form events handled here
@@ -8,14 +10,16 @@ function beginSubmit(formId, template, hookContext) {
   if (!Utility.checkTemplate(template)) return;
 
   // Get user-defined hooks
-  var hooks = Hooks.getHooks(formId, 'beginSubmit');
+  var hooks = Hooks.getHooks(formId, "beginSubmit");
   if (hooks.length) {
-    _.each(hooks, function beginSubmitHooks(hook) {
+    hooks.forEach(function beginSubmitHooks(hook) {
       hook.call(hookContext);
     });
   } else {
     // If there are no user-defined hooks, by default we disable the submit button during submission
-    var submitButton = template.find('button[type=submit]') || template.find('input[type=submit]');
+    var submitButton =
+      template.find("button[type=submit]") ||
+      template.find("input[type=submit]");
     if (submitButton) {
       submitButton.disabled = true;
     }
@@ -28,14 +32,16 @@ function endSubmit(formId, template, hookContext) {
   // Try to avoid incorrect reporting of which input caused autosave
   lastAutoSaveElement = null;
   // Get user-defined hooks
-  var hooks = Hooks.getHooks(formId, 'endSubmit');
+  var hooks = Hooks.getHooks(formId, "endSubmit");
   if (hooks.length) {
-    _.each(hooks, function endSubmitHooks(hook) {
+    hooks.forEach(function endSubmitHooks(hook) {
       hook.call(hookContext);
     });
   } else {
     // If there are no user-defined hooks, by default we disable the submit button during submission
-    var submitButton = template.find('button[type=submit]') || template.find('input[type=submit]');
+    var submitButton =
+      template.find("button[type=submit]") ||
+      template.find("input[type=submit]");
     if (submitButton) {
       submitButton.disabled = false;
     }
@@ -44,8 +50,8 @@ function endSubmit(formId, template, hookContext) {
 
 function adjustKeyForArrays(key) {
   var gKey = AutoForm.Utility.makeKeyGeneric(key);
-  if (gKey.slice(-2) === '.$' || gKey.indexOf('.$.') !== -1) {
-    key = gKey.slice(0, gKey.indexOf('.$'));
+  if (gKey.slice(-2) === ".$" || gKey.indexOf(".$.") !== -1) {
+    key = gKey.slice(0, gKey.indexOf(".$"));
   }
   return key;
 }
@@ -56,8 +62,9 @@ function adjustKeyForArrays(key) {
  * @param {String} validationType The validation type string.
  */
 function onlyIfAlreadyInvalid(validationType) {
-  return validationType === 'submitThenKeyup' ||
-    validationType === 'submitThenBlur';
+  return (
+    validationType === "submitThenKeyup" || validationType === "submitThenBlur"
+  );
 }
 
 /**
@@ -69,21 +76,23 @@ function onlyIfAlreadyInvalid(validationType) {
  * @returns {String|undefined} The schema key
  */
 function getKeyForElement(element) {
-  var key = element.getAttribute('data-schema-key');
+  var key = element.getAttribute("data-schema-key");
   if (!key) {
-    key = $(element).closest('[data-schema-key]').attr('data-schema-key');
+    key = $(element)
+      .closest("[data-schema-key]")
+      .attr("data-schema-key");
   }
   return key;
 }
 
 // throttle autosave, at most autosave every 500ms
-var throttleAutosave = _.throttle(function(event) {
+var throttleAutosave = throttle(function(event) {
   lastAutoSaveElement = event.target;
   $(event.currentTarget).submit();
-}, 500, { leading: false });
+}, 500);
 
 Template.autoForm.events({
-  'submit form': function autoFormSubmitHandler(event, template) {
+  "submit form": function autoFormSubmitHandler(event, template) {
     var formDoc;
     // Gather necessary form info
     var formId = this.id;
@@ -117,14 +126,14 @@ Template.autoForm.events({
     }
 
     // Gather hooks
-    var onSuccessHooks = Hooks.getHooks(formId, 'onSuccess');
-    var onErrorHooks = Hooks.getHooks(formId, 'onError');
-    var beforeHooks = Hooks.getHooks(formId, 'before', formType);
-    var afterHooks = Hooks.getHooks(formId, 'after', formType);
+    var onSuccessHooks = Hooks.getHooks(formId, "onSuccess");
+    var onErrorHooks = Hooks.getHooks(formId, "onError");
+    var beforeHooks = Hooks.getHooks(formId, "before", formType);
+    var afterHooks = Hooks.getHooks(formId, "after", formType);
 
     // Prep context with which hooks are called
     var hookContext = {
-      addStickyValidationError: function (key, type, value) {
+      addStickyValidationError: function(key, type, value) {
         AutoForm.addStickyValidationError(formId, key, type, value);
       },
       autoSaveChangedElement: lastAutoSaveElement,
@@ -135,10 +144,10 @@ Template.autoForm.events({
       formAttributes: form,
       formId: formId,
       formTypeDefinition: ftd,
-      removeStickyValidationError: function (key) {
+      removeStickyValidationError: function(key) {
         AutoForm.removeStickyValidationError(formId, key);
       },
-      resetForm: function () {
+      resetForm: function() {
         AutoForm.resetForm(formId, template);
       },
       ss: ss,
@@ -177,19 +186,20 @@ Template.autoForm.events({
       // of the Error object before we call
       // onError hooks
       var ec = ss.namedContext(formId);
-      var ik = ec.validationErrors(), error;
+      var ik = ec.validationErrors(),
+        error;
       if (ik) {
         if (ik.length) {
           error = new Error(ik[0].message || ec.keyErrorMessage(ik[0].name));
         } else {
-          error = new Error('form failed validation');
+          error = new Error("form failed validation");
         }
         error.validationErrors = ik;
       } else {
-        error = new Error('form failed validation');
+        error = new Error("form failed validation");
       }
-      _.each(onErrorHooks, function onErrorEach(hook) {
-        hook.call(hookContext, 'pre-submit validation', error);
+      onErrorHooks.forEach(function onErrorEach(hook) {
+        hook.call(hookContext, "pre-submit validation", error);
       });
       event.preventDefault();
       event.stopPropagation();
@@ -211,21 +221,28 @@ Template.autoForm.events({
         }
 
         // Define a `result` function
-        var cb = function (d) {
+        var cb = function(d) {
           // If the hook returns false, we cancel
           if (d === false) {
             endSubmission();
-          } else if (!_.isObject(d)) {
+          } else if (!isObject(d)) {
             throw new Error("A 'before' hook must return an object");
           } else {
             runHook(i + 1, d);
           }
         };
 
+        const cbOnce = () => {
+          let alreadyRan = false;
+          return d => {
+            if (alreadyRan) return;
+            alreadyRan = true;
+            return cb(d);
+          };
+        };
+
         // Add the `result` function to the before hook context
-        var ctx = _.extend({
-          result: _.once(cb)
-        }, hookContext);
+        var ctx = { result: cbOnce(), ...hookContext };
 
         var result = hook.call(ctx, doc);
 
@@ -244,10 +261,13 @@ Template.autoForm.events({
     function resultCallback(error, result) {
       if (error) {
         if (onErrorHooks && onErrorHooks.length) {
-          _.each(onErrorHooks, function onErrorEach(hook) {
+          onErrorHooks.forEach(function onErrorEach(hook) {
             hook.call(hookContext, formType, error);
           });
-        } else if ((!afterHooks || !afterHooks.length) && ss.namedContext(formId).isValid()) {
+        } else if (
+          (!afterHooks || !afterHooks.length) &&
+          ss.namedContext(formId).isValid()
+        ) {
           // if there are no onError or "after" hooks or validation errors, log the error
           // because it must be some other error from the server
           console.log(error);
@@ -260,14 +280,14 @@ Template.autoForm.events({
           AutoForm.resetForm(formId, template);
         }
         // Set docId in the context for insert forms, too
-        if (formType === 'insert') {
+        if (formType === "insert") {
           hookContext.docId = result;
         }
-        _.each(onSuccessHooks, function onSuccessEach(hook) {
+        onSuccessHooks.forEach(function onSuccessEach(hook) {
           hook.call(hookContext, formType, result);
         });
       }
-      _.each(afterHooks, function afterHooksEach(hook) {
+      afterHooks.forEach(function afterHooksEach(hook) {
         hook.call(hookContext, error, result);
       });
       endSubmission();
@@ -284,14 +304,17 @@ Template.autoForm.events({
     beginSubmit(formId, template, hookContext);
 
     // Ask form type definition whether we should prevalidate. By default we do.
-    var shouldPrevalidate = ftd.shouldPrevalidate ? ftd.shouldPrevalidate.call(hookContext) : true;
+    var shouldPrevalidate = ftd.shouldPrevalidate
+      ? ftd.shouldPrevalidate.call(hookContext)
+      : true;
 
     if (shouldPrevalidate) {
       // This validation pass happens before any "before" hooks run. We
       // validate against the form schema. Then before hooks can add any missing
       // properties before we validate against the full collection schema.
       try {
-        isValid = (form.validation === 'none') ||
+        isValid =
+          form.validation === "none" ||
           ftd.validateForm.call({
             form: form,
             formDoc: formDoc,
@@ -301,7 +324,7 @@ Template.autoForm.events({
         // Catch exceptions in validation functions which will bubble up here, cause a form with
         // onSubmit() to submit prematurely and prevent the error from being reported
         // (due to a page refresh).
-        console.error('Validation error', e);
+        console.error("Validation error", e);
         isValid = false;
       }
       // If we failed pre-submit validation, we stop submission.
@@ -312,20 +335,21 @@ Template.autoForm.events({
     }
 
     // Call onSubmit from the form type definition
-    ftd.onSubmit.call(_.extend({
+    ftd.onSubmit.call({
       runBeforeHooks: runBeforeHooks,
       result: resultCallback,
       endSubmission: endSubmission,
       failedValidation: failedValidation,
       validationOptions: validationOptions,
-      hookContext: hookContext
-    }, hookContext));
+      hookContext: hookContext,
+      ...hookContext
+    });
   },
-  'keyup [data-schema-key]': function autoFormKeyUpHandler(event) {
+  "keyup [data-schema-key]": function autoFormKeyUpHandler(event) {
     // Ignore enter/return, shift, ctrl, cmd, tab, arrows, etc.
     // Most of these are just optimizations, but without ignoring Enter, errors can fail to show up
     // because of conflicts between running onSubmit handlers and this around the same time.
-    if (_.contains([13, 9, 16, 20, 17, 91, 37, 38, 39, 40], event.keyCode)) return;
+    if ([13, 9, 16, 20, 17, 91, 37, 38, 39, 40].includes(event.keyCode)) return;
 
     // validateField is throttled, so we need to get the nearest form's
     // ID here, while we're still in the correct context
@@ -337,17 +361,27 @@ Template.autoForm.events({
     var validationType = form.validation;
     var skipEmpty = !(event.keyCode === 8 || event.keyCode === 46); // if deleting or backspacing, don't skip empty
 
-    if ((validationType === 'keyup' || validationType === 'submitThenKeyup')) {
+    if (validationType === "keyup" || validationType === "submitThenKeyup") {
       var key = getKeyForElement(event.currentTarget);
       if (!key) return;
 
-      validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid(validationType));
+      validateField(
+        key,
+        formId,
+        skipEmpty,
+        onlyIfAlreadyInvalid(validationType)
+      );
 
       // If it's an array field, we also want to validate the entire topmost array
       // in case there are minCount/maxCount errors, etc.
       var arrayKey = adjustKeyForArrays(key);
       if (arrayKey !== key) {
-        validateField(arrayKey, formId, skipEmpty, onlyIfAlreadyInvalid(validationType));
+        validateField(
+          arrayKey,
+          formId,
+          skipEmpty,
+          onlyIfAlreadyInvalid(validationType)
+        );
       }
 
       // If the form should be auto-saved whenever updated, we do that on field
@@ -357,7 +391,7 @@ Template.autoForm.events({
       }
     }
   },
-  'blur [data-schema-key]': function autoFormBlurHandler(event) {
+  "blur [data-schema-key]": function autoFormBlurHandler(event) {
     // validateField is throttled, so we need to get the nearest form's
     // ID here, while we're still in the correct context
     var formId = AutoForm.getFormId();
@@ -366,12 +400,16 @@ Template.autoForm.events({
     var form = AutoForm.getCurrentDataForForm(formId);
     var validationType = form.validation;
 
-    if (validationType === 'keyup' ||
-        validationType === 'blur' ||
-        validationType === 'submitThenKeyup' ||
-        validationType === 'submitThenBlur') {
+    if (
+      validationType === "keyup" ||
+      validationType === "blur" ||
+      validationType === "submitThenKeyup" ||
+      validationType === "submitThenBlur"
+    ) {
       var key = getKeyForElement(event.currentTarget);
-      if (!key) {return;}
+      if (!key) {
+        return;
+      }
 
       validateField(key, formId, false, onlyIfAlreadyInvalid(validationType));
 
@@ -379,15 +417,23 @@ Template.autoForm.events({
       // in case there are minCount/maxCount errors, etc.
       var arrayKey = adjustKeyForArrays(key);
       if (arrayKey !== key) {
-        validateField(arrayKey, formId, false, onlyIfAlreadyInvalid(validationType));
+        validateField(
+          arrayKey,
+          formId,
+          false,
+          onlyIfAlreadyInvalid(validationType)
+        );
       }
     }
   },
-  'change form': function autoFormChangeHandler(event, template) {
+  "change form": function autoFormChangeHandler(event, template) {
     var key = getKeyForElement(event.target);
-    if (!key) {return;}
+    if (!key) {
+      return;
+    }
 
-    var formId = this.id;
+    const formId = event.target.closest("form").id;
+    if (formId != this.id) return;
 
     // Some plugins, like jquery.inputmask, can cause infinite
     // loops by continually saying the field changed when it did not,
@@ -395,20 +441,25 @@ Template.autoForm.events({
     // prevent that from happening.
     var $target = $(event.target);
     var keyVal = $target.val();
-    if (event.target.type === 'checkbox') {
+    if (event.target.type === "checkbox") {
       // Special handling for checkboxes, which always have the same value
-      keyVal = keyVal + '_' + $target.prop('checked');
+      keyVal = keyVal + "_" + $target.prop("checked");
     }
 
-    keyVal = key + '___' + keyVal;
+    keyVal = key + "___" + keyVal;
 
     if (formId in lastKeyVals && keyVal === lastKeyVals[formId]) {
       return;
     }
     lastKeyVals[formId] = keyVal;
 
+    const value =
+      event.target.type === "checkbox"
+        ? $target.prop("checked")
+        : $target.val();
+
     // Mark field value as changed for reactive updates
-    updateTrackedFieldValue(template, key);
+    updateTrackedFieldValue(template, key, value);
 
     // Get current form data context
     var form = AutoForm.getCurrentDataForForm(formId);
@@ -423,22 +474,28 @@ Template.autoForm.events({
 
     var validationType = form.validation;
 
-    if (validationType === 'keyup' ||
-        validationType === 'blur' ||
-        validationType === 'submitThenKeyup' ||
-        validationType === 'submitThenBlur') {
-
+    if (
+      validationType === "keyup" ||
+      validationType === "blur" ||
+      validationType === "submitThenKeyup" ||
+      validationType === "submitThenBlur"
+    ) {
       validateField(key, formId, false, onlyIfAlreadyInvalid(validationType));
 
       // If it's an array field, we also want to validate the entire topmost array
       // in case there are minCount/maxCount errors, etc.
       var arrayKey = adjustKeyForArrays(key);
       if (arrayKey !== key) {
-        validateField(arrayKey, formId, false, onlyIfAlreadyInvalid(validationType));
+        validateField(
+          arrayKey,
+          formId,
+          false,
+          onlyIfAlreadyInvalid(validationType)
+        );
       }
     }
   },
-  'reset form': function autoFormResetHandler(event, template) {
+  "reset form": function autoFormResetHandler(event, template) {
     var formId = this.id;
 
     AutoForm.formPreserve.clearDocument(formId);
@@ -455,10 +512,9 @@ Template.autoForm.events({
     // Mark all fields as changed
     updateAllTrackedFieldValues(template);
     // Focus the autofocus element
-    template.$('[autofocus]').focus();
-
+    template.$("[autofocus]").focus();
   },
-  'keydown .autoform-array-item input': function (event) {
+  "keydown .autoform-array-item input": function(event) {
     // When enter is pressed in an array item field, default behavior
     // seems to be to "click" the remove item button. This doesn't make
     // sense so we stop it.
@@ -466,7 +522,10 @@ Template.autoForm.events({
       event.preventDefault();
     }
   },
-  'click .autoform-remove-item': function autoFormClickRemoveItem(event, template) {
+  "click .autoform-remove-item": function autoFormClickRemoveItem(
+    event,
+    template
+  ) {
     var self = this; // This type of button must be used within an afEachArrayItem block, so we know the context
 
     event.preventDefault();
@@ -480,17 +539,24 @@ Template.autoForm.events({
     var ss = AutoForm.getFormSchema(formId);
 
     // remove the item we clicked
-    arrayTracker.removeFromFieldAtIndex(formId, name, index, ss, minCount, maxCount);
+    arrayTracker.removeFromFieldAtIndex(
+      formId,
+      name,
+      index,
+      ss,
+      minCount,
+      maxCount
+    );
   },
-  'click .autoform-add-item': function autoFormClickAddItem(event, template) {
+  "click .autoform-add-item": function autoFormClickAddItem(event, template) {
     event.preventDefault();
 
     // We pull from data attributes because the button could be manually
     // added anywhere, so we don't know the data context.
     var btn = $(event.currentTarget);
-    var name = btn.attr('data-autoform-field');
-    var minCount = btn.attr('data-autoform-minCount'); // optional, overrides schema
-    var maxCount = btn.attr('data-autoform-maxCount'); // optional, overrides schema
+    var name = btn.attr("data-autoform-field");
+    var minCount = btn.attr("data-autoform-minCount"); // optional, overrides schema
+    var maxCount = btn.attr("data-autoform-maxCount"); // optional, overrides schema
 
     var data = template.data;
     var formId = data && data.id;

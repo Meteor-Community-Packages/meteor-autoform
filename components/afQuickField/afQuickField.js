@@ -1,6 +1,10 @@
 /* global AutoForm */
 
 Template.afQuickField.helpers({
+  isReady: function afIsComponentContextReady() {
+    const context = AutoForm.Utility.getComponentContext(this, "afQuickField") || {};
+    return Object.keys(context).length > 0;
+  },
   isGroup: function afQuickFieldIsGroup() {
     var c = AutoForm.Utility.getComponentContext(this, "afQuickField");
     // Render a group of fields if we expect an Object and we don't have options
@@ -17,7 +21,8 @@ Template.afQuickField.helpers({
   groupAtts: function afQuickFieldGroupAtts() {
     // afQuickField passes `fields` and `omitFields` on to `afObjectField`
     // and `afArrayField`, but not to `afFormGroup`
-    return _.omit(this, 'fields', 'omitFields');
+    const { fields, omitFields, ...rest } = this
+    return rest
   },
   isHiddenInput: function afQuickFieldIsHiddenInput() {
     var c = AutoForm.Utility.getComponentContext(this, "afQuickField");

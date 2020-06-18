@@ -12,7 +12,6 @@ Template.afEachArrayItem.helpers({
       docCount = c.atts.initialCount;
     }
     arrayTracker.initField(formId, name, ss, docCount, c.atts.minCount, c.atts.maxCount);
-    
     return arrayTracker.getField(formId, name);
   }
 });

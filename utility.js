@@ -1,4 +1,5 @@
 import MongoObject from 'mongo-object';
+import { isObject } from './common'
 
 /* global Utility:true, AutoForm, moment */
 
@@ -15,15 +16,18 @@ Utility = {
    */
   cleanNulls: function cleanNulls(doc, isArray, keepEmptyStrings) {
     var newDoc = isArray ? [] : {};
-    _.each(doc, function(val, key) {
-      if (!_.isArray(val) && isBasicObject(val)) {
+    Object.entries(doc).forEach(function ([key, val]) {
+      if (!Array.isArray(val) && isBasicObject(val)) {
         val = cleanNulls(val, false, keepEmptyStrings); // recurse into plain objects
-        if (!_.isEmpty(val)) {
+        if (Object.keys(val).length) {
           newDoc[key] = val;
         }
-      } else if (_.isArray(val)) {
+      } else if (Array.isArray(val)) {
+        if (!keepEmptyStrings) {
+          val = val.filter(v => ![null, undefined, ''].includes(v));
+        }
         val = cleanNulls(val, true, keepEmptyStrings); // recurse into non-typed arrays
-        if (!_.isEmpty(val)) {
+        if (Object.keys(val).length) {
           newDoc[key] = val;
         }
       } else if (!Utility.isNullUndefinedOrEmptyString(val)) {
@@ -45,7 +49,7 @@ Utility = {
   reportNulls: function reportNulls(flatDoc, keepEmptyStrings) {
     var nulls = {};
     // Loop through the flat doc
-    _.each(flatDoc, function(val, key) {
+    Object.entries(flatDoc).forEach(function ([key, val]) {
       // If value is undefined, null, or an empty string, report this as null so it will be unset
       if (val === null) {
         nulls[key] = '';
@@ -55,7 +59,7 @@ Utility = {
         nulls[key] = '';
       }
       // If value is an array in which all the values recursively are undefined, null, or an empty string, report this as null so it will be unset
-      else if (_.isArray(val) && Utility.cleanNulls(val, true, keepEmptyStrings).length === 0) {
+      else if (Array.isArray(val) && Utility.cleanNulls(val, true, keepEmptyStrings).length === 0) {
         nulls[key] = '';
       }
     });
@@ -85,10 +89,10 @@ Utility = {
     nulls = Utility.reportNulls(flatDoc, !!options.keepEmptyStrings);
     flatDoc = Utility.cleanNulls(flatDoc, false, !!options.keepEmptyStrings);
 
-    if (!_.isEmpty(flatDoc)) {
+    if (Object.keys(flatDoc).length) {
       modifier.$set = flatDoc;
     }
-    if (!_.isEmpty(nulls)) {
+    if (Object.keys(nulls).length) {
       modifier.$unset = nulls;
     }
     return modifier;
@@ -124,7 +128,7 @@ Utility = {
 
     // Handle options="allowed"
     if (selectOptions === 'allowed') {
-      selectOptions = _.map(defs.allowedValues, function(v) {
+      selectOptions = defs.allowedValues.map(function (v) {
         var label = v;
         if (hash.capitalize && v.length > 0 && schemaType === String) {
           label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
@@ -135,8 +139,8 @@ Utility = {
     }
 
     // Hashtable
-    else if (_.isObject(selectOptions) && !_.isArray(selectOptions)) {
-      selectOptions = _.map(selectOptions, function(v, k) {
+    else if (isObject(selectOptions) && !Array.isArray(selectOptions)) {
+      selectOptions = Object.entries(selectOptions).map(function ([k, v]) {
         return { label: v, value: schemaType(k) };
       });
     }
@@ -205,13 +209,13 @@ Utility = {
    */
   expandObj: function expandObj(doc) {
     var newDoc = {}, subkeys, subkey, subkeylen, nextPiece, current;
-    _.each(doc, function(val, key) {
+    Object.entries(doc).forEach(function ([key, val]) {
       subkeys = key.split('.');
       subkeylen = subkeys.length;
       current = newDoc;
       for (var i = 0; i < subkeylen; i++) {
         subkey = subkeys[i];
-        if (typeof current[subkey] !== 'undefined' && !_.isObject(current[subkey])) {
+        if (typeof current[subkey] !== 'undefined' && !isObject(current[subkey])) {
           break; // already set for some reason; leave it alone
         }
         if (i === subkeylen - 1) {
@@ -221,9 +225,9 @@ Utility = {
           // see if the next piece is a number
           nextPiece = subkeys[i + 1];
           nextPiece = parseInt(nextPiece, 10);
-          if (isNaN(nextPiece) && !_.isObject(current[subkey])) {
+          if (isNaN(nextPiece) && !isObject(current[subkey])) {
             current[subkey] = {};
-          } else if (!isNaN(nextPiece) && !_.isArray(current[subkey])) {
+          } else if (!isNaN(nextPiece) && !Array.isArray(current[subkey])) {
             current[subkey] = [];
           }
         }
@@ -241,14 +245,12 @@ Utility = {
    * Edits the object by reference, compacting any arrays at any level recursively.
    */
   compactArrays: function compactArrays(obj) {
-    if (_.isObject(obj)) {
-      _.each(obj, function (val, key) {
-        if (_.isArray(val)) {
-          obj[key] = _.without(val, void 0, null);
-          _.each(obj[key], function (arrayItem) {
-            compactArrays(arrayItem);
-          });
-        } else if (!(val instanceof Date) && _.isObject(val)) {
+    if (isObject(obj)) {
+      Object.entries(obj).forEach(function ([key, val]) {
+        if (Array.isArray(val)) {
+          obj[key] = val.filter(item => ![void 0, null].includes(item));
+          obj[key].forEach(compactArrays);
+        } else if (!(val instanceof Date) && isObject(val)) {
           // recurse into objects
           compactArrays(val);
         }
@@ -264,17 +266,15 @@ Utility = {
    * Edits the object by reference.
    */
   bubbleEmpty: function bubbleEmpty(obj, keepEmptyStrings) {
-    if (_.isObject(obj)) {
-      _.each(obj, function (val, key) {
-        if (_.isArray(val)) {
-          _.each(val, function (arrayItem) {
-            bubbleEmpty(arrayItem);
-          });
+    if (isObject(obj)) {
+      Object.entries(obj).forEach(function ([key, val]) {
+        if (Array.isArray(val)) {
+          val.forEach(bubbleEmpty);
         } else if (isBasicObject(val)) {
-          var allEmpty = _.all(val, function (prop) {
+          var allEmpty = Object.values(val).every(function (prop) {
             return (prop === void 0 || prop === null || (!keepEmptyStrings && typeof prop === 'string' && prop.length === 0));
           });
-          if (_.isEmpty(val) || allEmpty) {
+          if (!Object.keys(val).length || allEmpty) {
             obj[key] = null;
           } else {
             // recurse into objects
@@ -377,7 +377,7 @@ Utility = {
   getComponentContext: function autoFormGetComponentContext(context, name) {
     var atts, defs = {}, formComponentAttributes, fieldAttributes, fieldAttributesForComponentType, ss;
 
-    atts = _.clone(context || {});
+    atts = { ...context };
     ss = AutoForm.getFormSchema();
 
     defs = Utility.getFieldDefinition(ss, atts.name);
@@ -390,17 +390,21 @@ Utility = {
     // Get any field-specific attributes defined in the schema.
     // They can be in autoform.attrName or autoform.componentType.attrName, with
     // the latter overriding the former.
-    fieldAttributes = _.clone(defs.autoform) || {};
+    fieldAttributes = { ...defs.autoform };
     fieldAttributesForComponentType = fieldAttributes[name] || {};
-    fieldAttributes = _.omit(fieldAttributes, Utility.componentTypeList);
-    fieldAttributes = _.extend({}, fieldAttributes, fieldAttributesForComponentType);
+    fieldAttributes = Object.entries(fieldAttributes)
+      .reduce((result, [key, value]) => {
+        if (!Utility.componentTypeList.includes(key)) result[key] = value
+        return result
+      }, {})
+    fieldAttributes = { ...fieldAttributes, ...fieldAttributesForComponentType };
 
     // "autoform" option in the schema provides default atts
-    atts = _.extend({}, formComponentAttributes, fieldAttributes, atts);
+    atts = { ...formComponentAttributes, ...fieldAttributes, ...atts };
 
     // eval any attribute that is provided as a function
     var evaluatedAtts = {};
-    _.each(atts, function (v, k) {
+    Object.entries(atts).forEach(function ([k, v]) {
       if (typeof v === 'function') {
         evaluatedAtts[k] = v.call({
           name: atts.name
@@ -425,7 +429,7 @@ Utility = {
   stringToArray: function stringToArray(s, errorMessage) {
     if (typeof s === 'string') {
       return s.replace(/ /g, '').split(',');
-    } else if (!_.isArray(s)) {
+    } else if (!Array.isArray(s)) {
       throw new Error(errorMessage);
     } else {
       return s;
@@ -461,9 +465,9 @@ Utility = {
   },
   checkTemplate: function checkTemplate(template) {
     return !!(template &&
-            template.view &&
-            template.view._domrange &&
-            !template.view.isDestroyed);
+      template.view &&
+      template.view._domrange &&
+      !template.view.isDestroyed);
   },
   // This is copied from mongo-object to avoid a direct dep on that package
   makeKeyGeneric(key) {
@@ -475,11 +479,11 @@ Utility = {
 // getPrototypeOf polyfill
 if (typeof Object.getPrototypeOf !== 'function') {
   if (typeof ''.__proto__ === 'object') {
-    Object.getPrototypeOf = function(object) {
+    Object.getPrototypeOf = function (object) {
       return object.__proto__;
     };
   } else {
-    Object.getPrototypeOf = function(object) {
+    Object.getPrototypeOf = function (object) {
       // May break if the constructor has been tampered with
       return object.constructor.prototype;
     };
@@ -492,6 +496,6 @@ if (typeof Object.getPrototypeOf !== 'function') {
  * @param {any} obj
  * @returns {Boolean}
  */
-var isBasicObject = function(obj) {
-  return _.isObject(obj) && Object.getPrototypeOf(obj) === Object.prototype;
+var isBasicObject = function (obj) {
+  return isObject(obj) && Object.getPrototypeOf(obj) === Object.prototype;
 };

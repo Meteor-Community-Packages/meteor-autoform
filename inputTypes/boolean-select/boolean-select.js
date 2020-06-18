@@ -15,7 +15,7 @@ AutoForm.addInputType("boolean-select", {
     "numberArray": AutoForm.valueConverters.booleanToNumberArray
   },
   contextAdjust: function (context) {
-    var atts = _.omit(context.atts, 'trueLabel', 'falseLabel', 'nullLabel', 'firstOption');
+    const { trueLabel, falseLabel, nullLabel, firstOption, ...atts } = context.atts
 
     // build items list
     context.items = [

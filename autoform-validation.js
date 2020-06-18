@@ -1,3 +1,5 @@
+import { throttle } from './common'
+
 /* global AutoForm, validateField:true */
 
 function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
@@ -44,4 +46,4 @@ function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
 
 // Throttle field validation to occur at most every 300ms,
 // with leading and trailing calls.
-validateField = _.throttle(_validateField, 300);
+validateField = throttle(_validateField, 300);

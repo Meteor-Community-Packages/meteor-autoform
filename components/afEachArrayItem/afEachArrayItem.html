@@ -1,12 +1,10 @@
 <template name="afEachArrayItem">
   {{! This is a block component and doesn't render anything visible, so no customizable template is needed for this}}
-  {{#with innerContext}}
-    {{#each this}}
+  {{#each innerContext}}
     {{#if this.removed}}
-    <input type="hidden" name="{{this.name}}" data-schema-key="{{this.name}}" data-null-value="true" value="">
+      <input type="hidden" name="{{this.name}}" data-schema-key="{{this.name}}" data-null-value="true" value="">
     {{else}}
-    {{> Template.contentBlock this}}
+      {{> Template.contentBlock this}}
     {{/if}}
-    {{/each}}
-  {{/with}}
+  {{/each}}
 </template>

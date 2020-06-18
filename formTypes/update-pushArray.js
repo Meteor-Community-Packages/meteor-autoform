@@ -21,14 +21,14 @@ AutoForm.addFormType('update-pushArray', {
 
     // Run "before.update" hooks
     this.runBeforeHooks(this.insertDoc, function (doc) {
-      if (_.isEmpty(doc)) { // make sure this check stays after the before hooks
+      if (!Object.keys(doc).length) { // make sure this check stays after the before hooks
         // Nothing to update. Just treat it as a successful update.
         c.result(null, 0);
       } else {
-        var modifer = {$push: {}};
+        var modifer = { $push: {} };
         modifer.$push[scope] = doc;
         // Perform update
-        collection.update({_id: c.docId}, modifer, c.validationOptions, c.result);
+        collection.update({ _id: c.docId }, modifer, c.validationOptions, c.result);
       }
     });
   },
