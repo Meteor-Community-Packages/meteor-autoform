@@ -5,7 +5,7 @@
  */
 
 export const FormData = function FormData () {
-  var self = this;
+  const self = this;
   self.forms = {};
 };
 
@@ -14,7 +14,7 @@ export const FormData = function FormData () {
  * @param {String} formId The form's `id` attribute
  */
 FormData.prototype.initForm = function(formId) {
-  var self = this;
+  const self = this;
 
   if (self.forms[formId]) {
     return;
@@ -40,7 +40,7 @@ FormData.prototype.initForm = function(formId) {
  * @returns {MongoObject|undefined} Returns the form's MongoObject if getting.
  */
 FormData.prototype.sourceDoc = function(formId, sourceDoc) {
-  var self = this;
+  const self = this;
   self.initForm(formId);
 
   if (sourceDoc || sourceDoc === null) {
