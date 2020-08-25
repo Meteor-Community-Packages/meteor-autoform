@@ -1,0 +1,41 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Test suite
+
+# TODO: for now we only activate actions for the upcoming major version
+# TODO: change push to [master, develop] and pull_request to empty (all)
+# TODO: after v7-dev has been merged into develop succesfully
+on:
+  push:
+    branches:
+      - v7-dev
+  pull_request:
+    branches:
+      - v7-dev
+
+jobs:
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+    # needs: [lintcode,lintstyle,lintdocs] # we could add prior jobs for linting, if desired
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Setup meteor
+        uses: meteorengineer/setup-meteor@v1
+        with:
+          meteor-release: '1.10.1'
+
+      - name: cache dependencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - run: meteor create --bare testdummy
+      - run: cd testdummmy && meteor npm install --save-dev puppeteer simpl-schema chai
+      - run: cd testdummy && METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_WATCH=1 TEST_SERVER=0 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../
