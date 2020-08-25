@@ -37,5 +37,5 @@ jobs:
             ${{ runner.os }}-node-
 
       - run: meteor create --bare testdummy
-      - run: cd testdummmy && meteor npm install --save-dev puppeteer simpl-schema chai
+      - run: cd testdummy && meteor npm install --save-dev puppeteer simpl-schema chai
       - run: cd testdummy && METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_WATCH=1 TEST_SERVER=0 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../
