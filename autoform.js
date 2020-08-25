@@ -1,4 +1,6 @@
-/* global AutoForm:true, FormPreserve */
+/* global AutoForm:true */
+import { FormPreserve } from './form-preserve'
+import { FormData } from './autoform-formdata'
 
 AutoForm = AutoForm || {};
 
