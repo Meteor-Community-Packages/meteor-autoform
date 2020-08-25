@@ -6,14 +6,14 @@
  * Internal helper object to preserve form inputs across Hot Code Push
  * and across "pages" navigation if the option is enabled.
  */
-FormPreserve = function formPreserveConstructor(migrationName) {
-  var self = this;
+export const FormPreserve = function formPreserveConstructor(migrationName) {
+  const self = this;
   if ('string' !== typeof migrationName)
     throw Error('You must define an unique migration name of type String');
   self.registeredForms = {};
   self.retrievedDocuments = {};
   if (Package.reload) {
-    var Reload = Package.reload.Reload;
+    const Reload = Package.reload.Reload;
     self.retrievedDocuments = Reload._migrationData(migrationName) || '{}';
 
     // Currently migration does not seem to support proper storage
@@ -24,14 +24,14 @@ FormPreserve = function formPreserveConstructor(migrationName) {
     }
 
     Reload._onMigrate(migrationName, function () {
-      var doc = self._retrieveRegisteredDocuments();
+      const doc = self._retrieveRegisteredDocuments();
       return [true, EJSON.stringify(doc)];
     });
   }
 };
 
 FormPreserve.prototype.getDocument = function (formId) {
-  var self = this, doc;
+  const self = this;
   if (!(formId in self.retrievedDocuments)) {
     return false;
   }
@@ -57,14 +57,14 @@ FormPreserve.prototype.unregisterForm = function (formId) {
 };
 
 FormPreserve.prototype.unregisterAllForms = function () {
-  var self = this;
+  const self = this;
   self.registeredForms = {};
   self.retrievedDocuments = {};
 };
 
 FormPreserve.prototype._retrieveRegisteredDocuments = function () {
-  var self = this;
-  res = {};
+  const self = this;
+  const res = {};
   Object.entries(self.registeredForms).forEach(function ([formId, retrieveFunc]) {
     res[formId] = retrieveFunc();
   });
