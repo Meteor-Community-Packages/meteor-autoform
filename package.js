@@ -168,7 +168,27 @@ Package.onUse(function(api) {
 });
 
 Package.onTest(function(api) {
-  api.use(["aldeed:autoform", "tinytest", "mongo"]);
-  api.use("momentjs:moment", "client");
-  api.addFiles(["tests/utility-tests.js", "tests/autoform-tests.js"]);
+  // Running the tests requires a dummy project in order to
+  // resolve npm dependencies and the test env dependencies.
+  // To setup local tests enter the following in your console:
+  // $  meteor create --bare testdummy
+  // $ cd testdummmy
+  // $ meteor npm install --save-dev puppeteer simpl-schema chai
+  // $ METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_WATCH=1 TEST_SERVER=0 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../
+
+
+  api.use([
+    "meteortesting:browser-tests",
+    "meteortesting:mocha"
+  ]);
+
+  api.use([
+    "ecmascript",
+    "mongo",
+    "momentjs:moment",
+    "aldeed:autoform"
+  ]);
+
+  // api.addFiles(["tests/utility-tests.js", "tests/autoform-tests.js"]);
+  api.mainModule("tests/testSuite.tests.js");
 });

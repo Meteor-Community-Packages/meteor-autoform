@@ -1,11 +1,11 @@
 /* global Utility */
+import { expect } from 'chai'
 
-if (Meteor.isClient) {
-
-  Tinytest.add('AutoForm - Utility - cleanNulls', function(test) {
-    var date = new Date(), oid = new Mongo.Collection.ObjectID();
-
-    var cleaned = Utility.cleanNulls({
+describe('Utility', function () {
+  it('cleanNulls', function () {
+    const date = new Date();
+    const oid = new Mongo.Collection.ObjectID();
+    const cleaned = Utility.cleanNulls({
       a: void 0,
       b: undefined,
       c: null,
@@ -26,27 +26,28 @@ if (Meteor.isClient) {
         b: oid
       }
     });
-    test.equal(cleaned, {e: "keep me", f: {e: "keep me"}, h: { a: date, b: oid }});
-  });
 
-  Tinytest.add('AutoForm - Utility - reportNulls', function(test) {
-    var report = Utility.reportNulls({
+    expect(cleaned).to.deep.equal({e: "keep me", f: {e: "keep me"}, h: { a: date, b: oid }})
+  })
+  it('reportNulls', function () {
+    const report = Utility.reportNulls({
       a: void 0,
       b: undefined,
       c: null,
       d: "",
       e: "keep me"
     });
-    test.equal(report, {
+    expect(report).to.deep.equal({
       a: "",
       b: "",
       c: "",
       d: ""
     });
-  });
-
-  Tinytest.add('AutoForm - Utility - docToModifier', function(test) {
-    var date = new Date(), testObj, mod;
+  })
+  it('docToModifier', function () {
+    const date = new Date();
+    let testObj;
+    let mod;
 
     testObj = {
       a: 1,
@@ -78,7 +79,7 @@ if (Meteor.isClient) {
 
     // Test 1 w/ keepArrays, w/ keepEmptyStrings
     mod = Utility.docToModifier(testObj, {keepArrays: true, keepEmptyStrings: true});
-    test.equal(mod, {
+    expect(mod).to.deep.equal({
       $set: {
         a: 1,
         b: "foo",
@@ -109,7 +110,7 @@ if (Meteor.isClient) {
 
     // Test 2 w/ keepArrays, w/o keepEmptyStrings
     mod = Utility.docToModifier(testObj, {keepArrays: true, keepEmptyStrings: false});
-    test.equal(mod, {
+    expect(mod).to.deep.equal({
       $set: {
         a: 1,
         b: "foo",
@@ -140,7 +141,7 @@ if (Meteor.isClient) {
 
     // Test 3 w/o keepArrays, w/ keepEmptyStrings
     mod = Utility.docToModifier(testObj, {keepArrays: false, keepEmptyStrings: true});
-    test.equal(mod, {
+    expect(mod).to.deep.equal({
       $set: {
         a: 1,
         b: "foo",
@@ -166,7 +167,7 @@ if (Meteor.isClient) {
 
     // Test 4 w/o keepArrays, w/o keepEmptyStrings
     mod = Utility.docToModifier(testObj, {keepArrays: false, keepEmptyStrings: false});
-    test.equal(mod, {
+    expect(mod).to.deep.equal({
       $set: {
         a: 1,
         b: "foo",
@@ -189,12 +190,11 @@ if (Meteor.isClient) {
         f: ""
       }
     });
-  });
-
-  Tinytest.add('AutoForm - valueConverters - stringToNumber', function(test) {
-    function testMaybeNum(val, expect) {
-      var mod = AutoForm.valueConverters.stringToNumber(val);
-      test.equal(mod, expect);
+  })
+  it('stringToNumber', function () {
+    function testMaybeNum(val, expected) {
+      const mod = AutoForm.valueConverters.stringToNumber(val);
+      expect(mod).to.deep.equal(expected);
     }
 
     testMaybeNum(1, 1);
@@ -202,17 +202,17 @@ if (Meteor.isClient) {
     testMaybeNum("1", 1);
     testMaybeNum("1.1", 1.1);
     testMaybeNum("foo", "foo");
-    var d = new Date();
+
+    const d = new Date();
     testMaybeNum(d, d);
     testMaybeNum(true, true);
     testMaybeNum(false, false);
     testMaybeNum({}, {});
-  });
-
-  Tinytest.add('AutoForm - Utility - expandObj', function(test) {
-    function testExpandObj(val, expect) {
-      var mod = Utility.expandObj(val);
-      test.equal(JSON.stringify(mod), JSON.stringify(expect));
+  })
+  it('expandObj', function () {
+    function testExpandObj(val, expected) {
+      const mod = Utility.expandObj(val);
+      expect(JSON.stringify(mod)).to.equal(JSON.stringify(expected));
     }
 
     testExpandObj({}, {});
@@ -288,46 +288,26 @@ if (Meteor.isClient) {
       foo: [null, {bar: null}],
       baz: 1
     });
-  });
+  })
 
-  var startOfDayUTC = moment.utc("0001-3-14", "YYYY-MM-DD").toDate();
-  var endOfDayUTC = moment.utc("0001-3-14 23:59:59", "YYYY-MM-DD HH:mm:ss").toDate();
-  Tinytest.add('AutoForm - valueConverters - dateToDateString', function(test) {
+  const startOfDayUTC = moment.utc("0001-3-14", "YYYY-MM-DD").toDate();
+  const endOfDayUTC = moment.utc("0001-3-14 23:59:59", "YYYY-MM-DD HH:mm:ss").toDate();
+
+  it('dateToDateString', function () {
     // There's no way to set the timezone for Javascript's Date object, so
     // we check what the current timezone is.
-    var tzOffset = new Date().getTimezoneOffset();
+    const tzOffset = new Date().getTimezoneOffset();
     if(tzOffset > 0) {
-      test.equal(AutoForm.valueConverters.dateToDateString(startOfDayUTC), "0001-03-13");
+      expect(AutoForm.valueConverters.dateToDateString(startOfDayUTC)).to.equal("0001-03-13");
     } else if(tzOffset < 0) {
-      test.equal(AutoForm.valueConverters.dateToDateString(endOfDayUTC), "0001-03-15");
+      expect(AutoForm.valueConverters.dateToDateString(endOfDayUTC)).to.equal("0001-03-15");
     } else {
-      test.equal(AutoForm.valueConverters.dateToDateString(startOfDayUTC), "0001-03-14");
-      test.equal(AutoForm.valueConverters.dateToDateString(endOfDayUTC), "0001-03-14");
+      expect(AutoForm.valueConverters.dateToDateString(startOfDayUTC)).to.equal("0001-03-14");
+      expect(AutoForm.valueConverters.dateToDateString(endOfDayUTC)).to.equal("0001-03-14");
     }
-  });
-  Tinytest.add('AutoForm - valueConverters - dateToDateStringUTC', function(test) {
-    test.equal(AutoForm.valueConverters.dateToDateStringUTC(startOfDayUTC), "0001-03-14");
-    test.equal(AutoForm.valueConverters.dateToDateStringUTC(endOfDayUTC), "0001-03-14");
-  });
-
-}
-
-//Test API:
-//test.isFalse(v, msg)
-//test.isTrue(v, msg)
-//test.equalactual, expected, message, not
-//test.length(obj, len)
-//test.include(s, v)
-//test.isNaN(v, msg)
-//test.isUndefined(v, msg)
-//test.isNotNull
-//test.isNull
-//test.throws(func)
-//test.instanceOf(obj, klass)
-//test.notEqual(actual, expected, message)
-//test.runId()
-//test.exception(exception)
-//test.expect_fail()
-//test.ok(doc)
-//test.fail(doc)
-//test.equal(a, b, msg)
+  })
+  it('dateToDateStringUTC', function () {
+    expect(AutoForm.valueConverters.dateToDateStringUTC(startOfDayUTC)).to.equal("0001-03-14");
+    expect(AutoForm.valueConverters.dateToDateStringUTC(endOfDayUTC)).to.equal("0001-03-14");
+  })
+})
