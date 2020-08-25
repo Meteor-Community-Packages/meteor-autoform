@@ -1,3 +1,5 @@
+![Test suite](https://github.com/Meteor-Community-Packages/meteor-autoform/workflows/Test%20suite/badge.svg)
+
 # AutoForm
 
 This is a maintained fork of Meteor AutoForm. You can find the original readme file [here](README.original.md).
@@ -64,6 +66,21 @@ A lot. Here's a summary:
 - **`methodargs`**:
   Allows passing a `methodargs` attribute to autoForm/quickForm templates.
   These args will be passed to `meteormethod` if form type is `method` or `method-update`.
+
+## Tests
+
+- **`replaced`** TinyTest with `meteortesting:mocha` in combination with `chai` and `puppeteer`. This makes local tests
+  much easier. In Order to execute local tests, there is a local bare Meteor project required. It can easily be created
+  and executed via
+  
+```bash
+$  meteor create --bare testdummy # testdummy is already in the .gitignore
+$ cd testdummmy
+$ meteor npm install --save-dev puppeteer simpl-schema chai
+$ METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_WATCH=1 TEST_SERVER=0 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../
+```
+
+- **`replaced`** TravisCI with GitHub actions
 
 ## Other
 

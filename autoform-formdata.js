@@ -1,12 +1,10 @@
-/* global FormData:true */
-
 /*
  * Tracks form data with reactivity. This is similar to
  * ReactiveDict, but we need to store typed objects and
  * keep their type upon retrieval.
  */
 
-FormData = function() {
+export const FormData = function FormData () {
   var self = this;
   self.forms = {};
 };

@@ -1,1 +1,5 @@
 import './utility-tests'
+import './common.tests'
+import './FormPreserve.tests'
+import './FormData.tests'
+import './autoform-inputs.tests'
