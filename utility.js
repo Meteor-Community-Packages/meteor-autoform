@@ -3,19 +3,29 @@ import { isObject } from './common'
 
 /* global Utility:true, AutoForm, moment */
 
-Utility = {
+/**
+ * @private
+ * @type {RegExp}
+ * Used to validate time strings. This reg ex actually allows a few invalid hours/minutes/seconds,
+ * but we can catch that when parsing.
+ */
+const timeStringRegExp = /^[0-2][0-9]:[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
+
+export const Utility = {
   componentTypeList: ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'],
   /**
    * @method Utility.cleanNulls
    * @private
    * @param {Object} doc - Source object
+   * @param {Boolean} isArray
+   * @param {Boolean} keepEmptyStrings
    * @returns {Object}
    *
    * Returns an object in which all properties with null, undefined, or empty
    * string values have been removed, recursively.
    */
   cleanNulls: function cleanNulls(doc, isArray, keepEmptyStrings) {
-    var newDoc = isArray ? [] : {};
+    const newDoc = isArray ? [] : {};
     Object.entries(doc).forEach(function ([key, val]) {
       if (!Array.isArray(val) && isBasicObject(val)) {
         val = cleanNulls(val, false, keepEmptyStrings); // recurse into plain objects
@@ -42,12 +52,13 @@ Utility = {
    * @method Utility.reportNulls
    * @private
    * @param {Object} flatDoc - An object with no properties that are also objects.
+   * @param {Boolean} keepEmptyStrings
    * @returns {Object} An object in which the keys represent the keys in the
    * original object that were null, undefined, or empty strings, and the value
    * of each key is "".
    */
   reportNulls: function reportNulls(flatDoc, keepEmptyStrings) {
-    var nulls = {};
+    const nulls = {};
     // Loop through the flat doc
     Object.entries(flatDoc).forEach(function ([key, val]) {
       // If value is undefined, null, or an empty string, report this as null so it will be unset
@@ -79,15 +90,15 @@ Utility = {
    * putting the rest of the keys into `modifier.$set`.
    */
   docToModifier: function docToModifier(doc, options) {
-    var modifier = {}, mDoc, flatDoc, nulls;
+    const modifier = {};
     options = options || {};
 
     // Flatten doc
-    mDoc = new MongoObject(doc);
-    flatDoc = mDoc.getFlatObject({ keepArrays: !!options.keepArrays });
+    const mDoc = new MongoObject(doc);
+    let flatDoc = mDoc.getFlatObject({ keepArrays: Boolean(options.keepArrays) });
     // Get a list of null, undefined, and empty string values so we can unset them instead
-    nulls = Utility.reportNulls(flatDoc, !!options.keepEmptyStrings);
-    flatDoc = Utility.cleanNulls(flatDoc, false, !!options.keepEmptyStrings);
+    const nulls = Utility.reportNulls(flatDoc, Boolean(options.keepEmptyStrings));
+    flatDoc = Utility.cleanNulls(flatDoc, false, Boolean(options.keepEmptyStrings));
 
     if (Object.keys(flatDoc).length) {
       modifier.$set = flatDoc;
@@ -106,11 +117,11 @@ Utility = {
    * Gets a string array of all the selected values in a given `select` DOM element.
    */
   getSelectValues: function getSelectValues(select) {
-    var result = [];
-    var options = select && select.options || [];
-    var opt;
+    const result = [];
+    const options = select && select.options || [];
+    let opt;
 
-    for (var i = 0, ln = options.length; i < ln; i++) {
+    for (let i = 0, ln = options.length; i < ln; i++) {
       opt = options[i];
 
       if (opt.selected) {
@@ -123,13 +134,13 @@ Utility = {
    * Get select options
    */
   getSelectOptions: function getSelectOptions(defs, hash) {
-    var schemaType = defs.type;
-    var selectOptions = hash.options;
+    const schemaType = defs.type;
+    let selectOptions = hash.options;
 
     // Handle options="allowed"
     if (selectOptions === 'allowed') {
       selectOptions = defs.allowedValues.map(function (v) {
-        var label = v;
+        let label = v;
         if (hash.capitalize && v.length > 0 && schemaType === String) {
           label = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
         }
@@ -157,12 +168,13 @@ Utility = {
    * name on the `window` object. Otherwise returns `obj`.
    */
   lookup: function lookup(obj) {
-    var ref = window, arr;
+    let ref = window;
+    let arr;
     if (typeof obj === 'string') {
       arr = obj.split('.');
       while (arr.length && (ref = ref[arr.shift()]));
       if (!ref) {
-        throw new Error(obj + ' is not in the window scope');
+        throw new Error(`${obj} is not in the window scope`);
       }
       return ref;
     }
@@ -196,7 +208,7 @@ Utility = {
    * @todo should make this a static method in MongoObject
    */
   objAffectsKey: function objAffectsKey(obj, key) {
-    var mDoc = new MongoObject(obj);
+    const mDoc = new MongoObject(obj);
     return mDoc.affectsKey(key);
   },
   /**
@@ -208,12 +220,13 @@ Utility = {
    * Takes a flat object and returns an expanded version of it.
    */
   expandObj: function expandObj(doc) {
-    var newDoc = {}, subkeys, subkey, subkeylen, nextPiece, current;
+    const newDoc = {};
+    let subkeys, subkey, subkeylen, nextPiece, current;
     Object.entries(doc).forEach(function ([key, val]) {
       subkeys = key.split('.');
       subkeylen = subkeys.length;
       current = newDoc;
-      for (var i = 0; i < subkeylen; i++) {
+      for (let i = 0; i < subkeylen; i++) {
         subkey = subkeys[i];
         if (typeof current[subkey] !== 'undefined' && !isObject(current[subkey])) {
           break; // already set for some reason; leave it alone
@@ -261,6 +274,7 @@ Utility = {
    * @method Utility.bubbleEmpty
    * @private
    * @param  {Object} obj
+   * @param keepEmptyStrings
    * @return {undefined}
    *
    * Edits the object by reference.
@@ -271,7 +285,7 @@ Utility = {
         if (Array.isArray(val)) {
           val.forEach(bubbleEmpty);
         } else if (isBasicObject(val)) {
-          var allEmpty = Object.values(val).every(function (prop) {
+          const allEmpty = Object.values(val).every(function (prop) {
             return (prop === void 0 || prop === null || (!keepEmptyStrings && typeof prop === 'string' && prop.length === 0));
           });
           if (!Object.keys(val).length || allEmpty) {
@@ -304,7 +318,7 @@ Utility = {
    * Returns `true` if dateString is a "valid date string"
    */
   isValidDateString: function isValidDateString(dateString) {
-    var m = moment(dateString, 'YYYY-MM-DD', true);
+    const m = moment(dateString, 'YYYY-MM-DD', true);
     return m && m.isValid();
   },
   /**
@@ -320,10 +334,7 @@ Utility = {
       return false;
     }
 
-    // this reg ex actually allows a few invalid hours/minutes/seconds, but
-    // we can catch that when parsing
-    var regEx = /^[0-2][0-9]:[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
-    return regEx.test(timeString);
+    return timeStringRegExp.test(timeString);
   },
   /**
    * @method  Utility.isValidNormalizedForcedUtcGlobalDateAndTimeString
@@ -338,10 +349,10 @@ Utility = {
       return false;
     }
 
-    var datePart = dateString.substring(0, 10);
-    var tPart = dateString.substring(10, 11);
-    var timePart = dateString.substring(11, dateString.length - 1);
-    var zPart = dateString.substring(dateString.length - 1);
+    const datePart = dateString.substring(0, 10);
+    const tPart = dateString.substring(10, 11);
+    const timePart = dateString.substring(11, dateString.length - 1);
+    const zPart = dateString.substring(dateString.length - 1);
     return Utility.isValidDateString(datePart) && tPart === 'T' && Utility.isValidTimeString(timePart) && zPart === 'Z';
   },
   /**
@@ -357,9 +368,9 @@ Utility = {
       return false;
     }
 
-    var datePart = dtString.substring(0, 10);
-    var tPart = dtString.substring(10, 11);
-    var timePart = dtString.substring(11, dtString.length);
+    const datePart = dtString.substring(0, 10);
+    const tPart = dtString.substring(10, 11);
+    const timePart = dtString.substring(11, dtString.length);
     return Utility.isValidDateString(datePart) && tPart === 'T' && Utility.isValidTimeString(timePart);
   },
   /**
@@ -367,7 +378,7 @@ Utility = {
    * @private
    * @param  {Object} context A context (`this`) object
    * @param {String} name The name of the helper or component we're calling from.
-   * @return {Object} Normalized context object
+   * @return {Object|undefined} Normalized context object
    *
    * Returns an object with `atts` and `defs` properties, normalized from whatever object is passed in.
    * This helps deal with the fact that we have to pass the ancestor autoform's context to different
@@ -375,23 +386,21 @@ Utility = {
    * an error if we can't find an autoform context.
    */
   getComponentContext: function autoFormGetComponentContext(context, name) {
-    var atts, defs = {}, formComponentAttributes, fieldAttributes, fieldAttributesForComponentType, ss;
-
-    atts = { ...context };
-    ss = AutoForm.getFormSchema();
-
-    defs = Utility.getFieldDefinition(ss, atts.name);
+    let atts = { ...context };
+    const ss = AutoForm.getFormSchema();
+    const defs = Utility.getFieldDefinition(ss, atts.name);
     if (!defs) return;
 
     // Look up the tree if we're in a helper, checking to see if any ancestor components
     // had a <componentType>-attribute specified.
-    formComponentAttributes = AutoForm.findAttributesWithPrefix(name + '-');
+    const formComponentAttributes = AutoForm.findAttributesWithPrefix(name + '-');
 
     // Get any field-specific attributes defined in the schema.
     // They can be in autoform.attrName or autoform.componentType.attrName, with
     // the latter overriding the former.
-    fieldAttributes = { ...defs.autoform };
-    fieldAttributesForComponentType = fieldAttributes[name] || {};
+    let fieldAttributes = { ...defs.autoform };
+
+    const fieldAttributesForComponentType = fieldAttributes[name] || {};
     fieldAttributes = Object.entries(fieldAttributes)
       .reduce((result, [key, value]) => {
         if (!Utility.componentTypeList.includes(key)) result[key] = value
@@ -403,7 +412,7 @@ Utility = {
     atts = { ...formComponentAttributes, ...fieldAttributes, ...atts };
 
     // eval any attribute that is provided as a function
-    var evaluatedAtts = {};
+    const evaluatedAtts = {};
     Object.entries(atts).forEach(function ([k, v]) {
       if (typeof v === 'function') {
         evaluatedAtts[k] = v.call({
@@ -444,7 +453,7 @@ Utility = {
    */
   addClass: function addClass(atts, klass) {
     if (typeof atts['class'] === 'string') {
-      atts['class'] += ' ' + klass;
+      atts['class'] += ` ${klass}`;
     } else {
       atts['class'] = klass;
     }
@@ -457,9 +466,9 @@ Utility = {
    * @return {Object} The definition. Throws an error if type hasn't been defined.
    */
   getFormTypeDef: function getFormTypeDef(formType) {
-    var ftd = AutoForm._formTypeDefinitions[formType];
+    const ftd = AutoForm._formTypeDefinitions[formType];
     if (!ftd) {
-      throw new Error('AutoForm: Form type "' + formType + '" has not been defined');
+      throw new Error(`AutoForm: Form type "${formType}" has not been defined`);
     }
     return ftd;
   },
@@ -470,9 +479,10 @@ Utility = {
       !template.view.isDestroyed);
   },
   // This is copied from mongo-object to avoid a direct dep on that package
+  // XXX: we have already direct dep on that package, so it makes no difference anymore,
+  // plus it's safer to use the "original" to enforce DRY at least
   makeKeyGeneric(key) {
-    if (typeof key !== 'string') return null;
-    return key.replace(/\.[0-9]+(?=\.|$)/g, '.$');
+    return MongoObject.makeKeyGeneric(key);
   },
 };
 
@@ -496,6 +506,6 @@ if (typeof Object.getPrototypeOf !== 'function') {
  * @param {any} obj
  * @returns {Boolean}
  */
-var isBasicObject = function (obj) {
+const isBasicObject = function (obj) {
   return isObject(obj) && Object.getPrototypeOf(obj) === Object.prototype;
 };

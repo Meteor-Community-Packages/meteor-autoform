@@ -3,6 +3,7 @@ import { Random } from 'meteor/random';
 import { expect } from 'chai';
 import MongoObject from 'mongo-object';
 import { stub, restoreAll, restore, overrideStub } from './test-utils.tests'
+import  { Utility } from '../utility'
 
 describe('Utility', function () {
   afterEach(function () {
