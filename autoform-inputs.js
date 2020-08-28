@@ -1,10 +1,18 @@
-/* global AutoForm, getInputValue:true, getAllFieldsInForm:true, getInputData:true, updateTrackedFieldValue:true, updateAllTrackedFieldValues:true, getFlatDocOfFieldValues:true */
+/* global AutoForm */
+import { Utility } from './utility'
 
-getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
-  var doc = {};
+/**
+ * Creates a flat document that contains all field values as key/value pair, where key = fieldname and value = the
+ * field's current input value.
+ * @param fields {jQueryObjectList} A current jQuery-Object list, that allows to iterate over each element.
+ * @param ss {SimpleSchema} The current SimpleSchema instance for the form, related to the fields.
+ * @returns {Object} The document Object with key/value-paired fields.
+ */
+export const getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
+  const doc = {};
   fields.each(function() {
-    var fieldName,
-      val = AutoForm.getInputValue(this, ss);
+    let fieldName;
+    const val = AutoForm.getInputValue(this, ss);
     if (val !== void 0) {
       // Get the field/schema key name
       fieldName = $(this).attr("data-schema-key");
@@ -18,27 +26,33 @@ getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
  * package scope functions
  */
 
-/*
+/**
  * Gets the value that should be shown/selected in the input. Returns
  * a string, a boolean, or an array of strings. The value used,
  * in order of preference, is one of:
- * * The `value` attribute provided
- * * The value that is set in the `doc` provided on the containing autoForm
- * * The `defaultValue` from the schema
+ * - The `value` attribute provided
+ * - The value that is set in the `doc` provided on the containing autoForm
+ * - The `defaultValue` from the schema
+ * @param atts {Object} The current field attributes
+ * @param value {*} The current value of the field, can be anything
+ * @param mDoc {Object} The current doc, wrapped by MongoObject
+ * @param schemaDefaultValue {*} The defaultValue as defined in the schema
+ * @param fieldDefaultValue {*} The defaultValue as defined on the field level
+ * @param typeDefs {Object} The type definitions that are used when an input is registered (valueIn, valueIsArray etc.)
+ * @returns {*} The (maybe transformed) input value.
  */
-getInputValue = function getInputValue(
+export const getInputValue = function getInputValue(
   atts,
   value,
   mDoc,
   schemaDefaultValue,
   fieldDefaultValue,
-  typeDefs,
-  template
+  typeDefs
 ) {
   if (typeof value === "undefined") {
     // Get the value for this key in the current document
     if (mDoc) {
-      var valueInfo = mDoc.getInfoForKey(atts.name);
+      const valueInfo = mDoc.getInfoForKey(atts.name);
       if (valueInfo) {
         value = valueInfo.value;
       } else {
@@ -81,10 +95,17 @@ getInputValue = function getInputValue(
   return value;
 };
 
-/*
- * Builds the data context that the input component will have.
+/**
+ * Builds the data context that the input component will have. Not reactive.
+ * @param defs {Object} The field definitions
+ * @param hash {Object} The field attributes
+ * @param value {*} The value of the input, can be many types
+ * @param label {String} The label to be displayed
+ * @param formType {String} the type of the form (insert, update, normal, method etc.)
+ * @example
+ * const iData = getInputData(defs, atts, value, ss.label(c.atts.name), form.type);
  */
-getInputData = function getInputData(defs, hash, value, label, formType) {
+export const getInputData = function getInputData(defs, hash, value, label, formType) {
   /*
    * Get HTML attributes
    */
@@ -149,7 +170,7 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
    * input type template.
    */
 
-  var inputTypeContext = {
+  const inputTypeContext = {
     name: inputAtts.name,
     schemaType: defs.type,
     min: defs.min,
@@ -167,14 +188,20 @@ getInputData = function getInputData(defs, hash, value, label, formType) {
 
   // Before returning the context, we allow the registered form type to
   // adjust it if necessary.
-  var ftd = Utility.getFormTypeDef(formType);
+  const ftd = Utility.getFormTypeDef(formType);
   if (typeof ftd.adjustInputContext === "function") {
-    inputTypeContext = ftd.adjustInputContext(inputTypeContext);
+    return ftd.adjustInputContext(inputTypeContext);
   }
 
   return inputTypeContext;
 };
 
+/**
+ * @private Throttle factory-function - specific to markChanged. Timeouts are related to the respective fieldName.
+ * @param fn {Function} The markChanged function to be passed
+ * @param limit {Number} The throttle limit in ms
+ * @return {Function} The throttled markChanged function
+ */
 function markChangedThrottle(fn, limit) {
   let timeouts = {};
   return function(template, fieldName, fieldValue) {
@@ -185,34 +212,53 @@ function markChangedThrottle(fn, limit) {
   };
 }
 
+/**
+ * @private If the given field is a subfield within an array (fieldName = something.$) then this
+ * ensures, that the ancestor (something) is marked changed, too.
+ * @param template
+ * @param fieldName
+ */
 const markChangedAncestors = (template, fieldName) => {
   // To properly handle array fields, we'll mark the ancestors as changed, too
   // FIX THIS
   // XXX Might be a more elegant way to handle this
 
-  var dotPos = fieldName.lastIndexOf(".");
-  if (dotPos == -1) return;
-  fieldName = fieldName.slice(0, dotPos);
-  doMarkChanged(template, fieldName);
+  const dotPos = fieldName.lastIndexOf(".");
+  if (dotPos === -1) return;
+  const ancestorFieldName = fieldName.slice(0, dotPos);
+  doMarkChanged(template, ancestorFieldName);
 };
 
-const doMarkChanged = (template, fieldName, fieldValue) => {
+/**
+ * @private Checks, whether a Template can be considered as rendered.
+ * @param template
+ * @return {*|{}|boolean} truthy/falsy value, based on all checked properties
+ */
+const isRendered = template => template && template.view && template.view._domrange && !template.view.isDestroyed;
+
+/**
+ * @private Applies the change marking, creates a new Tracker Dependency if there is none for the field.
+ * @param template
+ * @param fieldName
+ */
+const doMarkChanged = (template, fieldName) => {
   if (!template.formValues[fieldName]) {
     template.formValues[fieldName] = new Tracker.Dependency();
   }
-  if (
-    template &&
-    template.view &&
-    template.view._domrange &&
-    !template.view.isDestroyed
-  ) {
+  if (isRendered(template)) {
     template.formValues[fieldName].isMarkedChanged = true;
     template.formValues[fieldName].changed();
   }
   markChangedAncestors(template, fieldName);
 };
 
-export const markChanged = markChangedThrottle(function(
+/**
+ * Marks a field as changed and updates the Treacker.Dependdency as changed. Reactivity compatible.
+ * @param template {Template} The current form template
+ * @param fieldName {String} The name of the current field
+ * @param fieldValue {*} The current field value
+ */
+export const markChanged = markChangedThrottle(function _markChanged(
   template,
   fieldName,
   fieldValue
@@ -223,18 +269,22 @@ export const markChanged = markChangedThrottle(function(
   // is there really a value??
   if (fieldValue === undefined) return;
   // is the form rendered???
-  const rendered =
-    template &&
-    template.view &&
-    template.view._domrange &&
-    !template.view.isDestroyed;
-  if (!rendered) return markChanged(template, fieldName, fieldValue);
 
-  doMarkChanged(template, fieldName, fieldValue);
-},
-150);
+  if (!isRendered(template)) {
+    return markChanged(template, fieldName, fieldValue);
+  }
+  doMarkChanged(template, fieldName);
+}, 150);
 
-updateTrackedFieldValue = function updateTrackedFieldValue(
+/**
+ * Creates a formValues entry on the template, in case it does not exist yet and updates the given
+ * field by fieldName as changed (if ok for update). Reactivity compatible.
+ * @see {markChanged}
+ * @param template {Template} The current form template
+ * @param fieldName {String} The name of the current field
+ * @param fieldValue {*} The current field value
+ */
+export const updateTrackedFieldValue = function updateTrackedFieldValue(
   template,
   fieldName,
   fieldValue
@@ -249,22 +299,30 @@ updateTrackedFieldValue = function updateTrackedFieldValue(
   markChanged(template, fieldName, fieldValue);
 };
 
-updateAllTrackedFieldValues = function updateAllTrackedFieldValues(template) {
+/**
+ * Calls {updateTrackedFieldValue} on all fields it can find in template.formValues. Reactivity compatible.
+ * @see {updateTrackedFieldValue}
+ * @param template {Template} The current form template
+ */
+export const updateAllTrackedFieldValues = function updateAllTrackedFieldValues(template) {
   if (template && template.formValues) {
     Object.keys(template.formValues).forEach(function(fieldName) {
-      updateTrackedFieldValue(template, fieldName);
+      // XXX - if we would not pass a fieldValue here, then there would be none of the fields marked as
+      // XXX - changed when the 'reset form'  event is running. We use a random number in order to prevent
+      // XXX - the chance of collision with the cachedValue.
+      updateTrackedFieldValue(template, fieldName, Math.random());
     });
   }
 };
 
-getAllFieldsInForm = function getAllFieldsInForm(template, disabled = false) {
+export const getAllFieldsInForm = function getAllFieldsInForm(template, disabled = false) {
   // Get all elements with `data-schema-key` attribute, unless disabled
   const formId = template.data.id;
   const allFields = template.$("[data-schema-key]").filter(function() {
     const fieldForm = $(this)
       .closest("form")
       .attr("id");
-    return fieldForm == formId;
+    return fieldForm === formId;
   });
   return disabled ? allFields : allFields.not("[disabled]");
   // Exclude fields in sub-forms, since they will belong to a different AutoForm and schema.
