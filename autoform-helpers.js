@@ -1,11 +1,13 @@
-import { isFunction } from './common'
+import { Template } from 'meteor/templating';
+import { isFunction } from './common';
 
 /* global arrayTracker, AutoForm */
 
+// TODO add a flag, that skips the schema for helpers, that do not require it
 function parseOptions(options) {
-  var hash = (options || {}).hash || {};
+  const hash = (options || {}).hash || {};
   // Find the form's schema
-  var ss = AutoForm.getFormSchema();
+  const ss = AutoForm.getFormSchema();
   return { ...hash, ss }
 }
 
@@ -13,120 +15,182 @@ function parseOptions(options) {
  * Global template helpers (exported to app)
  */
 
+/**
+ * Template helper to get the current error message from schema.
+ * @name afFieldMessage
+ * @param options
+ * @return {*}
+ */
+export const autoFormFieldMessage = function autoFormFieldMessage(options) {
+  options = parseOptions(options, 'afFieldMessage');
+  const formId = AutoForm.getFormId();
+
+  return options.ss.namedContext(formId).keyErrorMessage(options.name);
+}
+
 /*
  * afFieldMessage
  */
-Template.registerHelper('afFieldMessage', function autoFormFieldMessage(options) {
-  options = parseOptions(options, 'afFieldMessage');
-  var formId = AutoForm.getFormId();
+Template.registerHelper('afFieldMessage', autoFormFieldMessage);
 
-  return options.ss.namedContext(formId).keyErrorMessage(options.name);
-});
+/**
+ * @name afFieldIsInvalid
+ * @param options
+ * @return {*}
+ */
+export const autoFormFieldIsInvalid = function autoFormFieldIsInvalid(options) {
+  options = parseOptions(options, 'afFieldIsInvalid');
+  const formId = AutoForm.getFormId();
+
+  return options.ss.namedContext(formId).keyIsInvalid(options.name);
+}
 
 /*
  * afFieldIsInvalid
  */
-Template.registerHelper('afFieldIsInvalid', function autoFormFieldIsInvalid(options) {
-  options = parseOptions(options, 'afFieldIsInvalid');
-  var formId = AutoForm.getFormId();
+Template.registerHelper('afFieldIsInvalid', autoFormFieldIsInvalid);
 
-  return options.ss.namedContext(formId).keyIsInvalid(options.name);
-});
+/**
+ * @name afArrayFieldHasMoreThanMinimum
+ * @param options
+ * @return {boolean}
+ */
+export const autoFormArrayFieldHasMoreThanMinimum = function autoFormArrayFieldHasMoreThanMinimum(options) {
+  options = parseOptions(options, 'afArrayFieldHasMoreThanMinimum');
+  const form = AutoForm.getCurrentDataPlusExtrasForForm();
+
+  // Registered form types can disable adding/removing array items
+  if (form.formTypeDef.hideArrayItemButtons) {
+    return false;
+  }
+
+  const range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
+  const visibleCount = arrayTracker.getVisibleCount(form.id, options.name);
+  return (visibleCount > range.minCount);
+}
 
 /*
  * afArrayFieldHasMoreThanMinimum
  */
-Template.registerHelper('afArrayFieldHasMoreThanMinimum', function autoFormArrayFieldHasMoreThanMinimum(options) {
-  options = parseOptions(options, 'afArrayFieldHasMoreThanMinimum');
-  var form = AutoForm.getCurrentDataPlusExtrasForForm();
+Template.registerHelper('afArrayFieldHasMoreThanMinimum', autoFormArrayFieldHasMoreThanMinimum);
+
+/**
+ * @name afArrayFieldHasLessThanMaximum
+ * @param options
+ * @return {boolean}
+ */
+export const autoFormArrayFieldHasLessThanMaximum = function autoFormArrayFieldHasLessThanMaximum(options) {
+  options = parseOptions(options, 'afArrayFieldHasLessThanMaximum');
+  const form = AutoForm.getCurrentDataPlusExtrasForForm();
 
   // Registered form types can disable adding/removing array items
   if (form.formTypeDef.hideArrayItemButtons) {
     return false;
   }
 
-  var range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
-  var visibleCount = arrayTracker.getVisibleCount(form.id, options.name);
-  return (visibleCount > range.minCount);
-});
+  const range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
+  const visibleCount = arrayTracker.getVisibleCount(form.id, options.name);
+  return (visibleCount < range.maxCount);
+}
 
 /*
  * afArrayFieldHasLessThanMaximum
  */
-Template.registerHelper('afArrayFieldHasLessThanMaximum', function autoFormArrayFieldHasLessThanMaximum(options) {
-  options = parseOptions(options, 'afArrayFieldHasLessThanMaximum');
-  var form = AutoForm.getCurrentDataPlusExtrasForForm();
+Template.registerHelper('afArrayFieldHasLessThanMaximum', autoFormArrayFieldHasLessThanMaximum);
 
-  // Registered form types can disable adding/removing array items
-  if (form.formTypeDef.hideArrayItemButtons) {
-    return false;
-  }
+/**
+ * @name autoFormFieldValueIs
+ * @param options
+ * @return {boolean}
+ */
+export const autoFormFieldValueIs = function autoFormFieldValueIs(options) {
+  options = parseOptions(options, 'afFieldValueIs');
 
-  var range = arrayTracker.getMinMax(options.ss, options.name, options.minCount, options.maxCount);
-  var visibleCount = arrayTracker.getVisibleCount(form.id, options.name);
-  return (visibleCount < range.maxCount);
-});
-
+  const currentValue = AutoForm.getFieldValue(options.name, options.formId);
+  return currentValue === options.value;
+}
 /*
  * afFieldValueIs
  */
-Template.registerHelper('afFieldValueIs', function autoFormFieldValueIs(options) {
-  options = parseOptions(options, 'afFieldValueIs');
+Template.registerHelper('afFieldValueIs', autoFormFieldValueIs);
 
-  var currentValue = AutoForm.getFieldValue(options.name, options.formId);
-  return currentValue === options.value;
-});
+/**
+ * @name autoFormFieldValue
+ * @param options
+ * @return {Any}
+ */
+export const autoFormFieldValue = function autoFormFieldValue(options) {
+  options = parseOptions(options, 'afFieldValue');
+
+  return AutoForm.getFieldValue(options.name, options.formId || AutoForm.getFormId());
+}
 
 /*
  * afFieldValue
  */
-Template.registerHelper('afFieldValue', function autoFormFieldValue(options) {
-  options = parseOptions(options, 'afFieldValue');
+Template.registerHelper('afFieldValue', autoFormFieldValue);
 
-  return AutoForm.getFieldValue(options.name, options.formId || AutoForm.getFormId());
-});
-
+/**
+ * @name afArrayFieldIsFirstVisible
+ * @return {*}
+ */
+export const autoFormArrayFieldIsFirstVisible = function autoFormArrayFieldIsFirstVisible() {
+  const context = this;
+  return arrayTracker.isFirstFieldlVisible(context.formId, context.arrayFieldName, context.index);
+}
 /*
  * afArrayFieldIsFirstVisible
  */
-Template.registerHelper('afArrayFieldIsFirstVisible', function autoFormArrayFieldIsFirstVisible() {
-  var context = this;
-  return arrayTracker.isFirstFieldlVisible(context.formId, context.arrayFieldName, context.index);
-});
+Template.registerHelper('afArrayFieldIsFirstVisible', autoFormArrayFieldIsFirstVisible);
 
+/**
+ * @name afArrayFieldIsLastVisible
+ * @return {*}
+ */
+export const autoFormArrayFieldIsLastVisible = function autoFormArrayFieldIsLastVisible() {
+  const context = this;
+  return arrayTracker.isLastFieldlVisible(context.formId, context.arrayFieldName, context.index);
+}
 /*
  * afArrayFieldIsLastVisible
  */
-Template.registerHelper('afArrayFieldIsLastVisible', function autoFormArrayFieldIsLastVisible() {
-  var context = this;
-  return arrayTracker.isLastFieldlVisible(context.formId, context.arrayFieldName, context.index);
-});
+Template.registerHelper('afArrayFieldIsLastVisible', autoFormArrayFieldIsLastVisible);
 
+export const autoFormFieldValueContains = function autoFormFieldValueContains(options) {
+  options = parseOptions(options, 'afFieldValueContains');
+
+  const currentValue = AutoForm.getFieldValue(options.name, options.formId);
+  if (!Array.isArray(currentValue)) return false
+  return (currentValue.includes(options.value)
+      || !!(options.values) // for consistent return value
+      && options.values.split(',').filter(item => currentValue.includes(item)));
+}
 /*
  * afFieldValueContains
  */
-Template.registerHelper('afFieldValueContains', function autoFormFieldValueContains(options) {
-  options = parseOptions(options, 'afFieldValueContains');
+Template.registerHelper('afFieldValueContains', autoFormFieldValueContains);
 
-  var currentValue = AutoForm.getFieldValue(options.name, options.formId);
-  return Array.isArray(currentValue)
-    && (currentValue.includes(options.value)
-      || options.values
-      && options.values.split(',').filter(item => currentValue.includes(item)));
-});
-
+/**
+ * @name afFieldLabelText
+ * @param options
+ * @return {Object}
+ */
+export const autoFormFieldLabelText = function autoFormFieldLabelText(options) {
+  options = parseOptions(options, 'afFieldLabelText');
+  return AutoForm.getLabelForField(options.name);
+}
 /*
  * afFieldLabelText
  */
-Template.registerHelper('afFieldLabelText', function autoFormFieldLabelText(options) {
-  options = parseOptions(options, 'afFieldLabelText');
-  return AutoForm.getLabelForField(options.name);
-});
+Template.registerHelper('afFieldLabelText', autoFormFieldLabelText);
 
-/*
- * afFieldNames
+/**
+ * @name afFieldNames
+ * @param options
+ * @return {{name: *}[]}
  */
-Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
+export const autoFormFieldNames = function autoFormFieldNames(options) {
+  // TODO move to ES6 after we have tested most of this function's branches
   options = parseOptions(options, 'afFieldNames');
   var ss = options.ss, name = options.name, namePlusDot, genericName, genericNamePlusDot;
   var form = AutoForm.getCurrentDataForForm();
@@ -272,15 +336,19 @@ Template.registerHelper('afFieldNames', function autoFormFieldNames(options) {
   });
 
   return fieldList;
-});
-
-
+}
 /*
- * afSelectOptionAtts
+ * afFieldNames
  */
-Template.registerHelper('afSelectOptionAtts', function afSelectOptionAtts() {
+Template.registerHelper('afFieldNames', autoFormFieldNames);
+
+/**
+ * @name afSelectOptionAtts
+ * @return {*}
+ */
+export const afSelectOptionAtts = function afSelectOptionAtts() {
   if (this.value === false) this.value = 'false'
-  var atts = 'value' in this ? { value: this.value } : {}
+  const atts = 'value' in this ? { value: this.value } : {}
   if (this.selected) {
     atts.selected = '';
   }
@@ -288,7 +356,12 @@ Template.registerHelper('afSelectOptionAtts', function afSelectOptionAtts() {
     Object.assign(atts, this.htmlAtts);
   }
   return atts;
-});
+}
+
+/*
+ * afSelectOptionAtts
+ */
+Template.registerHelper('afSelectOptionAtts', afSelectOptionAtts);
 
 // Expects to be called with this.name available
 Template.registerHelper('afOptionsFromSchema', function afOptionsFromSchema() {
