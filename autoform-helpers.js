@@ -3,11 +3,10 @@ import { isFunction } from './common';
 
 /* global arrayTracker, AutoForm */
 
-// TODO add a flag, that skips the schema for helpers, that do not require it
-function parseOptions(options) {
+function parseOptions(options, helperName, skipSchema) {
   const hash = (options || {}).hash || {};
   // Find the form's schema
-  const ss = AutoForm.getFormSchema();
+  const ss = skipSchema === true ? {} : AutoForm.getFormSchema();
   return { ...hash, ss }
 }
 
@@ -104,7 +103,7 @@ Template.registerHelper('afArrayFieldHasLessThanMaximum', autoFormArrayFieldHasL
  * @return {boolean}
  */
 export const autoFormFieldValueIs = function autoFormFieldValueIs(options) {
-  options = parseOptions(options, 'afFieldValueIs');
+  options = parseOptions(options, 'afFieldValueIs', true);
 
   const currentValue = AutoForm.getFieldValue(options.name, options.formId);
   return currentValue === options.value;
@@ -120,7 +119,7 @@ Template.registerHelper('afFieldValueIs', autoFormFieldValueIs);
  * @return {Any}
  */
 export const autoFormFieldValue = function autoFormFieldValue(options) {
-  options = parseOptions(options, 'afFieldValue');
+  options = parseOptions(options, 'afFieldValue', true);
 
   return AutoForm.getFieldValue(options.name, options.formId || AutoForm.getFormId());
 }
@@ -157,7 +156,7 @@ export const autoFormArrayFieldIsLastVisible = function autoFormArrayFieldIsLast
 Template.registerHelper('afArrayFieldIsLastVisible', autoFormArrayFieldIsLastVisible);
 
 export const autoFormFieldValueContains = function autoFormFieldValueContains(options) {
-  options = parseOptions(options, 'afFieldValueContains');
+  options = parseOptions(options, 'afFieldValueContains', true);
 
   const currentValue = AutoForm.getFieldValue(options.name, options.formId);
   if (!Array.isArray(currentValue)) return false
@@ -176,7 +175,7 @@ Template.registerHelper('afFieldValueContains', autoFormFieldValueContains);
  * @return {Object}
  */
 export const autoFormFieldLabelText = function autoFormFieldLabelText(options) {
-  options = parseOptions(options, 'afFieldLabelText');
+  options = parseOptions(options, 'afFieldLabelText', true);
   return AutoForm.getLabelForField(options.name);
 }
 /*
