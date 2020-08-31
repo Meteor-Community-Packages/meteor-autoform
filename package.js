@@ -22,6 +22,7 @@ Package.onUse(function(api) {
       "reactive-dict",
       "random",
       "ecmascript",
+      "mongo",
       "momentjs:moment@2.10.6"
     ],
     "client"
@@ -43,7 +44,6 @@ Package.onUse(function(api) {
 
   // Exports
   api.export("AutoForm", "client");
-  api.export("Utility", "client", { testOnly: true });
 
   // Client Files
   api.addFiles(
@@ -173,7 +173,7 @@ Package.onTest(function(api) {
   // To setup local tests enter the following in your console:
   // $  meteor create --bare testdummy
   // $ cd testdummmy
-  // $ meteor npm install --save-dev puppeteer simpl-schema chai
+  // $ meteor npm install --save-dev puppeteer simpl-schema chai sinon
   // $ METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_WATCH=1 TEST_SERVER=0 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../
 
 
@@ -184,11 +184,15 @@ Package.onTest(function(api) {
 
   api.use([
     "ecmascript",
+    "tracker",
+    "blaze",
+    "templating",
     "mongo",
     "momentjs:moment",
     "aldeed:autoform"
-  ]);
+  ], 'client');
+
 
   // api.addFiles(["tests/utility-tests.js", "tests/autoform-tests.js"]);
-  api.mainModule("tests/testSuite.tests.js");
+  api.mainModule("tests/testSuite.tests.js", 'client');
 });
