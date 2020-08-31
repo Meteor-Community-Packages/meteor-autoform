@@ -1,15 +1,15 @@
 // Manages all hooks, supporting append/replace, get
 
-Hooks = {
+export const Hooks = {
   form: {}
 };
 
 // The names of all supported hooks, excluding "before" and "after".
-var hookNames = ['formToDoc', 'formToModifier', 'docToForm', 'onSubmit', 'onSuccess', 'onError',
+const hookNames = ['formToDoc', 'formToModifier', 'docToForm', 'onSubmit', 'onSuccess', 'onError',
   'beginSubmit', 'endSubmit'];
 
 Hooks.getDefault = function () {
-  var hooks = {
+  const hooks = {
     before: {},
     after: {}
   };
@@ -57,7 +57,7 @@ Hooks.addHooksToList = function addHooksToList(hooksList, hooks, replace) {
 };
 
 Hooks.getHooks = function getHooks(formId, type, subtype) {
-  var f, g;
+  let f, g;
   if (subtype) {
     f = Hooks.form[formId] && Hooks.form[formId][type] && Hooks.form[formId][type][subtype] || [];
     g = Hooks.global[type] && Hooks.global[type][subtype] || [];
