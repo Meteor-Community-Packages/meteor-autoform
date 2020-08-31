@@ -1,5 +1,7 @@
 /* global AutoForm, getInputValue, getInputData, updateTrackedFieldValue */
 
+import { getInputData, getInputValue, updateTrackedFieldValue } from '../../autoform-inputs'
+
 Template.afFieldInput.onRendered(() => {
   const template = AutoForm.templateInstanceForForm();
   const instance = Template.instance();

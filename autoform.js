@@ -1,6 +1,7 @@
 /* global AutoForm:true */
 import { FormPreserve } from './form-preserve'
 import { FormData } from './autoform-formdata'
+import { ArrayTracker } from './autoform-arrays'
 
 AutoForm = AutoForm || {};
 

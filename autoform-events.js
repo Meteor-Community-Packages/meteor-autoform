@@ -1,6 +1,9 @@
 import { isObject, throttle } from "./common";
-
-/* global AutoForm, Hooks, validateField, updateTrackedFieldValue, arrayTracker, updateAllTrackedFieldValues */
+import { updateTrackedFieldValue, updateAllTrackedFieldValues } from './autoform-inputs'
+import { validateField } from './autoform-validation'
+import { Hooks } from './autoform-hooks'
+import { Utility } from './utility'
+/* global AutoForm, arrayTracker */
 
 // all form events handled here
 var lastAutoSaveElement = null;

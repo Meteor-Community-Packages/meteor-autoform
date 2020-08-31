@@ -1,7 +1,8 @@
 import MongoObject from "mongo-object";
 import { isObject } from "../../common";
-
-/* global AutoForm, ReactiveVar, arrayTracker, Hooks, Utility, setDefaults */
+import { Hooks } from '../../autoform-hooks'
+import { Utility } from '../../utility'
+/* global AutoForm, ReactiveVar, arrayTracker, setDefaults */
 
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {

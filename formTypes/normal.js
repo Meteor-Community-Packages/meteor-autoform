@@ -1,4 +1,5 @@
-/* global AutoForm, Hooks */
+import { Hooks } from '../autoform-hooks'
+/* global AutoForm */
 
 AutoForm.addFormType('normal', {
   onSubmit: function () {

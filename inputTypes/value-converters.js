@@ -1,6 +1,7 @@
 /*
  * The conversion functions in this file can be used by input types to convert their outgoing values into the data type expected by the schema
  */
+import { Utility } from '../utility'
 
 AutoForm.valueConverters = {
   booleanToString: function booleanToString(val) {
