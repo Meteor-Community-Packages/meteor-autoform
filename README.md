@@ -76,11 +76,12 @@ A lot. Here's a summary:
 ```bash
 $  meteor create --bare testdummy # testdummy is already in the .gitignore
 $ cd testdummmy
-$ meteor npm install --save-dev puppeteer simpl-schema chai
+$ meteor npm install --save-dev puppeteer simpl-schema chai sinon
 $ METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_WATCH=1 TEST_SERVER=0 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../
 ```
 
 - **`replaced`** TravisCI with GitHub actions
+- **`implemented`** testsuite for API and internals
 
 ## Other
 
