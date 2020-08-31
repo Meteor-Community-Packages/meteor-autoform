@@ -107,6 +107,12 @@ describe('api', function () {
     });
   });
   describe('setDefaultTemplateForType', function () {
+    it ("throws if no template is found", function () {
+      const type = Random.id();
+      const template = Random.id();
+      const msg =  `setDefaultTemplateForType can't set default template to "${template}" for type "${type}" because there is no defined template with the name "${type}_${template}"`
+      expect(() => AutoForm.setDefaultTemplateForType(type, template)).to.throw(msg)
+    });
     it ("sets a default global template for a certain type", function () {
       const defaultTemplate = Random.id()
       Template[`type_${defaultTemplate}`] = { foo: defaultTemplate }
