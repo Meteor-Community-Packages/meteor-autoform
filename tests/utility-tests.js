@@ -418,23 +418,29 @@ describe('Utility', function () {
   });
   it ("compactArrays", function () {
     const id = Random.id();
-    const obj = { foo: [{ bar: id, some: [null] }, { baz: [{id, some: [undefined] }]}, undefined], id  };
+    const date = new Date();
+    const obj = { foo: [{ bar: id, some: [null] }, { baz: [{id, some: [undefined] }]}, undefined], id, d: date  };
     Utility.compactArrays(obj);
     expect(obj).to.deep.equal({
-      foo: [{ bar: id, some: [] }, { baz: [{id, some: [] }]}], id
+      foo: [{ bar: id, some: [] }, { baz: [{id, some: [] }]}], id, d: date
     });
   });
   it ("bubbleEmpty", function () {
+    function Custom () { this.val = ''; } // should fail isBasicObject test
     const obj = {
       foo: {
         bar: null,
         baz: undefined,
         some: ''
-      }
+      },
+      custom: new Custom()
     };
     Utility.bubbleEmpty(obj);
     expect(obj).to.deep.equal({
-      foo: null
+      foo: null,
+      custom: {
+        val: ''
+      }
     });
   });
   it ("isNullUndefinedOrEmptyString", function () {

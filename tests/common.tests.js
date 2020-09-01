@@ -4,12 +4,11 @@ import { isObject, isFunction, throttle } from '../common'
 describe("common", function () {
   describe(isObject.name, function () {
     it ("determines, if something is an object", function () {
-      // TODO remove array and function as they have their own checks
-      [{}, [], () => {}].forEach(obj => {
+      [{}, { foo: {}}, Object.create(null)].forEach(obj => {
         expect(isObject(obj)).to.equal(true)
       });
 
-      [false, 1, 'foo', new Date()].forEach(obj => {
+      [[], () => {}, false, 1, 'foo', new Date()].forEach(obj => {
         expect(isObject(obj)).to.equal(false)
       });
     });
@@ -20,8 +19,7 @@ describe("common", function () {
         expect(isFunction(obj)).to.equal(false)
       });
 
-      // TODO add async function() {}, async () => {}
-      [function () {}, () => {}].forEach(obj => {
+      [function () {}, () => {}, async function () {}, async () => {}].forEach(obj => {
         expect(isFunction(obj)).to.equal(true)
       });
     });

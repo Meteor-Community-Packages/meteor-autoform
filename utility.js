@@ -228,7 +228,7 @@ export const Utility = {
       current = newDoc;
       for (let i = 0; i < subkeylen; i++) {
         subkey = subkeys[i];
-        if (typeof current[subkey] !== 'undefined' && !isObject(current[subkey])) {
+        if (typeof current[subkey] !== 'undefined' && !isObject(current[subkey]) && !Array.isArray(current[subkey])) {
           break; // already set for some reason; leave it alone
         }
         if (i === subkeylen - 1) {
@@ -238,7 +238,7 @@ export const Utility = {
           // see if the next piece is a number
           nextPiece = subkeys[i + 1];
           nextPiece = parseInt(nextPiece, 10);
-          if (isNaN(nextPiece) && !isObject(current[subkey])) {
+          if (isNaN(nextPiece) && !isObject(current[subkey]) && !Array.isArray(current[subkey])) {
             current[subkey] = {};
           } else if (!isNaN(nextPiece) && !Array.isArray(current[subkey])) {
             current[subkey] = [];
@@ -263,7 +263,9 @@ export const Utility = {
         if (Array.isArray(val)) {
           obj[key] = val.filter(item => ![void 0, null].includes(item));
           obj[key].forEach(compactArrays);
-        } else if (!(val instanceof Date) && isObject(val)) {
+        }
+
+        else if (isObject(val)) {
           // recurse into objects
           compactArrays(val);
         }
@@ -283,11 +285,12 @@ export const Utility = {
     if (isObject(obj)) {
       Object.entries(obj).forEach(function ([key, val]) {
         if (Array.isArray(val)) {
-          val.forEach(bubbleEmpty);
+          val.forEach(bubbleEmpty); // TODO what if array is empty? Remove?
         } else if (isBasicObject(val)) {
           const allEmpty = Object.values(val).every(function (prop) {
             return (prop === void 0 || prop === null || (!keepEmptyStrings && typeof prop === 'string' && prop.length === 0));
           });
+
           if (!Object.keys(val).length || allEmpty) {
             obj[key] = null;
           } else {

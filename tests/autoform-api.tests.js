@@ -876,6 +876,19 @@ describe('api', function () {
       stub(Blaze, 'getData', () => viewData);
       expect(AutoForm.findAttributesWithPrefix(prefix)).to.deep.equal({});
     });
+    it ("ignores array values", function () {
+      const view = { name: 'Template.autoForm'};
+      const suffix = Random.id();
+      const prefix = Random.id();
+      const viewData = {
+        atts: [{
+          [`${prefix}-${suffix}`]: { prefix: suffix }
+        }]
+      };
+      stub(Blaze, 'currentView', view);
+      stub(Blaze, 'getData', () => viewData);
+      expect(AutoForm.findAttributesWithPrefix(prefix)).to.deep.equal({});
+    });
     it ("Searches for attributes that start with the given prefix", function () {
       const view = { name: 'Template.autoForm'};
       const prefix = Random.id();

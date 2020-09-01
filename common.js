@@ -1,5 +1,8 @@
-export const isObject = obj => toString.call(obj) == '[object Object]' || Array.isArray(obj) || isFunction(obj)
-export const isFunction = obj => toString.call(obj) == '[object Function]'
+export const isObject = obj => Object.prototype.toString.call(obj) === '[object Object]';
+export const isFunction = obj => {
+  const type = Object.prototype.toString.call(obj);
+  return type === '[object Function]' || type === '[object AsyncFunction]';
+}
 
 export const throttle = (fn, limit) => {
   let timeout

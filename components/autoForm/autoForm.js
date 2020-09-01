@@ -1,5 +1,5 @@
 import MongoObject from "mongo-object";
-import { isObject } from "../../common";
+import { isObject, isFunction } from "../../common";
 import { Hooks } from '../../autoform-hooks'
 import { Utility } from '../../utility'
 /* global AutoForm, ReactiveVar, arrayTracker, setDefaults */
@@ -36,7 +36,7 @@ Template.autoForm.helpers({
       });
     }
 
-    // Filter out arrays and objects, which are obviously not meant to be
+    // Filter out arrays and objects and functions, which are obviously not meant to be
     // HTML attributes.
     for (var prop in context) {
       if (
@@ -45,7 +45,7 @@ Template.autoForm.helpers({
         !hasComponentPrefix(prop)
       ) {
         val = context[prop];
-        if (!Array.isArray(val) && !isObject(val)) {
+        if (!Array.isArray(val) && !isObject(val) && !isFunction(val)) {
           htmlAttributes[prop] = val;
         }
       }
