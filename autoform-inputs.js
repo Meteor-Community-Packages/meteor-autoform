@@ -1,5 +1,5 @@
 /* global AutoForm */
-import { Utility } from './utility'
+import { Utility } from "./utility";
 
 /**
  * Creates a flat document that contains all field values as key/value pair, where key = fieldname and value = the
@@ -8,9 +8,12 @@ import { Utility } from './utility'
  * @param ss {SimpleSchema} The current SimpleSchema instance for the form, related to the fields.
  * @returns {Object} The document Object with key/value-paired fields.
  */
-export const getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) {
+export const getFlatDocOfFieldValues = function getFlatDocOfFieldValues(
+  fields,
+  ss
+) {
   const doc = {};
-  fields.each(function() {
+  fields.each(function () {
     let fieldName;
     const val = AutoForm.getInputValue(this, ss);
     if (val !== void 0) {
@@ -105,7 +108,13 @@ export const getInputValue = function getInputValue(
  * @example
  * const iData = getInputData(defs, atts, value, ss.label(c.atts.name), form.type);
  */
-export const getInputData = function getInputData(defs, hash, value, label, formType) {
+export const getInputData = function getInputData(
+  defs,
+  hash,
+  value,
+  label,
+  formType
+) {
   /*
    * Get HTML attributes
    */
@@ -143,27 +152,27 @@ export const getInputData = function getInputData(defs, hash, value, label, form
   // in a simple way, we add the attributes to the HTML
   // only if their value is `true`. That is, unlike in
   // HTML, their mere presence does not matter.
-  ["disabled", "readonly", "checked", "required", "autofocus"].forEach(function(
-    booleanProp
-  ) {
-    if (!(booleanProp in hash)) {
-      return;
-    }
+  ["disabled", "readonly", "checked", "required", "autofocus"].forEach(
+    function (booleanProp) {
+      if (!(booleanProp in hash)) {
+        return;
+      }
 
-    // For historical reasons, we treat the string "true" and an empty string as `true`, too.
-    // But an empty string value results in the cleanest rendered output for boolean props,
-    // so we standardize as that.
-    if (
-      hash[booleanProp] === true ||
-      hash[booleanProp] === "true" ||
-      hash[booleanProp] === ""
-    ) {
-      inputAtts[booleanProp] = "";
-    } else {
-      // If the value is anything else, we don't render it
-      delete inputAtts[booleanProp];
+      // For historical reasons, we treat the string "true" and an empty string as `true`, too.
+      // But an empty string value results in the cleanest rendered output for boolean props,
+      // so we standardize as that.
+      if (
+        hash[booleanProp] === true ||
+        hash[booleanProp] === "true" ||
+        hash[booleanProp] === ""
+      ) {
+        inputAtts[booleanProp] = "";
+      } else {
+        // If the value is anything else, we don't render it
+        delete inputAtts[booleanProp];
+      }
     }
-  });
+  );
 
   /*
    * Set up the context. This is the object that becomes `this` in the
@@ -177,7 +186,7 @@ export const getInputData = function getInputData(defs, hash, value, label, form
     max: defs.max,
     value: value,
     atts: inputAtts,
-    selectOptions: AutoForm.Utility.getSelectOptions(defs, hash)
+    selectOptions: AutoForm.Utility.getSelectOptions(defs, hash),
   };
 
   /*
@@ -204,9 +213,9 @@ export const getInputData = function getInputData(defs, hash, value, label, form
  */
 function markChangedThrottle(fn, limit) {
   let timeouts = {};
-  return function(template, fieldName, fieldValue) {
+  return function (template, fieldName, fieldValue) {
     clearTimeout(timeouts[fieldName]);
-    timeouts[fieldName] = setTimeout(function() {
+    timeouts[fieldName] = setTimeout(function () {
       fn(template, fieldName, fieldValue);
     }, limit);
   };
@@ -234,7 +243,11 @@ const markChangedAncestors = (template, fieldName) => {
  * @param {Template} template
  * @return {*|{}|boolean} truthy/falsy value, based on all checked properties
  */
-const isRendered = template => template && template.view && template.view._domrange && !template.view.isDestroyed;
+const isRendered = (template) =>
+  template &&
+  template.view &&
+  template.view._domrange &&
+  !template.view.isDestroyed;
 
 /**
  * @private Applies the change marking, creates a new Tracker Dependency if there is none for the field.
@@ -274,7 +287,8 @@ export const markChanged = markChangedThrottle(function _markChanged(
     return markChanged(template, fieldName, fieldValue);
   }
   doMarkChanged(template, fieldName);
-}, 150);
+},
+150);
 
 /**
  * Creates a formValues entry on the template, in case it does not exist yet and updates the given
@@ -304,9 +318,11 @@ export const updateTrackedFieldValue = function updateTrackedFieldValue(
  * @see {updateTrackedFieldValue}
  * @param template {Template} The current form template
  */
-export const updateAllTrackedFieldValues = function updateAllTrackedFieldValues(template) {
+export const updateAllTrackedFieldValues = function updateAllTrackedFieldValues(
+  template
+) {
   if (template && template.formValues) {
-    Object.keys(template.formValues).forEach(function(fieldName) {
+    Object.keys(template.formValues).forEach(function (fieldName) {
       // XXX - if we would not pass a fieldValue here, then there would be none of the fields marked as
       // XXX - changed when the 'reset form'  event is running. We use a random number in order to prevent
       // XXX - the chance of collision with the cachedValue.
@@ -315,13 +331,14 @@ export const updateAllTrackedFieldValues = function updateAllTrackedFieldValues(
   }
 };
 
-export const getAllFieldsInForm = function getAllFieldsInForm(template, disabled = false) {
+export const getAllFieldsInForm = function getAllFieldsInForm(
+  template,
+  disabled = false
+) {
   // Get all elements with `data-schema-key` attribute, unless disabled
   const formId = template.data.id;
-  const allFields = template.$("[data-schema-key]").filter(function() {
-    const fieldForm = $(this)
-      .closest("form")
-      .attr("id");
+  const allFields = template.$("[data-schema-key]").filter(function () {
+    const fieldForm = $(this).closest("form").attr("id");
     return fieldForm === formId;
   });
   return disabled ? allFields : allFields.not("[disabled]");

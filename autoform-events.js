@@ -1,8 +1,11 @@
 import { isObject, throttle } from "./common";
-import { updateTrackedFieldValue, updateAllTrackedFieldValues } from './autoform-inputs'
-import { validateField } from './autoform-validation'
-import { Hooks } from './autoform-hooks'
-import { Utility } from './utility'
+import {
+  updateTrackedFieldValue,
+  updateAllTrackedFieldValues,
+} from "./autoform-inputs";
+import { validateField } from "./autoform-validation";
+import { Hooks } from "./autoform-hooks";
+import { Utility } from "./utility";
 /* global AutoForm, arrayTracker */
 
 // all form events handled here
@@ -81,15 +84,13 @@ function onlyIfAlreadyInvalid(validationType) {
 function getKeyForElement(element) {
   var key = element.getAttribute("data-schema-key");
   if (!key) {
-    key = $(element)
-      .closest("[data-schema-key]")
-      .attr("data-schema-key");
+    key = $(element).closest("[data-schema-key]").attr("data-schema-key");
   }
   return key;
 }
 
 // throttle autosave, at most autosave every 500ms
-var throttleAutosave = throttle(function(event) {
+var throttleAutosave = throttle(function (event) {
   lastAutoSaveElement = event.target;
   $(event.currentTarget).submit();
 }, 500);
@@ -116,7 +117,7 @@ Template.autoForm.events({
       filter: form.filter,
       autoConvert: form.autoConvert,
       removeEmptyStrings: form.removeEmptyStrings,
-      trimStrings: form.trimStrings
+      trimStrings: form.trimStrings,
     };
 
     // Get the form type definition
@@ -136,7 +137,7 @@ Template.autoForm.events({
 
     // Prep context with which hooks are called
     var hookContext = {
-      addStickyValidationError: function(key, type, value) {
+      addStickyValidationError: function (key, type, value) {
         AutoForm.addStickyValidationError(formId, key, type, value);
       },
       autoSaveChangedElement: lastAutoSaveElement,
@@ -147,16 +148,16 @@ Template.autoForm.events({
       formAttributes: form,
       formId: formId,
       formTypeDefinition: ftd,
-      removeStickyValidationError: function(key) {
+      removeStickyValidationError: function (key) {
         AutoForm.removeStickyValidationError(formId, key);
       },
-      resetForm: function() {
+      resetForm: function () {
         AutoForm.resetForm(formId, template);
       },
       ss: ss,
       ssIsOverride: ssIsOverride,
       template: template,
-      validationContext: AutoForm.getValidationContext(formId)
+      validationContext: AutoForm.getValidationContext(formId),
     };
 
     // Gather all form values
@@ -224,7 +225,7 @@ Template.autoForm.events({
         }
 
         // Define a `result` function
-        var cb = function(d) {
+        var cb = function (d) {
           // If the hook returns false, we cancel
           if (d === false) {
             endSubmission();
@@ -237,7 +238,7 @@ Template.autoForm.events({
 
         const cbOnce = () => {
           let alreadyRan = false;
-          return d => {
+          return (d) => {
             if (alreadyRan) return;
             alreadyRan = true;
             return cb(d);
@@ -321,7 +322,7 @@ Template.autoForm.events({
           ftd.validateForm.call({
             form: form,
             formDoc: formDoc,
-            useCollectionSchema: false
+            useCollectionSchema: false,
           });
       } catch (e) {
         // Catch exceptions in validation functions which will bubble up here, cause a form with
@@ -345,7 +346,7 @@ Template.autoForm.events({
       failedValidation: failedValidation,
       validationOptions: validationOptions,
       hookContext: hookContext,
-      ...hookContext
+      ...hookContext,
     });
   },
   "keyup [data-schema-key]": function autoFormKeyUpHandler(event) {
@@ -517,7 +518,7 @@ Template.autoForm.events({
     // Focus the autofocus element
     template.$("[autofocus]").focus();
   },
-  "keydown .autoform-array-item input": function(event) {
+  "keydown .autoform-array-item input": function (event) {
     // When enter is pressed in an array item field, default behavior
     // seems to be to "click" the remove item button. This doesn't make
     // sense so we stop it.
@@ -566,5 +567,5 @@ Template.autoForm.events({
     var ss = AutoForm.getFormSchema(formId);
 
     arrayTracker.addOneToField(formId, name, ss, minCount, maxCount);
-  }
+  },
 });

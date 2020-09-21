@@ -1,5 +1,5 @@
-import MongoObject from 'mongo-object';
-import { isObject } from './common'
+import MongoObject from "mongo-object";
+import { isObject } from "./common";
 
 /* global Utility:true, AutoForm, moment */
 
@@ -12,7 +12,17 @@ import { isObject } from './common'
 const timeStringRegExp = /^[0-2][0-9]:[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/;
 
 export const Utility = {
-  componentTypeList: ['afArrayField', 'afEachArrayItem', 'afFieldInput', 'afFormGroup', 'afObjectField', 'afQuickField', 'afQuickFields', 'autoForm', 'quickForm'],
+  componentTypeList: [
+    "afArrayField",
+    "afEachArrayItem",
+    "afFieldInput",
+    "afFormGroup",
+    "afObjectField",
+    "afQuickField",
+    "afQuickFields",
+    "autoForm",
+    "quickForm",
+  ],
   /**
    * @method Utility.cleanNulls
    * @private
@@ -34,7 +44,7 @@ export const Utility = {
         }
       } else if (Array.isArray(val)) {
         if (!keepEmptyStrings) {
-          val = val.filter(v => ![null, undefined, ''].includes(v));
+          val = val.filter((v) => ![null, undefined, ""].includes(v));
         }
         val = cleanNulls(val, true, keepEmptyStrings); // recurse into non-typed arrays
         if (Object.keys(val).length) {
@@ -42,7 +52,11 @@ export const Utility = {
         }
       } else if (!Utility.isNullUndefinedOrEmptyString(val)) {
         newDoc[key] = val;
-      } else if (keepEmptyStrings && typeof val === 'string' && val.length === 0) {
+      } else if (
+        keepEmptyStrings &&
+        typeof val === "string" &&
+        val.length === 0
+      ) {
         newDoc[key] = val;
       }
     });
@@ -63,15 +77,22 @@ export const Utility = {
     Object.entries(flatDoc).forEach(function ([key, val]) {
       // If value is undefined, null, or an empty string, report this as null so it will be unset
       if (val === null) {
-        nulls[key] = '';
+        nulls[key] = "";
       } else if (val === void 0) {
-        nulls[key] = '';
-      } else if (!keepEmptyStrings && typeof val === 'string' && val.length === 0) {
-        nulls[key] = '';
+        nulls[key] = "";
+      } else if (
+        !keepEmptyStrings &&
+        typeof val === "string" &&
+        val.length === 0
+      ) {
+        nulls[key] = "";
       }
       // If value is an array in which all the values recursively are undefined, null, or an empty string, report this as null so it will be unset
-      else if (Array.isArray(val) && Utility.cleanNulls(val, true, keepEmptyStrings).length === 0) {
-        nulls[key] = '';
+      else if (
+        Array.isArray(val) &&
+        Utility.cleanNulls(val, true, keepEmptyStrings).length === 0
+      ) {
+        nulls[key] = "";
       }
     });
     return nulls;
@@ -95,10 +116,19 @@ export const Utility = {
 
     // Flatten doc
     const mDoc = new MongoObject(doc);
-    let flatDoc = mDoc.getFlatObject({ keepArrays: Boolean(options.keepArrays) });
+    let flatDoc = mDoc.getFlatObject({
+      keepArrays: Boolean(options.keepArrays),
+    });
     // Get a list of null, undefined, and empty string values so we can unset them instead
-    const nulls = Utility.reportNulls(flatDoc, Boolean(options.keepEmptyStrings));
-    flatDoc = Utility.cleanNulls(flatDoc, false, Boolean(options.keepEmptyStrings));
+    const nulls = Utility.reportNulls(
+      flatDoc,
+      Boolean(options.keepEmptyStrings)
+    );
+    flatDoc = Utility.cleanNulls(
+      flatDoc,
+      false,
+      Boolean(options.keepEmptyStrings)
+    );
 
     if (Object.keys(flatDoc).length) {
       modifier.$set = flatDoc;
@@ -118,7 +148,7 @@ export const Utility = {
    */
   getSelectValues: function getSelectValues(select) {
     const result = [];
-    const options = select && select.options || [];
+    const options = (select && select.options) || [];
     let opt;
 
     for (let i = 0, ln = options.length; i < ln; i++) {
@@ -138,7 +168,7 @@ export const Utility = {
     let selectOptions = hash.options;
 
     // Handle options="allowed"
-    if (selectOptions === 'allowed') {
+    if (selectOptions === "allowed") {
       selectOptions = defs.allowedValues.map(function (v) {
         let label = v;
         if (hash.capitalize && v.length > 0 && schemaType === String) {
@@ -170,8 +200,8 @@ export const Utility = {
   lookup: function lookup(obj) {
     let ref = window;
     let arr;
-    if (typeof obj === 'string') {
-      arr = obj.split('.');
+    if (typeof obj === "string") {
+      arr = obj.split(".");
       while (arr.length && (ref = ref[arr.shift()]));
       if (!ref) {
         throw new Error(`${obj} is not in the window scope`);
@@ -196,7 +226,7 @@ export const Utility = {
 
     return {
       ...def,
-      ...(def.type && def.type[0]) || {},
+      ...((def.type && def.type[0]) || {}),
     };
   },
   /**
@@ -223,12 +253,16 @@ export const Utility = {
     const newDoc = {};
     let subkeys, subkey, subkeylen, nextPiece, current;
     Object.entries(doc).forEach(function ([key, val]) {
-      subkeys = key.split('.');
+      subkeys = key.split(".");
       subkeylen = subkeys.length;
       current = newDoc;
       for (let i = 0; i < subkeylen; i++) {
         subkey = subkeys[i];
-        if (typeof current[subkey] !== 'undefined' && !isObject(current[subkey]) && !Array.isArray(current[subkey])) {
+        if (
+          typeof current[subkey] !== "undefined" &&
+          !isObject(current[subkey]) &&
+          !Array.isArray(current[subkey])
+        ) {
           break; // already set for some reason; leave it alone
         }
         if (i === subkeylen - 1) {
@@ -238,7 +272,11 @@ export const Utility = {
           // see if the next piece is a number
           nextPiece = subkeys[i + 1];
           nextPiece = parseInt(nextPiece, 10);
-          if (isNaN(nextPiece) && !isObject(current[subkey]) && !Array.isArray(current[subkey])) {
+          if (
+            isNaN(nextPiece) &&
+            !isObject(current[subkey]) &&
+            !Array.isArray(current[subkey])
+          ) {
             current[subkey] = {};
           } else if (!isNaN(nextPiece) && !Array.isArray(current[subkey])) {
             current[subkey] = [];
@@ -261,11 +299,9 @@ export const Utility = {
     if (isObject(obj)) {
       Object.entries(obj).forEach(function ([key, val]) {
         if (Array.isArray(val)) {
-          obj[key] = val.filter(item => ![void 0, null].includes(item));
+          obj[key] = val.filter((item) => ![void 0, null].includes(item));
           obj[key].forEach(compactArrays);
-        }
-
-        else if (isObject(val)) {
+        } else if (isObject(val)) {
           // recurse into objects
           compactArrays(val);
         }
@@ -288,7 +324,13 @@ export const Utility = {
           val.forEach(bubbleEmpty); // TODO what if array is empty? Remove?
         } else if (isBasicObject(val)) {
           const allEmpty = Object.values(val).every(function (prop) {
-            return (prop === void 0 || prop === null || (!keepEmptyStrings && typeof prop === 'string' && prop.length === 0));
+            return (
+              prop === void 0 ||
+              prop === null ||
+              (!keepEmptyStrings &&
+                typeof prop === "string" &&
+                prop.length === 0)
+            );
           });
 
           if (!Object.keys(val).length || allEmpty) {
@@ -310,7 +352,11 @@ export const Utility = {
    * Returns `true` if the value is null, undefined, or an empty string
    */
   isNullUndefinedOrEmptyString: function isNullUndefinedOrEmptyString(val) {
-    return (val === void 0 || val === null || (typeof val === 'string' && val.length === 0));
+    return (
+      val === void 0 ||
+      val === null ||
+      (typeof val === "string" && val.length === 0)
+    );
   },
   /**
    * @method Utility.isValidDateString
@@ -321,7 +367,7 @@ export const Utility = {
    * Returns `true` if dateString is a "valid date string"
    */
   isValidDateString: function isValidDateString(dateString) {
-    const m = moment(dateString, 'YYYY-MM-DD', true);
+    const m = moment(dateString, "YYYY-MM-DD", true);
     return m && m.isValid();
   },
   /**
@@ -333,7 +379,7 @@ export const Utility = {
    * Returns `true` if timeString is a "valid time string"
    */
   isValidTimeString: function isValidTimeString(timeString) {
-    if (typeof timeString !== 'string') {
+    if (typeof timeString !== "string") {
       return false;
     }
 
@@ -347,8 +393,10 @@ export const Utility = {
    *
    * Returns true if dateString is a "valid normalized forced-UTC global date and time string"
    */
-  isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString(dateString) {
-    if (typeof dateString !== 'string') {
+  isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString(
+    dateString
+  ) {
+    if (typeof dateString !== "string") {
       return false;
     }
 
@@ -356,7 +404,12 @@ export const Utility = {
     const tPart = dateString.substring(10, 11);
     const timePart = dateString.substring(11, dateString.length - 1);
     const zPart = dateString.substring(dateString.length - 1);
-    return Utility.isValidDateString(datePart) && tPart === 'T' && Utility.isValidTimeString(timePart) && zPart === 'Z';
+    return (
+      Utility.isValidDateString(datePart) &&
+      tPart === "T" &&
+      Utility.isValidTimeString(timePart) &&
+      zPart === "Z"
+    );
   },
   /**
    * @method  Utility.isValidNormalizedLocalDateAndTimeString
@@ -366,15 +419,21 @@ export const Utility = {
    *
    * Returns true if dtString is a "valid normalized local date and time string"
    */
-  isValidNormalizedLocalDateAndTimeString: function isValidNormalizedLocalDateAndTimeString(dtString) {
-    if (typeof dtString !== 'string') {
+  isValidNormalizedLocalDateAndTimeString: function isValidNormalizedLocalDateAndTimeString(
+    dtString
+  ) {
+    if (typeof dtString !== "string") {
       return false;
     }
 
     const datePart = dtString.substring(0, 10);
     const tPart = dtString.substring(10, 11);
     const timePart = dtString.substring(11, dtString.length);
-    return Utility.isValidDateString(datePart) && tPart === 'T' && Utility.isValidTimeString(timePart);
+    return (
+      Utility.isValidDateString(datePart) &&
+      tPart === "T" &&
+      Utility.isValidTimeString(timePart)
+    );
   },
   /**
    * @method Utility.getComponentContext
@@ -396,7 +455,9 @@ export const Utility = {
 
     // Look up the tree if we're in a helper, checking to see if any ancestor components
     // had a <componentType>-attribute specified.
-    const formComponentAttributes = AutoForm.findAttributesWithPrefix(name + '-');
+    const formComponentAttributes = AutoForm.findAttributesWithPrefix(
+      name + "-"
+    );
 
     // Get any field-specific attributes defined in the schema.
     // They can be in autoform.attrName or autoform.componentType.attrName, with
@@ -404,12 +465,17 @@ export const Utility = {
     let fieldAttributes = { ...defs.autoform };
 
     const fieldAttributesForComponentType = fieldAttributes[name] || {};
-    fieldAttributes = Object.entries(fieldAttributes)
-      .reduce((result, [key, value]) => {
-        if (!Utility.componentTypeList.includes(key)) result[key] = value
-        return result
-      }, {})
-    fieldAttributes = { ...fieldAttributes, ...fieldAttributesForComponentType };
+    fieldAttributes = Object.entries(fieldAttributes).reduce(
+      (result, [key, value]) => {
+        if (!Utility.componentTypeList.includes(key)) result[key] = value;
+        return result;
+      },
+      {}
+    );
+    fieldAttributes = {
+      ...fieldAttributes,
+      ...fieldAttributesForComponentType,
+    };
 
     // "autoform" option in the schema provides default atts
     atts = { ...formComponentAttributes, ...fieldAttributes, ...atts };
@@ -417,9 +483,9 @@ export const Utility = {
     // eval any attribute that is provided as a function
     const evaluatedAtts = {};
     Object.entries(atts).forEach(function ([k, v]) {
-      if (typeof v === 'function') {
+      if (typeof v === "function") {
         evaluatedAtts[k] = v.call({
-          name: atts.name
+          name: atts.name,
         });
       } else {
         evaluatedAtts[k] = v;
@@ -428,7 +494,7 @@ export const Utility = {
 
     return {
       atts: evaluatedAtts,
-      defs: defs
+      defs: defs,
     };
   },
   /**
@@ -439,8 +505,8 @@ export const Utility = {
    * @return {Array} The array, building it from a comma-delimited string if necessary.
    */
   stringToArray: function stringToArray(s, errorMessage) {
-    if (typeof s === 'string') {
-      return s.replace(/ /g, '').split(',');
+    if (typeof s === "string") {
+      return s.replace(/ /g, "").split(",");
     } else if (!Array.isArray(s)) {
       throw new Error(errorMessage);
     } else {
@@ -455,10 +521,10 @@ export const Utility = {
    * @return {Object} The object with klass added to the "class" property, creating the property if necessary
    */
   addClass: function addClass(atts, klass) {
-    if (typeof atts['class'] === 'string') {
-      atts['class'] += ` ${klass}`;
+    if (typeof atts["class"] === "string") {
+      atts["class"] += ` ${klass}`;
     } else {
-      atts['class'] = klass;
+      atts["class"] = klass;
     }
     return atts;
   },
@@ -476,10 +542,12 @@ export const Utility = {
     return ftd;
   },
   checkTemplate: function checkTemplate(template) {
-    return !!(template &&
+    return !!(
+      template &&
       template.view &&
       template.view._domrange &&
-      !template.view.isDestroyed);
+      !template.view.isDestroyed
+    );
   },
   // This is copied from mongo-object to avoid a direct dep on that package
   // XXX: we have already direct dep on that package, so it makes no difference anymore,
@@ -490,8 +558,8 @@ export const Utility = {
 };
 
 // getPrototypeOf polyfill
-if (typeof Object.getPrototypeOf !== 'function') {
-  if (typeof ''.__proto__ === 'object') {
+if (typeof Object.getPrototypeOf !== "function") {
+  if (typeof "".__proto__ === "object") {
     Object.getPrototypeOf = function (object) {
       return object.__proto__;
     };

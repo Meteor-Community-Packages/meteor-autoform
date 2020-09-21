@@ -1,5 +1,5 @@
-import { Mongo } from 'meteor/mongo';
-import { Utility } from './utility'
+import { Mongo } from "meteor/mongo";
+import { Utility } from "./utility";
 
 /**
  * Track arrays; this allows us to add/remove fields or groups of fields for an array
@@ -111,7 +111,7 @@ ArrayTracker.prototype.resetField = function atResetField(formId, field) {
 
   if (!self.info[formId][field]) {
     self.info[formId][field] = {
-      deps: new Tracker.Dependency()
+      deps: new Tracker.Dependency(),
     };
   }
 
@@ -127,7 +127,7 @@ ArrayTracker.prototype.resetField = function atResetField(formId, field) {
 
 ArrayTracker.prototype.resetForm = function atResetForm(formId) {
   const self = this;
-  Object.keys(self.info[formId] || {}).forEach(function(field) {
+  Object.keys(self.info[formId] || {}).forEach(function (field) {
     self.resetField(formId, field);
   });
 };
@@ -135,7 +135,7 @@ ArrayTracker.prototype.resetForm = function atResetForm(formId) {
 ArrayTracker.prototype.untrackForm = function atUntrackForm(formId) {
   const self = this;
   if (self.info[formId]) {
-    Object.keys(self.info[formId]).forEach(field => {
+    Object.keys(self.info[formId]).forEach((field) => {
       if (self.info[formId][field].collection) {
         self.info[formId][field].collection.remove({});
       }
@@ -183,7 +183,7 @@ ArrayTracker.prototype.isFirstFieldlVisible = function atIsFirstFieldlVisible(
   const self = this;
   self.ensureField(formId, field);
   self.info[formId][field].deps.depend();
-  const firstVisibleField = self.info[formId][field].array.find(function(
+  const firstVisibleField = self.info[formId][field].array.find(function (
     currentField
   ) {
     return !currentField.removed;
@@ -200,7 +200,7 @@ ArrayTracker.prototype.isLastFieldlVisible = function atIsLastFieldlVisible(
   self.ensureField(formId, field);
   self.info[formId][field].deps.depend();
   const lastVisibleField = self.info[formId][field].array
-    .filter(function(currentField) {
+    .filter(function (currentField) {
       return !currentField.removed;
     })
     .pop();
@@ -286,7 +286,7 @@ ArrayTracker.prototype.removeFromFieldAtIndex = function atRemoveFromFieldAtInde
 /*
  * PRIVATE
  */
-const createLoopCtx = function(
+const createLoopCtx = function (
   formId,
   field,
   index,
@@ -300,13 +300,13 @@ const createLoopCtx = function(
     name: field + "." + index,
     index: index,
     minCount: overrideMinCount,
-    maxCount: overrideMaxCount
+    maxCount: overrideMaxCount,
   };
 
   // If this is an array of objects, add child key names under loopCtx.current[childName] = fullKeyName
   if (childKeys.length) {
     loopCtx.current = {};
-    childKeys.forEach(function(k) {
+    childKeys.forEach(function (k) {
       loopCtx.current[k] = field + "." + index + "." + k;
     });
   }

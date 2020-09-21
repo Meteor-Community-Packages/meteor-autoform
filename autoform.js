@@ -1,13 +1,13 @@
 /* global AutoForm:true */
-import { FormPreserve } from './form-preserve'
-import { FormData } from './autoform-formdata'
-import { ArrayTracker } from './autoform-arrays'
+import { FormPreserve } from "./form-preserve";
+import { FormData } from "./autoform-formdata";
+import { ArrayTracker } from "./autoform-arrays";
 
 AutoForm = AutoForm || {};
 
 // formPreserve is used to keep current form data across hot code
 // reloads for any forms that are currently rendered
-AutoForm.formPreserve = new FormPreserve('autoforms');
+AutoForm.formPreserve = new FormPreserve("autoforms");
 
 AutoForm.reactiveFormData = new FormData();
 
@@ -20,9 +20,9 @@ arrayTracker = new ArrayTracker();
 AutoForm._destroyForm = {};
 
 // reactive templates
-globalDefaultTemplate = 'bootstrap3';
+globalDefaultTemplate = "bootstrap3";
 defaultTypeTemplates = {};
 deps = {
   defaultTemplate: new Tracker.Dependency(),
-  defaultTypeTemplates: {}
+  defaultTypeTemplates: {},
 };

@@ -8,18 +8,18 @@
  */
 export const FormPreserve = function formPreserveConstructor(migrationName) {
   const self = this;
-  if ('string' !== typeof migrationName)
-    throw Error('You must define an unique migration name of type String');
+  if ("string" !== typeof migrationName)
+    throw Error("You must define an unique migration name of type String");
   self.registeredForms = {};
   self.retrievedDocuments = {};
   if (Package.reload) {
     const Reload = Package.reload.Reload;
-    self.retrievedDocuments = Reload._migrationData(migrationName) || '{}';
+    self.retrievedDocuments = Reload._migrationData(migrationName) || "{}";
 
     // Currently migration does not seem to support proper storage
     // of Date type. It comes back as a string, so we need to store
     // EJSON instead.
-    if (typeof self.retrievedDocuments === 'string') {
+    if (typeof self.retrievedDocuments === "string") {
       self.retrievedDocuments = EJSON.parse(self.retrievedDocuments);
     }
 
@@ -65,7 +65,10 @@ FormPreserve.prototype.unregisterAllForms = function () {
 FormPreserve.prototype._retrieveRegisteredDocuments = function () {
   const self = this;
   const res = {};
-  Object.entries(self.registeredForms).forEach(function ([formId, retrieveFunc]) {
+  Object.entries(self.registeredForms).forEach(function ([
+    formId,
+    retrieveFunc,
+  ]) {
     res[formId] = retrieveFunc();
   });
   return res;

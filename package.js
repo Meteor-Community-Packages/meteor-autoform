@@ -3,10 +3,10 @@ Package.describe({
   summary:
     "Easily create forms with automatic insert and update, and automatic reactive validation.",
   git: "https://github.com/aldeed/meteor-autoform.git",
-  version: "7.0.0-rc-1"
+  version: "7.0.0-rc-1",
 });
 
-Package.onUse(function(api) {
+Package.onUse(function (api) {
   api.versionsFrom("METEOR@1.3");
 
   // Dependencies
@@ -23,7 +23,7 @@ Package.onUse(function(api) {
       "random",
       "ecmascript",
       "mongo",
-      "momentjs:moment@2.10.6"
+      "momentjs:moment@2.10.6",
     ],
     "client"
   );
@@ -36,7 +36,7 @@ Package.onUse(function(api) {
       "aldeed:collection2-core@2.0.0",
       "aldeed:collection2@3.0.0",
       "aldeed:moment-timezone@0.4.0",
-      "reload"
+      "reload",
     ],
     "client",
     { weak: true }
@@ -161,13 +161,13 @@ Package.onUse(function(api) {
       "components/afQuickFields/afQuickFields.html",
       "components/afQuickFields/afQuickFields.js",
       // event handling
-      "autoform-events.js"
+      "autoform-events.js",
     ],
     "client"
   );
 });
 
-Package.onTest(function(api) {
+Package.onTest(function (api) {
   // Running the tests requires a dummy project in order to
   // resolve npm dependencies and the test env dependencies.
   // To setup local tests enter the following in your console:
@@ -176,23 +176,21 @@ Package.onTest(function(api) {
   // $ meteor npm install --save-dev puppeteer simpl-schema chai sinon
   // $ METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_WATCH=1 TEST_SERVER=0 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../
 
+  api.use(["meteortesting:browser-tests", "meteortesting:mocha"]);
 
-  api.use([
-    "meteortesting:browser-tests",
-    "meteortesting:mocha"
-  ]);
-
-  api.use([
-    "ecmascript",
-    "tracker",
-    "blaze",
-    "templating",
-    "mongo",
-    "momentjs:moment",
-    "aldeed:autoform"
-  ], 'client');
-
+  api.use(
+    [
+      "ecmascript",
+      "tracker",
+      "blaze",
+      "templating",
+      "mongo",
+      "momentjs:moment",
+      "aldeed:autoform",
+    ],
+    "client"
+  );
 
   // api.addFiles(["tests/utility-tests.js", "tests/autoform-tests.js"]);
-  api.mainModule("tests/testSuite.tests.js", 'client');
+  api.mainModule("tests/testSuite.tests.js", "client");
 });

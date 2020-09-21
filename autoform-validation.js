@@ -1,5 +1,5 @@
-import { throttle } from './common'
-import { Utility } from './utility';
+import { throttle } from "./common";
+import { Utility } from "./utility";
 
 /* global AutoForm, validateField:true */
 
@@ -12,7 +12,12 @@ import { Utility } from './utility';
  * @return {*}
  * @private
  */
-const _validateField = function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) {
+const _validateField = function _validateField(
+  key,
+  formId,
+  skipEmpty,
+  onlyIfAlreadyInvalid
+) {
   // Due to throttling, this can be called after the autoForm template is destroyed.
   // If that happens, we exit without error.
   const template = AutoForm.templateInstanceForForm(formId);
@@ -36,7 +41,12 @@ const _validateField = function _validateField(key, formId, skipEmpty, onlyIfAlr
   const ftd = Utility.getFormTypeDef(form.type);
 
   // Clean and validate doc
-  const docToValidate = AutoForm.getFormValues(formId, template, ss, !!ftd.usesModifier);
+  const docToValidate = AutoForm.getFormValues(
+    formId,
+    template,
+    ss,
+    !!ftd.usesModifier
+  );
 
   // If form is not currently rendered, return true
   if (!docToValidate) {
@@ -49,8 +59,15 @@ const _validateField = function _validateField(key, formId, skipEmpty, onlyIfAlr
     return true; // skip validation
   }
 
-  return AutoForm._validateFormDoc(docToValidate, !!ftd.usesModifier, formId, ss, form, key);
-}
+  return AutoForm._validateFormDoc(
+    docToValidate,
+    !!ftd.usesModifier,
+    formId,
+    ss,
+    form,
+    key
+  );
+};
 
 // Throttle field validation to occur at most every 300ms,
 // with leading and trailing calls.
