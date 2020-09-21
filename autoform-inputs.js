@@ -215,8 +215,8 @@ function markChangedThrottle(fn, limit) {
 /**
  * @private If the given field is a subfield within an array (fieldName = something.$) then this
  * ensures, that the ancestor (something) is marked changed, too.
- * @param template
- * @param fieldName
+ * @param {Template} template
+ * @param {String} fieldName
  */
 const markChangedAncestors = (template, fieldName) => {
   // To properly handle array fields, we'll mark the ancestors as changed, too
@@ -231,15 +231,15 @@ const markChangedAncestors = (template, fieldName) => {
 
 /**
  * @private Checks, whether a Template can be considered as rendered.
- * @param template
+ * @param {Template} template
  * @return {*|{}|boolean} truthy/falsy value, based on all checked properties
  */
 const isRendered = template => template && template.view && template.view._domrange && !template.view.isDestroyed;
 
 /**
  * @private Applies the change marking, creates a new Tracker Dependency if there is none for the field.
- * @param template
- * @param fieldName
+ * @param {Template} template
+ * @param {String} fieldName
  */
 const doMarkChanged = (template, fieldName) => {
   if (!template.formValues[fieldName]) {

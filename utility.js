@@ -276,7 +276,7 @@ export const Utility = {
    * @method Utility.bubbleEmpty
    * @private
    * @param  {Object} obj
-   * @param keepEmptyStrings
+   * @param {String} keepEmptyStrings
    * @return {undefined}
    *
    * Edits the object by reference.

@@ -17,7 +17,7 @@ function parseOptions(options, helperName, skipSchema) {
 /**
  * Template helper to get the current error message from schema.
  * @name afFieldMessage
- * @param options
+ * @param {Object} options
  * @return {*}
  */
 export const autoFormFieldMessage = function autoFormFieldMessage(options) {
@@ -34,7 +34,7 @@ Template.registerHelper('afFieldMessage', autoFormFieldMessage);
 
 /**
  * @name afFieldIsInvalid
- * @param options
+ * @param {Object} options
  * @return {*}
  */
 export const autoFormFieldIsInvalid = function autoFormFieldIsInvalid(options) {
@@ -51,7 +51,7 @@ Template.registerHelper('afFieldIsInvalid', autoFormFieldIsInvalid);
 
 /**
  * @name afArrayFieldHasMoreThanMinimum
- * @param options
+ * @param {Object} options
  * @return {boolean}
  */
 export const autoFormArrayFieldHasMoreThanMinimum = function autoFormArrayFieldHasMoreThanMinimum(options) {
@@ -75,7 +75,7 @@ Template.registerHelper('afArrayFieldHasMoreThanMinimum', autoFormArrayFieldHasM
 
 /**
  * @name afArrayFieldHasLessThanMaximum
- * @param options
+ * @param {Object} options
  * @return {boolean}
  */
 export const autoFormArrayFieldHasLessThanMaximum = function autoFormArrayFieldHasLessThanMaximum(options) {
@@ -99,7 +99,7 @@ Template.registerHelper('afArrayFieldHasLessThanMaximum', autoFormArrayFieldHasL
 
 /**
  * @name autoFormFieldValueIs
- * @param options
+ * @param {Object} options
  * @return {boolean}
  */
 export const autoFormFieldValueIs = function autoFormFieldValueIs(options) {
@@ -115,7 +115,7 @@ Template.registerHelper('afFieldValueIs', autoFormFieldValueIs);
 
 /**
  * @name autoFormFieldValue
- * @param options
+ * @param {Object} options
  * @return {Any}
  */
 export const autoFormFieldValue = function autoFormFieldValue(options) {
@@ -171,7 +171,7 @@ Template.registerHelper('afFieldValueContains', autoFormFieldValueContains);
 
 /**
  * @name afFieldLabelText
- * @param options
+ * @param {Object} options
  * @return {Object}
  */
 export const autoFormFieldLabelText = function autoFormFieldLabelText(options) {
@@ -185,7 +185,7 @@ Template.registerHelper('afFieldLabelText', autoFormFieldLabelText);
 
 /**
  * @name afFieldNames
- * @param options
+ * @param {Object} options
  * @return {{name: *}[]}
  */
 export const autoFormFieldNames = function autoFormFieldNames(options) {

@@ -8,7 +8,7 @@ import { Utility } from './utility';
  * @param key {String} a specific schema key to validate
  * @param formId {String} the id the form the key belongs to
  * @param skipEmpty {Boolean} allows to skip validation if the key has no value
- * @param onlyIfAlreadyInvalid
+ * @param {Boolean} onlyIfAlreadyInvalid
  * @return {*}
  * @private
  */

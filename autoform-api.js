@@ -1295,10 +1295,10 @@ AutoForm.selectFirstInvalidField = function selectFirstInvalidField(
 
 /**
  * Adds validation errors to their respective inputs.
- * @param formId
- * @param key
- * @param type
- * @param value
+ * @param {String} formId
+ * @param {String} key
+ * @param {String} type
+ * @param {String} value
  */
 AutoForm.addStickyValidationError = function addStickyValidationError(
   formId,
@@ -1321,8 +1321,8 @@ AutoForm.addStickyValidationError = function addStickyValidationError(
 
 /**
  * Removes validation errors from their respective inputs.
- * @param formId
- * @param key
+ * @param {String} formId
+ * @param {String} key
  */
 AutoForm.removeStickyValidationError = function removeStickyValidationError(
   formId,

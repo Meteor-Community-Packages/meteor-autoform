@@ -1,52 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [aldeed:autoform Public API](#aldeedautoform-public-api)
-  - [<a name="AutoForm.Utility"></a>*AutoForm*.Utility {any}&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformutilityaautoformutility-anynbspnbspsubiclientisub)
-  - [<a name="AutoForm.addHooks"></a>*AutoForm*.addHooks(formIds, hooks)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformaddhooksaautoformaddhooksformids-hooksnbspnbspsubiclientisub)
-  - [<a name="AutoForm.hooks"></a>*AutoForm*.hooks(hooks)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformhooksaautoformhookshooksnbspnbspsubiclientisub)
-  - [<a name="AutoForm._hooks"></a>*AutoForm*._hooks {any}&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoform_hooksaautoform_hooks-anynbspnbspsubiclientisub)
-  - [<a name="AutoForm._globalHooks"></a>*AutoForm*._globalHooks {any}&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoform_globalhooksaautoform_globalhooks-anynbspnbspsubiclientisub)
-  - [<a name="AutoForm._forceResetFormValues"></a>*AutoForm*._forceResetFormValues(formId)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoform_forceresetformvaluesaautoform_forceresetformvaluesformidnbspnbspsubiclientisub)
-  - [<a name="AutoForm.resetForm"></a>*AutoForm*.resetForm(formId, [template])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformresetformaautoformresetformformid-templatenbspnbspsubiclientisub)
-  - [<a name="AutoForm.setDefaultTemplate"></a>*AutoForm*.setDefaultTemplate(template)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformsetdefaulttemplateaautoformsetdefaulttemplatetemplatenbspnbspsubiclientisub)
-  - [<a name="AutoForm.getDefaultTemplate"></a>*AutoForm*.getDefaultTemplate()&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetdefaulttemplateaautoformgetdefaulttemplatenbspnbspsubiclientisub)
-  - [<a name="AutoForm.setDefaultTemplateForType"></a>*AutoForm*.setDefaultTemplateForType(type, template)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformsetdefaulttemplatefortypeaautoformsetdefaulttemplatefortypetype-templatenbspnbspsubiclientisub)
-  - [<a name="AutoForm.getDefaultTemplateForType"></a>*AutoForm*.getDefaultTemplateForType(type)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetdefaulttemplatefortypeaautoformgetdefaulttemplatefortypetypenbspnbspsubiclientisub)
-  - [<a name="AutoForm.getTemplateName"></a>*AutoForm*.getTemplateName(templateType, templateName, [fieldName], [skipExistsCheck])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgettemplatenameaautoformgettemplatenametemplatetype-templatename-fieldname-skipexistschecknbspnbspsubiclientisub)
-  - [<a name="AutoForm.getFormValues"></a>*AutoForm*.getFormValues(formId, [template], [ss], [getModifier])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetformvaluesaautoformgetformvaluesformid-template-ss-getmodifiernbspnbspsubiclientisub)
-  - [<a name="AutoForm.getFieldValue"></a>*AutoForm*.getFieldValue(fieldName, [formId])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetfieldvalueaautoformgetfieldvaluefieldname-formidnbspnbspsubiclientisub)
-  - [<a name="AutoForm.getInputTypeTemplateNameForElement"></a>*AutoForm*.getInputTypeTemplateNameForElement(element)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetinputtypetemplatenameforelementaautoformgetinputtypetemplatenameforelementelementnbspnbspsubiclientisub)
-  - [<a name="AutoForm.getInputValue"></a>*AutoForm*.getInputValue(element, [ss])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetinputvalueaautoformgetinputvalueelement-ssnbspnbspsubiclientisub)
-  - [<a name="AutoForm.addInputType"></a>*AutoForm*.addInputType(name, definition)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformaddinputtypeaautoformaddinputtypename-definitionnbspnbspsubiclientisub)
-  - [<a name="AutoForm.addFormType"></a>*AutoForm*.addFormType(name, definition)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformaddformtypeaautoformaddformtypename-definitionnbspnbspsubiclientisub)
-  - [<a name="AutoForm.validateField"></a>*AutoForm*.validateField(formId, fieldName, [skipEmpty])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformvalidatefieldaautoformvalidatefieldformid-fieldname-skipemptynbspnbspsubiclientisub)
-  - [<a name="AutoForm.validateForm"></a>*AutoForm*.validateForm(formId)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformvalidateformaautoformvalidateformformidnbspnbspsubiclientisub)
-  - [<a name="AutoForm.getValidationContext"></a>*AutoForm*.getValidationContext([formId])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetvalidationcontextaautoformgetvalidationcontextformidnbspnbspsubiclientisub)
-  - [<a name="AutoForm.findAttribute"></a>*AutoForm*.findAttribute(attrName)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformfindattributeaautoformfindattributeattrnamenbspnbspsubiclientisub)
-  - [<a name="AutoForm.findAttributesWithPrefix"></a>*AutoForm*.findAttributesWithPrefix(prefix)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformfindattributeswithprefixaautoformfindattributeswithprefixprefixnbspnbspsubiclientisub)
-  - [<a name="AutoForm.debug"></a>*AutoForm*.debug()&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformdebugaautoformdebugnbspnbspsubiclientisub)
-  - [<a name="AutoForm.arrayTracker"></a>*AutoForm*.arrayTracker {any}&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformarraytrackeraautoformarraytracker-anynbspnbspsubiclientisub)
-  - [<a name="AutoForm.getInputType"></a>*AutoForm*.getInputType(atts)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetinputtypeaautoformgetinputtypeattsnbspnbspsubiclientisub)
-  - [<a name="AutoForm.getSchemaForField"></a>*AutoForm*.getSchemaForField(name)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetschemaforfieldaautoformgetschemaforfieldnamenbspnbspsubiclientisub)
-  - [<a name="AutoForm._getOptionsForField"></a>*AutoForm*._getOptionsForField(name)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoform_getoptionsforfieldaautoform_getoptionsforfieldnamenbspnbspsubiclientisub)
-  - [<a name="AutoForm.getLabelForField"></a>*AutoForm*.getLabelForField(name)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetlabelforfieldaautoformgetlabelforfieldnamenbspnbspsubiclientisub)
-  - [<a name="AutoForm.templateInstanceForForm"></a>*AutoForm*.templateInstanceForForm([formId])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformtemplateinstanceforformaautoformtemplateinstanceforformformidnbspnbspsubiclientisub)
-  - [<a name="AutoForm.viewForForm"></a>*AutoForm*.viewForForm([formId])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformviewforformaautoformviewforformformidnbspnbspsubiclientisub)
-  - [<a name="AutoForm.getArrayCountFromDocForField"></a>*AutoForm*.getArrayCountFromDocForField(formId, field)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetarraycountfromdocforfieldaautoformgetarraycountfromdocforfieldformid-fieldnbspnbspsubiclientisub)
-  - [<a name="AutoForm.parseData"></a>*AutoForm*.parseData(data)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformparsedataaautoformparsedatadatanbspnbspsubiclientisub)
-  - [<a name="AutoForm.getCurrentDataForForm"></a>*AutoForm*.getCurrentDataForForm(formId)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetcurrentdataforformaautoformgetcurrentdataforformformidnbspnbspsubiclientisub)
-  - [<a name="AutoForm.getCurrentDataPlusExtrasForForm"></a>*AutoForm*.getCurrentDataPlusExtrasForForm()&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetcurrentdataplusextrasforformaautoformgetcurrentdataplusextrasforformnbspnbspsubiclientisub)
-  - [<a name="AutoForm.getFormCollection"></a>*AutoForm*.getFormCollection(formId)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetformcollectionaautoformgetformcollectionformidnbspnbspsubiclientisub)
-  - [<a name="AutoForm.getFormSchema"></a>*AutoForm*.getFormSchema([formId], [form])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetformschemaaautoformgetformschemaformid-formnbspnbspsubiclientisub)
-  - [<a name="AutoForm.getFormId"></a>*AutoForm*.getFormId()&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformgetformidaautoformgetformidnbspnbspsubiclientisub)
-  - [<a name="AutoForm.selectFirstInvalidField"></a>*AutoForm*.selectFirstInvalidField(formId, ss)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformselectfirstinvalidfieldaautoformselectfirstinvalidfieldformid-ssnbspnbspsubiclientisub)
-  - [<a name="AutoForm._validateFormDoc"></a>*AutoForm*._validateFormDoc(doc, isModifier, formId, ss, form, [key])&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoform_validateformdocaautoform_validateformdocdoc-ismodifier-formid-ss-form-keynbspnbspsubiclientisub)
-  - [<a name="AutoForm.valueConverters.stringToNumber"></a>*AutoFormvalueConverters*.stringToNumber(val)&nbsp;&nbsp;<sub><i>Client</i></sub>](#a-nameautoformvalueconvertersstringtonumberaautoformvalueconvertersstringtonumbervalnbspnbspsubiclientisub)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 ## aldeed:autoform Public API ##
 
 Easily create forms with automatic insert and update, and automatic reactive validation.
@@ -60,12 +11,12 @@ _API documentation automatically generated by [docmeteor](https://github.com/rai
 *This property __Utility__ is defined in `AutoForm`*
 
 
-> ```AutoForm.Utility = Utility;``` [autoform-api.js:13](autoform-api.js#L13)
+> ```AutoForm.Utility = Utility;``` [autoform-api.js:17](autoform-api.js#L17)
 
 
 -
 
-### <a name="AutoForm.addHooks"></a>*AutoForm*.addHooks(formIds, hooks)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+### <a name="AutoForm.addHooks"></a>*AutoForm*.addHooks(formIds, hooks, replace)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
 
 *This method __addHooks__ is defined in `AutoForm`*
 
@@ -79,6 +30,10 @@ __Arguments__
 
  Hooks to add, where supported names are "before", "after", "formToDoc", "docToForm", "onSubmit", "onSuccess", and "onError".
 
+* __replace__ *{Boolean}*  
+
+ Replaces all existing hooks with the ones in {hooks}, if true
+
 
 __Returns__  *{undefined}*
 
@@ -86,12 +41,12 @@ __Returns__  *{undefined}*
 Defines hooks to be used by one or more forms. Extends hooks lists if called multiple times for the same
 form.
 
-> ```AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) { ...``` [autoform-api.js:25](autoform-api.js#L25)
+> ```AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) { ...``` [autoform-api.js:30](autoform-api.js#L30)
 
 
 -
 
-### <a name="AutoForm.hooks"></a>*AutoForm*.hooks(hooks)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+### <a name="AutoForm.hooks"></a>*AutoForm*.hooks(hooks, replace)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
 
 *This method __hooks__ is defined in `AutoForm`*
 
@@ -99,13 +54,20 @@ __Arguments__
 
 * __hooks__ *{Object}*  
 
+ Hooks to add, where supported names are "before", "after", "formToDoc", "docToForm", "onSubmit", "onSuccess", and "onError".
+
+* __replace__ *{Boolean}*  
+
+ Replaces all existing hooks with the ones in {hooks}, if true
+
+
 __Returns__  *{undefined}*
 
 
 Defines hooks by form id. Extends hooks lists if called multiple times for the same
 form.
 
-> ```AutoForm.hooks = function autoFormHooks(hooks, replace) { ...``` [autoform-api.js:53](autoform-api.js#L53)
+> ```AutoForm.hooks = function autoFormHooks(hooks, replace) { ...``` [autoform-api.js:58](autoform-api.js#L58)
 
 
 -
@@ -117,7 +79,7 @@ form.
 
 Hooks list to aid automated testing
 
-> ```AutoForm._hooks = Hooks.form;``` [autoform-api.js:65](autoform-api.js#L65)
+> ```Object.defineProperty(AutoForm, ``` [autoform-api.js:70](autoform-api.js#L70)
 
 
 -
@@ -129,7 +91,7 @@ Hooks list to aid automated testing
 
 Global hooks list to aid automated testing
 
-> ```AutoForm._globalHooks = Hooks.global;``` [autoform-api.js:73](autoform-api.js#L73)
+> ```Object.defineProperty(AutoForm, ``` [autoform-api.js:83](autoform-api.js#L83)
 
 
 -
@@ -145,10 +107,10 @@ __Arguments__
 __Returns__  *{undefined}*
 
 
-Forces an AutoForm's values to properly update.
+Forces an AutoForm"s values to properly update.
 See https:
 
-> ```AutoForm._forceResetFormValues = function autoFormForceResetFormValues(formId) { ...``` [autoform-api.js:84](autoform-api.js#L84)
+> ```AutoForm._forceResetFormValues = function autoFormForceResetFormValues(formId) { ...``` [autoform-api.js:98](autoform-api.js#L98)
 
 
 -
@@ -170,7 +132,7 @@ __Returns__  *{undefined}*
 
 Resets an autoform, including resetting validation errors. The same as clicking the reset button for an autoform.
 
-> ```AutoForm.resetForm = function autoFormResetForm(formId, template) { ...``` [autoform-api.js:102](autoform-api.js#L102)
+> ```AutoForm.resetForm = function autoFormResetForm(formId, template) { ...``` [autoform-api.js:117](autoform-api.js#L117)
 
 
 -
@@ -184,7 +146,7 @@ __Arguments__
 * __template__ *{String}*  
 
 
-> ```AutoForm.setDefaultTemplate = function autoFormSetDefaultTemplate(template) { ...``` [autoform-api.js:113](autoform-api.js#L113)
+> ```AutoForm.setDefaultTemplate = function autoFormSetDefaultTemplate(template) { ...``` [autoform-api.js:128](autoform-api.js#L128)
 
 
 -
@@ -196,7 +158,7 @@ __Arguments__
 
 Reactive.
 
-> ```AutoForm.getDefaultTemplate = function autoFormGetDefaultTemplate() { ...``` [autoform-api.js:124](autoform-api.js#L124)
+> ```AutoForm.getDefaultTemplate = function autoFormGetDefaultTemplate() { ...``` [autoform-api.js:139](autoform-api.js#L139)
 
 
 -
@@ -211,7 +173,7 @@ __Arguments__
 * __template__ *{String}*  
 
 
-> ```AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(type, template) { ...``` [autoform-api.js:135](autoform-api.js#L135)
+> ```AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(``` [autoform-api.js:150](autoform-api.js#L150)
 
 
 -
@@ -230,7 +192,7 @@ Template name
 
 Reactive.
 
-> ```AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(type) { ...``` [autoform-api.js:154](autoform-api.js#L154)
+> ```AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(``` [autoform-api.js:174](autoform-api.js#L174)
 
 
 -
@@ -246,7 +208,7 @@ __Arguments__
 * __fieldName__ *{String}*  (Optional)
 * __skipExistsCheck__ *{Boolean}*  (Optional)
 
- Pass `true` to return a template name even if that template hasn't been defined.
+ Pass `true` to return a template name even if that template hasn"t been defined.
 
 
 __Returns__  *{String}*
@@ -265,12 +227,12 @@ manner:
 6. Default template, as set by AutoForm.setDefaultTemplate.
 7. Built-in default template, currently bootstrap-3.
 
-> ```AutoForm.getTemplateName = function autoFormGetTemplateName(templateType, templateName, fieldName, skipExistsCheck) { ...``` [autoform-api.js:183](autoform-api.js#L183)
+> ```AutoForm.getTemplateName = function autoFormGetTemplateName(``` [autoform-api.js:210](autoform-api.js#L210)
 
 
 -
 
-### <a name="AutoForm.getFormValues"></a>*AutoForm*.getFormValues(formId, [template], [ss], [getModifier])&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+### <a name="AutoForm.getFormValues"></a>*AutoForm*.getFormValues(formId, [template], [ss], [getModifier], [clean], [disabled])&nbsp;&nbsp;<sub><i>Client</i></sub> ###
 
 *This method __getFormValues__ is defined in `AutoForm`*
 
@@ -292,6 +254,8 @@ __Arguments__
 
  Set to `true` to return a modifier object or `false` to return a normal object. For backwards compatibility, and object containing both is returned if this is undefined.
 
+* __clean__ *{Boolean}*  (Optional)
+* __disabled__ *{Boolean}*  (Optional)
 
 __Returns__  *{Object|null}*
 
@@ -299,12 +263,37 @@ __Returns__  *{Object|null}*
 Returns an object representing the current values of all schema-based fields in the form.
 The returned object is either a normal object or a MongoDB modifier, based on the `getModifier` argument. Return value may be `null` if the form is not currently rendered on screen.
 
-> ```AutoForm.getFormValues = function autoFormGetFormValues(formId, template, ss, getModifier) { ...``` [autoform-api.js:255](autoform-api.js#L255)
+> ```AutoForm.getFormValues = function autoFormGetFormValues(``` [autoform-api.js:314](autoform-api.js#L314)
 
 
 -
 
-### <a name="AutoForm.getFieldValue"></a>*AutoForm*.getFieldValue(fieldName, [formId])&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+### <a name="AutoForm.resetValueCache"></a>*AutoForm*.resetValueCache([formId], [fieldName])&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method __resetValueCache__ is defined in `AutoForm`*
+
+__Arguments__
+
+* __formId__ *{String}*  (Optional)
+
+ The `id` attribute of the `autoForm` you want current values for. Default is the closest form from the current context.
+
+* __fieldName__ *{String}*  (Optional)
+
+ The field `name` you want to reset the cache of.
+
+
+__Returns__  *{Any|undefined}*
+
+
+Reset the cache and mark all fields as changed
+
+> ```AutoForm.resetValueCache = function autoFormResetValueCache(formId, fieldName) { ...``` [autoform-api.js:482](autoform-api.js#L482)
+
+
+-
+
+### <a name="AutoForm.getFieldValue"></a>*AutoForm*.getFieldValue(fieldName, [formId], [clean])&nbsp;&nbsp;<sub><i>Client</i></sub> ###
 
 *This method __getFieldValue__ is defined in `AutoForm`*
 
@@ -318,6 +307,10 @@ __Arguments__
 
  The `id` attribute of the `autoForm` you want current values for. Default is the closest form from the current context.
 
+* __clean__ *{Boolean}*  (Optional)
+
+ Indicates if the method should clean the values or not. Default is true.
+
 
 __Returns__  *{Any|undefined}*
 
@@ -325,7 +318,61 @@ __Returns__  *{Any|undefined}*
 Returns the value of the field (the value that would be used if the form were submitted right now).
 This is a reactive method that will rerun whenever the current value of the requested field changes. Return value will be undefined if the field is not currently rendered.
 
-> ```AutoForm.getFieldValue = function autoFormGetFieldValue(fieldName, formId) { ...``` [autoform-api.js:411](autoform-api.js#L411)
+> ```AutoForm.getFieldValue = function autoFormGetFieldValue(``` [autoform-api.js:532](autoform-api.js#L532)
+
+
+-
+
+### <a name="AutoForm.setFieldValue"></a>*AutoForm*.setFieldValue(fieldName, value, [formId])&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method __setFieldValue__ is defined in `AutoForm`*
+
+__Arguments__
+
+* __fieldName__ *{String}*  
+
+ The name of the field for which you want to set the current value.
+
+* __value__ *{Any}*  
+
+ Value of the field
+
+* __formId__ *{String}*  (Optional)
+
+ The `id` attribute of the `autoForm` you want current values for. Default is the closest form from the current context.
+
+
+__Returns__  *{Any|undefined}*
+
+
+Sets the value for a field, resets the cache and emits changed events (reactive).
+
+> ```AutoForm.setFieldValue = function autoFormSetFieldValue(``` [autoform-api.js:584](autoform-api.js#L584)
+
+
+-
+
+### <a name="AutoForm.setFormValues"></a>*AutoForm*.setFormValues(value, [formId])&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+*This method __setFormValues__ is defined in `AutoForm`*
+
+__Arguments__
+
+* __value__ *{Any}*  
+
+ Value of the form
+
+* __formId__ *{String}*  (Optional)
+
+ The `id` attribute of the `autoForm` you want current values for. Default is the closest form from the current context.
+
+
+__Returns__  *{Any|undefined}*
+
+
+Sets the value for a field, resets the cache and emits changed events.
+
+> ```AutoForm.setFormValues = function autoFormSetFormValues(value, formId) { ...``` [autoform-api.js:617](autoform-api.js#L617)
 
 
 -
@@ -346,18 +393,18 @@ __Returns__  *{String}*
 
 Returns the name of the template used to render the element.
 
-> ```AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTemplateNameForElement(element) { ...``` [autoform-api.js:446](autoform-api.js#L446)
+> ```AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTemplateNameForElement(``` [autoform-api.js:629](autoform-api.js#L629)
 
 
 -
 
-### <a name="AutoForm.getInputValue"></a>*AutoForm*.getInputValue(element, [ss])&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+### <a name="AutoForm.getInputValue"></a>*AutoForm*.getInputValue([element], [ss])&nbsp;&nbsp;<sub><i>Client</i></sub> ###
 
 *This method __getInputValue__ is defined in `AutoForm`*
 
 __Arguments__
 
-* __element__ *{[DOMElement](#DOMElement)}*  
+* __element__ *{[DOMElement](#DOMElement)}*  (Optional)
 
  The input DOM element, generated by an autoform input control, which must have a `data-schema-key` attribute set to the correct schema key name.
 
@@ -372,7 +419,7 @@ __Returns__  *{Any}*
 Returns the value of the field (the value that would be used if the form were submitted right now).
 Unlike `AutoForm.getFieldValue`, this function is not reactive.
 
-> ```AutoForm.getInputValue = function autoFormGetInputValue(element, ss) { ...``` [autoform-api.js:474](autoform-api.js#L474)
+> ```AutoForm.getInputValue = function autoFormGetInputValue(element, ss) { ...``` [autoform-api.js:661](autoform-api.js#L661)
 
 
 -
@@ -401,7 +448,7 @@ __Returns__  *{undefined}*
 
 Use this method to add custom input components.
 
-> ```AutoForm.addInputType = function afAddInputType(name, definition) { ...``` [autoform-api.js:541](autoform-api.js#L541)
+> ```AutoForm.addInputType = function afAddInputType(name, definition) { ...``` [autoform-api.js:739](autoform-api.js#L739)
 
 
 -
@@ -434,7 +481,7 @@ __Arguments__
 
     * __onSubmit__ *{Function}*  
 
-    A function that does whatever should happen upon submission of this form type. When this function is called, `this` contains useful information about the form. At a minimum, you probably want to call `this.event.preventDefault()` to prevent the browser from submitting the form. Your submission logic may want to rely on additional custom form attributes, which will be available in `this.formAttributes`. If you do any additional validation and it fails, you should call `this.failedValidation()`. When your logic is done, you should call `this.result(error, result)`. If you want to end the submission process without providing a result, call `this.endSubmission()`. If you don't call `this.result()` or `this.endSubmission()`, `endSubmit` hooks won't be called, so for example the submit button might remain disabled. `onError` hooks will be called only if you pass an error to `this.result()`. `onSuccess` hooks will be called only if you do not pass an error to `this.result()`.
+    A function that does whatever should happen upon submission of this form type. When this function is called, `this` contains useful information about the form. At a minimum, you probably want to call `this.event.preventDefault()` to prevent the browser from submitting the form. Your submission logic may want to rely on additional custom form attributes, which will be available in `this.formAttributes`. If you do any additional validation and it fails, you should call `this.failedValidation()`. When your logic is done, you should call `this.result(error, result)`. If you want to end the submission process without providing a result, call `this.endSubmission()`. If you don"t call `this.result()` or `this.endSubmission()`, `endSubmit` hooks won"t be called, so for example the submit button might remain disabled. `onError` hooks will be called only if you pass an error to `this.result()`. `onSuccess` hooks will be called only if you do not pass an error to `this.result()`.
 
     * __shouldPrevalidate__ *{Function}*  (Optional)
 
@@ -450,7 +497,7 @@ __Returns__  *{undefined}*
 
 Use this method to add custom form types.
 
-> ```AutoForm.addFormType = function afAddFormType(name, definition) { ...``` [autoform-api.js:562](autoform-api.js#L562)
+> ```AutoForm.addFormType = function afAddFormType(name, definition) { ...``` [autoform-api.js:760](autoform-api.js#L760)
 
 
 -
@@ -481,7 +528,7 @@ Is it valid?
 In addition to returning a boolean that indicates whether the field is currently valid,
 this method causes the reactive validation messages to appear.
 
-> ```AutoForm.validateField = function autoFormValidateField(formId, fieldName, skipEmpty) { ...``` [autoform-api.js:579](autoform-api.js#L579)
+> ```AutoForm.validateField = function autoFormValidateField(``` [autoform-api.js:777](autoform-api.js#L777)
 
 
 -
@@ -504,7 +551,7 @@ Is it valid?
 In addition to returning a boolean that indicates whether the form is currently valid,
 this method causes the reactive validation messages to appear.
 
-> ```AutoForm.validateForm = function autoFormValidateForm(formId) { ...``` [autoform-api.js:592](autoform-api.js#L592)
+> ```AutoForm.validateForm = function autoFormValidateForm(formId) { ...``` [autoform-api.js:794](autoform-api.js#L794)
 
 
 -
@@ -527,7 +574,7 @@ The SimpleSchema validation context object.
 Use this method to get the validation context, which can be used to check
 the current invalid fields, manually invalidate fields, etc.
 
-> ```AutoForm.getValidationContext = function autoFormGetValidationContext(formId) { ...``` [autoform-api.js:628](autoform-api.js#L628)
+> ```AutoForm.getValidationContext = function autoFormGetValidationContext(formId) { ...``` [autoform-api.js:834](autoform-api.js#L834)
 
 
 -
@@ -549,7 +596,7 @@ Searches for the given attribute, looking up the parent context tree until the c
 
 Call this method from a UI helper. Might return undefined.
 
-> ```AutoForm.findAttribute = function autoFormFindAttribute(attrName) { ...``` [autoform-api.js:645](autoform-api.js#L645)
+> ```AutoForm.findAttribute = function autoFormFindAttribute(attrName) { ...``` [autoform-api.js:851](autoform-api.js#L851)
 
 
 -
@@ -571,7 +618,7 @@ An object containing all of the found attributes and their values, with the pref
 
 Call this method from a UI helper. Searches for attributes that start with the given prefix, looking up the parent context tree until the closest autoform is reached.
 
-> ```AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(prefix) { ...``` [autoform-api.js:686](autoform-api.js#L686)
+> ```AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(``` [autoform-api.js:893](autoform-api.js#L893)
 
 
 -
@@ -584,7 +631,7 @@ Call this method from a UI helper. Searches for attributes that start with the g
 Call this method in client code while developing to turn on extra logging.
 You need to call it just one time, usually in top level client code.
 
-> ```AutoForm.debug = function autoFormDebug() { ...``` [autoform-api.js:730](autoform-api.js#L730)
+> ```AutoForm.debug = function autoFormDebug() { ...``` [autoform-api.js:941](autoform-api.js#L941)
 
 
 -
@@ -594,18 +641,18 @@ You need to call it just one time, usually in top level client code.
 *This property __arrayTracker__ is defined in `AutoForm`*
 
 
-> ```AutoForm.arrayTracker = arrayTracker;``` [autoform-api.js:743](autoform-api.js#L743)
+> ```AutoForm.arrayTracker = arrayTracker;``` [autoform-api.js:954](autoform-api.js#L954)
 
 
 -
 
-### <a name="AutoForm.getInputType"></a>*AutoForm*.getInputType(atts)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+### <a name="AutoForm.getInputType"></a>*AutoForm*.getInputType([attributes])&nbsp;&nbsp;<sub><i>Client</i></sub> ###
 
 *This method __getInputType__ is defined in `AutoForm`*
 
 __Arguments__
 
-* __atts__ *{Object}*  
+* __attributes__ *{Object}*  (Optional)
 
  The attributes provided to afFieldInput.
 
@@ -616,7 +663,7 @@ The input type. Most are the same as the `type` attributes for HTML input elemen
 
 Call this method from a UI helper to get the type string for the input control.
 
-> ```AutoForm.getInputType = function getInputType(atts) { ...``` [autoform-api.js:753](autoform-api.js#L753)
+> ```AutoForm.getInputType = function getInputType(attributes) { ...``` [autoform-api.js:964](autoform-api.js#L964)
 
 
 -
@@ -637,7 +684,7 @@ __Returns__  *{Object|undefined}*
 
 Call this method from a UI helper to get the field definitions based on the schema used by the closest containing autoForm.
 
-> ```AutoForm.getSchemaForField = function autoFormGetSchemaForField(name) { ...``` [autoform-api.js:836](autoform-api.js#L836)
+> ```AutoForm.getSchemaForField = function autoFormGetSchemaForField(name) { ...``` [autoform-api.js:1046](autoform-api.js#L1046)
 
 
 -
@@ -658,7 +705,7 @@ __Returns__  *{Array(Object)|String|undefined}*
 
 Call this method from a UI helper to get the select options for the field. Might return the string "allowed".
 
-> ```AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) { ...``` [autoform-api.js:850](autoform-api.js#L850)
+> ```AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) { ...``` [autoform-api.js:1060](autoform-api.js#L1060)
 
 
 -
@@ -679,7 +726,7 @@ __Returns__  *{Object}*
 
 Call this method from a UI helper to get the field definitions based on the schema used by the closest containing autoForm.
 
-> ```AutoForm.getLabelForField = function autoFormGetLabelForField(name) { ...``` [autoform-api.js:884](autoform-api.js#L884)
+> ```AutoForm.getLabelForField = function autoFormGetLabelForField(name) { ...``` [autoform-api.js:1092](autoform-api.js#L1092)
 
 
 -
@@ -692,7 +739,7 @@ __Arguments__
 
 * __formId__ *{String}*  (Optional)
 
- The form's `id` attribute
+ The form"s `id` attribute
 
 
 __Returns__  *{TemplateInstance|undefined}*
@@ -701,7 +748,7 @@ The template instance.
 
 Gets the template instance for the form with formId or the closest form to the current context.
 
-> ```AutoForm.templateInstanceForForm = function (formId) { ...``` [autoform-api.js:896](autoform-api.js#L896)
+> ```AutoForm.templateInstanceForForm = function(formId) { ...``` [autoform-api.js:1104](autoform-api.js#L1104)
 
 
 -
@@ -714,7 +761,7 @@ __Arguments__
 
 * __formId__ *{String}*  (Optional)
 
- The form's `id` attribute. Do not pass this if calling from within a form context.
+ The form"s `id` attribute. Do not pass this if calling from within a form context.
 
 
 __Returns__  *{Blaze.View|undefined}*
@@ -723,7 +770,7 @@ The `Blaze.View` instance for the autoForm.
 
 Gets the `Blaze.View` instance for the form with formId or the closest form to the current context.
 
-> ```AutoForm.viewForForm = function (formId) { ...``` [autoform-api.js:912](autoform-api.js#L912)
+> ```AutoForm.viewForForm = function(formId) { ...``` [autoform-api.js:1119](autoform-api.js#L1119)
 
 
 -
@@ -736,7 +783,7 @@ __Arguments__
 
 * __formId__ *{String}*  
 
- The form's `id` attribute
+ The form"s `id` attribute
 
 * __field__ *{String}*  
 
@@ -751,7 +798,7 @@ Looks in the document attached to the form to see if the
 requested field exists and is an array. If so, returns the
 length (count) of the array. Otherwise returns undefined.
 
-> ```AutoForm.getArrayCountFromDocForField = function (formId, field) { ...``` [autoform-api.js:949](autoform-api.js#L949)
+> ```AutoForm.getArrayCountFromDocForField = function(formId, field) { ...``` [autoform-api.js:1156](autoform-api.js#L1156)
 
 
 -
@@ -764,7 +811,7 @@ __Arguments__
 
 * __data__ *{Object}*  
 
- Current data context for the form, or an empty object. Usually this is used from a quickForm, since the autoForm won't be rendered yet. Otherwise you should use AutoForm.getCurrentDataForForm if you can.
+ Current data context for the form, or an empty object. Usually this is used from a quickForm, since the autoForm won"t be rendered yet. Otherwise you should use AutoForm.getCurrentDataForForm if you can.
 
 
 __Returns__  *{Object}*
@@ -773,7 +820,7 @@ Current data context for the form, or an empty object.
 
 Parses and alters the current data context for a form. It will have default values added and a `_resolvedSchema` property that has the schema the form should use.
 
-> ```AutoForm.parseData = function (data) { ...``` [autoform-api.js:969](autoform-api.js#L969)
+> ```AutoForm.parseData = function(data) { ...``` [autoform-api.js:1176](autoform-api.js#L1176)
 
 
 -
@@ -786,7 +833,7 @@ __Arguments__
 
 * __formId__ *{String}*  
 
- The form's `id` attribute
+ The form"s `id` attribute
 
 
 __Returns__  *{Object}*
@@ -797,7 +844,7 @@ Returns the current data context for a form.
 You can call this without a formId from within a helper and
 the data for the nearest containing form will be returned.
 
-> ```AutoForm.getCurrentDataForForm = function (formId) { ...``` [autoform-api.js:983](autoform-api.js#L983)
+> ```AutoForm.getCurrentDataForForm = function(formId) { ...``` [autoform-api.js:1190](autoform-api.js#L1190)
 
 
 -
@@ -810,7 +857,7 @@ __Arguments__
 
 * ____ *{any}*  
 
- {String} [formId] The form's `id` attribute
+ {String} [formId] The form"s `id` attribute
 
 
 __Returns__  *{Object}*
@@ -821,7 +868,7 @@ Returns the current data context for a form plus some extra properties.
 You can call this without a formId from within a helper and
 the data for the nearest containing form will be returned.
 
-> ```AutoForm.getCurrentDataPlusExtrasForForm = function (formId) { ...``` [autoform-api.js:1005](autoform-api.js#L1005)
+> ```AutoForm.getCurrentDataPlusExtrasForForm = function(formId) { ...``` [autoform-api.js:1210](autoform-api.js#L1210)
 
 
 -
@@ -834,7 +881,7 @@ __Arguments__
 
 * __formId__ *{String}*  
 
- The form's `id` attribute
+ The form"s `id` attribute
 
 
 __Returns__  *{Mongo.Collection|undefined}*
@@ -843,7 +890,7 @@ The Collection instance
 
 Gets the collection for a form from the `collection` attribute
 
-> ```AutoForm.getFormCollection = function (formId) { ...``` [autoform-api.js:1025](autoform-api.js#L1025)
+> ```AutoForm.getFormCollection = function(formId) { ...``` [autoform-api.js:1229](autoform-api.js#L1229)
 
 
 -
@@ -856,7 +903,7 @@ __Arguments__
 
 * __formId__ *{String}*  (Optional)
 
- The form's `id` attribute
+ The form"s `id` attribute
 
 * __form__ *{Object}*  (Optional)
 
@@ -872,7 +919,7 @@ provided, or from the schema attached to the `Mongo.Collection`
 specified in the `collection` attribute. The form must be
 currently rendered.
 
-> ```AutoForm.getFormSchema = function (formId, form) { ...``` [autoform-api.js:1042](autoform-api.js#L1042)
+> ```AutoForm.getFormSchema = function(formId, form) { ...``` [autoform-api.js:1246](autoform-api.js#L1246)
 
 
 -
@@ -882,12 +929,12 @@ currently rendered.
 *This method __getFormId__ is defined in `AutoForm`*
 
 __Returns__  *{String}*
-The containing form's `id` attribute value
+The containing form"s `id` attribute value
 
 
-Call in a helper to get the containing form's `id` attribute. Reactive.
+Call in a helper to get the containing form"s `id` attribute. Reactive.
 
-> ```AutoForm.getFormId = function () { ...``` [autoform-api.js:1054](autoform-api.js#L1054)
+> ```AutoForm.getFormId = function() { ...``` [autoform-api.js:1258](autoform-api.js#L1258)
 
 
 -
@@ -904,7 +951,7 @@ __Arguments__
 
 * __ss__ *{[SimpleSchema](#SimpleSchema)}*  
 
- The SimpleSchema instance that was used to create the form's validation context.
+ The SimpleSchema instance that was used to create the form"s validation context.
 
 
 __Returns__  *{undefined}*
@@ -912,7 +959,45 @@ __Returns__  *{undefined}*
 
 Selects the focus the first field (in DOM order) with an error.
 
-> ```AutoForm.selectFirstInvalidField = function selectFirstInvalidField(formId, ss) { ...``` [autoform-api.js:1067](autoform-api.js#L1067)
+> ```AutoForm.selectFirstInvalidField = function selectFirstInvalidField(``` [autoform-api.js:1271](autoform-api.js#L1271)
+
+
+-
+
+### <a name="AutoForm.addStickyValidationError"></a>*AutoForm*.addStickyValidationError(formId, key, type, value)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+```
+Adds validation errors to their respective inputs.
+```
+*This method __addStickyValidationError__ is defined in `AutoForm`*
+
+__Arguments__
+
+* __formId__ *{String}*  
+* __key__ *{String}*  
+* __type__ *{String}*  
+* __value__ *{String}*  
+
+
+> ```AutoForm.addStickyValidationError = function addStickyValidationError(``` [autoform-api.js:1303](autoform-api.js#L1303)
+
+
+-
+
+### <a name="AutoForm.removeStickyValidationError"></a>*AutoForm*.removeStickyValidationError(formId, key)&nbsp;&nbsp;<sub><i>Client</i></sub> ###
+
+```
+Removes validation errors from their respective inputs.
+```
+*This method __removeStickyValidationError__ is defined in `AutoForm`*
+
+__Arguments__
+
+* __formId__ *{String}*  
+* __key__ *{String}*  
+
+
+> ```AutoForm.removeStickyValidationError = function removeStickyValidationError(``` [autoform-api.js:1327](autoform-api.js#L1327)
 
 
 -
@@ -952,10 +1037,11 @@ __Returns__  *{Boolean}*
 Is the form valid?
 
 
-If creating a form type, you will often want to call this from the `validateForm` function. It provides the generic form validation logic that does not typically change between form types.
+If creating a form type, you will often want to call this from the `validateForm` function.
+It provides the generic form validation logic that does not typically change between form types.
 
 
-> ```AutoForm._validateFormDoc = function validateFormDoc(doc, isModifier, formId, ss, form, key) { ...``` [autoform-api.js:1121](autoform-api.js#L1121)
+> ```AutoForm._validateFormDoc = function validateFormDoc(``` [autoform-api.js:1356](autoform-api.js#L1356)
 
 
 -
@@ -977,6 +1063,6 @@ The string converted to a Number or the original value.
 
 For strings, returns Number(val) unless the result is NaN. Otherwise returns val.
 
-> ```stringToNumber: function stringToNumber(val) { ...``` [inputTypes/value-converters.js:141](inputTypes/value-converters.js#L141)
+> ```stringToNumber: function stringToNumber(val) { ...``` [inputTypes/value-converters.js:142](inputTypes/value-converters.js#L142)
 
 
