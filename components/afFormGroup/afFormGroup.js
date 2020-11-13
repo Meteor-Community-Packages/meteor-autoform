@@ -1,14 +1,15 @@
 /* global AutoForm */
+import { Random } from 'meteor/random';
 
 Template.afFormGroup.helpers({
   getTemplateName: function() {
     return AutoForm.getTemplateName("afFormGroup", this.template, this.name);
   },
   innerContext: function afFormGroupContext() {
-    var c = AutoForm.Utility.getComponentContext(this, "afFormGroup");
-    var afFormGroupAtts = formGroupAtts(c.atts);
-    var afFieldLabelAtts = formGroupLabelAtts(c.atts);
-    var afFieldInputAtts = formGroupInputAtts(c.atts);
+    const c = AutoForm.Utility.getComponentContext(this, "afFormGroup");
+    const afFormGroupAtts = formGroupAtts(c.atts);
+    const afFieldLabelAtts = formGroupLabelAtts(c.atts);
+    const afFieldInputAtts = formGroupInputAtts(c.atts);
 
     // Construct an `id` attribute for the input, optionally
     // adding a user-provided prefix. Since id attribute is
@@ -17,15 +18,22 @@ Template.afFormGroup.helpers({
     // and generate a random one here for accessibility reasons.
     const instance = Template.instance();
     instance.fieldIds = instance.fieldIds || {};
-    const name = c.atts["name"];
-    var id = instance.fieldIds[name];
-    if (!id) {
-      id = Random.id();
-      var idPrefix = c.atts["id-prefix"];
-      if (idPrefix && idPrefix.length > 0) {
-        id = idPrefix + "-" + id;
+
+    let id = undefined
+
+    if (typeof c.atts.id !== 'undefined') {
+      id = c.atts.id;
+    } else {
+      const name = c.atts["name"];
+      id = instance.fieldIds[name];
+      if (!id) {
+        id = Random.id();
+        const idPrefix = c.atts["id-prefix"];
+        if (idPrefix && idPrefix.length > 0) {
+          id = idPrefix + "-" + id;
+        }
+        instance.fieldIds[name] = id;
       }
-      instance.fieldIds[name] = id;
     }
 
     // Set the input's `id` attribute and the label's `for` attribute to
@@ -34,9 +42,9 @@ Template.afFormGroup.helpers({
     afFieldLabelAtts["for"] = afFieldInputAtts.id = id;
 
     // Get the field's schema definition
-    var fieldSchema = AutoForm.getSchemaForField(c.atts.name);
+    const fieldSchema = AutoForm.getSchemaForField(c.atts.name);
 
-    const innerContext = {
+    return {
       skipLabel: c.atts.label === false,
       afFormGroupClass: c.atts["formgroup-class"],
       afFormGroupAtts: afFormGroupAtts,
@@ -46,8 +54,6 @@ Template.afFormGroup.helpers({
       required: fieldSchema ? !fieldSchema.optional : false,
       labelText: typeof c.atts.label === "string" ? c.atts.label : null
     };
-
-    return innerContext;
   }
 });
 
@@ -59,7 +65,7 @@ function formGroupAtts(atts) {
   // Separate formgroup options from input options; formgroup items begin with 'formgroup-'
   var labelAtts = {};
   Object.entries(atts).forEach(function autoFormLabelAttsEach([key, val]) {
-    if (key.indexOf("formgroup-") === 0 && key != "formgroup-class") {
+    if (key.indexOf("formgroup-") === 0 && key !== "formgroup-class") {
       labelAtts[key.substring(10)] = val;
     }
   });
