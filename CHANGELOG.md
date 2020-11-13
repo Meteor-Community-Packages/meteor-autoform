@@ -163,6 +163,7 @@ This is a major change and is not backward compatible.
 - **`disabled` in select options**: didn't work.
 - merged aldeed/meteor-autoform/pull/1289
 - Detects **nested forms** in `form change` event
+- quickForm field grouping now corrected filtering, preventing followup errors
 
 **Features**
 
