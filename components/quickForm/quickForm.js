@@ -1,7 +1,9 @@
 /* global AutoForm */
-
-const falsyList = [null, undefined, '', false]
-const falsyValues = f => !falsyList.includes(f)
+import {
+  getSortedFieldGroupNames,
+  getFieldsForGroup,
+  getFieldsWithNoGroup
+} from './quickFormUtils';
 
 Template.quickForm.helpers({
   getTemplateName: function () {
@@ -79,58 +81,3 @@ Template.quickForm.helpers({
     return context;
   }
 });
-
-/* Private Functions */
-
-/**
- * Takes a schema object and returns a sorted array of field group names for it
- *
- * @param   {Object}   schemaObj Like from mySimpleSchema.schema()
- * @returns {String[]} Array of field group names
- */
-function getSortedFieldGroupNames(schemaObj) {
-  const names = Object
-    .values(schemaObj)
-    .map(field => field.autoform && field.autoform.group)
-    .filter(falsyValues);
-
-  // Remove duplicate names and sort
-  return [...new Set(names)].sort();
-}
-
-/**
- * Returns the schema field names that belong in the group.
- *
- * @param   {String}   groupName The group name
- * @param   {Object}   schemaObj Like from mySimpleSchema.schema()
- * @returns {String[]} Array of field names (schema keys)
- */
-function getFieldsForGroup(groupName, schemaObj) {
-  return Object
-    .entries(schemaObj)
-    .map(([fieldName, field]) => {
-      return (fieldName.slice(-2) !== '.$') &&
-        field.autoform &&
-        field.autoform.group === groupName &&
-        fieldName;
-    })
-    .filter(falsyValues);
-}
-
-/**
- * Returns the schema field names that don't belong to a group
- *
- * @param   {Object}   schemaObj Like from mySimpleSchema.schema()
- * @returns {String[]} Array of field names (schema keys)
- */
-function getFieldsWithNoGroup(schemaObj) {
-  return Object
-    .entries(schemaObj)
-    .map(function ([fieldName, field]) {
-      return (fieldName.slice(-2) !== '.$') &&
-        (!field.autoform || !field.autoform.group) &&
-        fieldName
-    })
-    .filter(falsyValues);
-}
-
