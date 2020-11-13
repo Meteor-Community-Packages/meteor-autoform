@@ -1,5 +1,8 @@
 /* global AutoForm */
 
+const falsyList = [null, undefined, '', false]
+const falsyValues = f => !falsyList.includes(f)
+
 Template.quickForm.helpers({
   getTemplateName: function () {
     return AutoForm.getTemplateName('quickForm', this.template);
@@ -86,17 +89,13 @@ Template.quickForm.helpers({
  * @returns {String[]} Array of field group names
  */
 function getSortedFieldGroupNames(schemaObj) {
-  var names = Object.values(schemaObj).map(function (field) {
-    return field.autoform && field.autoform.group;
-  });
+  const names = Object
+    .values(schemaObj)
+    .map(field => field.autoform && field.autoform.group)
+    .filter(falsyValues);
 
-  // Remove undefined
-  names = names.filter(n => ![null, undefined, ''].includes(n));
-
-  // Remove duplicate names
-  names = [...new Set(names)];
-
-  return names.sort();
+  // Remove duplicate names and sort
+  return [...new Set(names)].sort();
 }
 
 /**
@@ -107,17 +106,15 @@ function getSortedFieldGroupNames(schemaObj) {
  * @returns {String[]} Array of field names (schema keys)
  */
 function getFieldsForGroup(groupName, schemaObj) {
-  var fields = Object.entries(schemaObj).map(function ([fieldName, field]) {
-    return (fieldName.slice(-2) !== '.$') &&
-      field.autoform &&
-      field.autoform.group === groupName &&
-      fieldName;
-  });
-
-  // Remove undefined
-  fields = fields.filter(f => ![null, undefined, ''].includes(f));
-
-  return fields;
+  return Object
+    .entries(schemaObj)
+    .map(([fieldName, field]) => {
+      return (fieldName.slice(-2) !== '.$') &&
+        field.autoform &&
+        field.autoform.group === groupName &&
+        fieldName;
+    })
+    .filter(falsyValues);
 }
 
 /**
@@ -127,14 +124,13 @@ function getFieldsForGroup(groupName, schemaObj) {
  * @returns {String[]} Array of field names (schema keys)
  */
 function getFieldsWithNoGroup(schemaObj) {
-  var fields = Object.entries(schemaObj).map(function ([fieldName, field]) {
-    return (fieldName.slice(-2) !== '.$') &&
-      (!field.autoform || !field.autoform.group) &&
-      fieldName;
-  });
-
-  // Remove undefined
-  fields = fields.filter(f => ![null, undefined, ''].includes(f));
-
-  return fields;
+  return Object
+    .entries(schemaObj)
+    .map(function ([fieldName, field]) {
+      return (fieldName.slice(-2) !== '.$') &&
+        (!field.autoform || !field.autoform.group) &&
+        fieldName
+    })
+    .filter(falsyValues);
 }
+
