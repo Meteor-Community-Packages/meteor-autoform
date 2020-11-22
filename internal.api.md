@@ -42,7 +42,7 @@ __Returns__  *{Object}*
 Returns an object in which all properties with null, undefined, or empty
 string values have been removed, recursively.
 
-> ```cleanNulls: function cleanNulls(doc, isArray, keepEmptyStrings) { ...``` [utility.js:27](utility.js#L27)
+> ```cleanNulls: function cleanNulls(doc, isArray, keepEmptyStrings) { ...``` [utility.js:37](utility.js#L37)
 
 
 -
@@ -66,7 +66,7 @@ An object in which the keys represent the keys in the
 original object that were null, undefined, or empty strings, and the value
 of each key is "".
 
-> ```reportNulls: function reportNulls(flatDoc, keepEmptyStrings) { ...``` [utility.js:60](utility.js#L60)
+> ```reportNulls: function reportNulls(flatDoc, keepEmptyStrings) { ...``` [utility.js:74](utility.js#L74)
 
 
 -
@@ -103,7 +103,7 @@ Converts an object into a modifier by flattening it, putting keys with
 null, undefined, and empty string values into `modifier.$unset`, and
 putting the rest of the keys into `modifier.$set`.
 
-> ```docToModifier: function docToModifier(doc, options) { ...``` [utility.js:92](utility.js#L92)
+> ```docToModifier: function docToModifier(doc, options) { ...``` [utility.js:113](utility.js#L113)
 
 
 -
@@ -125,7 +125,7 @@ __Returns__  *{string[]}*
 
 Gets a string array of all the selected values in a given `select` DOM element.
 
-> ```getSelectValues: function getSelectValues(select) { ...``` [utility.js:119](utility.js#L119)
+> ```getSelectValues: function getSelectValues(select) { ...``` [utility.js:149](utility.js#L149)
 
 
 -
@@ -145,7 +145,7 @@ __Returns__  *{Any}*
 If `obj` is a string, returns the value of the property with that
 name on the `window` object. Otherwise returns `obj`.
 
-> ```lookup: function lookup(obj) { ...``` [utility.js:170](utility.js#L170)
+> ```lookup: function lookup(obj) { ...``` [utility.js:200](utility.js#L200)
 
 
 -
@@ -167,7 +167,7 @@ Schema definitions object
 Returns the schema definitions object from a SimpleSchema instance, grabbing the first
 type definition out of potentially multiple.
 
-> ```getFieldDefinition(ss, name) { ...``` [utility.js:193](utility.js#L193)
+> ```getFieldDefinition(ss, name) { ...``` [utility.js:223](utility.js#L223)
 
 
 -
@@ -196,7 +196,7 @@ __TODO__
 ```
 
 
-> ```objAffectsKey: function objAffectsKey(obj, key) { ...``` [utility.js:210](utility.js#L210)
+> ```objAffectsKey: function objAffectsKey(obj, key) { ...``` [utility.js:240](utility.js#L240)
 
 
 -
@@ -218,7 +218,7 @@ __Returns__  *{Object}*
 
 Takes a flat object and returns an expanded version of it.
 
-> ```expandObj: function expandObj(doc) { ...``` [utility.js:222](utility.js#L222)
+> ```expandObj: function expandObj(doc) { ...``` [utility.js:252](utility.js#L252)
 
 
 -
@@ -240,7 +240,7 @@ __Returns__  *{undefined}*
 
 Edits the object by reference, compacting any arrays at any level recursively.
 
-> ```compactArrays: function compactArrays(obj) { ...``` [utility.js:260](utility.js#L260)
+> ```compactArrays: function compactArrays(obj) { ...``` [utility.js:298](utility.js#L298)
 
 
 -
@@ -263,7 +263,7 @@ __Returns__  *{undefined}*
 
 Edits the object by reference.
 
-> ```bubbleEmpty: function bubbleEmpty(obj, keepEmptyStrings) { ...``` [utility.js:284](utility.js#L284)
+> ```bubbleEmpty: function bubbleEmpty(obj, keepEmptyStrings) { ...``` [utility.js:320](utility.js#L320)
 
 
 -
@@ -285,7 +285,7 @@ __Returns__  *{Boolean}*
 
 Returns `true` if the value is null, undefined, or an empty string
 
-> ```isNullUndefinedOrEmptyString: function isNullUndefinedOrEmptyString(val) { ...``` [utility.js:312](utility.js#L312)
+> ```isNullUndefinedOrEmptyString: function isNullUndefinedOrEmptyString(val) { ...``` [utility.js:354](utility.js#L354)
 
 
 -
@@ -307,7 +307,7 @@ __Returns__  *{Boolean}*
 
 Returns `true` if dateString is a "valid date string"
 
-> ```isValidDateString: function isValidDateString(dateString) { ...``` [utility.js:323](utility.js#L323)
+> ```isValidDateString: function isValidDateString(dateString) { ...``` [utility.js:369](utility.js#L369)
 
 
 -
@@ -329,7 +329,7 @@ __Returns__  *{Boolean}*
 
 Returns `true` if timeString is a "valid time string"
 
-> ```isValidTimeString: function isValidTimeString(timeString) { ...``` [utility.js:335](utility.js#L335)
+> ```isValidTimeString: function isValidTimeString(timeString) { ...``` [utility.js:381](utility.js#L381)
 
 
 -
@@ -350,7 +350,7 @@ __Returns__  *{Boolean}*
 
 Returns true if dateString is a "valid normalized forced-UTC global date and time string"
 
-> ```isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString(dateString) { ...``` [utility.js:350](utility.js#L350)
+> ```isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString(``` [utility.js:396](utility.js#L396)
 
 
 -
@@ -371,7 +371,7 @@ __Returns__  *{Boolean}*
 
 Returns true if dtString is a "valid normalized local date and time string"
 
-> ```isValidNormalizedLocalDateAndTimeString: function isValidNormalizedLocalDateAndTimeString(dtString) { ...``` [utility.js:369](utility.js#L369)
+> ```isValidNormalizedLocalDateAndTimeString: function isValidNormalizedLocalDateAndTimeString(``` [utility.js:422](utility.js#L422)
 
 
 -
@@ -401,7 +401,7 @@ This helps deal with the fact that we have to pass the ancestor autoform's conte
 helpers and components in different ways, but in all cases we want to get access to it and throw
 an error if we can't find an autoform context.
 
-> ```getComponentContext: function autoFormGetComponentContext(context, name) { ...``` [utility.js:391](utility.js#L391)
+> ```getComponentContext: function autoFormGetComponentContext(context, name) { ...``` [utility.js:450](utility.js#L450)
 
 
 -
@@ -426,7 +426,7 @@ __Returns__  *{Array}*
 The array, building it from a comma-delimited string if necessary.
 
 
-> ```stringToArray: function stringToArray(s, errorMessage) { ...``` [utility.js:441](utility.js#L441)
+> ```stringToArray: function stringToArray(s, errorMessage) { ...``` [utility.js:507](utility.js#L507)
 
 
 -
@@ -451,7 +451,7 @@ __Returns__  *{Object}*
 The object with klass added to the "class" property, creating the property if necessary
 
 
-> ```addClass: function addClass(atts, klass) { ...``` [utility.js:457](utility.js#L457)
+> ```addClass: function addClass(atts, klass) { ...``` [utility.js:523](utility.js#L523)
 
 
 -
@@ -472,7 +472,7 @@ __Returns__  *{Object}*
 The definition. Throws an error if type hasn't been defined.
 
 
-> ```getFormTypeDef: function getFormTypeDef(formType) { ...``` [utility.js:471](utility.js#L471)
+> ```getFormTypeDef: function getFormTypeDef(formType) { ...``` [utility.js:537](utility.js#L537)
 
 
 -
@@ -491,7 +491,7 @@ __Arguments__
 __Returns__  *{Boolean}*
 
 
-> ```const isBasicObject = function (obj) { ...``` [utility.js:512](utility.js#L512)
+> ```const isBasicObject = function (obj) { ...``` [utility.js:580](utility.js#L580)
 
 
 ***
@@ -529,7 +529,7 @@ ReactiveDict, but we need to store typed objects and
 keep their type upon retrieval.
 ```
 
-> ```export const FormData = function FormData () { ...``` [autoform-formdata.js:7](autoform-formdata.js#L7)
+> ```export const FormData = function FormData() { ...``` [autoform-formdata.js:7](autoform-formdata.js#L7)
 
 
 -
@@ -549,7 +549,7 @@ __Arguments__
 
 
 
-> ```FormData.prototype.initForm = function(formId) { ...``` [autoform-formdata.js:16](autoform-formdata.js#L16)
+> ```FormData.prototype.initForm = function (formId) { ...``` [autoform-formdata.js:16](autoform-formdata.js#L16)
 
 
 -
@@ -569,7 +569,7 @@ __Arguments__
 
 
 
-> ```FormData.prototype.sourceDoc = function(formId, sourceDoc) { ...``` [autoform-formdata.js:42](autoform-formdata.js#L42)
+> ```FormData.prototype.sourceDoc = function (formId, sourceDoc) { ...``` [autoform-formdata.js:42](autoform-formdata.js#L42)
 
 
 -
@@ -596,7 +596,7 @@ __Returns__  *{MongoObject|undefined}*
 Returns the form's MongoObject if getting.
 
 
-> ```FormData.prototype.sourceDoc = function(formId, sourceDoc) { ...``` [autoform-formdata.js:42](autoform-formdata.js#L42)
+> ```FormData.prototype.sourceDoc = function (formId, sourceDoc) { ...``` [autoform-formdata.js:42](autoform-formdata.js#L42)
 
 
 ***
@@ -673,7 +673,7 @@ __Arguments__
 __Returns__  *{boolean}*
 
 
-> ```export const autoFormArrayFieldHasMoreThanMinimum = function autoFormArrayFieldHasMoreThanMinimum(options) { ...``` [autoform-helpers.js:57](autoform-helpers.js#L57)
+> ```export const autoFormArrayFieldHasMoreThanMinimum = function autoFormArrayFieldHasMoreThanMinimum(``` [autoform-helpers.js:57](autoform-helpers.js#L57)
 
 
 -
@@ -691,7 +691,7 @@ __Arguments__
 __Returns__  *{boolean}*
 
 
-> ```export const autoFormArrayFieldHasLessThanMaximum = function autoFormArrayFieldHasLessThanMaximum(options) { ...``` [autoform-helpers.js:81](autoform-helpers.js#L81)
+> ```export const autoFormArrayFieldHasLessThanMaximum = function autoFormArrayFieldHasLessThanMaximum(``` [autoform-helpers.js:91](autoform-helpers.js#L91)
 
 
 -
@@ -709,7 +709,7 @@ __Arguments__
 __Returns__  *{boolean}*
 
 
-> ```export const autoFormFieldValueIs = function autoFormFieldValueIs(options) { ...``` [autoform-helpers.js:105](autoform-helpers.js#L105)
+> ```export const autoFormFieldValueIs = function autoFormFieldValueIs(options) { ...``` [autoform-helpers.js:125](autoform-helpers.js#L125)
 
 
 -
@@ -727,7 +727,7 @@ __Arguments__
 __Returns__  *{Any}*
 
 
-> ```export const autoFormFieldValue = function autoFormFieldValue(options) { ...``` [autoform-helpers.js:121](autoform-helpers.js#L121)
+> ```export const autoFormFieldValue = function autoFormFieldValue(options) { ...``` [autoform-helpers.js:141](autoform-helpers.js#L141)
 
 
 -
@@ -741,7 +741,7 @@ __Returns__  *{Any}*
 __Returns__  *{*}*
 
 
-> ```export const autoFormArrayFieldIsFirstVisible = function autoFormArrayFieldIsFirstVisible() { ...``` [autoform-helpers.js:136](autoform-helpers.js#L136)
+> ```export const autoFormArrayFieldIsFirstVisible = function autoFormArrayFieldIsFirstVisible() { ...``` [autoform-helpers.js:159](autoform-helpers.js#L159)
 
 
 -
@@ -755,7 +755,7 @@ __Returns__  *{*}*
 __Returns__  *{*}*
 
 
-> ```export const autoFormArrayFieldIsLastVisible = function autoFormArrayFieldIsLastVisible() { ...``` [autoform-helpers.js:149](autoform-helpers.js#L149)
+> ```export const autoFormArrayFieldIsLastVisible = function autoFormArrayFieldIsLastVisible() { ...``` [autoform-helpers.js:179](autoform-helpers.js#L179)
 
 
 -
@@ -773,7 +773,7 @@ __Arguments__
 __Returns__  *{Object}*
 
 
-> ```export const autoFormFieldLabelText = function autoFormFieldLabelText(options) { ...``` [autoform-helpers.js:177](autoform-helpers.js#L177)
+> ```export const autoFormFieldLabelText = function autoFormFieldLabelText(options) { ...``` [autoform-helpers.js:218](autoform-helpers.js#L218)
 
 
 -
@@ -791,7 +791,7 @@ __Arguments__
 __Returns__  *{{name: *}[]}*
 
 
-> ```export const autoFormFieldNames = function autoFormFieldNames(options) { ...``` [autoform-helpers.js:191](autoform-helpers.js#L191)
+> ```export const autoFormFieldNames = function autoFormFieldNames(options) { ...``` [autoform-helpers.js:232](autoform-helpers.js#L232)
 
 
 -
@@ -805,7 +805,7 @@ __Returns__  *{{name: *}[]}*
 __Returns__  *{*}*
 
 
-> ```export const afSelectOptionAtts = function afSelectOptionAtts() { ...``` [autoform-helpers.js:348](autoform-helpers.js#L348)
+> ```export const afSelectOptionAtts = function afSelectOptionAtts() { ...``` [autoform-helpers.js:411](autoform-helpers.js#L411)
 
 
 ***
@@ -840,7 +840,7 @@ __Arguments__
 
 __Returns__  *{*}*
 
-> ```const _validateField = function _validateField(key, formId, skipEmpty, onlyIfAlreadyInvalid) { ...``` [autoform-validation.js:15](autoform-validation.js#L15)
+> ```const _validateField = function _validateField(``` [autoform-validation.js:15](autoform-validation.js#L15)
 
 
 
@@ -875,7 +875,7 @@ __Returns__  *{Object}*
 The document Object with key/value-paired fields.
 
 
-> ```export const getFlatDocOfFieldValues = function getFlatDocOfFieldValues(fields, ss) { ...``` [autoform-inputs.js:11](autoform-inputs.js#L11)
+> ```export const getFlatDocOfFieldValues = function getFlatDocOfFieldValues(``` [autoform-inputs.js:11](autoform-inputs.js#L11)
 
 
 -
@@ -922,7 +922,7 @@ __Returns__  *{*}*
 The (maybe transformed) input value.
 
 
-> ```export const getInputValue = function getInputValue(``` [autoform-inputs.js:44](autoform-inputs.js#L44)
+> ```export const getInputValue = function getInputValue(``` [autoform-inputs.js:47](autoform-inputs.js#L47)
 
 
 -
@@ -959,7 +959,7 @@ __Arguments__
 @example
 const iData = getInputData(defs, atts, value, ss.label(c.atts.name), form.type);
 
-> ```export const getInputData = function getInputData(defs, hash, value, label, formType) { ...``` [autoform-inputs.js:108](autoform-inputs.js#L108)
+> ```export const getInputData = function getInputData(``` [autoform-inputs.js:111](autoform-inputs.js#L111)
 
 
 -
@@ -971,7 +971,7 @@ Set up the context. This is the object that becomes `this` in the
 input type template.
 ```
 
-> ```const inputTypeContext = { ...``` [autoform-inputs.js:173](autoform-inputs.js#L173)
+> ```const inputTypeContext = { ...``` [autoform-inputs.js:182](autoform-inputs.js#L182)
 
 
 -
@@ -983,7 +983,7 @@ Merge data property from the field schema with the context.
 We do not want these turned into HTML attributes.
 ```
 
-> ```if (hash.data) Object.assign(inputTypeContext, hash.data);``` [autoform-inputs.js:187](autoform-inputs.js#L187)
+> ```if (hash.data) Object.assign(inputTypeContext, hash.data);``` [autoform-inputs.js:196](autoform-inputs.js#L196)
 
 
 -
@@ -1007,7 +1007,7 @@ __Returns__  *{Function}*
 The throttled markChanged function
 
 
-> ```function markChangedThrottle(fn, limit) { ...``` [autoform-inputs.js:205](autoform-inputs.js#L205)
+> ```function markChangedThrottle(fn, limit) { ...``` [autoform-inputs.js:214](autoform-inputs.js#L214)
 
 
 -
@@ -1023,7 +1023,7 @@ __Arguments__
 
 ensures, that the ancestor (something) is marked changed, too.
 
-> ```const markChangedAncestors = (template, fieldName) => { ...``` [autoform-inputs.js:221](autoform-inputs.js#L221)
+> ```const markChangedAncestors = (template, fieldName) => { ...``` [autoform-inputs.js:230](autoform-inputs.js#L230)
 
 
 -
@@ -1040,7 +1040,7 @@ __Returns__  *{*|{}|boolean}*
 truthy/falsy value, based on all checked properties
 
 
-> ```const isRendered = template => template && template.view && template.view._domrange && !template.view.isDestroyed;``` [autoform-inputs.js:237](autoform-inputs.js#L237)
+> ```const isRendered = (template) =>``` [autoform-inputs.js:246](autoform-inputs.js#L246)
 
 
 -
@@ -1055,7 +1055,7 @@ __Arguments__
 * __fieldName__ *{String}*  
 
 
-> ```const doMarkChanged = (template, fieldName) => { ...``` [autoform-inputs.js:244](autoform-inputs.js#L244)
+> ```const doMarkChanged = (template, fieldName) => { ...``` [autoform-inputs.js:257](autoform-inputs.js#L257)
 
 
 -
@@ -1082,7 +1082,7 @@ __Arguments__
 
 
 
-> ```export const markChanged = markChangedThrottle(function _markChanged(``` [autoform-inputs.js:261](autoform-inputs.js#L261)
+> ```export const markChanged = markChangedThrottle(function _markChanged(``` [autoform-inputs.js:274](autoform-inputs.js#L274)
 
 
 -
@@ -1110,7 +1110,7 @@ __Arguments__
 
 
 
-> ```export const updateTrackedFieldValue = function updateTrackedFieldValue(``` [autoform-inputs.js:287](autoform-inputs.js#L287)
+> ```export const updateTrackedFieldValue = function updateTrackedFieldValue(``` [autoform-inputs.js:301](autoform-inputs.js#L301)
 
 
 -
@@ -1129,7 +1129,7 @@ __Arguments__
 
 
 
-> ```export const updateAllTrackedFieldValues = function updateAllTrackedFieldValues(template) { ...``` [autoform-inputs.js:307](autoform-inputs.js#L307)
+> ```export const updateAllTrackedFieldValues = function updateAllTrackedFieldValues(``` [autoform-inputs.js:321](autoform-inputs.js#L321)
 
 
 ***
@@ -1143,7 +1143,7 @@ __File: ["autoform-api.js"](autoform-api.js) Where: {client}__
 *This property __Utility__ is defined in `AutoForm`*
 
 
-> ```AutoForm.Utility = Utility;``` [autoform-api.js:17](autoform-api.js#L17)
+> ```AutoForm.Utility = Utility;``` [autoform-api.js:21](autoform-api.js#L21)
 
 
 -
@@ -1173,7 +1173,7 @@ __Returns__  *{undefined}*
 Defines hooks to be used by one or more forms. Extends hooks lists if called multiple times for the same
 form.
 
-> ```AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) { ...``` [autoform-api.js:30](autoform-api.js#L30)
+> ```AutoForm.addHooks = function autoFormAddHooks(formIds, hooks, replace) { ...``` [autoform-api.js:34](autoform-api.js#L34)
 
 
 -
@@ -1199,7 +1199,7 @@ __Returns__  *{undefined}*
 Defines hooks by form id. Extends hooks lists if called multiple times for the same
 form.
 
-> ```AutoForm.hooks = function autoFormHooks(hooks, replace) { ...``` [autoform-api.js:58](autoform-api.js#L58)
+> ```AutoForm.hooks = function autoFormHooks(hooks, replace) { ...``` [autoform-api.js:62](autoform-api.js#L62)
 
 
 -
@@ -1211,7 +1211,7 @@ form.
 
 Hooks list to aid automated testing
 
-> ```Object.defineProperty(AutoForm, ``` [autoform-api.js:70](autoform-api.js#L70)
+> ```Object.defineProperty(AutoForm, ``` [autoform-api.js:74](autoform-api.js#L74)
 
 
 -
@@ -1223,7 +1223,7 @@ Hooks list to aid automated testing
 
 Global hooks list to aid automated testing
 
-> ```Object.defineProperty(AutoForm, ``` [autoform-api.js:83](autoform-api.js#L83)
+> ```Object.defineProperty(AutoForm, ``` [autoform-api.js:87](autoform-api.js#L87)
 
 
 -
@@ -1242,7 +1242,7 @@ __Returns__  *{undefined}*
 Forces an AutoForm"s values to properly update.
 See https:
 
-> ```AutoForm._forceResetFormValues = function autoFormForceResetFormValues(formId) { ...``` [autoform-api.js:98](autoform-api.js#L98)
+> ```AutoForm._forceResetFormValues = function autoFormForceResetFormValues(formId) { ...``` [autoform-api.js:102](autoform-api.js#L102)
 
 
 -
@@ -1264,7 +1264,7 @@ __Returns__  *{undefined}*
 
 Resets an autoform, including resetting validation errors. The same as clicking the reset button for an autoform.
 
-> ```AutoForm.resetForm = function autoFormResetForm(formId, template) { ...``` [autoform-api.js:117](autoform-api.js#L117)
+> ```AutoForm.resetForm = function autoFormResetForm(formId, template) { ...``` [autoform-api.js:121](autoform-api.js#L121)
 
 
 -
@@ -1278,7 +1278,7 @@ __Arguments__
 * __template__ *{String}*  
 
 
-> ```AutoForm.setDefaultTemplate = function autoFormSetDefaultTemplate(template) { ...``` [autoform-api.js:128](autoform-api.js#L128)
+> ```AutoForm.setDefaultTemplate = function autoFormSetDefaultTemplate(template) { ...``` [autoform-api.js:132](autoform-api.js#L132)
 
 
 -
@@ -1290,7 +1290,7 @@ __Arguments__
 
 Reactive.
 
-> ```AutoForm.getDefaultTemplate = function autoFormGetDefaultTemplate() { ...``` [autoform-api.js:139](autoform-api.js#L139)
+> ```AutoForm.getDefaultTemplate = function autoFormGetDefaultTemplate() { ...``` [autoform-api.js:143](autoform-api.js#L143)
 
 
 -
@@ -1305,7 +1305,7 @@ __Arguments__
 * __template__ *{String}*  
 
 
-> ```AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(``` [autoform-api.js:150](autoform-api.js#L150)
+> ```AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType(``` [autoform-api.js:154](autoform-api.js#L154)
 
 
 -
@@ -1324,7 +1324,7 @@ Template name
 
 Reactive.
 
-> ```AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(``` [autoform-api.js:174](autoform-api.js#L174)
+> ```AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType(``` [autoform-api.js:178](autoform-api.js#L178)
 
 
 -
@@ -1334,7 +1334,7 @@ Reactive.
 *This property is private*
 
 
-> ```const toTypeTemplate = (type, template) => `${ ...``` [autoform-api.js:187](autoform-api.js#L187)
+> ```const toTypeTemplate = (type, template) => `${ ...``` [autoform-api.js:191](autoform-api.js#L191)
 
 
 -
@@ -1369,7 +1369,7 @@ manner:
 6. Default template, as set by AutoForm.setDefaultTemplate.
 7. Built-in default template, currently bootstrap-3.
 
-> ```AutoForm.getTemplateName = function autoFormGetTemplateName(``` [autoform-api.js:210](autoform-api.js#L210)
+> ```AutoForm.getTemplateName = function autoFormGetTemplateName(``` [autoform-api.js:214](autoform-api.js#L214)
 
 
 -
@@ -1405,7 +1405,7 @@ __Returns__  *{Object|null}*
 Returns an object representing the current values of all schema-based fields in the form.
 The returned object is either a normal object or a MongoDB modifier, based on the `getModifier` argument. Return value may be `null` if the form is not currently rendered on screen.
 
-> ```AutoForm.getFormValues = function autoFormGetFormValues(``` [autoform-api.js:314](autoform-api.js#L314)
+> ```AutoForm.getFormValues = function autoFormGetFormValues(``` [autoform-api.js:322](autoform-api.js#L322)
 
 
 -
@@ -1430,7 +1430,7 @@ __Returns__  *{Any|undefined}*
 
 Reset the cache and mark all fields as changed
 
-> ```AutoForm.resetValueCache = function autoFormResetValueCache(formId, fieldName) { ...``` [autoform-api.js:482](autoform-api.js#L482)
+> ```AutoForm.resetValueCache = function autoFormResetValueCache(formId, fieldName) { ...``` [autoform-api.js:490](autoform-api.js#L490)
 
 
 -
@@ -1460,7 +1460,7 @@ __Returns__  *{Any|undefined}*
 Returns the value of the field (the value that would be used if the form were submitted right now).
 This is a reactive method that will rerun whenever the current value of the requested field changes. Return value will be undefined if the field is not currently rendered.
 
-> ```AutoForm.getFieldValue = function autoFormGetFieldValue(``` [autoform-api.js:532](autoform-api.js#L532)
+> ```AutoForm.getFieldValue = function autoFormGetFieldValue(``` [autoform-api.js:540](autoform-api.js#L540)
 
 
 -
@@ -1489,7 +1489,7 @@ __Returns__  *{Any|undefined}*
 
 Sets the value for a field, resets the cache and emits changed events (reactive).
 
-> ```AutoForm.setFieldValue = function autoFormSetFieldValue(``` [autoform-api.js:584](autoform-api.js#L584)
+> ```AutoForm.setFieldValue = function autoFormSetFieldValue(``` [autoform-api.js:599](autoform-api.js#L599)
 
 
 -
@@ -1514,7 +1514,7 @@ __Returns__  *{Any|undefined}*
 
 Sets the value for a field, resets the cache and emits changed events.
 
-> ```AutoForm.setFormValues = function autoFormSetFormValues(value, formId) { ...``` [autoform-api.js:617](autoform-api.js#L617)
+> ```AutoForm.setFormValues = function autoFormSetFormValues(value, formId) { ...``` [autoform-api.js:632](autoform-api.js#L632)
 
 
 -
@@ -1535,7 +1535,7 @@ __Returns__  *{String}*
 
 Returns the name of the template used to render the element.
 
-> ```AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTemplateNameForElement(``` [autoform-api.js:629](autoform-api.js#L629)
+> ```AutoForm.getInputTypeTemplateNameForElement = function autoFormGetInputTypeTemplateNameForElement(``` [autoform-api.js:644](autoform-api.js#L644)
 
 
 -
@@ -1561,7 +1561,7 @@ __Returns__  *{Any}*
 Returns the value of the field (the value that would be used if the form were submitted right now).
 Unlike `AutoForm.getFieldValue`, this function is not reactive.
 
-> ```AutoForm.getInputValue = function autoFormGetInputValue(element, ss) { ...``` [autoform-api.js:661](autoform-api.js#L661)
+> ```AutoForm.getInputValue = function autoFormGetInputValue(element, ss) { ...``` [autoform-api.js:676](autoform-api.js#L676)
 
 
 -
@@ -1590,7 +1590,7 @@ __Returns__  *{undefined}*
 
 Use this method to add custom input components.
 
-> ```AutoForm.addInputType = function afAddInputType(name, definition) { ...``` [autoform-api.js:739](autoform-api.js#L739)
+> ```AutoForm.addInputType = function afAddInputType(name, definition) { ...``` [autoform-api.js:751](autoform-api.js#L751)
 
 
 -
@@ -1639,7 +1639,7 @@ __Returns__  *{undefined}*
 
 Use this method to add custom form types.
 
-> ```AutoForm.addFormType = function afAddFormType(name, definition) { ...``` [autoform-api.js:760](autoform-api.js#L760)
+> ```AutoForm.addFormType = function afAddFormType(name, definition) { ...``` [autoform-api.js:772](autoform-api.js#L772)
 
 
 -
@@ -1670,7 +1670,7 @@ Is it valid?
 In addition to returning a boolean that indicates whether the field is currently valid,
 this method causes the reactive validation messages to appear.
 
-> ```AutoForm.validateField = function autoFormValidateField(``` [autoform-api.js:777](autoform-api.js#L777)
+> ```AutoForm.validateField = function autoFormValidateField(``` [autoform-api.js:789](autoform-api.js#L789)
 
 
 -
@@ -1693,7 +1693,7 @@ Is it valid?
 In addition to returning a boolean that indicates whether the form is currently valid,
 this method causes the reactive validation messages to appear.
 
-> ```AutoForm.validateForm = function autoFormValidateForm(formId) { ...``` [autoform-api.js:794](autoform-api.js#L794)
+> ```AutoForm.validateForm = function autoFormValidateForm(formId) { ...``` [autoform-api.js:806](autoform-api.js#L806)
 
 
 -
@@ -1716,7 +1716,7 @@ The SimpleSchema validation context object.
 Use this method to get the validation context, which can be used to check
 the current invalid fields, manually invalidate fields, etc.
 
-> ```AutoForm.getValidationContext = function autoFormGetValidationContext(formId) { ...``` [autoform-api.js:834](autoform-api.js#L834)
+> ```AutoForm.getValidationContext = function autoFormGetValidationContext(formId) { ...``` [autoform-api.js:846](autoform-api.js#L846)
 
 
 -
@@ -1738,7 +1738,7 @@ Searches for the given attribute, looking up the parent context tree until the c
 
 Call this method from a UI helper. Might return undefined.
 
-> ```AutoForm.findAttribute = function autoFormFindAttribute(attrName) { ...``` [autoform-api.js:851](autoform-api.js#L851)
+> ```AutoForm.findAttribute = function autoFormFindAttribute(attrName) { ...``` [autoform-api.js:863](autoform-api.js#L863)
 
 
 -
@@ -1760,7 +1760,7 @@ An object containing all of the found attributes and their values, with the pref
 
 Call this method from a UI helper. Searches for attributes that start with the given prefix, looking up the parent context tree until the closest autoform is reached.
 
-> ```AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(``` [autoform-api.js:893](autoform-api.js#L893)
+> ```AutoForm.findAttributesWithPrefix = function autoFormFindAttributesWithPrefix(``` [autoform-api.js:905](autoform-api.js#L905)
 
 
 -
@@ -1773,7 +1773,7 @@ Call this method from a UI helper. Searches for attributes that start with the g
 Call this method in client code while developing to turn on extra logging.
 You need to call it just one time, usually in top level client code.
 
-> ```AutoForm.debug = function autoFormDebug() { ...``` [autoform-api.js:941](autoform-api.js#L941)
+> ```AutoForm.debug = function autoFormDebug() { ...``` [autoform-api.js:953](autoform-api.js#L953)
 
 
 -
@@ -1783,7 +1783,7 @@ You need to call it just one time, usually in top level client code.
 *This property __arrayTracker__ is defined in `AutoForm`*
 
 
-> ```AutoForm.arrayTracker = arrayTracker;``` [autoform-api.js:954](autoform-api.js#L954)
+> ```AutoForm.arrayTracker = arrayTracker;``` [autoform-api.js:966](autoform-api.js#L966)
 
 
 -
@@ -1805,7 +1805,7 @@ The input type. Most are the same as the `type` attributes for HTML input elemen
 
 Call this method from a UI helper to get the type string for the input control.
 
-> ```AutoForm.getInputType = function getInputType(attributes) { ...``` [autoform-api.js:964](autoform-api.js#L964)
+> ```AutoForm.getInputType = function getInputType(attributes) { ...``` [autoform-api.js:976](autoform-api.js#L976)
 
 
 -
@@ -1826,7 +1826,7 @@ __Returns__  *{Object|undefined}*
 
 Call this method from a UI helper to get the field definitions based on the schema used by the closest containing autoForm.
 
-> ```AutoForm.getSchemaForField = function autoFormGetSchemaForField(name) { ...``` [autoform-api.js:1046](autoform-api.js#L1046)
+> ```AutoForm.getSchemaForField = function autoFormGetSchemaForField(name) { ...``` [autoform-api.js:1059](autoform-api.js#L1059)
 
 
 -
@@ -1847,7 +1847,7 @@ __Returns__  *{Array(Object)|String|undefined}*
 
 Call this method from a UI helper to get the select options for the field. Might return the string "allowed".
 
-> ```AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) { ...``` [autoform-api.js:1060](autoform-api.js#L1060)
+> ```AutoForm._getOptionsForField = function autoFormGetOptionsForField(name) { ...``` [autoform-api.js:1073](autoform-api.js#L1073)
 
 
 -
@@ -1868,7 +1868,7 @@ __Returns__  *{Object}*
 
 Call this method from a UI helper to get the field definitions based on the schema used by the closest containing autoForm.
 
-> ```AutoForm.getLabelForField = function autoFormGetLabelForField(name) { ...``` [autoform-api.js:1092](autoform-api.js#L1092)
+> ```AutoForm.getLabelForField = function autoFormGetLabelForField(name) { ...``` [autoform-api.js:1105](autoform-api.js#L1105)
 
 
 -
@@ -1890,7 +1890,7 @@ The template instance.
 
 Gets the template instance for the form with formId or the closest form to the current context.
 
-> ```AutoForm.templateInstanceForForm = function(formId) { ...``` [autoform-api.js:1104](autoform-api.js#L1104)
+> ```AutoForm.templateInstanceForForm = function (formId) { ...``` [autoform-api.js:1117](autoform-api.js#L1117)
 
 
 -
@@ -1912,7 +1912,7 @@ The `Blaze.View` instance for the autoForm.
 
 Gets the `Blaze.View` instance for the form with formId or the closest form to the current context.
 
-> ```AutoForm.viewForForm = function(formId) { ...``` [autoform-api.js:1119](autoform-api.js#L1119)
+> ```AutoForm.viewForForm = function (formId) { ...``` [autoform-api.js:1132](autoform-api.js#L1132)
 
 
 -
@@ -1940,7 +1940,7 @@ Looks in the document attached to the form to see if the
 requested field exists and is an array. If so, returns the
 length (count) of the array. Otherwise returns undefined.
 
-> ```AutoForm.getArrayCountFromDocForField = function(formId, field) { ...``` [autoform-api.js:1156](autoform-api.js#L1156)
+> ```AutoForm.getArrayCountFromDocForField = function (formId, field) { ...``` [autoform-api.js:1169](autoform-api.js#L1169)
 
 
 -
@@ -1962,7 +1962,7 @@ Current data context for the form, or an empty object.
 
 Parses and alters the current data context for a form. It will have default values added and a `_resolvedSchema` property that has the schema the form should use.
 
-> ```AutoForm.parseData = function(data) { ...``` [autoform-api.js:1176](autoform-api.js#L1176)
+> ```AutoForm.parseData = function (data) { ...``` [autoform-api.js:1189](autoform-api.js#L1189)
 
 
 -
@@ -1978,7 +1978,7 @@ __Arguments__
  The form"s `id` attribute
 
 
-__Returns__  *{Object}*
+__Returns__  *{Object|undefined}*
 Current data context for the form, or an empty object.
 
 
@@ -1986,7 +1986,7 @@ Returns the current data context for a form.
 You can call this without a formId from within a helper and
 the data for the nearest containing form will be returned.
 
-> ```AutoForm.getCurrentDataForForm = function(formId) { ...``` [autoform-api.js:1190](autoform-api.js#L1190)
+> ```AutoForm.getCurrentDataForForm = function (formId) { ...``` [autoform-api.js:1203](autoform-api.js#L1203)
 
 
 -
@@ -2010,7 +2010,7 @@ Returns the current data context for a form plus some extra properties.
 You can call this without a formId from within a helper and
 the data for the nearest containing form will be returned.
 
-> ```AutoForm.getCurrentDataPlusExtrasForForm = function(formId) { ...``` [autoform-api.js:1210](autoform-api.js#L1210)
+> ```AutoForm.getCurrentDataPlusExtrasForForm = function (formId) { ...``` [autoform-api.js:1223](autoform-api.js#L1223)
 
 
 -
@@ -2032,7 +2032,7 @@ The Collection instance
 
 Gets the collection for a form from the `collection` attribute
 
-> ```AutoForm.getFormCollection = function(formId) { ...``` [autoform-api.js:1229](autoform-api.js#L1229)
+> ```AutoForm.getFormCollection = function (formId) { ...``` [autoform-api.js:1242](autoform-api.js#L1242)
 
 
 -
@@ -2061,7 +2061,7 @@ provided, or from the schema attached to the `Mongo.Collection`
 specified in the `collection` attribute. The form must be
 currently rendered.
 
-> ```AutoForm.getFormSchema = function(formId, form) { ...``` [autoform-api.js:1246](autoform-api.js#L1246)
+> ```AutoForm.getFormSchema = function (formId, form) { ...``` [autoform-api.js:1259](autoform-api.js#L1259)
 
 
 -
@@ -2076,7 +2076,7 @@ The containing form"s `id` attribute value
 
 Call in a helper to get the containing form"s `id` attribute. Reactive.
 
-> ```AutoForm.getFormId = function() { ...``` [autoform-api.js:1258](autoform-api.js#L1258)
+> ```AutoForm.getFormId = function () { ...``` [autoform-api.js:1271](autoform-api.js#L1271)
 
 
 -
@@ -2101,7 +2101,7 @@ __Returns__  *{undefined}*
 
 Selects the focus the first field (in DOM order) with an error.
 
-> ```AutoForm.selectFirstInvalidField = function selectFirstInvalidField(``` [autoform-api.js:1271](autoform-api.js#L1271)
+> ```AutoForm.selectFirstInvalidField = function selectFirstInvalidField(``` [autoform-api.js:1284](autoform-api.js#L1284)
 
 
 -
@@ -2121,7 +2121,7 @@ __Arguments__
 * __value__ *{String}*  
 
 
-> ```AutoForm.addStickyValidationError = function addStickyValidationError(``` [autoform-api.js:1303](autoform-api.js#L1303)
+> ```AutoForm.addStickyValidationError = function addStickyValidationError(``` [autoform-api.js:1316](autoform-api.js#L1316)
 
 
 -
@@ -2139,7 +2139,7 @@ __Arguments__
 * __key__ *{String}*  
 
 
-> ```AutoForm.removeStickyValidationError = function removeStickyValidationError(``` [autoform-api.js:1327](autoform-api.js#L1327)
+> ```AutoForm.removeStickyValidationError = function removeStickyValidationError(``` [autoform-api.js:1340](autoform-api.js#L1340)
 
 
 -
@@ -2183,7 +2183,7 @@ If creating a form type, you will often want to call this from the `validateForm
 It provides the generic form validation logic that does not typically change between form types.
 
 
-> ```AutoForm._validateFormDoc = function validateFormDoc(``` [autoform-api.js:1356](autoform-api.js#L1356)
+> ```AutoForm._validateFormDoc = function validateFormDoc(``` [autoform-api.js:1369](autoform-api.js#L1369)
 
 
 -
@@ -2199,7 +2199,7 @@ __Returns__  *{String}*
 The data context with property defaults added.
 
 
-> ```setDefaults = function setDefaults(data) { ...``` [autoform-api.js:1438](autoform-api.js#L1438)
+> ```setDefaults = function setDefaults(data) { ...``` [autoform-api.js:1451](autoform-api.js#L1451)
 
 
 ***
@@ -2370,83 +2370,6 @@ Returns new Date(val) as long as val is a string with at least one character. Ot
 
 ***
 
-__File: ["components/quickForm/quickForm.js"](components/quickForm/quickForm.js) Where: {client}__
-
-***
-
-### <a name=""></a>&nbsp;&nbsp;<sub><i>undefined</i></sub> ###
-
-```
-Private Functions *
-Takes a schema object and returns a sorted array of field group names for it
-```
-
-__Arguments__
-
-* ____ *{any}*  
-
- {Object}   schemaObj Like from mySimpleSchema.schema()
-
-
-__Returns__  *{String[]}*
-Array of field group names
-
-
-> ```function getSortedFieldGroupNames(schemaObj) { ...``` [components/quickForm/quickForm.js:88](components/quickForm/quickForm.js#L88)
-
-
--
-
-### <a name=""></a>&nbsp;&nbsp;<sub><i>undefined</i></sub> ###
-
-```
-Returns the schema field names that belong in the group.
-```
-
-__Arguments__
-
-* ____ *{any}*  
-
- {String}   groupName The group name
-
-* ____ *{any}*  
-
- {Object}   schemaObj Like from mySimpleSchema.schema()
-
-
-__Returns__  *{String[]}*
-Array of field names (schema keys)
-
-
-
-> ```function getFieldsForGroup(groupName, schemaObj) { ...``` [components/quickForm/quickForm.js:109](components/quickForm/quickForm.js#L109)
-
-
--
-
-### <a name=""></a>&nbsp;&nbsp;<sub><i>undefined</i></sub> ###
-
-```
-Returns the schema field names that don't belong to a group
-```
-
-__Arguments__
-
-* ____ *{any}*  
-
- {Object}   schemaObj Like from mySimpleSchema.schema()
-
-
-__Returns__  *{String[]}*
-Array of field names (schema keys)
-
-
-
-> ```function getFieldsWithNoGroup(schemaObj) { ...``` [components/quickForm/quickForm.js:129](components/quickForm/quickForm.js#L129)
-
-
-***
-
 __File: ["autoform-events.js"](autoform-events.js) Where: {client}__
 
 ***
@@ -2466,7 +2389,7 @@ __Arguments__
 
 
 
-> ```function onlyIfAlreadyInvalid(validationType) { ...``` [autoform-events.js:67](autoform-events.js#L67)
+> ```function onlyIfAlreadyInvalid(validationType) { ...``` [autoform-events.js:70](autoform-events.js#L70)
 
 
 -
@@ -2491,6 +2414,6 @@ The schema key
 
 
 
-> ```function getKeyForElement(element) { ...``` [autoform-events.js:81](autoform-events.js#L81)
+> ```function getKeyForElement(element) { ...``` [autoform-events.js:84](autoform-events.js#L84)
 
 
