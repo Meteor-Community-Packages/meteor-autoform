@@ -1194,7 +1194,7 @@ AutoForm.parseData = function (data) {
  * @method AutoForm.getCurrentDataForForm
  * @public
  * @param {String} formId The form"s `id` attribute
- * @returns {Object} Current data context for the form, or an empty object.
+ * @returns {Object|undefined} Current data context for the form, or an empty object.
  *
  * Returns the current data context for a form.
  * You can call this without a formId from within a helper and
