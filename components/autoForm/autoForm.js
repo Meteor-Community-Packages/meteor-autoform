@@ -1,17 +1,17 @@
 import MongoObject from "mongo-object";
 import { isObject, isFunction } from "../../common";
-import { Hooks } from '../../autoform-hooks'
-import { Utility } from '../../utility'
+import { Hooks } from "../../autoform-hooks";
+import { Utility } from "../../utility";
 /* global AutoForm, ReactiveVar, arrayTracker, setDefaults */
 
 Template.autoForm.helpers({
   atts: function autoFormTplAtts() {
     // After removing all of the props we know about, everything else should
     // become a form attribute unless it's an array or object.
-    var val,
-      htmlAttributes = {},
-      context = this;
-    var removeProps = [
+    let val = undefined;
+    const htmlAttributes = {}
+    const context = this;
+    const removeProps = [
       "schema",
       "collection",
       "validation",
@@ -38,7 +38,7 @@ Template.autoForm.helpers({
 
     // Filter out arrays and objects and functions, which are obviously not meant to be
     // HTML attributes.
-    for (var prop in context) {
+    for (const prop in context) {
       if (
         context.hasOwnProperty(prop) &&
         !removeProps.includes(prop) &&
@@ -67,7 +67,7 @@ Template.autoForm.helpers({
 });
 
 Template.autoForm.created = function autoFormCreated() {
-  var template = this;
+  const template = this;
 
   // We'll add tracker dependencies for reactive field values
   // to this object as necessary
@@ -79,12 +79,12 @@ Template.autoForm.created = function autoFormCreated() {
   template._stickyErrors = {};
 
   template.autorun(function(c) {
-    var data = Template.currentData(); // rerun when current data changes
-    var formId = data.id;
+    let data = Template.currentData(); // rerun when current data changes
+    const formId = data.id;
 
     if (!formId) {
       throw new Error(
-        'Every autoForm and quickForm must have an "id" attribute set to a unique string.'
+        "Every autoForm and quickForm must have an \"id\" attribute set to a unique string."
       );
     }
 
@@ -96,7 +96,7 @@ Template.autoForm.created = function autoFormCreated() {
 
     // Clone the doc so that docToForm and other modifications do not change
     // the original referenced object.
-    var doc = data.doc ? EJSON.clone(data.doc) : null;
+    let doc = data.doc ? EJSON.clone(data.doc) : null;
 
     // Update cached form values for hot code reload persistence
     if (data.preserveForm === false) {
@@ -120,16 +120,16 @@ Template.autoForm.created = function autoFormCreated() {
 
     // Retain doc values after a "hot code push", if possible
     if (c.firstRun) {
-      var retrievedDoc = AutoForm.formPreserve.getDocument(formId);
+      const retrievedDoc = AutoForm.formPreserve.getDocument(formId);
       if (retrievedDoc !== false) {
         // Ensure we keep the _id property which may not be present in retrievedDoc.
         doc = { ...doc, ...retrievedDoc };
       }
     }
 
-    var mDoc;
+    let mDoc = undefined;
     if (doc && Object.keys(doc).length) {
-      var hookCtx = { formId: formId };
+      const hookCtx = { formId: formId };
       // Pass doc through docToForm hooks
       Hooks.getHooks(formId, "docToForm").forEach(
         function autoFormEachDocToForm(hook) {
@@ -149,15 +149,15 @@ Template.autoForm.created = function autoFormCreated() {
       mDoc = new MongoObject(doc);
       AutoForm.reactiveFormData.sourceDoc(formId, mDoc);
     } else {
-      AutoForm.reactiveFormData.sourceDoc(formId);
+      AutoForm.reactiveFormData.sourceDoc(formId, undefined);
     }
   });
 };
 
 Template.autoForm.rendered = function autoFormRendered() {
-  var lastId;
+  let lastId = undefined;
   this.autorun(function() {
-    var data = Template.currentData(); // rerun when current data changes
+    const data = Template.currentData(); // rerun when current data changes
 
     if (data.id === lastId) return;
     lastId = data.id;
@@ -167,8 +167,8 @@ Template.autoForm.rendered = function autoFormRendered() {
 };
 
 Template.autoForm.destroyed = function autoFormDestroyed() {
-  var self = this;
-  var formId = self.data.id;
+  const self = this;
+  const formId = self.data.id;
 
   // TODO if formId was changing reactively during life of instance,
   // some data won't be removed by the calls below.

@@ -5,7 +5,7 @@ Template.afObjectField.helpers({
     return AutoForm.getTemplateName('afObjectField', this.template, this.name);
   },
   innerContext: function () {
-    var c = AutoForm.Utility.getComponentContext(this, 'afObjectField');
+    const c = AutoForm.Utility.getComponentContext(this, 'afObjectField');
     return { ...this, ...c.atts }
   }
 });

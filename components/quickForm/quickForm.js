@@ -3,26 +3,25 @@ import {
   getSortedFieldGroupNames,
   getFieldsForGroup,
   getFieldsWithNoGroup
-} from './quickFormUtils';
+} from "./quickFormUtils";
 
 Template.quickForm.helpers({
   getTemplateName: function () {
-    return AutoForm.getTemplateName('quickForm', this.template);
+    return AutoForm.getTemplateName("quickForm", this.template);
   },
   innerContext: function quickFormContext() {
-
-    var atts = this;
-    var adjustedData = AutoForm.parseData({ ...this });
-    var simpleSchema = adjustedData._resolvedSchema;
-    var sortedSchema = {};
-    var fieldGroups = [];
-    var grouplessFieldContext;
+    const atts = this;
+    const adjustedData = AutoForm.parseData({ ...this });
+    const simpleSchema = adjustedData._resolvedSchema;
+    const sortedSchema = {};
+    const fieldGroups = [];
+    let grouplessFieldContext = undefined;
 
     // --------------- A. Schema --------------- //
 
-    var fieldList = atts.fields;
+    let fieldList = atts.fields;
     if (fieldList) {
-      fieldList = AutoForm.Utility.stringToArray(fieldList, 'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields');
+      fieldList = AutoForm.Utility.stringToArray(fieldList, "AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields");
     } else {
       const fullSchema = simpleSchema.mergedSchema();
       fieldList = Object.keys(fullSchema);
@@ -35,7 +34,7 @@ Template.quickForm.helpers({
 
     // --------------- B. Field With No Groups --------------- //
 
-    var grouplessFields = getFieldsWithNoGroup(sortedSchema);
+    const grouplessFields = getFieldsWithNoGroup(sortedSchema);
     if (grouplessFields.length > 0) {
       grouplessFieldContext = {
         atts: { ...atts, fields: grouplessFields },
@@ -46,11 +45,11 @@ Template.quickForm.helpers({
     // --------------- C. Field With Groups --------------- //
 
     // get sorted list of field groups
-    var fieldGroupNames = getSortedFieldGroupNames(sortedSchema);
+    const fieldGroupNames = getSortedFieldGroupNames(sortedSchema);
 
     // Loop through the list and make a field group context for each
     fieldGroupNames.forEach(function (fieldGroupName) {
-      var fieldsForGroup = getFieldsForGroup(fieldGroupName, sortedSchema);
+      const fieldsForGroup = getFieldsForGroup(fieldGroupName, sortedSchema);
 
       if (fieldsForGroup.length > 0) {
         fieldGroups.push({
@@ -65,19 +64,28 @@ Template.quickForm.helpers({
 
     // Pass along quickForm context to autoForm context, minus a few
     // properties that are specific to quickForms.
-    const { buttonContent, buttonClasses, fields, omitFields, 'id-prefix': idPrefix, ...qfAutoFormContext } = atts
+    const {
+      buttonContent,
+      buttonClasses,
+      fields,
+      omitFields,
+      "id-prefix": idPrefix,
+      ...qfAutoFormContext
+    } = atts
 
     // Determine whether we want to render a submit button
-    var qfShouldRenderButton = (atts.buttonContent !== false && atts.type !== 'readonly' && atts.type !== 'disabled');
+    const qfShouldRenderButton = (
+      atts.buttonContent !== false &&
+      atts.type !== "readonly" &&
+      atts.type !== "disabled"
+    );
 
-    var context = {
+    return {
       qfAutoFormContext: qfAutoFormContext,
       atts: atts,
       qfShouldRenderButton: qfShouldRenderButton,
       fieldGroups: fieldGroups,
       grouplessFields: grouplessFieldContext
     };
-
-    return context;
   }
 });

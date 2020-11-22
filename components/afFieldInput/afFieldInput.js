@@ -1,6 +1,6 @@
 /* global AutoForm, getInputValue, getInputData, updateTrackedFieldValue */
 
-import { getInputData, getInputValue, updateTrackedFieldValue } from '../../autoform-inputs'
+import { getInputData, getInputValue, updateTrackedFieldValue } from "../../autoform-inputs"
 
 Template.afFieldInput.onRendered(() => {
   const template = AutoForm.templateInstanceForForm();
@@ -26,7 +26,7 @@ export function afFieldInputContext() {
 
   // Adjust for array fields if necessary
   if (defs.type === Array) {
-    defs = AutoForm.Utility.getFieldDefinition(ss, c.atts.name + ".$");
+    defs = AutoForm.Utility.getFieldDefinition(ss, `${c.atts.name}.$`);
   }
 
   // Determine what `type` attribute should be if not set
@@ -86,7 +86,7 @@ Template.afFieldInput.helpers({
 
     // on first attempt we try to get the template without skipping non-existent
     // templates in order to circumvent false-positives that may occur due to
-    // custom data context, set in conten blocks or dynamic templates
+    // custom data context, set in content blocks or forms in forms
     let templateName = AutoForm.getTemplateName(
       inputTemplateName,
       styleTemplateName,
@@ -96,7 +96,7 @@ Template.afFieldInput.helpers({
 
     if (!templateName) {
       // In case we found nothing, we skip the check for existence here so that
-      // we can get the `_plain` string even though they don't exist.
+      // we can get the `_plain` string even though they don"t exist.
       templateName = AutoForm.getTemplateName(
         inputTemplateName,
         styleTemplateName,
