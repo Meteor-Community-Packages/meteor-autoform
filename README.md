@@ -97,9 +97,9 @@ We do NOT recommend using something like `api.use('aldeed:autoform@6.0.0 || 7.0.
 - [Examples](#examples)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
-- [Contributors](#contributors)
-- [Backers](#backers)
-- [Sponsors](#sponsors)
+- [Testing](#testing)
+- [Credits](#credits)
+- [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -1695,7 +1695,32 @@ no errors, make sure the button's type is `submit`.
 
 ## Contributing
 
-[More Info](CONTRIBUTING.md)
+MCP welcomes any form on contribution. If you are interested, please read more
+about it in the [contributing guide](CONTRIBUTING.md).
+
+## Testing
+
+In order to improve development we have replaced TinyTest with 
+`meteortesting:mocha` in combination with `chai` and `puppeteer`. 
+
+This makes local tests much easier and also allows us to run tests in the CI.
+In Order to execute local tests, there is a **local bare Meteor project 
+required**. However, don't worry, because it can easily be created and 
+executed via the following lines:
+  
+```bash
+$ meteor create --bare testdummy # testdummy is already in the .gitignore
+$ cd testdummy
+$ meteor npm install --save-dev puppeteer simpl-schema chai sinon
+$ METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_WATCH=1 TEST_SERVER=0 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../
+```
+
+**Publishing note:** If you publish the package to atmosphere, make sure you
+remove the test project or move it outside of the package root.
+
+<!--
+The following is uncommented, because the opencollective page https://opencollective.com/autoform is not reachable anymore.
+This can be uncommented, when we are back with a new opencollective or whatever account.
 
 ## Contributors
 
@@ -1722,3 +1747,16 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 <a href="https://opencollective.com/autoform/sponsor/7/website" target="_blank"><img src="https://opencollective.com/autoform/sponsor/7/avatar.svg"></a>
 <a href="https://opencollective.com/autoform/sponsor/8/website" target="_blank"><img src="https://opencollective.com/autoform/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/autoform/sponsor/9/website" target="_blank"><img src="https://opencollective.com/autoform/sponsor/9/avatar.svg"></a>
+-->
+
+## Credits
+
+Many thanks to [Eric Dobbertin (aldeed)](https://github.com/aldeed) for creating 
+this package and many years of improvement and for the trust in Meteor Community Packages.
+
+Also many thanks to all the [contributors](https://github.com/Meteor-Community-Packages/meteor-autoform/graphs/contributors).
+
+## License
+
+This package is released under the MIT License. See the [LICENSE file](./LICENSE)
+for more information.
