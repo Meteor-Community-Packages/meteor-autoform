@@ -2,19 +2,19 @@
 
 AutoForm.addFormType('update-pushArray', {
   onSubmit: function () {
-    var c = this;
+    const ctx = this;
 
     // Prevent browser form submission
     this.event.preventDefault();
 
     // Make sure we have a collection
-    var collection = this.collection;
+    const collection = this.collection;
     if (!collection) {
       throw new Error("AutoForm: You must specify a collection when form type is update-pushArray.");
     }
 
     // Make sure we have a scope
-    var scope = c.formAttributes.scope;
+    const scope = ctx.formAttributes.scope;
     if (!scope) {
       throw new Error("AutoForm: You must specify a scope when form type is update-pushArray.");
     }
@@ -23,23 +23,23 @@ AutoForm.addFormType('update-pushArray', {
     this.runBeforeHooks(this.insertDoc, function (doc) {
       if (!Object.keys(doc).length) { // make sure this check stays after the before hooks
         // Nothing to update. Just treat it as a successful update.
-        c.result(null, 0);
+        ctx.result(null, 0);
       } else {
-        var modifer = { $push: {} };
+        const modifer = { $push: {} };
         modifer.$push[scope] = doc;
         // Perform update
-        collection.update({ _id: c.docId }, modifer, c.validationOptions, c.result);
+        collection.update({ _id: ctx.docId }, modifer, ctx.validationOptions, ctx.result);
       }
     });
   },
   validateForm: function () {
     // Get SimpleSchema
-    var ss = AutoForm.getFormSchema(this.form.id);
+    const formSchema = AutoForm.getFormSchema(this.form.id);
     // We validate as if it's an insert form
-    return AutoForm._validateFormDoc(this.formDoc, false, this.form.id, ss, this.form);
+    return AutoForm._validateFormDoc(this.formDoc, false, this.form.id, formSchema, this.form);
   },
-  adjustSchema: function (ss) {
-    return ss.getObjectSchema(this.form.scope + '.$');
+  adjustSchema: function (formSchema) {
+    return formSchema.getObjectSchema(`${this.form.scope}.$`);
   },
   shouldPrevalidate: function () {
     // Prevalidate because the form is generated with a schema

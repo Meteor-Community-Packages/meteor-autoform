@@ -2,7 +2,7 @@
 
 AutoForm.addFormType("method-update", {
   onSubmit: function() {
-    var c = this;
+    const ctx = this;
 
     // Prevent browser form submission
     this.event.preventDefault();
@@ -18,18 +18,18 @@ AutoForm.addFormType("method-update", {
       // Validate. If both schema and collection were provided, then we validate
       // against the collection schema here. Otherwise we validate against whichever
       // one was passed.
-      var valid =
-        c.formAttributes.validation === "none" ||
-        c.formTypeDefinition.validateForm.call({
-          form: c.formAttributes,
+      const valid =
+        ctx.formAttributes.validation === "none" ||
+        ctx.formTypeDefinition.validateForm.call({
+          form: ctx.formAttributes,
           formDoc: updateDoc,
-          useCollectionSchema: c.ssIsOverride
+          useCollectionSchema: ctx.ssIsOverride
         });
 
       if (valid === false) {
-        c.failedValidation();
+        ctx.failedValidation();
       } else {
-        const { methodargs } = c.formAttributes;
+        const { methodargs } = ctx.formAttributes;
         const args = methodargs
           ? typeof methodargs === "function"
             ? methodargs()
@@ -37,16 +37,16 @@ AutoForm.addFormType("method-update", {
           : [];
         // Call the method. If a ddp connection was provided, use
         // that instead of the default Meteor connection
-        var ddp = c.formAttributes.ddp;
+        let ddp = ctx.formAttributes.ddp;
         ddp = ddp && typeof ddp.call === "function" ? ddp : Meteor;
         ddp.call(
-          c.formAttributes.meteormethod,
+          ctx.formAttributes.meteormethod,
           {
-            _id: c.docId,
+            _id: ctx.docId,
             modifier: updateDoc
           },
           ...args,
-          c.result
+          ctx.result
         );
       }
     });
@@ -54,20 +54,21 @@ AutoForm.addFormType("method-update", {
   usesModifier: true,
   validateForm: function() {
     // Get SimpleSchema
-    var ss = AutoForm.getFormSchema(this.form.id);
+    let formSchema = AutoForm.getFormSchema(this.form.id);
 
-    var collection = AutoForm.getFormCollection(this.form.id);
+    const collection = AutoForm.getFormCollection(this.form.id);
     // If there is a `schema` attribute but you want to force validation against the
     // collection's schema instead, pass useCollectionSchema=true
-    ss =
-      this.useCollectionSchema && collection ? collection.simpleSchema() : ss;
+    formSchema = this.useCollectionSchema && collection
+      ? collection.simpleSchema()
+      : formSchema;
 
     // We validate the modifier. We don't want to throw errors about missing required fields, etc.
     return AutoForm._validateFormDoc(
       this.formDoc,
       true,
       this.form.id,
-      ss,
+      formSchema,
       this.form
     );
   },
