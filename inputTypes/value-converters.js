@@ -1,13 +1,24 @@
-/*
- * The conversion functions in this file can be used by input types to convert their outgoing values into the data type expected by the schema
- */
 import { Utility } from '../utility'
 
+const isDate = d => Object.prototype.toString.call(d) === '[object Date]'
+const toTrimmedString = s => s.trim()
+
+/**
+ * The conversion functions in this file can be used by input types to convert
+ * heir outgoing values into the data type expected by the schema.
+ */
 AutoForm.valueConverters = {
+
+  /**
+   * Converts a boolean to a string
+   * @param val
+   * @return {String} a String value representing a boolean value
+   */
   booleanToString: function booleanToString(val) {
     if (val === true) {
       return "TRUE";
-    } else if (val === false) {
+    }
+    if (val === false) {
       return "FALSE";
     }
     return val;
@@ -15,7 +26,8 @@ AutoForm.valueConverters = {
   booleanToStringArray: function booleanToStringArray(val) {
     if (val === true) {
       return ["TRUE"];
-    } else if (val === false) {
+    }
+    if (val === false) {
       return ["FALSE"];
     }
     return val;
@@ -23,7 +35,8 @@ AutoForm.valueConverters = {
   booleanToNumber: function booleanToNumber(val) {
     if (val === true) {
       return 1;
-    } else if (val === false) {
+    }
+    if (val === false) {
       return 0;
     }
     return val;
@@ -31,7 +44,8 @@ AutoForm.valueConverters = {
   booleanToNumberArray: function booleanToNumberArray(val) {
     if (val === true) {
       return [1];
-    } else if (val === false) {
+    }
+    if (val === false) {
       return [0];
     }
     return val;
@@ -39,35 +53,52 @@ AutoForm.valueConverters = {
   /**
    * @method  AutoForm.valueConverters.dateToDateString
    * @private
-   * @param  {Date} date
+   * @param  {Date} val
    * @return {String}
    *
-   * Returns a "valid date string" representing the local date.
+   * Returns a "valid date string" representing the local date in format
+   * YYYY-MM-DD
    */
   dateToDateString: function dateToDateString(val) {
-    return (val instanceof Date) ? moment(val).format("YYYY-MM-DD") : val;
+    if (!isDate(val)) return val
+
+    const fyr = val.getFullYear()
+    const mon = String(val.getMonth() + 1).padStart(2, '0')
+    const day = String(val.getDate()).padStart(2, '0')
+
+    return `${fyr}-${mon}-${day}`
   },
   /**
    * @method  AutoForm.valueConverters.dateToDateStringUTC
    * @private
-   * @param  {Date} date
+   * @param  {Date} val
    * @return {String}
    *
    * Returns a "valid date string" representing the date converted to the UTC time zone.
    */
   dateToDateStringUTC: function dateToDateStringUTC(val) {
-    return (val instanceof Date) ? moment.utc(val).format("YYYY-MM-DD") : val;
+    if (!isDate(val)) return val
+
+    const fyr = val.getUTCFullYear()
+    const mon = String(val.getUTCMonth() + 1).padStart(2, '0')
+    const day = String(val.getUTCDate()).padStart(2, '0')
+
+    return `${fyr}-${mon}-${day}`
   },
+  /**
+   *
+   * @param val
+   * @return {*}
+   */
   dateToDateStringUTCArray: function dateToDateStringUTCArray(val) {
-    if (val instanceof Date) {
-      return [AutoForm.valueConverters.dateToDateStringUTC(val)];
-    }
-    return val;
+    if (!isDate(val)) return val
+
+    return [AutoForm.valueConverters.dateToDateStringUTC(val)];
   },
   /**
    * @method  AutoForm.valueConverters.dateToNormalizedForcedUtcGlobalDateAndTimeString
    * @private
-   * @param  {Date} date
+   * @param  {Date} val
    * @return {String}
    *
    * Returns a "valid normalized forced-UTC global date and time string" representing the time
@@ -78,13 +109,14 @@ AutoForm.valueConverters = {
    * http://www.whatwg.org/specs/web-apps/current-work/multipage/common-microsyntaxes.html#valid-normalized-forced-utc-global-date-and-time-string
    */
   dateToNormalizedForcedUtcGlobalDateAndTimeString: function dateToNormalizedForcedUtcGlobalDateAndTimeString(val) {
-    return (val instanceof Date) ? moment(val).utc().format("YYYY-MM-DD[T]HH:mm:ss.SSS[Z]") : val;
+    if (!isDate(val)) return val
+
+    return val.toISOString()
   },
   dateToNormalizedForcedUtcGlobalDateAndTimeStringArray: function dateToNormalizedForcedUtcGlobalDateAndTimeStringArray(val) {
-    if (val instanceof Date) {
-      return [AutoForm.valueConverters.dateToNormalizedForcedUtcGlobalDateAndTimeString(val)];
-    }
-    return val;
+    if (!isDate(val)) return val
+
+    return [AutoForm.valueConverters.dateToNormalizedForcedUtcGlobalDateAndTimeString(val)];
   },
   /**
    * @method AutoForm.valueConverters.dateToNormalizedLocalDateAndTimeString
@@ -96,7 +128,9 @@ AutoForm.valueConverters = {
    * Returns a "valid normalized local date and time string".
    */
   dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString(date, timezoneId) {
-    var m = moment(date);
+    if (!isDate(date)) return date
+
+    const m = moment(date);
     // by default, we assume local timezone; add moment-timezone to app and pass timezoneId
     // to use a different timezone
     if (typeof timezoneId === "string") {
@@ -107,27 +141,35 @@ AutoForm.valueConverters = {
     }
     return m.format("YYYY-MM-DD[T]HH:mm:ss.SSS");
   },
+  /**
+   * Returns the timestamp number of a date
+   * @param {Date} val
+   * @return {number} the unix timestamp of the date
+   */
   dateToNumber: function dateToNumber(val) {
-    return (val instanceof Date) ? val.getTime() : val;
+    return isDate(val)
+      ? val.getTime()
+      : val;
   },
   dateToNumberArray: function dateToNumberArray(val) {
-    if (val instanceof Date) {
-      return [val.getTime()];
-    }
-    return val;
+    return isDate(val)
+      ? [val.getTime()]
+      : val;
   },
   dateToDateArray: function dateToDateArray(val) {
-    if (val instanceof Date) {
-      return [val];
-    }
-    return val;
+    return isDate(val)
+      ? [val]
+      : val;
   },
+  /**
+   * Returns an array of (trimmed) strings from a comma-separated string.
+   * @example 'hello, world' => ['hello', 'world']
+   * @param {string] val
+   * @return {[String]}
+   */
   stringToStringArray: function stringToStringArray(val) {
     if (typeof val === "string") {
-      val = val.split(",");
-      return val.map(function (item) {
-        return $.trim(item);
-      });
+      return val.split(",").map(toTrimmedString)
     }
     return val;
   },
@@ -141,7 +183,7 @@ AutoForm.valueConverters = {
    */
   stringToNumber: function stringToNumber(val) {
     if (typeof val === "string" && val.length > 0) {
-      var numVal = Number(val);
+      const numVal = Number(val);
       if (!isNaN(numVal)) {
         return numVal;
       }
@@ -150,11 +192,7 @@ AutoForm.valueConverters = {
   },
   stringToNumberArray: function stringToNumberArray(val) {
     if (typeof val === "string") {
-      val = val.split(",");
-      return val.map(function (item) {
-        item = $.trim(item);
-        return AutoForm.valueConverters.stringToNumber(item);
-      });
+      return val.split(",").map(item => AutoForm.valueConverters.stringToNumber(item.trim()))
     }
     return val;
   },
@@ -168,10 +206,11 @@ AutoForm.valueConverters = {
    */
   stringToBoolean: function stringToBoolean(val) {
     if (typeof val === "string" && val.length > 0) {
-      var lval = val.toLowerCase();
-      if (lval === "true" || lval === "1") {
+      const lowerCaseVal = val.toLowerCase();
+      if (lowerCaseVal === "true" || lowerCaseVal === "1") {
         return true;
-      } else if (lval === "false" || lval === "0") {
+      }
+      if (lowerCaseVal === "false" || lowerCaseVal === "0") {
         return false;
       }
     }
@@ -179,11 +218,7 @@ AutoForm.valueConverters = {
   },
   stringToBooleanArray: function stringToBooleanArray(val) {
     if (typeof val === "string") {
-      val = val.split(",");
-      return val.map(function (item) {
-        item = $.trim(item);
-        return AutoForm.valueConverters.stringToBoolean(item);
-      });
+      return val.split(",").map(item => AutoForm.valueConverters.stringToBoolean(item.trim()))
     }
     return val;
   },
@@ -193,21 +228,34 @@ AutoForm.valueConverters = {
    * @param {String} val A string or null or undefined.
    * @return {Date|String} The string converted to a Date instance.
    *
-   * Returns new Date(val) as long as val is a string with at least one character. Otherwise returns the original string.
+   * Returns new Date(val) as long as val is a string with at least one character.
+   * If the resulting date is an 'Invalid Date' the original string is returned.
+   * Otherwise returns the original string.
    */
   stringToDate: function stringToDate(val) {
     if (typeof val === "string" && val.length > 0) {
-      return new Date(val);
+      let d = undefined
+
+      // try number-strings first
+      const num = Number(val)
+      d = !Number.isNaN(num) && new Date(num)
+
+      if (d && d.toString() !== 'Invalid Date') {
+        return d
+      }
+
+      // fallback to direct value input
+      d = new Date(val);
+
+      if (d.toString() !== 'Invalid Date') {
+        return d
+      }
     }
     return val;
   },
   stringToDateArray: function stringToDateArray(val) {
     if (typeof val === "string") {
-      val = val.split(",");
-      return val.map(function (item) {
-        item = $.trim(item);
-        return AutoForm.valueConverters.stringToDate(item);
-      });
+      return val.split(",").map(item => AutoForm.valueConverters.stringToDate(item.trim()));
     }
     return val;
   },
@@ -232,7 +280,8 @@ AutoForm.valueConverters = {
   numberToBoolean: function numberToBoolean(val) {
     if (val === 0) {
       return false;
-    } else if (val === 1) {
+    }
+    if (val === 1) {
       return true;
     }
     return val;
@@ -240,7 +289,8 @@ AutoForm.valueConverters = {
   numberToBooleanArray: function numberToBooleanArray(val) {
     if (val === 0) {
       return [false];
-    } else if (val === 1) {
+    }
+    if (val === 1) {
       return [true];
     }
     return val;

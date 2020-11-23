@@ -10,3 +10,5 @@ import './autoform-validation.tests'
 import './autoform-api.tests'
 // component specific
 import './components/quickForm/quickFormUtils.tests'
+//input types
+import './inputTypes/value-converters.tests'
