@@ -62,9 +62,9 @@ AutoForm.valueConverters = {
   dateToDateString: function dateToDateString(val) {
     if (!isDate(val)) return val
 
-    const fyr = val.getFullYear()
-    const mon = String(val.getMonth() + 1).padStart(2, '0')
-    const day = String(val.getDate()).padStart(2, '0')
+    const fyr = (val.getFullYear()).toString().padStart(4, '0')
+    const mon = (val.getMonth() + 1).toString().padStart(2, '0')
+    const day = (val.getDate()).toString().padStart(2, '0')
 
     return `${fyr}-${mon}-${day}`
   },
@@ -79,9 +79,9 @@ AutoForm.valueConverters = {
   dateToDateStringUTC: function dateToDateStringUTC(val) {
     if (!isDate(val)) return val
 
-    const fyr = val.getUTCFullYear()
-    const mon = String(val.getUTCMonth() + 1).padStart(2, '0')
-    const day = String(val.getUTCDate()).padStart(2, '0')
+    const fyr = (val.getUTCFullYear()).toString().padStart(4, '0')
+    const mon = (val.getUTCMonth() + 1).toString().padStart(2, '0')
+    const day = (val.getUTCDate()).toString().padStart(2, '0')
 
     return `${fyr}-${mon}-${day}`
   },
