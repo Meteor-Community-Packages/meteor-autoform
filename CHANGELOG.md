@@ -116,6 +116,10 @@ This is a major change and is not backward compatible.
 
 **Performance**
 
+- **support dynamic imports**:
+  The package can now be imported with a minimal set of base functionality, 
+  while the greater part of templates can be dynamically loaded.
+
 - **No underscore.js**:
   Underscore dependency was removed.
 

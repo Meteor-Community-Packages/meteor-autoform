@@ -1,9 +1,14 @@
-![Test suite](https://github.com/Meteor-Community-Packages/meteor-autoform/workflows/Test%20suite/badge.svg)
-
 AutoForm
 =========================
 
 AutoForm is a Meteor package that adds UI components and helpers to easily create basic forms with automatic insert and update events, and automatic reactive validation. Versions 6+ of this package require that you separately install the [simpl-schema](https://github.com/aldeed/node-simple-schema) NPM package. Prior versions require and automatically install the [simple-schema](https://github.com/aldeed/meteor-simple-schema) Meteor package. You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you have to add to your app yourself.
+
+![Test suite](https://github.com/Meteor-Community-Packages/meteor-autoform/workflows/Test%20suite/badge.svg)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+![LGTM Grade](https://img.shields.io/lgtm/grade/javascript/github/Meteor-Community-Packages/meteor-autoform)
+![GitHub](https://img.shields.io/github/license/Meteor-Community-Packages/meteor-autoform)
+
 
 ## NOTE: AutoForm 7.0
 
@@ -133,6 +138,51 @@ The following themes are available and tested to work with v7:
 
 Please also consider, that `twbs:bootstrap` is depending on an outdated (and potential insecure!) Bootstrap version.
 Better: Use the latest Bootstrap 3.x or 4.x from NPM in favour.
+
+**Installation troubleshooting:** If you update to 7.0.0 you will likely
+encounter errors from your extension packages like
+
+```bash
+While selecting package versions:
+error: Conflict: Constraint aldeed:autoform@6.3.0 is not satisfied by aldeed:autoform 7.0.0.
+Constraints on package "aldeed:autoform":
+* aldeed:autoform@=7.0.0 <- top level
+* aldeed:autoform@6.3.0 <- someone:packagename x.y.z
+```
+
+You can easily circumvent this issue by editing the package entry in `.meteor/packages`
+from `aldeed:autoform` to `aldeed:autoform@7.0.0!` (note the exclamation mark).
+
+This is because many extensions will not have the `7.0.0` reference in their
+`package.js` file, yet. However, this major version is intended to not break 
+compatibility with extensions, that worked with `6.x`. If you encounter any
+runtime issues with extensions, please open an issue.
+
+### Import using dynamic imports
+
+This package supports `dynamic-import`, which helps to reduce initial bundle
+size. In order to enable dynamic imports you need to add an **environment
+variable** on startup of your Meteor app:
+
+```bash
+$ AUTOFORM_DYNAMIC_IMPORTS="1" meteor
+```
+
+Note, that if you have already added autoform before defining the environment 
+flag, you need to remove the package via `meteor remove aldeed:autoform`
+and then add it again in order to make the changes take effect.
+
+In your application code you can then initialize the AutoForm templates via
+
+```bash
+AutoForm.initialize()
+  .then(() => {
+    // ... on init success code, for example set a ReactiveVar to true
+  ))
+  .catch(e => {
+    // ... on error code
+  })
+```
 
 ### Community Add-On Packages
 
@@ -1696,7 +1746,8 @@ no errors, make sure the button's type is `submit`.
 ## Contributing
 
 MCP welcomes any form on contribution. If you are interested, please read more
-about it in the [contributing guide](CONTRIBUTING.md).
+about it in the [contributing guide](CONTRIBUTING.md) and also consider the
+[MCP Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ## Testing
 
@@ -1707,16 +1758,21 @@ This makes local tests much easier and also allows us to run tests in the CI.
 In Order to execute local tests, there is a **local bare Meteor project 
 required**. However, don't worry, because it can easily be created and 
 executed via the following lines:
-  
+
 ```bash
 $ meteor create --bare testdummy # testdummy is already in the .gitignore
-$ cd testdummy
-$ meteor npm install --save-dev puppeteer simpl-schema chai sinon
+$ cd testdummy && meteor npm install --save-dev puppeteer simpl-schema chai sinon
 $ METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_WATCH=1 TEST_SERVER=0 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../
 ```
 
-**Publishing note:** If you publish the package to atmosphere, make sure you
+**Publishing note** 
+
+If you publish the package to atmosphere, make sure you
 remove the test project or move it outside of the package root.
+
+**Testing with coverage**
+
+
 
 <!--
 The following is uncommented, because the opencollective page https://opencollective.com/autoform is not reachable anymore.
