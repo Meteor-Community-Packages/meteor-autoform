@@ -13,11 +13,11 @@ Template.afFieldInput.onRendered(() => {
 });
 
 export function afFieldInputContext() {
-  const c = AutoForm.Utility.getComponentContext(this, "afFieldInput");
+  const ctx = AutoForm.Utility.getComponentContext(this, "afFieldInput");
   const form = AutoForm.getCurrentDataForForm();
   const formId = form.id;
-  const ss = AutoForm.getFormSchema();
-  let defs = c.defs;
+  const formSchema = AutoForm.getFormSchema();
+  let defs = ctx.defs;
   const instance = Template.instance();
 
   // Get schema default value.
@@ -26,7 +26,7 @@ export function afFieldInputContext() {
 
   // Adjust for array fields if necessary
   if (defs.type === Array) {
-    defs = AutoForm.Utility.getFieldDefinition(ss, `${c.atts.name}.$`);
+    defs = AutoForm.Utility.getFieldDefinition(formSchema, `${ctx.atts.name}.$`);
   }
 
   // Determine what `type` attribute should be if not set
@@ -41,26 +41,26 @@ export function afFieldInputContext() {
 
   // Get input value
   const value = getInputValue(
-    c.atts,
-    c.atts.value,
+    ctx.atts,
+    ctx.atts.value,
     mDoc,
     schemaDefaultValue,
-    c.atts.defaultValue,
+    ctx.atts.defaultValue,
     componentDef,
   );
 
   // Build input data context
   const iData = getInputData(
     defs,
-    c.atts,
+    ctx.atts,
     value,
-    ss.label(c.atts.name),
+    formSchema.label(ctx.atts.name),
     form.type
   );
 
   // These are needed for onRendered
 
-  instance.afFieldName = c.atts.name;
+  instance.afFieldName = ctx.atts.name;
   instance.afFieldValue = value;
 
   // Adjust and return context

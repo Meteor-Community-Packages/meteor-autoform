@@ -6,17 +6,17 @@ Template.afQuickField.helpers({
     return Object.keys(context).length > 0;
   },
   isGroup: function afQuickFieldIsGroup() {
-    const c = AutoForm.Utility.getComponentContext(this, "afQuickField");
+    const ctx = AutoForm.Utility.getComponentContext(this, "afQuickField");
     // Render a group of fields if we expect an Object and we don"t have options
     // and we have not overridden the type
-    const isSubschema = typeof c.defs.type === "object" && c.defs.type._schema;
-    return ((c.defs.type === Object || isSubschema) && !c.atts.options && !c.atts.type);
+    const isSubschema = typeof ctx.defs.type === "object" && ctx.defs.type._schema;
+    return ((ctx.defs.type === Object || isSubschema) && !ctx.atts.options && !ctx.atts.type);
   },
   isFieldArray: function afQuickFieldIsFieldArray() {
-    const c = AutoForm.Utility.getComponentContext(this, "afQuickField");
+    const ctx = AutoForm.Utility.getComponentContext(this, "afQuickField");
     // Render an array of fields if we expect an Array and we don"t have options
     // and we have not overridden the type
-    return (c.defs.type === Array && !c.atts.options && !c.atts.type);
+    return (ctx.defs.type === Array && !ctx.atts.options && !ctx.atts.type);
   },
   groupAtts: function afQuickFieldGroupAtts() {
     // afQuickField passes `fields` and `omitFields` on to `afObjectField`
@@ -25,8 +25,8 @@ Template.afQuickField.helpers({
     return rest;
   },
   isHiddenInput: function afQuickFieldIsHiddenInput() {
-    const c = AutoForm.Utility.getComponentContext(this, "afQuickField");
-    const inputType = c.atts.type;
+    const ctx = AutoForm.Utility.getComponentContext(this, "afQuickField");
+    const inputType = ctx.atts.type;
     if (inputType) {
       const componentDef = AutoForm._inputTypeDefinitions[inputType];
       if (!componentDef) {

@@ -2,16 +2,16 @@
 
 Template.afEachArrayItem.helpers({
   innerContext: function afEachArrayItemContext() {
-    const c = AutoForm.Utility.getComponentContext(this, "afEachArrayItem");
+    const ctx = AutoForm.Utility.getComponentContext(this, "afEachArrayItem");
     const formId = AutoForm.getFormId();
-    const ss = AutoForm.getFormSchema();
-    const name = c.atts.name;
+    const formSchema = AutoForm.getFormSchema();
+    const name = ctx.atts.name;
 
     let docCount = AutoForm.getArrayCountFromDocForField(formId, name);
     if (docCount === undefined) {
-      docCount = c.atts.initialCount;
+      docCount = ctx.atts.initialCount;
     }
-    arrayTracker.initField(formId, name, ss, docCount, c.atts.minCount, c.atts.maxCount);
+    arrayTracker.initField(formId, name, formSchema, docCount, ctx.atts.minCount, ctx.atts.maxCount);
     return arrayTracker.getField(formId, name);
   }
 });

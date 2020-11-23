@@ -6,10 +6,10 @@ Template.afFormGroup.helpers({
     return AutoForm.getTemplateName('afFormGroup', this.template, this.name);
   },
   innerContext: function afFormGroupContext() {
-    const c = AutoForm.Utility.getComponentContext(this, 'afFormGroup');
-    const afFormGroupAtts = formGroupAtts(c.atts);
-    const afFieldLabelAtts = formGroupLabelAtts(c.atts);
-    const afFieldInputAtts = formGroupInputAtts(c.atts);
+    const ctx = AutoForm.Utility.getComponentContext(this, 'afFormGroup');
+    const afFormGroupAtts = formGroupAtts(ctx.atts);
+    const afFieldLabelAtts = formGroupLabelAtts(ctx.atts);
+    const afFieldInputAtts = formGroupInputAtts(ctx.atts);
 
     // Construct an `id` attribute for the input, optionally
     // adding a user-provided prefix. Since id attribute is
@@ -21,14 +21,14 @@ Template.afFormGroup.helpers({
 
     let id = undefined
 
-    if (typeof c.atts.id !== 'undefined') {
-      id = c.atts.id;
+    if (typeof ctx.atts.id !== 'undefined') {
+      id = ctx.atts.id;
     } else {
-      const name = c.atts['name'];
+      const name = ctx.atts['name'];
       id = instance.fieldIds[name];
       if (!id) {
         id = Random.id();
-        const idPrefix = c.atts['id-prefix'];
+        const idPrefix = ctx.atts['id-prefix'];
         if (idPrefix && idPrefix.length > 0) {
           id = `${idPrefix}-${id}`;
         }
@@ -42,17 +42,17 @@ Template.afFormGroup.helpers({
     afFieldLabelAtts['for'] = afFieldInputAtts.id = id;
 
     // Get the field's schema definition
-    const fieldSchema = AutoForm.getSchemaForField(c.atts.name);
+    const fieldSchema = AutoForm.getSchemaForField(ctx.atts.name);
 
     return {
-      skipLabel: c.atts.label === false,
-      afFormGroupClass: c.atts['formgroup-class'],
+      skipLabel: ctx.atts.label === false,
+      afFormGroupClass: ctx.atts['formgroup-class'],
       afFormGroupAtts: afFormGroupAtts,
       afFieldLabelAtts: afFieldLabelAtts,
       afFieldInputAtts: afFieldInputAtts,
-      name: c.atts.name,
+      name: ctx.atts.name,
       required: fieldSchema ? !fieldSchema.optional : false,
-      labelText: typeof c.atts.label === 'string' ? c.atts.label : null
+      labelText: typeof ctx.atts.label === 'string' ? ctx.atts.label : null
     };
   }
 });
