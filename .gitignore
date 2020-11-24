@@ -1,13 +1,10 @@
 .DS_Store
 .build*
 .npm*
-.meteor*
 smart.lock
 nbproject*
 /packages/
 .idea
 .vscode
 node_modules/
-package.json
-package-lock.json
 packages/

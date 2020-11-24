@@ -1,0 +1,49 @@
+{
+  "name": "testapp",
+  "private": true,
+  "scripts": {
+    "start": "meteor run",
+    "setup": "mkdir -p packages && ln -sfn ../../ ./packages/meteor-autoform",
+    "lint": "npm run setup && standardx -v ./packages/meteor-autoform/ | snazzy",
+    "lint:fix": "npm run setup && standardx --fix ./packages/meteor-autoform/ | snazzy",
+    "test": "METEOR_PACKAGE_DIRS='../' TEST_BROWSER_DRIVER=puppeteer TEST_SERVER=0 meteor test-packages --once --raw-logs --driver-package meteortesting:mocha ../",
+    "test:watch": "METEOR_PACKAGE_DIRS='../' TEST_BROWSER_DRIVER=puppeteer TEST_SERVER=0 TEST_WATCH=1 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.11.2",
+    "meteor-node-stubs": "^1.0.1",
+    "puppeteer": "^5.5.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.7",
+    "@babel/eslint-parser": "^7.12.1",
+    "chai": "^4.2.0",
+    "eslint-config-standard": "^16.0.2",
+    "simpl-schema": "^1.10.2",
+    "sinon": "^9.2.1",
+    "standardx": "^7.0.0"
+  },
+  "babel": {},
+  "standardx": {
+    "globals": [
+      "AutoForm",
+      "arrayTracker",
+      "globalDefaultTemplate",
+      "defaultTypeTemplates",
+      "deps"
+    ],
+    "ignore": [
+      "**/testdummy/"
+    ]
+  },
+  "eslintConfig": {
+    "parser": "@babel/eslint-parser",
+    "parserOptions": {
+      "sourceType": "module",
+      "allowImportExportEverywhere": false
+    },
+    "rules": {
+      "brace-style": ["error", "stroustrup", { "allowSingleLine": true }]
+    }
+  }
+}
