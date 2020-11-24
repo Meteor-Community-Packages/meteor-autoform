@@ -3,16 +3,16 @@
 AutoForm.addFormType('readonly', {
   onSubmit: function () {
     // Prevent browser form submission
-    this.event.preventDefault();
+    this.event.preventDefault()
     // Nothing else
   },
   validateForm: function () {
     // Always valid
-    return true;
+    return true
   },
   adjustInputContext: function (ctx) {
-    ctx.atts.readonly = "";
-    return ctx;
+    ctx.atts.readonly = ''
+    return ctx
   },
   hideArrayItemButtons: true
-});
+})

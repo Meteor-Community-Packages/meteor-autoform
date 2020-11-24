@@ -1,5 +1,5 @@
-const falsyValues = [null, undefined, '', false];
-const byFalsyValues = f => !falsyValues.includes(f);
+const falsyValues = [null, undefined, '', false]
+const byFalsyValues = f => !falsyValues.includes(f)
 
 /**
  * Takes a schema object and returns a sorted array of field group names for it
@@ -7,14 +7,14 @@ const byFalsyValues = f => !falsyValues.includes(f);
  * @param   {Object}   schemaObj Like from mySimpleSchema.schema()
  * @returns {String[]} Array of field group names
  */
-export const getSortedFieldGroupNames = function getSortedFieldGroupNames(schemaObj) {
+export const getSortedFieldGroupNames = function getSortedFieldGroupNames (schemaObj) {
   const names = Object
     .values(schemaObj)
     .map(field => field.autoform && field.autoform.group)
-    .filter(byFalsyValues);
+    .filter(byFalsyValues)
 
   // Remove duplicate names and sort
-  return [...new Set(names)].sort();
+  return [...new Set(names)].sort()
 }
 
 /**
@@ -24,16 +24,16 @@ export const getSortedFieldGroupNames = function getSortedFieldGroupNames(schema
  * @param   {Object}   schemaObj Like from mySimpleSchema.schema()
  * @returns {String[]} Array of field names (schema keys)
  */
-export const getFieldsForGroup = function getFieldsForGroup(groupName, schemaObj) {
+export const getFieldsForGroup = function getFieldsForGroup (groupName, schemaObj) {
   return Object
     .entries(schemaObj)
     .map(([fieldName, field]) => {
       return (fieldName.slice(-2) !== '.$') &&
         field.autoform &&
         field.autoform.group === groupName &&
-        fieldName;
+        fieldName
     })
-    .filter(byFalsyValues);
+    .filter(byFalsyValues)
 }
 
 /**
@@ -42,7 +42,7 @@ export const getFieldsForGroup = function getFieldsForGroup(groupName, schemaObj
  * @param   {Object}   schemaObj Like from mySimpleSchema.schema()
  * @returns {String[]} Array of field names (schema keys)
  */
-export const getFieldsWithNoGroup = function getFieldsWithNoGroup(schemaObj) {
+export const getFieldsWithNoGroup = function getFieldsWithNoGroup (schemaObj) {
   return Object
     .entries(schemaObj)
     .map(function ([fieldName, field]) {
@@ -50,5 +50,5 @@ export const getFieldsWithNoGroup = function getFieldsWithNoGroup(schemaObj) {
         (!field.autoform || !field.autoform.group) &&
         fieldName
     })
-    .filter(byFalsyValues);
+    .filter(byFalsyValues)
 }

@@ -1,3 +1,3 @@
-AutoForm.addInputType("color", {
-  template: "afInputColor"
-});
+AutoForm.addInputType('color', {
+  template: 'afInputColor'
+})

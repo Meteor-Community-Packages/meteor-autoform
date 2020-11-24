@@ -1,13 +1,13 @@
-import { Template } from "meteor/templating";
-import { isFunction } from "./common";
+import { Template } from 'meteor/templating'
+import { isFunction } from './common'
 
 /* global arrayTracker, AutoForm */
 
-function parseOptions(options, helperName, skipSchema) {
-  const hash = (options || {}).hash || {};
+function parseOptions (options, helperName, skipSchema) {
+  const hash = (options || {}).hash || {}
   // Find the form's schema
-  const ss = skipSchema === true ? {} : AutoForm.getFormSchema();
-  return { ...hash, ss };
+  const ss = skipSchema === true ? {} : AutoForm.getFormSchema()
+  return { ...hash, ss }
 }
 
 /*
@@ -20,49 +20,49 @@ function parseOptions(options, helperName, skipSchema) {
  * @param {Object} options
  * @return {*}
  */
-export const autoFormFieldMessage = function autoFormFieldMessage(options) {
-  options = parseOptions(options, "afFieldMessage");
-  const formId = AutoForm.getFormId();
+export const autoFormFieldMessage = function autoFormFieldMessage (options) {
+  options = parseOptions(options, 'afFieldMessage')
+  const formId = AutoForm.getFormId()
 
-  return options.ss.namedContext(formId).keyErrorMessage(options.name);
-};
+  return options.ss.namedContext(formId).keyErrorMessage(options.name)
+}
 
 /*
  * afFieldMessage
  */
-Template.registerHelper("afFieldMessage", autoFormFieldMessage);
+Template.registerHelper('afFieldMessage', autoFormFieldMessage)
 
 /**
  * @name afFieldIsInvalid
  * @param {Object} options
  * @return {*}
  */
-export const autoFormFieldIsInvalid = function autoFormFieldIsInvalid(options) {
-  options = parseOptions(options, "afFieldIsInvalid");
-  const formId = AutoForm.getFormId();
+export const autoFormFieldIsInvalid = function autoFormFieldIsInvalid (options) {
+  options = parseOptions(options, 'afFieldIsInvalid')
+  const formId = AutoForm.getFormId()
 
-  return options.ss.namedContext(formId).keyIsInvalid(options.name);
-};
+  return options.ss.namedContext(formId).keyIsInvalid(options.name)
+}
 
 /*
  * afFieldIsInvalid
  */
-Template.registerHelper("afFieldIsInvalid", autoFormFieldIsInvalid);
+Template.registerHelper('afFieldIsInvalid', autoFormFieldIsInvalid)
 
 /**
  * @name afArrayFieldHasMoreThanMinimum
  * @param {Object} options
  * @return {boolean}
  */
-export const autoFormArrayFieldHasMoreThanMinimum = function autoFormArrayFieldHasMoreThanMinimum(
+export const autoFormArrayFieldHasMoreThanMinimum = function autoFormArrayFieldHasMoreThanMinimum (
   options
 ) {
-  options = parseOptions(options, "afArrayFieldHasMoreThanMinimum");
-  const form = AutoForm.getCurrentDataPlusExtrasForForm();
+  options = parseOptions(options, 'afArrayFieldHasMoreThanMinimum')
+  const form = AutoForm.getCurrentDataPlusExtrasForForm()
 
   // Registered form types can disable adding/removing array items
   if (form.formTypeDef.hideArrayItemButtons) {
-    return false;
+    return false
   }
 
   const range = arrayTracker.getMinMax(
@@ -70,33 +70,33 @@ export const autoFormArrayFieldHasMoreThanMinimum = function autoFormArrayFieldH
     options.name,
     options.minCount,
     options.maxCount
-  );
-  const visibleCount = arrayTracker.getVisibleCount(form.id, options.name);
-  return visibleCount > range.minCount;
-};
+  )
+  const visibleCount = arrayTracker.getVisibleCount(form.id, options.name)
+  return visibleCount > range.minCount
+}
 
 /*
  * afArrayFieldHasMoreThanMinimum
  */
 Template.registerHelper(
-  "afArrayFieldHasMoreThanMinimum",
+  'afArrayFieldHasMoreThanMinimum',
   autoFormArrayFieldHasMoreThanMinimum
-);
+)
 
 /**
  * @name afArrayFieldHasLessThanMaximum
  * @param {Object} options
  * @return {boolean}
  */
-export const autoFormArrayFieldHasLessThanMaximum = function autoFormArrayFieldHasLessThanMaximum(
+export const autoFormArrayFieldHasLessThanMaximum = function autoFormArrayFieldHasLessThanMaximum (
   options
 ) {
-  options = parseOptions(options, "afArrayFieldHasLessThanMaximum");
-  const form = AutoForm.getCurrentDataPlusExtrasForForm();
+  options = parseOptions(options, 'afArrayFieldHasLessThanMaximum')
+  const form = AutoForm.getCurrentDataPlusExtrasForForm()
 
   // Registered form types can disable adding/removing array items
   if (form.formTypeDef.hideArrayItemButtons) {
-    return false;
+    return false
   }
 
   const range = arrayTracker.getMinMax(
@@ -104,169 +104,169 @@ export const autoFormArrayFieldHasLessThanMaximum = function autoFormArrayFieldH
     options.name,
     options.minCount,
     options.maxCount
-  );
-  const visibleCount = arrayTracker.getVisibleCount(form.id, options.name);
-  return visibleCount < range.maxCount;
-};
+  )
+  const visibleCount = arrayTracker.getVisibleCount(form.id, options.name)
+  return visibleCount < range.maxCount
+}
 
 /*
  * afArrayFieldHasLessThanMaximum
  */
 Template.registerHelper(
-  "afArrayFieldHasLessThanMaximum",
+  'afArrayFieldHasLessThanMaximum',
   autoFormArrayFieldHasLessThanMaximum
-);
+)
 
 /**
  * @name autoFormFieldValueIs
  * @param {Object} options
  * @return {boolean}
  */
-export const autoFormFieldValueIs = function autoFormFieldValueIs(options) {
-  options = parseOptions(options, "afFieldValueIs", true);
+export const autoFormFieldValueIs = function autoFormFieldValueIs (options) {
+  options = parseOptions(options, 'afFieldValueIs', true)
 
-  const currentValue = AutoForm.getFieldValue(options.name, options.formId);
-  return currentValue === options.value;
-};
+  const currentValue = AutoForm.getFieldValue(options.name, options.formId)
+  return currentValue === options.value
+}
 /*
  * afFieldValueIs
  */
-Template.registerHelper("afFieldValueIs", autoFormFieldValueIs);
+Template.registerHelper('afFieldValueIs', autoFormFieldValueIs)
 
 /**
  * @name autoFormFieldValue
  * @param {Object} options
  * @return {Any}
  */
-export const autoFormFieldValue = function autoFormFieldValue(options) {
-  options = parseOptions(options, "afFieldValue", true);
+export const autoFormFieldValue = function autoFormFieldValue (options) {
+  options = parseOptions(options, 'afFieldValue', true)
 
   return AutoForm.getFieldValue(
     options.name,
     options.formId || AutoForm.getFormId()
-  );
-};
+  )
+}
 
 /*
  * afFieldValue
  */
-Template.registerHelper("afFieldValue", autoFormFieldValue);
+Template.registerHelper('afFieldValue', autoFormFieldValue)
 
 /**
  * @name afArrayFieldIsFirstVisible
  * @return {*}
  */
-export const autoFormArrayFieldIsFirstVisible = function autoFormArrayFieldIsFirstVisible() {
-  const context = this;
+export const autoFormArrayFieldIsFirstVisible = function autoFormArrayFieldIsFirstVisible () {
+  const context = this
   return arrayTracker.isFirstFieldlVisible(
     context.formId,
     context.arrayFieldName,
     context.index
-  );
-};
+  )
+}
 /*
  * afArrayFieldIsFirstVisible
  */
 Template.registerHelper(
-  "afArrayFieldIsFirstVisible",
+  'afArrayFieldIsFirstVisible',
   autoFormArrayFieldIsFirstVisible
-);
+)
 
 /**
  * @name afArrayFieldIsLastVisible
  * @return {*}
  */
-export const autoFormArrayFieldIsLastVisible = function autoFormArrayFieldIsLastVisible() {
-  const context = this;
+export const autoFormArrayFieldIsLastVisible = function autoFormArrayFieldIsLastVisible () {
+  const context = this
   return arrayTracker.isLastFieldlVisible(
     context.formId,
     context.arrayFieldName,
     context.index
-  );
-};
+  )
+}
 /*
  * afArrayFieldIsLastVisible
  */
 Template.registerHelper(
-  "afArrayFieldIsLastVisible",
+  'afArrayFieldIsLastVisible',
   autoFormArrayFieldIsLastVisible
-);
+)
 
-export const autoFormFieldValueContains = function autoFormFieldValueContains(
+export const autoFormFieldValueContains = function autoFormFieldValueContains (
   options
 ) {
-  options = parseOptions(options, "afFieldValueContains", true);
+  options = parseOptions(options, 'afFieldValueContains', true)
 
-  const currentValue = AutoForm.getFieldValue(options.name, options.formId);
-  if (!Array.isArray(currentValue)) return false;
+  const currentValue = AutoForm.getFieldValue(options.name, options.formId)
+  if (!Array.isArray(currentValue)) return false
   return (
     currentValue.includes(options.value) ||
     (!!options.values && // for consistent return value
-      options.values.split(",").filter((item) => currentValue.includes(item)))
-  );
-};
+      options.values.split(',').filter((item) => currentValue.includes(item)))
+  )
+}
 /*
  * afFieldValueContains
  */
-Template.registerHelper("afFieldValueContains", autoFormFieldValueContains);
+Template.registerHelper('afFieldValueContains', autoFormFieldValueContains)
 
 /**
  * @name afFieldLabelText
  * @param {Object} options
  * @return {Object}
  */
-export const autoFormFieldLabelText = function autoFormFieldLabelText(options) {
-  options = parseOptions(options, "afFieldLabelText", true);
-  return AutoForm.getLabelForField(options.name);
-};
+export const autoFormFieldLabelText = function autoFormFieldLabelText (options) {
+  options = parseOptions(options, 'afFieldLabelText', true)
+  return AutoForm.getLabelForField(options.name)
+}
 /*
  * afFieldLabelText
  */
-Template.registerHelper("afFieldLabelText", autoFormFieldLabelText);
+Template.registerHelper('afFieldLabelText', autoFormFieldLabelText)
 
 /**
  * @name afFieldNames
  * @param {Object} options
  * @return {{name: *}[]}
  */
-export const autoFormFieldNames = function autoFormFieldNames(options) {
+export const autoFormFieldNames = function autoFormFieldNames (options) {
   // TODO move to ES6 after we have tested most of this function's branches
-  options = parseOptions(options, "afFieldNames");
-  const ss = options.ss;
-  const name = options.name;
-  const form = AutoForm.getCurrentDataForForm();
+  options = parseOptions(options, 'afFieldNames')
+  const ss = options.ss
+  const name = options.name
+  const form = AutoForm.getCurrentDataForForm()
   let namePlusDot,
     genericName,
-    genericNamePlusDot;
+    genericNamePlusDot
 
   if (name) {
-    namePlusDot = `${name}.`;
-    genericName = AutoForm.Utility.makeKeyGeneric(name);
-    genericNamePlusDot = `${genericName}.`;
+    namePlusDot = `${name}.`
+    genericName = AutoForm.Utility.makeKeyGeneric(name)
+    genericNamePlusDot = `${genericName}.`
   }
 
   // Get the list of fields we want included
-  let fieldList = options.fields,
-    usedAncestorFieldList = false;
+  let fieldList = options.fields
+  let usedAncestorFieldList = false
   if (fieldList) {
     fieldList = AutoForm.Utility.stringToArray(
       fieldList,
-      "AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields"
-    );
+      'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields'
+    )
   }
 
-  let ancestorFieldList = AutoForm.findAttribute("fields");
+  let ancestorFieldList = AutoForm.findAttribute('fields')
   if (ancestorFieldList) {
     ancestorFieldList = AutoForm.Utility.stringToArray(
       ancestorFieldList,
-      "AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields"
-    );
+      'AutoForm: fields attribute must be an array or a string containing a comma-delimited list of fields'
+    )
 
     // Use the ancestor field list as backup, unless there is
     // a name and that name is listed in the ancestor field list
     if (!fieldList) {
-      fieldList = ancestorFieldList;
-      usedAncestorFieldList = true;
+      fieldList = ancestorFieldList
+      usedAncestorFieldList = true
     }
   }
 
@@ -279,23 +279,23 @@ export const autoFormFieldNames = function autoFormFieldNames(options) {
       if (genericName !== name) {
         fieldList = fieldList.map(function (field) {
           if (field.indexOf(genericNamePlusDot) === 0) {
-            const fieldName = field.slice(genericNamePlusDot.length);
-            return `${namePlusDot}${fieldName}`;
+            const fieldName = field.slice(genericNamePlusDot.length)
+            return `${namePlusDot}${fieldName}`
           }
-          return field;
-        });
+          return field
+        })
       }
 
-      fieldList = fieldList.filter(function filterFieldsByName(field) {
-        return field.indexOf(namePlusDot) === 0;
-      });
+      fieldList = fieldList.filter(function filterFieldsByName (field) {
+        return field.indexOf(namePlusDot) === 0
+      })
     }
 
     // If top level fields, be sure to remove any with $ in them
     else {
-      fieldList = fieldList.filter(function filterArrayFields(field) {
-        return field.slice(-2) !== ".$" && field.indexOf(".$.") === -1;
-      });
+      fieldList = fieldList.filter(function filterArrayFields (field) {
+        return field.slice(-2) !== '.$' && field.indexOf('.$.') === -1
+      })
     }
 
     // First we filter out any fields that are subobjects where the
@@ -307,64 +307,64 @@ export const autoFormFieldNames = function autoFormFieldNames(options) {
     // we will use a single field for the city, with no afObjectField
     // template around it.
     fieldList = fieldList.filter(function (field) {
-      const lastDotPos = field.lastIndexOf(".");
+      const lastDotPos = field.lastIndexOf('.')
       if (lastDotPos === -1) {
-        return true; // keep
+        return true // keep
       }
 
-      let parentField = field.slice(0, lastDotPos);
-      if (parentField.slice(-2) === ".$") {
-        parentField = parentField.slice(0, -2);
+      let parentField = field.slice(0, lastDotPos)
+      if (parentField.slice(-2) === '.$') {
+        parentField = parentField.slice(0, -2)
       }
       return (
         !fieldList.includes(parentField) ||
         parentField === name ||
         parentField === genericName
-      );
-    });
+      )
+    })
   }
 
   if (!fieldList || (fieldList.length === 0 && usedAncestorFieldList)) {
     // Get list of field names that are descendants of this field's name.
     // If name/genericName is undefined, this will return top-level
     // schema keys.
-    fieldList = ss.objectKeys(genericName);
+    fieldList = ss.objectKeys(genericName)
 
     if (name) {
       // Tack child field name on to end of parent field name. This
       // ensures that we keep the desired array index for array items.
       fieldList = fieldList.map(function (field) {
-        return name + "." + field;
-      });
+        return name + '.' + field
+      })
     }
   }
 
   // If user wants to omit some fields, remove those from the array
-  let omitFields = options.omitFields || AutoForm.findAttribute("omitFields");
+  let omitFields = options.omitFields || AutoForm.findAttribute('omitFields')
   if (omitFields) {
     omitFields = AutoForm.Utility.stringToArray(
       omitFields,
-      "AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields"
-    );
-    fieldList = fieldList.filter((field) => !omitFields.includes(field));
+      'AutoForm: omitFields attribute must be an array or a string containing a comma-delimited list of fields'
+    )
+    fieldList = fieldList.filter((field) => !omitFields.includes(field))
     // If omitFields contains generic field names (with $) we omit those too
     fieldList = fieldList.filter(function (f) {
-      return !omitFields.includes(AutoForm.Utility.makeKeyGeneric(f));
-    });
+      return !omitFields.includes(AutoForm.Utility.makeKeyGeneric(f))
+    })
   }
 
   // Filter out fields we never want
-  fieldList = fieldList.filter(function shouldIncludeField(field) {
-    const fieldDefs = AutoForm.Utility.getFieldDefinition(ss, field);
+  fieldList = fieldList.filter(function shouldIncludeField (field) {
+    const fieldDefs = AutoForm.Utility.getFieldDefinition(ss, field)
 
     // Don't include fields that are not in the schema
     if (!fieldDefs) {
-      return false;
+      return false
     }
 
     // Don't include fields with autoform.omit=true
     if (fieldDefs.autoform && fieldDefs.autoform.omit === true) {
-      return false;
+      return false
     }
 
     if (
@@ -372,60 +372,60 @@ export const autoFormFieldNames = function autoFormFieldNames(options) {
       isFunction(fieldDefs.autoform.omit) &&
       fieldDefs.autoform.omit(field) === true
     ) {
-      return false;
+      return false
     }
 
     // Don't include fields with denyInsert=true when it's an insert form
-    if (fieldDefs.denyInsert && form.type === "insert") {
-      return false;
+    if (fieldDefs.denyInsert && form.type === 'insert') {
+      return false
     }
 
     // Don't include fields with denyUpdate=true when it's an update form
-    if (fieldDefs.denyUpdate && form.type === "update") {
-      return false;
+    if (fieldDefs.denyUpdate && form.type === 'update') {
+      return false
     }
 
-    return true;
-  });
+    return true
+  })
 
   // Ensure fields are not added more than once
-  fieldList = [...new Set(fieldList)];
+  fieldList = [...new Set(fieldList)]
 
   // We return it as an array of objects because that
   // works better with Blaze contexts
   fieldList = fieldList.map(function (name) {
-    return { name: name };
-  });
+    return { name: name }
+  })
 
-  return fieldList;
-};
+  return fieldList
+}
 /*
  * afFieldNames
  */
-Template.registerHelper("afFieldNames", autoFormFieldNames);
+Template.registerHelper('afFieldNames', autoFormFieldNames)
 
 /**
  * @name afSelectOptionAtts
  * @return {*}
  */
-export const afSelectOptionAtts = function afSelectOptionAtts() {
-  if (this.value === false) this.value = "false";
-  const atts = "value" in this ? { value: this.value } : {};
+export const afSelectOptionAtts = function afSelectOptionAtts () {
+  if (this.value === false) this.value = 'false'
+  const atts = 'value' in this ? { value: this.value } : {}
   if (this.selected) {
-    atts.selected = "";
+    atts.selected = ''
   }
   if (this.htmlAtts) {
-    Object.assign(atts, this.htmlAtts);
+    Object.assign(atts, this.htmlAtts)
   }
-  return atts;
-};
+  return atts
+}
 
 /*
  * afSelectOptionAtts
  */
-Template.registerHelper("afSelectOptionAtts", afSelectOptionAtts);
+Template.registerHelper('afSelectOptionAtts', afSelectOptionAtts)
 
 // Expects to be called with this.name available
-Template.registerHelper("afOptionsFromSchema", function afOptionsFromSchema() {
-  return AutoForm._getOptionsForField(this.name);
-});
+Template.registerHelper('afOptionsFromSchema', function afOptionsFromSchema () {
+  return AutoForm._getOptionsForField(this.name)
+})

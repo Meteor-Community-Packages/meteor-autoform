@@ -1,26 +1,28 @@
-import { Template } from 'meteor/templating';
-import { Blaze } from 'meteor/blaze';
-import { Tracker } from 'meteor/tracker';
+/* eslint-env mocha */
+import { Template } from 'meteor/templating'
+import { Blaze } from 'meteor/blaze'
+import { Tracker } from 'meteor/tracker'
 import sinon from 'sinon'
 
-const withDiv = function withDiv(callback) {
-  const el = document.createElement('div');
-  document.body.appendChild(el);
+const withDiv = function withDiv (callback) {
+  const el = document.createElement('div')
+  document.body.appendChild(el)
   try {
-    callback(el);
-  } finally {
-    document.body.removeChild(el);
+    callback(el)
   }
-};
+  finally {
+    document.body.removeChild(el)
+  }
+}
 
-export const withRenderedTemplate = function withRenderedTemplate(template, data, callback) {
+export const withRenderedTemplate = function withRenderedTemplate (template, data, callback) {
   withDiv((el) => {
-    const ourTemplate = (typeof template === 'string') ? Template[template] : template;
-    Blaze.renderWithData(ourTemplate, data, el);
-    Tracker.flush();
-    callback(el);
-  });
-};
+    const ourTemplate = (typeof template === 'string') ? Template[template] : template
+    Blaze.renderWithData(ourTemplate, data, el)
+    Tracker.flush()
+    callback(el)
+  })
+}
 
 /*
  * Stubbing, the easy way
@@ -35,7 +37,8 @@ export const stub = (target, name, handler) => {
   const stubbedTarget = sinon.stub(target, name)
   if (typeof handler === 'function') {
     stubbedTarget.callsFake(handler)
-  } else {
+  }
+  else {
     stubbedTarget.value(handler)
   }
   stubs.set(stubbedTarget, name)
@@ -63,6 +66,8 @@ export const restoreAll = () => {
 
 export class UnexpectedCallError extends Error {
   constructor () {
-    super("Expected not to be called")
+    super('Expected not to be called')
   }
 }
+
+export const getVoid = () => (void 0) // eslint-disable-line no-void

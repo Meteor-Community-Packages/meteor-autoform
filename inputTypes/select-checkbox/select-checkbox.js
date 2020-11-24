@@ -1,20 +1,23 @@
-AutoForm.addInputType("select-checkbox", {
-  template: "afCheckboxGroup",
+/* global $ */
+import { Template } from 'meteor/templating'
+
+AutoForm.addInputType('select-checkbox', {
+  template: 'afCheckboxGroup',
   valueIsArray: true,
   valueOut: function () {
-    var val = [];
+    const val = []
     this.find('input[type=checkbox]').each(function () {
-      if ($(this).is(":checked")) {
-        val.push($(this).val());
+      if ($(this).is(':checked')) {
+        val.push($(this).val())
       }
-    });
-    return val;
+    })
+    return val
   },
   contextAdjust: function (context) {
-    var itemAtts = { ...context.atts };
+    const itemAtts = { ...context.atts }
 
     // build items list
-    context.items = [];
+    context.items = []
 
     // Add all defined options
     context.selectOptions.forEach(function (opt) {
@@ -28,27 +31,27 @@ AutoForm.addInputType("select-checkbox", {
         _id: opt.value,
         selected: (context.value.includes(opt.value)),
         atts: itemAtts
-      });
-    });
+      })
+    })
 
-    return context;
+    return context
   }
-});
+})
 
 Template.afCheckboxGroup.helpers({
-  atts: function selectedAttsAdjust() {
-    var atts = { ...this.atts };
+  atts: function selectedAttsAdjust () {
+    const atts = { ...this.atts }
     if (this.selected) {
-      atts.checked = "";
+      atts.checked = ''
     }
     // remove data-schema-key attribute because we put it
     // on the entire group
-    delete atts["data-schema-key"];
-    return atts;
+    delete atts['data-schema-key']
+    return atts
   },
-  dsk: function dsk() {
+  dsk: function dsk () {
     return {
-      "data-schema-key": this.atts["data-schema-key"]
+      'data-schema-key': this.atts['data-schema-key']
     }
   }
-});
+})

@@ -1,15 +1,15 @@
-AutoForm.addInputType("select-multiple", {
-  template: "afSelectMultiple",
+AutoForm.addInputType('select-multiple', {
+  template: 'afSelectMultiple',
   valueIsArray: true,
   valueOut: function () {
-    return AutoForm.Utility.getSelectValues(this[0]);
+    return AutoForm.Utility.getSelectValues(this[0])
   },
   contextAdjust: function (context) {
     // build items list
     context.items = context.selectOptions.map(function (opt) {
       if (opt.optgroup) {
-        const { label, value, ...htmlAtts } = subOpt
-        var subItems = opt.options.map(function (subOpt) {
+        const subItems = opt.options.map(function (subOpt) {
+          const { label, value, ...htmlAtts } = subOpt
           return {
             name: context.name,
             label,
@@ -22,13 +22,14 @@ AutoForm.addInputType("select-multiple", {
             selected: context.value.includes(subOpt.value),
             disabled: !!opt.disabled,
             atts: context.atts
-          };
-        });
+          }
+        })
         return {
           optgroup: opt.optgroup,
           items: subItems
-        };
-      } else {
+        }
+      }
+      else {
         const { label, value, ...htmlAtts } = opt
         return {
           name: context.name,
@@ -42,10 +43,10 @@ AutoForm.addInputType("select-multiple", {
           selected: context.value.includes(opt.value),
           disabled: !!opt.disabled,
           atts: context.atts
-        };
+        }
       }
-    });
+    })
 
-    return context;
+    return context
   }
-});
+})

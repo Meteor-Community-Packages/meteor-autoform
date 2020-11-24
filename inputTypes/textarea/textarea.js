@@ -1,51 +1,51 @@
-AutoForm.addInputType("textarea", {
-  template: "afTextarea",
+AutoForm.addInputType('textarea', {
+  template: 'afTextarea',
   valueConverters: {
-    "stringArray": function (val) {
-      if (typeof val === "string" && val.length > 0) {
-        return linesToArray(val);
+    stringArray: function (val) {
+      if (typeof val === 'string' && val.length > 0) {
+        return linesToArray(val)
       }
-      return val;
+      return val
     },
-    "number": AutoForm.valueConverters.stringToNumber,
-    "numberArray": AutoForm.valueConverters.stringToNumberArray,
-    "boolean": AutoForm.valueConverters.stringToBoolean,
-    "booleanArray": function (val) {
-      if (typeof val === "string" && val.length > 0) {
-        var arr = linesToArray(val);
+    number: AutoForm.valueConverters.stringToNumber,
+    numberArray: AutoForm.valueConverters.stringToNumberArray,
+    boolean: AutoForm.valueConverters.stringToBoolean,
+    booleanArray: function (val) {
+      if (typeof val === 'string' && val.length > 0) {
+        const arr = linesToArray(val)
         return arr.map(function (item) {
-          return AutoForm.valueConverters.stringToBoolean(item);
-        });
+          return AutoForm.valueConverters.stringToBoolean(item)
+        })
       }
-      return val;
+      return val
     },
-    "date": AutoForm.valueConverters.stringToDate,
-    "dateArray": function (val) {
-      if (typeof val === "string" && val.length > 0) {
-        var arr = linesToArray(val);
+    date: AutoForm.valueConverters.stringToDate,
+    dateArray: function (val) {
+      if (typeof val === 'string' && val.length > 0) {
+        const arr = linesToArray(val)
         return arr.map(function (item) {
-          return AutoForm.valueConverters.stringToDate(item);
-        });
+          return AutoForm.valueConverters.stringToDate(item)
+        })
       }
-      return val;
+      return val
     }
   },
   contextAdjust: function (context) {
-    if (typeof context.atts.maxlength === "undefined" && typeof context.max === "number") {
-      context.atts.maxlength = context.max;
+    if (typeof context.atts.maxlength === 'undefined' && typeof context.max === 'number') {
+      context.atts.maxlength = context.max
     }
-    return context;
+    return context
   }
-});
+})
 
-function linesToArray(text) {
-  text = text.split('\n');
-  var lines = [];
+function linesToArray (text) {
+  text = text.split('\n')
+  const lines = []
   text.forEach(function (line) {
-    line = $.trim(line);
+    line = line.trim()
     if (line.length) {
-      lines.push(line);
+      lines.push(line)
     }
-  });
-  return lines;
+  })
+  return lines
 }

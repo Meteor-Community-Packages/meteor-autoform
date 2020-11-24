@@ -124,6 +124,6 @@ function init () {
     import('./components/afQuickFields/afQuickFields.html'),
     import('./components/afQuickFields/afQuickFields.js'),
     // event handling
-    import('./autoform-events.js'),
+    import('./autoform-events.js')
   ])
 }

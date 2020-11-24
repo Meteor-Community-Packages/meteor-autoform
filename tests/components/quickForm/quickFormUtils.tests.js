@@ -1,10 +1,11 @@
-import { expect } from 'chai';
-import { restoreAll } from '../../test-utils.tests';
+/* eslint-env mocha */
+import { expect } from 'chai'
+import { restoreAll } from '../../test-utils.tests'
 import {
   getSortedFieldGroupNames,
   getFieldsWithNoGroup,
   getFieldsForGroup
-} from '../../../components/quickForm/quickFormUtils';
+} from '../../../components/quickForm/quickFormUtils'
 
 const schemaObject = {
   // ungrouped
@@ -66,7 +67,7 @@ const schemaObject = {
       group: 'bars'
     }
   },
-  'gextra': {
+  gextra: {
     type: Number,
     autoform: {
       group: 'bars'
@@ -76,19 +77,19 @@ const schemaObject = {
 
 describe('quickForm - utils', function () {
   afterEach(function () {
-    restoreAll();
-  });
+    restoreAll()
+  })
 
   describe(getSortedFieldGroupNames.name, function () {
-    it("Takes a schema object and returns a sorted array of field group names for it", function () {
-      const groupNames = getSortedFieldGroupNames(schemaObject);
-      expect(groupNames).to.deep.equal(['bars', 'foos']);
-    });
-  });
+    it('Takes a schema object and returns a sorted array of field group names for it', function () {
+      const groupNames = getSortedFieldGroupNames(schemaObject)
+      expect(groupNames).to.deep.equal(['bars', 'foos'])
+    })
+  })
 
   describe(getFieldsWithNoGroup.name, function () {
     it("Returns the schema field names that don't belong to a group", function () {
-      const fieldNames = getFieldsWithNoGroup(schemaObject);
+      const fieldNames = getFieldsWithNoGroup(schemaObject)
       expect(fieldNames).to.deep.equal([
         'name',
         'list',
@@ -96,26 +97,26 @@ describe('quickForm - utils', function () {
         'list.$.entry2',
         'complex',
         'complex.foo',
-        'complex.bar',
-      ]);
-    });
-  });
+        'complex.bar'
+      ])
+    })
+  })
 
   describe(getFieldsForGroup.name, function () {
-    it("Returns the schema field names that belong in the group.", function () {
-      expect(getFieldsForGroup('noname', schemaObject)).to.deep.equal([]);
+    it('Returns the schema field names that belong in the group.', function () {
+      expect(getFieldsForGroup('noname', schemaObject)).to.deep.equal([])
       expect(getFieldsForGroup('foos', schemaObject)).to.deep.equal([
         'gname',
         'glist',
         'glist.$.entry1',
         'glist.$.entry2'
-      ]);
+      ])
       expect(getFieldsForGroup('bars', schemaObject)).to.deep.equal([
         'gcomplex',
         'gcomplex.foo',
         'gcomplex.bar',
         'gextra'
-      ]);
-    });
-  });
-});
+      ])
+    })
+  })
+})
