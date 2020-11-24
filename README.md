@@ -7,7 +7,6 @@ AutoForm is a Meteor package that adds UI components and helpers to easily creat
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 ![LGTM Grade](https://img.shields.io/lgtm/grade/javascript/github/Meteor-Community-Packages/meteor-autoform)
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 ![GitHub](https://img.shields.io/github/license/Meteor-Community-Packages/meteor-autoform)
 
 
@@ -159,30 +158,87 @@ This is because many extensions will not have the `7.0.0` reference in their
 compatibility with extensions, that worked with `6.x`. If you encounter any
 runtime issues with extensions, please open an issue.
 
+### Import using static imports
+
+If you come from a previous version and want to "keep things as they were" then
+this is the option you should choose.
+
+AutoForm now comes only with the core functionality added to the initial package
+code. In order to make the Templates available, too, you only need to
+put the following line into your top-level client startup code (for example
+*`imports/startup/client/autoform.js`*):
+
+```javascript
+import 'meteor/aldeed:autoform/static'
+```
+
+That's it. The Templates are now available.
+
 ### Import using dynamic imports
 
 This package supports `dynamic-import`, which helps to reduce initial bundle
-size. In order to enable dynamic imports you need to add an **environment
-variable** on startup of your Meteor app:
+size of the package from ~110 KB to ~60 KB (estimated via `bundle-visualizer`). 
 
-```bash
-$ AUTOFORM_DYNAMIC_IMPORTS="1" meteor
-```
+The following example shows how to import the packages dynamically:
 
-Note, that if you have already added autoform before defining the environment 
-flag, you need to remove the package via `meteor remove aldeed:autoform`
-and then add it again in order to make the changes take effect.
+```javascript
+import 'meteor/aldeed:autoform/dynamic'
 
-In your application code you can then initialize the AutoForm templates via
-
-```bash
-AutoForm.initialize()
+AutoForm.load()
   .then(() => {
     // ... on init success code, for example set a ReactiveVar to true
   ))
   .catch(e => {
     // ... on error code
   })
+```
+
+You can even combine this with one of the themes (if they support dynamic imports) 
+like in the following example:
+
+```javascript
+import { AutoFormThemeBootstrap4 } from 'meteor/communitypackages:autoform-bootstrap4/dynamic'
+import 'meteor/aldeed:autoform/dynamic'
+
+async function init () {
+  await AutoForm.load()
+  await AutoFormThemeBootstrap4.load()
+  // theme is imported, you can now make the form available
+  // you could use a reactive var that resolves to true here
+  // or any other mechanism you like to use to reactively activate the form
+  AutoForm.setDefaultTemplate('bootstrap4')
+}
+
+(function () {
+  init()
+    .catch(e => console.error('[autoForm]: init failed - ', e))
+    .then(() => console.info('[autoForm]: initialized'))
+})()
+```
+
+Note, that you can't use the `#autoForm` or `>quickForm` Templates before the
+import has not completed. You can however use a `ReactiveVar` in your Temlate
+to "wait" with rendering the form:
+
+```javascript
+import { ReactiveVar } from 'meteor/reactive-var'
+import { initAutoForm } from 'meteor/aldeed:autoform/dynamic'
+
+const autoFormLoaded = new ReactiveVar()
+
+initAutoForm()
+  .then(() => autoFormLoaded.set(true))
+  .catch(e => {
+    // ... on error code
+  })
+  
+// ... other Template code
+  
+Template.myCoolForm.helpers({
+  loadComplete() {
+    return autoFormLoaded.get()
+  }
+})  
 ```
 
 ### Community Add-On Packages
