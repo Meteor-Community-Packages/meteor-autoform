@@ -21,6 +21,7 @@
     "eslint-config-standard": "^16.0.2",
     "simpl-schema": "^1.10.2",
     "sinon": "^9.2.1",
+    "snazzy": "^9.0.0",
     "standardx": "^7.0.0"
   },
   "babel": {},
@@ -43,7 +44,13 @@
       "allowImportExportEverywhere": false
     },
     "rules": {
-      "brace-style": ["error", "stroustrup", { "allowSingleLine": true }]
+      "brace-style": [
+        "error",
+        "stroustrup",
+        {
+          "allowSingleLine": true
+        }
+      ]
     }
   }
 }

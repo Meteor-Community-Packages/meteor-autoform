@@ -36,6 +36,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - run: cd testapp && meteor npm install
+      - run: cd testapp && meteor npm ci
       - run: cd testapp && meteor npm run lint
       - run: cd testapp && meteor npm run test
