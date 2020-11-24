@@ -120,18 +120,19 @@ describe('api', function () {
     })
     it('sets a default global template for a certain type', function (done) {
       const defaultTemplate = Random.id()
-      Template[`type_${defaultTemplate}`] = { foo: defaultTemplate }
-
-      AutoForm.setDefaultTemplateForType('type', defaultTemplate)
+      const defaultTemplateName = `type_${defaultTemplate}`
+      Template[defaultTemplateName] = { foo: defaultTemplate }
 
       Tracker.autorun(() => {
-        const currentTemplate = AutoForm.getDefaultTemplateForType()
+        const currentTemplate = AutoForm.getDefaultTemplateForType('type')
         if (currentTemplate === defaultTemplate) {
           // cleanup and done
-          delete Template[`type_${defaultTemplate}`]
+          delete Template[defaultTemplateName]
           done()
         }
       })
+
+      AutoForm.setDefaultTemplateForType('type', defaultTemplate)
     })
   })
   describe('getDefaultTemplateForType', function () {
