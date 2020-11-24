@@ -116,7 +116,8 @@ describe('inputTypes - value converters', function () {
   describe(AutoForm.valueConverters.dateToNormalizedLocalDateAndTimeString.name, function () {
     it('converts date to normalized local date and time string array', function () {
       const date = new Date('Mon Nov 23 2020 00:00:38 GMT+0100')
-      expect(AutoForm.valueConverters.dateToNormalizedLocalDateAndTimeString(date)).to.equal('2020-11-23T00:00:38.000')
+      expect(AutoForm.valueConverters.dateToNormalizedLocalDateAndTimeString(date, 'America/Los_Angeles'))
+        .to.equal('2020-11-22T15:00:38.000')
     })
     it('ignores other types', function () {
       [1, 0, '1', '0', '', 'true', 'TRUE', 'false', 'false', {}, []]
