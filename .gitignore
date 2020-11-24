@@ -10,5 +10,4 @@ nbproject*
 node_modules/
 package.json
 package-lock.json
-testapp/node_modules
-testapp/packages
+packages/
