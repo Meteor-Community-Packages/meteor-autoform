@@ -36,6 +36,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - run: meteor create --bare testdummy
-      - run: cd testdummy && meteor npm install --save-dev puppeteer simpl-schema chai sinon
-      - run: cd testdummy && METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_SERVER=0 meteor test-packages --once --raw-logs --driver-package meteortesting:mocha ../
+      - run: cd testapp && meteor npm install
+      - run: cd testapp && meteor npm run lint
+      - run: cd testapp && meteor npm run test
