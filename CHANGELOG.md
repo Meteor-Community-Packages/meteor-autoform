@@ -196,6 +196,10 @@ $ METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_WATCH=1 TEST_SERV
 
 **Other**
 
+- **Standard code style**:
+  All code has been updated to use standard code style as defined in the Meteor
+  Community Packages template repository
+
 - **No templates in main package**:
   BS3 is deprecated. These templates are rarely used, including them in the main package and
   supporting them makes the code unnecessarily huge and difficult to maintain.
