@@ -1,3 +1,5 @@
+import 'meteor/aldeed:autoform/static'
+
 import './utility-tests'
 import './common.tests'
 import './FormPreserve.tests'

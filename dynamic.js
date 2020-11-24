@@ -1,23 +1,8 @@
-/* global AutoForm */
-// the following imports are minimal required in order to preserve functionality
-// with themes and extensions that require the AutoForm API at startup time
-import './utility.js'
-import './form-preserve.js'
-import './autoform-hooks.js'
-import './autoform-formdata.js'
-import './autoform-arrays.js'
-import './autoform.js'
-import './autoform-helpers.js'
-import './autoform-validation.js'
-import './autoform-inputs.js'
-import './autoform-api.js'
-
 let initialized = false
 
-AutoForm.initialize = async function () {
+AutoForm.load = async function load () {
   if (!initialized) {
     await init()
-
     initialized = true
   }
 
@@ -26,6 +11,7 @@ AutoForm.initialize = async function () {
 
 function init () {
   return Promise.all([
+    import('./autoform-helpers.js'),
     // form types
     import('./formTypes/insert.js'),
     import('./formTypes/update.js'),
