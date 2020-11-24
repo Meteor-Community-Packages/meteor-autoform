@@ -1756,15 +1756,26 @@ In order to improve development we have replaced TinyTest with
 `meteortesting:mocha` in combination with `chai` and `puppeteer`. 
 
 This makes local tests much easier and also allows us to run tests in the CI.
-In Order to execute local tests, there is a **local bare Meteor project 
-required**. However, don't worry, because it can easily be created and 
-executed via the following lines:
+We have added a minimal test project in this repo, that serves as our proxy
+environment for running the tests.
+
+In order to run the tests you there need to do the following:
 
 ```bash
-$ meteor create --bare testdummy # testdummy is already in the .gitignore
-$ cd testdummy && meteor npm install --save-dev puppeteer simpl-schema chai sinon
-$ METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_WATCH=1 TEST_SERVER=0 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../
+$ cd testapp
+$ meteor npm install
+$ meteor npm run lint
+$ meteor npm run test
 ```
+
+**Test commands**
+
+The following test commands are available:
+
+- `lint` - runs the JavaScript standard linter
+- `lint:fix` - runs the JavaScript standard linter and autofixes issues
+- `test` - runs the tests once; CLI-only
+- `test:watch` - runs the tests in watch mode; CLI-only
 
 **Publishing note** 
 
