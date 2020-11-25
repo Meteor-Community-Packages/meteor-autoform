@@ -3,16 +3,12 @@
 
 name: Test suite
 
-# TODO: for now we only activate actions for the upcoming major version
-# TODO: change push to [master, develop] and pull_request to empty (all)
-# TODO: after v7-dev has been merged into develop succesfully
 on:
   push:
     branches:
-      - v7-dev
+      - master
+      - develop
   pull_request:
-    branches:
-      - v7-dev
 
 jobs:
   tests:
