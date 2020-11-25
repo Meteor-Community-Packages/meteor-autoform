@@ -1,15 +1,24 @@
-[![Build Status](https://travis-ci.org/aldeed/meteor-autoform.svg)](https://travis-ci.org/aldeed/meteor-autoform) [![Backers on Open Collective](https://opencollective.com/autoform/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/autoform/sponsors/badge.svg)](#sponsors)
-
 AutoForm
 =========================
 
 AutoForm is a Meteor package that adds UI components and helpers to easily create basic forms with automatic insert and update events, and automatic reactive validation. Versions 6+ of this package require that you separately install the [simpl-schema](https://github.com/aldeed/node-simple-schema) NPM package. Prior versions require and automatically install the [simple-schema](https://github.com/aldeed/meteor-simple-schema) Meteor package. You can optionally use it with the [collection2](https://github.com/aldeed/meteor-collection2) package, which you have to add to your app yourself.
 
-## NOTE: AutoForm 6.0
+![Test suite](https://github.com/Meteor-Community-Packages/meteor-autoform/workflows/Test%20suite/badge.svg)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+![LGTM Grade](https://img.shields.io/lgtm/grade/javascript/github/Meteor-Community-Packages/meteor-autoform)
+![GitHub](https://img.shields.io/github/license/Meteor-Community-Packages/meteor-autoform)
 
-AutoForm 6.0 is now available and requires switching your app to using the SimpleSchema package from NPM. Be sure to check out the [change log](https://github.com/aldeed/meteor-autoform/blob/devel/CHANGELOG.md#600) for full details. Note that if you use add-on packages that haven't been updated yet, you will not yet be able to update to version 6.
 
-**Add-on Package Authors**: Please test your package against AutoForm 6.0, and then release a major version update in which you change your `api.use` to `api.use('aldeed:autoform@6.0.0');`. I do NOT recommend using something like `api.use('aldeed:autoform@4.0.0 || 5.0.0 || 6.0.0');` to try to support multiple major versions of AutoForm because there is currently a known Meteor issue where trying to support too many dependency paths leads to running out of memory when trying to resolve dependencies.
+## NOTE: AutoForm 7.0
+
+AutoForm 7.0 is now available and decouples from the default themes. **You will have to install themes manually!**
+
+Be sure to check out the [change log](./CHANGELOG.md#700) for full details, first.
+Note that if you use add-on packages that haven't been updated yet, you will not yet be able to update to version 6.
+
+**Add-on Package Authors**: Please test your package against AutoForm 7.0, and then release a major version update in which you change your `api.use` to `api.use('aldeed:autoform@7.0.0');`. 
+We do NOT recommend using something like `api.use('aldeed:autoform@6.0.0 || 7.0.0');` to try to support multiple major versions of AutoForm because there is currently a known Meteor issue where trying to support too many dependency paths leads to running out of memory when trying to resolve dependencies.
 
 ## Table of Contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -17,6 +26,9 @@ AutoForm 6.0 is now available and requires switching your app to using the Simpl
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Installation](#installation)
+  - [Migration from 6.x](#migration-from-6x)
+  - [Import using static imports](#import-using-static-imports)
+  - [Import using dynamic imports](#import-using-dynamic-imports)
   - [Community Add-On Packages](#community-add-on-packages)
     - [Custom Input Types](#custom-input-types)
     - [Themes](#themes)
@@ -93,9 +105,9 @@ AutoForm 6.0 is now available and requires switching your app to using the Simpl
 - [Examples](#examples)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
-- [Contributors](#contributors)
-- [Backers](#backers)
-- [Sponsors](#sponsors)
+- [Testing](#testing)
+- [Credits](#credits)
+- [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -120,6 +132,121 @@ import SimpleSchema from 'simpl-schema';
 SimpleSchema.extendOptions(['autoform']);
 ```
 
+By default there is no theme included, so you will have to install a theme, too.
+The following themes are available and tested to work with v7:
+
+- [autoform-plain](https://github.com/pouya-eghbali/autoform-plain)
+- [autoform-bootstrap3](https://github.com/pouya-eghbali/autoform-bootstrap3)
+- [autoform-bootstrap4](https://github.com/jankapunkt/autoform-bootstrap4)
+
+Please also consider, that `twbs:bootstrap` is depending on an outdated (and potential insecure!) Bootstrap version.
+Better: Use the latest Bootstrap 3.x or 4.x from NPM in favour.
+
+
+### Migration from 6.x
+
+If you update to 7.0.0 you will likely
+encounter errors from your extension packages like
+
+```bash
+While selecting package versions:
+error: Conflict: Constraint aldeed:autoform@6.3.0 is not satisfied by aldeed:autoform 7.0.0.
+Constraints on package "aldeed:autoform":
+* aldeed:autoform@=7.0.0 <- top level
+* aldeed:autoform@6.3.0 <- someone:packagename x.y.z
+```
+
+You can easily circumvent this issue by editing the package entry in `.meteor/packages`
+from `aldeed:autoform` to `aldeed:autoform@7.0.0!` (note the exclamation mark).
+
+This is because many extensions will not have the `7.0.0` reference in their
+`package.js` file, yet. However, this major version is intended to not break 
+compatibility with extensions, that worked with `6.x`. If you encounter any
+runtime issues with extensions, please open an issue.
+
+### Import using static imports
+
+If you come from a previous version and want to "keep things as they were" then
+this is the option you should choose.
+
+AutoForm now comes only with the core functionality added to the initial package
+code. In order to make the Templates available, too, you only need to
+put the following line into your top-level client startup code (for example
+*`imports/startup/client/autoform.js`*):
+
+```javascript
+import 'meteor/aldeed:autoform/static'
+```
+
+That's it. The Templates are now available.
+
+### Import using dynamic imports
+
+This package supports `dynamic-import`, which helps to reduce initial bundle
+size of the package from ~110 KB to ~60 KB (estimated via `bundle-visualizer`). 
+
+The following example shows how to import the packages dynamically:
+
+```javascript
+import 'meteor/aldeed:autoform/dynamic'
+
+AutoForm.load()
+  .then(() => {
+    // ... on init success code, for example set a ReactiveVar to true
+  ))
+  .catch(e => {
+    // ... on error code
+  })
+```
+
+You can even combine this with one of the themes (if they support dynamic imports) 
+like in the following example:
+
+```javascript
+import { AutoFormThemeBootstrap4 } from 'meteor/communitypackages:autoform-bootstrap4/dynamic'
+import 'meteor/aldeed:autoform/dynamic'
+
+async function init () {
+  await AutoForm.load()
+  await AutoFormThemeBootstrap4.load()
+  // theme is imported, you can now make the form available
+  // you could use a reactive var that resolves to true here
+  // or any other mechanism you like to use to reactively activate the form
+  AutoForm.setDefaultTemplate('bootstrap4')
+}
+
+(function () {
+  init()
+    .catch(e => console.error('[autoForm]: init failed - ', e))
+    .then(() => console.info('[autoForm]: initialized'))
+})()
+```
+
+Note, that you can't use the `#autoForm` or `>quickForm` Templates before the
+import has not completed. You can however use a `ReactiveVar` in your Temlate
+to "wait" with rendering the form:
+
+```javascript
+import { ReactiveVar } from 'meteor/reactive-var'
+import { initAutoForm } from 'meteor/aldeed:autoform/dynamic'
+
+const autoFormLoaded = new ReactiveVar()
+
+initAutoForm()
+  .then(() => autoFormLoaded.set(true))
+  .catch(e => {
+    // ... on error code
+  })
+  
+// ... other Template code
+  
+Template.myCoolForm.helpers({
+  loadComplete() {
+    return autoFormLoaded.get()
+  }
+})  
+```
+
 ### Community Add-On Packages
 
 *Submit a pull request to add your package to this list!*
@@ -128,8 +255,8 @@ SimpleSchema.extendOptions(['autoform']);
 
 Dates and times:
 
-* [aldeed:autoform-bs-datepicker](https://atmospherejs.com/aldeed/autoform-bs-datepicker)
-* [aldeed:autoform-bs-datetimepicker](https://atmospherejs.com/aldeed/autoform-bs-datetimepicker)
+* [aldeed:autoform-bs-datepicker](https://github.com/Meteor-Community-Packages/meteor-autoform-bs-datepicker)
+* [aldeed:autoform-bs-datetimepicker](https://github.com/Meteor-Community-Packages/meteor-autoform-bs-datetimepicker)
 * [miguelalarcos:afwrap-xdatetime](https://atmospherejs.com/miguelalarcos/afwrap-xdatetime)
 * [notorii:autoform-datetimepicker](https://atmospherejs.com/notorii/autoform-datetimepicker)
 * [lukemadera:autoform-pikaday](https://atmospherejs.com/lukemadera/autoform-pikaday)
@@ -139,8 +266,8 @@ Dates and times:
 
 Selects:
 
-* [aldeed:autoform-select2](https://atmospherejs.com/aldeed/autoform-select2)
-* [aldeed:autoform-bs-button-group-input](https://atmospherejs.com/aldeed/autoform-bs-button-group-input)
+* [aldeed:autoform-select2](https://github.com/Meteor-Community-Packages/meteor-autoform-select2)
+* [aldeed:autoform-bs-button-group-input](https://github.com/Meteor-Community-Packages/meteor-autoform-bs-button-group-input)
 * [comerc:autoform-selectize](https://atmospherejs.com/comerc/autoform-selectize)
 * [vazco:universe-autoform-select](https://atmospherejs.com/vazco/universe-autoform-select)
 * [lukemadera:autoform-autocomplete](https://atmospherejs.com/lukemadera/autoform-autocomplete)
@@ -280,7 +407,7 @@ Books.attachSchema(new SimpleSchema({
 
 That's it! This gives you:
 
-* An autogenerated form that uses bootstrap3 classes.
+* An autogenerated form that uses the appropriate classes, depending on your theme.
 * Appropriate HTML5 fields for all keys in the "Books" collection schema.
 * A submit button that gathers the entered values and inserts them into
 the "Books" collection.
@@ -1162,7 +1289,7 @@ Then in client code, add the hooks:
 AutoForm.hooks({
   postsForm: {
     docToForm: function(doc) {
-      if (_.isArray(doc.tags)) {
+      if (Array.isArray(doc.tags)) {
         doc.tags = doc.tags.join(", ");
       }
       return doc;
@@ -1618,7 +1745,7 @@ Since `autoform.options` is in the schema, that will be used instead of `allowed
     allowedValues: ['red', 'green', 'blue'],
     autoform: {
       options: function () {
-        return _.map(['red', 'green', 'blue'], function (c, i) {
+        return ['red', 'green', 'blue'].map(function (c, i) {
           return {label: "Color " + i + ": " + c, value: c};
         });
       }
@@ -1681,7 +1808,49 @@ no errors, make sure the button's type is `submit`.
 
 ## Contributing
 
-[More Info](CONTRIBUTING.md)
+MCP welcomes any form on contribution. If you are interested, please read more
+about it in the [contributing guide](CONTRIBUTING.md) and also consider the
+[MCP Code of Conduct](./CODE_OF_CONDUCT.md).
+
+## Testing
+
+In order to improve development we have replaced TinyTest with 
+`meteortesting:mocha` in combination with `chai` and `puppeteer`. 
+
+This makes local tests much easier and also allows us to run tests in the CI.
+We have added a minimal test project in this repo, that serves as our proxy
+environment for running the tests.
+
+In order to run the tests you there need to do the following:
+
+```bash
+$ cd testapp
+$ meteor npm install
+$ meteor npm run lint
+$ meteor npm run test
+```
+
+**Test commands**
+
+The following test commands are available:
+
+- `lint` - runs the JavaScript standard linter
+- `lint:fix` - runs the JavaScript standard linter and autofixes issues
+- `test` - runs the tests once; CLI-only
+- `test:watch` - runs the tests in watch mode; CLI-only
+
+**Publishing note** 
+
+If you publish the package to atmosphere, make sure you
+remove the test project or move it outside of the package root.
+
+**Testing with coverage**
+
+
+
+<!--
+The following is uncommented, because the opencollective page https://opencollective.com/autoform is not reachable anymore.
+This can be uncommented, when we are back with a new opencollective or whatever account.
 
 ## Contributors
 
@@ -1708,3 +1877,16 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 <a href="https://opencollective.com/autoform/sponsor/7/website" target="_blank"><img src="https://opencollective.com/autoform/sponsor/7/avatar.svg"></a>
 <a href="https://opencollective.com/autoform/sponsor/8/website" target="_blank"><img src="https://opencollective.com/autoform/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/autoform/sponsor/9/website" target="_blank"><img src="https://opencollective.com/autoform/sponsor/9/avatar.svg"></a>
+-->
+
+## Credits
+
+Many thanks to [Eric Dobbertin (aldeed)](https://github.com/aldeed) for creating 
+this package and many years of improvement and for the trust in Meteor Community Packages.
+
+Also many thanks to all the [contributors](https://github.com/Meteor-Community-Packages/meteor-autoform/graphs/contributors).
+
+## License
+
+This package is released under the MIT License. See the [LICENSE file](./LICENSE)
+for more information.

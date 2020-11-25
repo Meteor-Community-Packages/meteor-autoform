@@ -10,10 +10,6 @@
 - [Code review process](#code-review-process)
 - [Financial contributions](#financial-contributions)
 - [Questions](#questions)
-- [Credits](#credits)
-  - [Contributors](#contributors)
-  - [Backers](#backers)
-  - [Sponsors](#sponsors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -50,6 +46,11 @@ Anyone can file an expense. If the expense makes sense for the development of th
 
 If you have any questions, create an [issue](issue) (protip: do a quick search first to see if someone else didn't ask the same question before!).
 
+<!--
+
+The following is uncommented, because the opencollective page https://opencollective.com/autoform is not reachable anymore.
+This can be uncommented, when we are back with a new opencollective or whatever account.
+
 ## Credits
 
 ### Contributors
@@ -79,5 +80,6 @@ Thank you to all our sponsors! (please ask your company to also support this ope
 <a href="https://opencollective.com/autoform/sponsor/7/website" target="_blank"><img src="https://opencollective.com/autoform/sponsor/7/avatar.svg"></a>
 <a href="https://opencollective.com/autoform/sponsor/8/website" target="_blank"><img src="https://opencollective.com/autoform/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/autoform/sponsor/9/website" target="_blank"><img src="https://opencollective.com/autoform/sponsor/9/avatar.svg"></a>
+-->
 
 <!-- This `CONTRIBUTING.md` is based on @nayafia's template https://github.com/nayafia/contributing-template -->

@@ -1,3 +1,3 @@
-AutoForm.addInputType("file", {
-  template: "afInputFile"
-});
+AutoForm.addInputType('file', {
+  template: 'afInputFile'
+})

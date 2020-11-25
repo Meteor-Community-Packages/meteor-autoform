@@ -1,3 +1,3 @@
-AutoForm.addInputType("submit", {
-  template: "afInputSubmit"
-});
+AutoForm.addInputType('submit', {
+  template: 'afInputSubmit'
+})
