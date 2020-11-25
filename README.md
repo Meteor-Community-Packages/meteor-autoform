@@ -135,9 +135,9 @@ SimpleSchema.extendOptions(['autoform']);
 By default there is no theme included, so you will have to install a theme, too.
 The following themes are available and tested to work with v7:
 
-- [autoform-plain](https://github.com/pouya-eghbali/autoform-plain)
-- [autoform-bootstrap3](https://github.com/pouya-eghbali/autoform-bootstrap3)
-- [autoform-bootstrap4](https://github.com/jankapunkt/autoform-bootstrap4)
+- [autoform-plain](https://github.com/Meteor-Community-Packages/meteor-autoform-themes/tree/main/plain)
+- [autoform-bootstrap3](https://github.com/Meteor-Community-Packages/meteor-autoform-themes/tree/main/bootstrap3)
+- [autoform-bootstrap4](https://github.com/Meteor-Community-Packages/meteor-autoform-themes/tree/main/bootstrap4)
 
 Please also consider, that `twbs:bootstrap` is depending on an outdated (and potential insecure!) Bootstrap version.
 Better: Use the latest Bootstrap 3.x or 4.x from NPM in favour.
