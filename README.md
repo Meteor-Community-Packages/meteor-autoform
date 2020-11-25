@@ -14,7 +14,7 @@ AutoForm is a Meteor package that adds UI components and helpers to easily creat
 
 AutoForm 7.0 is now available and decouples from the default themes. **You will have to install themes manually!**
 
-Be sure to check out the [change log](https://github.com/aldeed/meteor-autoform/blob/devel/CHANGELOG.md#600) for full details. 
+Be sure to check out the [change log](./CHANGELOG.md#700) for full details, first.
 Note that if you use add-on packages that haven't been updated yet, you will not yet be able to update to version 6.
 
 **Add-on Package Authors**: Please test your package against AutoForm 7.0, and then release a major version update in which you change your `api.use` to `api.use('aldeed:autoform@7.0.0');`. 
@@ -26,6 +26,9 @@ We do NOT recommend using something like `api.use('aldeed:autoform@6.0.0 || 7.0.
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Installation](#installation)
+  - [Migration from 6.x](#migration-from-6x)
+  - [Import using static imports](#import-using-static-imports)
+  - [Import using dynamic imports](#import-using-dynamic-imports)
   - [Community Add-On Packages](#community-add-on-packages)
     - [Custom Input Types](#custom-input-types)
     - [Themes](#themes)
@@ -139,7 +142,10 @@ The following themes are available and tested to work with v7:
 Please also consider, that `twbs:bootstrap` is depending on an outdated (and potential insecure!) Bootstrap version.
 Better: Use the latest Bootstrap 3.x or 4.x from NPM in favour.
 
-**Installation troubleshooting:** If you update to 7.0.0 you will likely
+
+### Migration from 6.x
+
+If you update to 7.0.0 you will likely
 encounter errors from your extension packages like
 
 ```bash

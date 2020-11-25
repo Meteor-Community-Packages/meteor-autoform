@@ -112,13 +112,16 @@
 
 ### 7.0.0
 
-This is a major change and is not backward compatible.
+This is a major change and can break existing setups. However, we carefully
+worked out the changes and updated documentation accordingly. In theory there
+should be no issues if you follow the [installation](./README.md#installation) 
+guide.
 
 **Performance**
 
 - **support dynamic imports**:
   The package can now be imported with a minimal set of base functionality, 
-  while the greater part of templates can be dynamically loaded.
+  while the greater part of templates can be dynamically loaded. Saves 
 
 - **No underscore.js**:
   Underscore dependency was removed.
