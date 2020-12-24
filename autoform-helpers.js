@@ -425,6 +425,27 @@ export const afSelectOptionAtts = function afSelectOptionAtts () {
  */
 Template.registerHelper('afSelectOptionAtts', afSelectOptionAtts)
 
+/**
+ * @name afAutocompleteSuggestionAtts
+ * @return {*}
+ */
+export const afAutocompleteSuggestionAtts = function afAutocompleteSuggestionAtts () {
+  if (this.value === false) this.value = 'false'
+  const atts = 'value' in this ? { value: this.value } : {}
+  if (this.selected) {
+    atts.selected = ''
+  }
+  if (this.htmlAtts) {
+    Object.assign(atts, this.htmlAtts)
+  }
+  return atts
+}
+
+/*
+ * afAutocompleteSuggetionAtts
+ */
+Template.registerHelper('afAutocompleteSuggestionAtts', afAutocompleteSuggestionAtts)
+
 // Expects to be called with this.name available
 Template.registerHelper('afOptionsFromSchema', function afOptionsFromSchema () {
   return AutoForm._getOptionsForField(this.name)
