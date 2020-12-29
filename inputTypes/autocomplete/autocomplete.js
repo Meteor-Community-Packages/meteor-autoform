@@ -1,4 +1,5 @@
 import { Template } from 'meteor/templating'
+
 AutoForm.addInputType('autocomplete', {
   template: 'afAutocomplete',
   valueOut: function () {
@@ -21,26 +22,30 @@ AutoForm.addInputType('autocomplete', {
     context.items = []
 
     // re-use selectOptions to keep it DRY
-    // Add all defined options
-    context.selectOptions.forEach(function(opt) {
-      // there are no subgroups here
-      const { label, value, ...htmlAtts } = opt
-      context.items.push({
-        name: context.name,
-        label,
-        value,
-        htmlAtts,
-        _id: opt.value.toString(),
-        selected: (opt.value === context.value),
-        atts: itemAtts
+    // Add all defined options or default
+    if (context.selectOptions) {
+      context.selectOptions.forEach(function (opt) {
+        // there are no subgroups here
+        const { label, value, ...htmlAtts } = opt
+        context.items.push({
+          name: context.name,
+          label,
+          value,
+          htmlAtts,
+          _id: opt.value.toString(),
+          selected: (opt.value === context.value),
+          atts: itemAtts
+        })
       })
-    })
+    } else {
+      console.warn('autocomplete requires options for suggestions.')
+    }
 
     return context
   }
 })
 
-Template.afAutocomplete.onRendered(function() {
+Template.afAutocomplete.onRendered(function () {
   /* AUTOCOMPLETE
    ***************
    * This uses the same datums as select types, which
@@ -48,151 +53,112 @@ Template.afAutocomplete.onRendered(function() {
    *
    * It allows selection by arrows up/down/enter; mouse click;
    * and when enough characters entered make a positive match.
-   * Arrow nanigation is circlular; top to bottom & vice versa.
+   * Arrow navigation is circlular; top to bottom & vice versa.
    *
-   * It needs some class definitions and styles, such as:
-   *
-   * .autocomplete {
-   *   .ac-container { // trick to prevent calculating position
-   *     position: relative;
-   *     height: 0;
-   *
-   *     .ac-suggestions {
-   *       position: absolute;
-   *       top: 0;
-   *       left: 0;
-   *       width: 100%;
-   *       z-index: $zindex-modal + 1;
-   *       border-radius: $border-radius-lg;
-   *       background-color: lighten($card-black-background, 6%);
-   *       overflow: hidden;
-   *
-   *       > div {
-   *         padding: 15px;
-   *         font-size: $font-size-sm;
-   *
-   *         &:first-child {
-   *           border-color: lighten($nav-gray,5%);
-   *           border-top: 2px solid;
-   *         }
-   *
-   *         &:hover,
-   *         &.ac-selected {
-   *           background-color: darken($white, 10%);
-   *           color: $black;
-   *         }
-   *       }
-   *     }
-   *   }
-   * }
+   * It uses the 'dropdown' classes in bootstrap 4 for styling.
    */
 
   // get the instance items
   // defined in several ways
   const me = Template.instance()
-  const items = me.data.items
 
   // secure the dom so multiple autocompletes don't clash
-  const $me = $(me.firstNode)
-  const $input = $me.children('input')
-  const $container = $me.children('.ac-container')
-  const $suggestions = $container.children('.ac-suggestions')
+  const $input = me.$('input')
+  const $container = me.$('.dropdown')
+  const $suggestions = me.$('.dropdown-menu')
 
   // prepare for arrow navigation
   let currIndex = -1
   let totalItems = 0
 
   // prevent form submit from "Enter/Return"
-  $input.keypress((e) =>
-  {
-    if (e.originalEvent.key === "Enter")
-    {
+  $input.keypress((e) => {
+    if (e.originalEvent.key === 'Enter') {
       e.preventDefault()
       e.stopPropagation()
     }
   })
 
   // detect the keystrokes
-  $input.keyup((e) =>
-  {
+  $input.keyup((e) => {
     // only populate when typing characters or deleting
     // otherwise, we are navigating
-    if (/ArrowDown|ArrowUp|Enter/.test(e.originalEvent.key) === false)
-    {
+    if (/ArrowDown|ArrowUp|Enter/.test(e.originalEvent.key) === false) {
       // we're typing
       // filter results from input
-      let result = me.data.items.filter((i) => {
-        let reg = new RegExp(e.target.value, 'gi')
-        return reg.test(i.value)
+      const result = me.data.items.filter((i) => {
+        const reg = new RegExp(e.target.value, 'gi')
+        return reg.test(i.label)
       })
 
       // display results in 'suggestions' div
       $suggestions.empty()
+      let html
       let len = result.length
       totalItems = result.length
-      if (len > 1)
-      {
-        while (--len > -1)
-        {
+
+      if (len > 1) {
+        currIndex = -1
+        while (--len > -1) {
           // populate suggestions
-          let html = `<div data-value=${result[len].value}>${result[len].label}`
+          html = `<div class="dropdown-item" data-value="${result[len].value}">${result[len].label}</div>`
           $suggestions.append(html)
+          $suggestions.addClass('show')
+          $container.addClass('show')
         }
 
         // clear any manual navigated selections on hover
         $suggestions.children().hover((e) => {
-          $suggestions.children().removeClass('ac-selected')
+          $suggestions.children().removeClass('active')
           currIndex = -1
         })
 
         // choose an answer on click
         $suggestions.children().click((e) => {
-          let dataValue = $(e.target).attr('data-value')
+          const dataValue = $(e.target).attr('data-value')
           $input.val(dataValue)
           $suggestions.empty()
+          $suggestions.removeClass('show')
+          $container.removeClass('show')
         })
-      }
-      else if (e.originalEvent.key !== "Backspace")
-      {
+      } else if (e.originalEvent.key !== 'Backspace') {
         // only force populate if not deleting
         // bc we all make mistakes
-        if (result.length === 1)
-        {
+        if (result.length === 1) {
           $input.val(result[0].value)
+          $suggestions.removeClass('show')
+          $container.removeClass('show')
+        } else {
+          // no results, hide
+          $suggestions.removeClass('show')
+          $container.removeClass('show')
         }
       }
-    }
-    else // we're navigating suggestions
-    {
+    } else { // we're navigating suggestions
       // start highlighting at the 0 index
-      if (/ArrowDown/.test(e.originalEvent.key) === true)
-      {
+      if (/ArrowDown/.test(e.originalEvent.key) === true) {
         // navigating down
-        if (currIndex === totalItems - 1)
-        {
+        if (currIndex === totalItems - 1) {
           currIndex = -1
         }
         // remove all classes from the children
-        $suggestions.children().removeClass('ac-selected')
-        $suggestions.children('div').eq(++currIndex).addClass('ac-selected')
-      }
-      else if (/ArrowUp/.test(e.originalEvent.key) === true)
-      {
-        if (currIndex <= 0)
-        {
+        $suggestions.children().removeClass('active')
+        $suggestions.children('div').eq(++currIndex).addClass('active')
+      } else if (/ArrowUp/.test(e.originalEvent.key) === true) {
+        if (currIndex <= 0) {
           currIndex = totalItems
         }
         // navigating up
         // remove all classes from the children
-        $suggestions.children().removeClass('ac-selected')
-        $suggestions.children('div').eq(--currIndex).addClass('ac-selected')
-      }
-      else if (/Enter/.test(e.originalEvent.key) === true)
-      {
+        $suggestions.children().removeClass('active')
+        $suggestions.children('div').eq(--currIndex).addClass('active')
+      } else if (/Enter/.test(e.originalEvent.key) === true) {
         // we're selecting
-        let enterVal = $suggestions.children('div').eq(currIndex).attr('data-value')
+        const enterVal = $suggestions.children('div').eq(currIndex).attr('data-value')
         $input.val(enterVal)
         $suggestions.empty()
+        $suggestions.removeClass('show')
+        $container.removeClass('show')
         currIndex = -1
         totalItems = 0
       }
