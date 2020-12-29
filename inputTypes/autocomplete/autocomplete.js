@@ -37,7 +37,8 @@ AutoForm.addInputType('autocomplete', {
           atts: itemAtts
         })
       })
-    } else {
+    }
+    else {
       console.warn('autocomplete requires options for suggestions.')
     }
 
@@ -121,20 +122,23 @@ Template.afAutocomplete.onRendered(function () {
           $suggestions.removeClass('show')
           $container.removeClass('show')
         })
-      } else if (e.originalEvent.key !== 'Backspace') {
+      }
+      else if (e.originalEvent.key !== 'Backspace') {
         // only force populate if not deleting
         // bc we all make mistakes
         if (result.length === 1) {
           $input.val(result[0].value)
           $suggestions.removeClass('show')
           $container.removeClass('show')
-        } else {
+        }
+        else {
           // no results, hide
           $suggestions.removeClass('show')
           $container.removeClass('show')
         }
       }
-    } else { // we're navigating suggestions
+    }
+    else { // we're navigating suggestions
       // start highlighting at the 0 index
       if (/ArrowDown/.test(e.originalEvent.key) === true) {
         // navigating down
@@ -144,7 +148,8 @@ Template.afAutocomplete.onRendered(function () {
         // remove all classes from the children
         $suggestions.children().removeClass('active')
         $suggestions.children('div').eq(++currIndex).addClass('active')
-      } else if (/ArrowUp/.test(e.originalEvent.key) === true) {
+      }
+      else if (/ArrowUp/.test(e.originalEvent.key) === true) {
         if (currIndex <= 0) {
           currIndex = totalItems
         }
@@ -152,7 +157,8 @@ Template.afAutocomplete.onRendered(function () {
         // remove all classes from the children
         $suggestions.children().removeClass('active')
         $suggestions.children('div').eq(--currIndex).addClass('active')
-      } else if (/Enter/.test(e.originalEvent.key) === true) {
+      }
+      else if (/Enter/.test(e.originalEvent.key) === true) {
         // we're selecting
         const enterVal = $suggestions.children('div').eq(currIndex).attr('data-value')
         $input.val(enterVal)
