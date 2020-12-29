@@ -116,7 +116,7 @@ Template.afAutocomplete.onRendered(function () {
 
         // choose an answer on click
         $suggestions.children().click((e) => {
-          const dataValue = $(e.target).attr('data-value')
+          const dataValue = me.$(e.target).attr('data-value')
           $input.val(dataValue)
           $suggestions.empty()
           $suggestions.removeClass('show')
