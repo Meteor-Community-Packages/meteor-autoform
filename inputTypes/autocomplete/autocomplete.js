@@ -17,7 +17,14 @@ AutoForm.addInputType('autocomplete', {
   contextAdjust: function (context) {
     context.atts.autocomplete = 'off'
     const itemAtts = { ...context.atts }
-
+    // remove non-essential atts from visible input
+    const visibleAtts = Object.assign({}, { ...context.atts })
+    const keys = ['data-schema-key', 'id', 'name']
+    keys.forEach(key => {
+      delete visibleAtts[key]
+    })
+    // add form-control to remaining classes
+    context.visibleAtts = AutoForm.Utility.addClass({ ...visibleAtts }, 'form-control')
     // build items list
     context.items = []
 
@@ -37,11 +44,22 @@ AutoForm.addInputType('autocomplete', {
           atts: itemAtts
         })
       })
-    } else {
+    }
+    else {
       console.warn('autocomplete requires options for suggestions.')
     }
-
     return context
+  }
+})
+
+Template.afAutocomplete.helpers({
+  visibleAtts () {
+    console.log(this.atts)
+    const atts = this.atts
+    return atts
+  },
+  hiddenAtts () {
+    return this.atts
   }
 })
 
@@ -63,7 +81,8 @@ Template.afAutocomplete.onRendered(function () {
   const me = Template.instance()
 
   // secure the dom so multiple autocompletes don't clash
-  const $input = me.$('input')
+  const $input = me.$('input[type="text"]')
+  const $hidden = me.$('input[type="hidden"]')
   const $container = me.$('.dropdown')
   const $suggestions = me.$('.dropdown-menu')
 
@@ -85,7 +104,7 @@ Template.afAutocomplete.onRendered(function () {
     // otherwise, we are navigating
     if (/ArrowDown|ArrowUp|Enter/.test(e.originalEvent.key) === false) {
       // we're typing
-      // filter results from input
+      // filter results from visible input value
       const result = me.data.items.filter((i) => {
         const reg = new RegExp(e.target.value, 'gi')
         return reg.test(i.label)
@@ -101,7 +120,7 @@ Template.afAutocomplete.onRendered(function () {
         currIndex = -1
         while (--len > -1) {
           // populate suggestions
-          html = `<div class="dropdown-item" data-value="${result[len].value}">${result[len].label}</div>`
+          html = `<div class="dropdown-item" data-value="${result[len].value}" data-label="${result[len].label}">${result[len].label}</div>`
           $suggestions.append(html)
           $suggestions.addClass('show')
           $container.addClass('show')
@@ -115,26 +134,32 @@ Template.afAutocomplete.onRendered(function () {
 
         // choose an answer on click
         $suggestions.children().click((e) => {
-          const dataValue = $(e.target).attr('data-value')
-          $input.val(dataValue)
+          const dataValue = me.$(e.target).attr('data-value')
+          const dataLabel = me.$(e.target).attr('data-label')
+          $input.val(dataLabel)
+          $hidden.val(dataValue)
           $suggestions.empty()
           $suggestions.removeClass('show')
           $container.removeClass('show')
         })
-      } else if (e.originalEvent.key !== 'Backspace') {
+      }
+      else if (e.originalEvent.key !== 'Backspace') {
         // only force populate if not deleting
         // bc we all make mistakes
         if (result.length === 1) {
-          $input.val(result[0].value)
+          $input.val(result[0].label)
+          $hidden.val(result[0].value)
           $suggestions.removeClass('show')
           $container.removeClass('show')
-        } else {
+        }
+        else {
           // no results, hide
           $suggestions.removeClass('show')
           $container.removeClass('show')
         }
       }
-    } else { // we're navigating suggestions
+    }
+    else { // we're navigating suggestions
       // start highlighting at the 0 index
       if (/ArrowDown/.test(e.originalEvent.key) === true) {
         // navigating down
@@ -144,7 +169,8 @@ Template.afAutocomplete.onRendered(function () {
         // remove all classes from the children
         $suggestions.children().removeClass('active')
         $suggestions.children('div').eq(++currIndex).addClass('active')
-      } else if (/ArrowUp/.test(e.originalEvent.key) === true) {
+      }
+      else if (/ArrowUp/.test(e.originalEvent.key) === true) {
         if (currIndex <= 0) {
           currIndex = totalItems
         }
@@ -152,10 +178,13 @@ Template.afAutocomplete.onRendered(function () {
         // remove all classes from the children
         $suggestions.children().removeClass('active')
         $suggestions.children('div').eq(--currIndex).addClass('active')
-      } else if (/Enter/.test(e.originalEvent.key) === true) {
+      }
+      else if (/Enter/.test(e.originalEvent.key) === true) {
         // we're selecting
-        const enterVal = $suggestions.children('div').eq(currIndex).attr('data-value')
-        $input.val(enterVal)
+        const enterValue = $suggestions.children('div').eq(currIndex).attr('data-value')
+        const enterLabel = $suggestions.children('div').eq(currIndex).attr('data-label')
+        $input.val(enterLabel)
+        $hidden.val(enterValue)
         $suggestions.empty()
         $suggestions.removeClass('show')
         $container.removeClass('show')

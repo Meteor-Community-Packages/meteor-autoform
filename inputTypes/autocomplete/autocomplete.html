@@ -1,6 +1,7 @@
 <template name="afAutocomplete">
   <div class="autocomplete dropdown">
-    <input type="text" value="{{this.value}}" {{this.atts}} />
+    <input type="hidden" value="{{this.value}}" {{this.atts}} />
+    <input type="text" value="{{this.label}}" {{this.visibleAtts}} />
     <div class="dropdown-menu"></div>
   </div>
 </template>
