@@ -52,17 +52,6 @@ AutoForm.addInputType('autocomplete', {
   }
 })
 
-Template.afAutocomplete.helpers({
-  visibleAtts () {
-    console.log(this.atts)
-    const atts = this.atts
-    return atts
-  },
-  hiddenAtts () {
-    return this.atts
-  }
-})
-
 Template.afAutocomplete.onRendered(function () {
   /* AUTOCOMPLETE
    ***************
@@ -89,20 +78,50 @@ Template.afAutocomplete.onRendered(function () {
   // prepare for arrow navigation
   let currIndex = -1
   let totalItems = 0
+  let showing = false
 
-  // prevent form submit from "Enter/Return"
-  $input.keypress((e) => {
-    if (e.originalEvent.key === 'Enter') {
+  const clearDropdown = function (e, haltEvents = false) {
+    if (showing === true) {
+      // hide the menu and reset the params
+      $suggestions.empty().removeClass('show')
+      $container.removeClass('show')
+      currIndex = -1
+      totalItems = 0
+      showing = false
+      if (haltEvents === true) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    }
+  }
+
+  // keydown catches escape
+  $input.keydown((e) => {
+    // prevent form submit from "Enter/Return" if showing
+    if (
+      /Enter/.test(e.originalEvent.key) === true &&
+      showing === true
+    ) {
       e.preventDefault()
       e.stopPropagation()
     }
+    // allow Escape to close the dropdown
+    else if (
+      /Escape/.test(e.originalEvent.key) === true &&
+      showing === true
+    ) {
+      clearDropdown(e, true)
+    }
   })
 
-  // detect the keystrokes
-  $input.keyup((e) => {
+  // clear on blur?
+  // TODO: Figure out how blur won't block "click"
+  // $input.blur((e)=>{ clearDropdown(e) })
+
+  const callback = function (e) {
     // only populate when typing characters or deleting
     // otherwise, we are navigating
-    if (/ArrowDown|ArrowUp|Enter/.test(e.originalEvent.key) === false) {
+    if (/ArrowDown|ArrowUp|ArrowLeft|ArrowRight|Enter|Escape/.test(e.originalEvent.key) === false) {
       // we're typing
       // filter results from visible input value
       const result = me.data.items.filter((i) => {
@@ -113,18 +132,19 @@ Template.afAutocomplete.onRendered(function () {
       // display results in 'suggestions' div
       $suggestions.empty()
       let html
-      let len = result.length
+      const len = result.length
       totalItems = result.length
 
       if (len > 1) {
         currIndex = -1
-        while (--len > -1) {
+        for (let i = 0; i < len; i++) {
           // populate suggestions
-          html = `<div class="dropdown-item" data-value="${result[len].value}" data-label="${result[len].label}">${result[len].label}</div>`
+          html = `<div class="dropdown-item" data-value="${result[i].value}" data-label="${result[i].label}">${result[i].label}</div>`
           $suggestions.append(html)
-          $suggestions.addClass('show')
-          $container.addClass('show')
         }
+        $suggestions.addClass('show')
+        $container.addClass('show')
+        showing = true
 
         // clear any manual navigated selections on hover
         $suggestions.children().hover((e) => {
@@ -138,9 +158,7 @@ Template.afAutocomplete.onRendered(function () {
           const dataLabel = me.$(e.target).attr('data-label')
           $input.val(dataLabel)
           $hidden.val(dataValue)
-          $suggestions.empty()
-          $suggestions.removeClass('show')
-          $container.removeClass('show')
+          clearDropdown(e, false)
         })
       }
       else if (e.originalEvent.key !== 'Backspace') {
@@ -149,17 +167,15 @@ Template.afAutocomplete.onRendered(function () {
         if (result.length === 1) {
           $input.val(result[0].label)
           $hidden.val(result[0].value)
-          $suggestions.removeClass('show')
-          $container.removeClass('show')
+          clearDropdown(e, false)
         }
         else {
           // no results, hide
-          $suggestions.removeClass('show')
-          $container.removeClass('show')
+          clearDropdown(e, false)
         }
       }
     }
-    else { // we're navigating suggestions
+    else if (showing === true) { // we're navigating suggestions
       // start highlighting at the 0 index
       if (/ArrowDown/.test(e.originalEvent.key) === true) {
         // navigating down
@@ -181,16 +197,25 @@ Template.afAutocomplete.onRendered(function () {
       }
       else if (/Enter/.test(e.originalEvent.key) === true) {
         // we're selecting
+        if (currIndex === -1) {
+          currIndex = 0
+        }
         const enterValue = $suggestions.children('div').eq(currIndex).attr('data-value')
         const enterLabel = $suggestions.children('div').eq(currIndex).attr('data-label')
         $input.val(enterLabel)
         $hidden.val(enterValue)
-        $suggestions.empty()
-        $suggestions.removeClass('show')
-        $container.removeClass('show')
-        currIndex = -1
-        totalItems = 0
+        clearDropdown(e, false)
       }
     }
+  }
+
+  // detect keystrokes
+  $input.keyup((e) => {
+    callback(e)
+  })
+
+  // show on double click
+  $input.dblclick((e) => {
+    callback(e)
   })
 })
