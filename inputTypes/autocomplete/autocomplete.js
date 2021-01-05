@@ -25,6 +25,7 @@ AutoForm.addInputType('autocomplete', {
     })
     // add form-control to remaining classes
     context.visibleAtts = AutoForm.Utility.addClass({ ...visibleAtts }, 'form-control')
+    context.atts = AutoForm.Utility.addClass({ ...itemAtts }, 'form-control')
     // build items list
     context.items = []
 
