@@ -124,6 +124,8 @@ Template.afAutocomplete.onRendered(function () {
     // otherwise, we are navigating
     if (/ArrowDown|ArrowUp|ArrowLeft|ArrowRight|Enter|Escape/.test(e.originalEvent.key) === false) {
       // we're typing
+      // ensure hidden and visible values match for validation
+      $hidden.val($input.val())
       // filter results from visible input value
       const result = me.data.items.filter((i) => {
         const reg = new RegExp(e.target.value, 'gi')
