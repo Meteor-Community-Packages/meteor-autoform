@@ -162,6 +162,7 @@ Template.afAutocomplete.onRendered(function () {
           $input.val(dataLabel)
           $hidden.val(dataValue)
           clearDropdown(e, false)
+          $input.focus()
         })
       }
       else if (e.originalEvent.key !== 'Backspace') {
@@ -171,6 +172,7 @@ Template.afAutocomplete.onRendered(function () {
           $input.val(result[0].label)
           $hidden.val(result[0].value)
           clearDropdown(e, false)
+          $input.focus()
         }
         else {
           // no results, hide
@@ -208,6 +210,7 @@ Template.afAutocomplete.onRendered(function () {
         $input.val(enterLabel)
         $hidden.val(enterValue)
         clearDropdown(e, false)
+        $input.focus()
       }
     }
   }
