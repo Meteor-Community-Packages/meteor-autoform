@@ -69,6 +69,11 @@ Template.afAutocomplete.onRendered(function () {
   // get the instance items
   // defined in several ways
   const me = Template.instance()
+  const items = new ReactiveVar([])
+  me.autorun(() => {
+    const data = Template.currentData()
+    items.set(data.items)
+  })
 
   // secure the dom so multiple autocompletes don't clash
   const $input = me.$('input[type="text"]')
@@ -127,7 +132,7 @@ Template.afAutocomplete.onRendered(function () {
       // ensure hidden and visible values match for validation
       $hidden.val($input.val())
       // filter results from visible input value
-      const result = me.data.items.filter((i) => {
+      const result = items.get().filter((i) => {
         const reg = new RegExp(e.target.value, 'gi')
         return reg.test(i.label)
       })
