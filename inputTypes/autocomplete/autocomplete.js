@@ -230,4 +230,9 @@ Template.afAutocomplete.onRendered(function () {
   $input.dblclick((e) => {
     callback(e)
   })
+
+  // show on double click
+  $input.on('touchstart', (e) => {
+    callback(e)
+  })
 })
