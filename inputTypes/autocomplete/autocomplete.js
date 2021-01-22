@@ -17,16 +17,17 @@ AutoForm.addInputType('autocomplete', {
   },
   contextAdjust: function (context) {
     context.atts.autocomplete = 'off'
-    const itemAtts = { ...context.atts }
+    const { ...itemAtts } = context.atts
     // remove non-essential atts from visible input
-    const visibleAtts = Object.assign({}, { ...context.atts })
-    const keys = ['data-schema-key', 'id', 'name']
-    keys.forEach(key => {
+    const visibleAtts = Object.assign({}, context.atts)
+
+    ;['data-schema-key', 'id', 'name'].forEach(key => {
       delete visibleAtts[key]
     })
+
     // add form-control to remaining classes
-    context.visibleAtts = AutoForm.Utility.addClass({ ...visibleAtts }, 'form-control')
-    context.atts = AutoForm.Utility.addClass({ ...itemAtts }, 'form-control')
+    context.visibleAtts = visibleAtts
+
     // build items list
     context.items = []
 
@@ -121,6 +122,11 @@ Template.afAutocomplete.onRendered(function () {
     }
   })
 
+  const updateValue = value => {
+    $hidden.val(value)
+    $hidden.trigger('change')
+  }
+
   // clear on blur?
   // TODO: Figure out how blur won't block "click"
   // $input.blur((e)=>{ clearDropdown(e) })
@@ -131,7 +137,7 @@ Template.afAutocomplete.onRendered(function () {
     if (/ArrowDown|ArrowUp|ArrowLeft|ArrowRight|Enter|Escape/.test(e.originalEvent.key) === false) {
       // we're typing
       // ensure hidden and visible values match for validation
-      $hidden.val($input.val())
+      updateValue($input.val())
       // filter results from visible input value
       const result = items.get().filter((i) => {
         const reg = new RegExp(e.target.value, 'gi')
@@ -166,7 +172,7 @@ Template.afAutocomplete.onRendered(function () {
           const dataValue = me.$(e.target).attr('data-value')
           const dataLabel = me.$(e.target).attr('data-label')
           $input.val(dataLabel)
-          $hidden.val(dataValue)
+          updateValue(dataValue)
           clearDropdown(e, false)
           $input.focus()
         })
@@ -176,7 +182,7 @@ Template.afAutocomplete.onRendered(function () {
         // bc we all make mistakes
         if (result.length === 1) {
           $input.val(result[0].label)
-          $hidden.val(result[0].value)
+          updateValue(result[0].value)
           clearDropdown(e, false)
           $input.focus()
         }
@@ -214,12 +220,16 @@ Template.afAutocomplete.onRendered(function () {
         const enterValue = $suggestions.children('div').eq(currIndex).attr('data-value')
         const enterLabel = $suggestions.children('div').eq(currIndex).attr('data-label')
         $input.val(enterLabel)
-        $hidden.val(enterValue)
+        updateValue(enterValue)
         clearDropdown(e, false)
         $input.focus()
       }
     }
   }
+
+  $input.blur(() => {
+    $hidden.trigger('blur') // triggers re-validation
+  })
 
   // detect keystrokes
   $input.keyup((e) => {
@@ -233,6 +243,7 @@ Template.afAutocomplete.onRendered(function () {
 
   // show on double click
   $input.on('touchstart', (e) => {
+    $hidden.trigger('touchstart')
     callback(e)
   })
 })
