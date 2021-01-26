@@ -122,6 +122,9 @@ Template.afAutocomplete.onRendered(function () {
     }
   })
 
+  /**
+   * Ensure reactivity when changing the hidden value
+   */
   const updateValue = value => {
     $hidden.val(value)
     $hidden.trigger('change')
