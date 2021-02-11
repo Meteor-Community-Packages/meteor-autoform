@@ -107,7 +107,7 @@ Template.afAutocomplete.onRendered(function () {
   $input.keydown((e) => {
     // prevent form submit from "Enter/Return" if showing
     if (
-      /Enter/.test(e.originalEvent.key) === true &&
+      /Enter|Tab/.test(e.originalEvent.key) === true &&
       showing === true
     ) {
       e.preventDefault()
@@ -130,14 +130,10 @@ Template.afAutocomplete.onRendered(function () {
     $hidden.trigger('change')
   }
 
-  // clear on blur?
-  // TODO: Figure out how blur won't block "click"
-  // $input.blur((e)=>{ clearDropdown(e) })
-
   const callback = function (e) {
     // only populate when typing characters or deleting
     // otherwise, we are navigating
-    if (/ArrowDown|ArrowUp|ArrowLeft|ArrowRight|Enter|Escape/.test(e.originalEvent.key) === false) {
+    if (/ArrowDown|ArrowUp|ArrowLeft|ArrowRight|Enter|Escape|Tab/.test(e.originalEvent.key) === false) {
       // we're typing
       // ensure hidden and visible values match for validation
       updateValue($input.val())
@@ -157,7 +153,7 @@ Template.afAutocomplete.onRendered(function () {
         currIndex = -1
         for (let i = 0; i < len; i++) {
           // populate suggestions
-          html = `<div class="dropdown-item" data-value="${result[i].value}" data-label="${result[i].label}">${result[i].label}</div>`
+          html = `<div class="dropdown-item" data-suggestion="1" data-index="${i}" data-value="${result[i].value}" data-label="${result[i].label}">${result[i].label}</div>`
           $suggestions.append(html)
         }
         $suggestions.addClass('show')
@@ -167,11 +163,22 @@ Template.afAutocomplete.onRendered(function () {
         // clear any manual navigated selections on hover
         $suggestions.children().hover((e) => {
           $suggestions.children().removeClass('active')
-          currIndex = -1
+          const $target = me.$(e.target)
+          $target.addClass('active')
+          currIndex = Number.parseInt($target.data('index'), 10)
+
+          // make sure showing remains true
+          showing = true
+        })
+
+        // prevent blur when clicking on a suggestion!
+        $suggestions.children().on('mousedown', e => {
+          e.preventDefault()
+          e.stopPropagation()
         })
 
         // choose an answer on click
-        $suggestions.children().click((e) => {
+        $suggestions.children().on('click', (e) => {
           const dataValue = me.$(e.target).attr('data-value')
           const dataLabel = me.$(e.target).attr('data-label')
           $input.val(dataLabel)
@@ -215,7 +222,7 @@ Template.afAutocomplete.onRendered(function () {
         $suggestions.children().removeClass('active')
         $suggestions.children('div').eq(--currIndex).addClass('active')
       }
-      else if (/Enter/.test(e.originalEvent.key) === true) {
+      else if (/Enter|Tab/.test(e.originalEvent.key) === true) {
         // we're selecting
         if (currIndex === -1) {
           currIndex = 0
@@ -230,17 +237,28 @@ Template.afAutocomplete.onRendered(function () {
     }
   }
 
-  $input.blur(() => {
+  // mousedown triggers before blur, so we can check if mousedown is connected
+  // to a suggestion element and this prevent further bubbling to blur:
+  // https://stackoverflow.com/a/12092486
+  $input.on('mousedown', e => {
+    if (me.$(e.currentTarget).data('suggestion')) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  })
+
+  $input.on('blur', e => {
     $hidden.trigger('blur') // triggers re-validation
+    clearDropdown(e, false)
   })
 
   // detect keystrokes
-  $input.keyup((e) => {
+  $input.on('keyup', e => {
     callback(e)
   })
 
   // show on double click
-  $input.dblclick((e) => {
+  $input.on('dblclick', (e) => {
     callback(e)
   })
 
@@ -249,4 +267,19 @@ Template.afAutocomplete.onRendered(function () {
     $hidden.trigger('touchstart')
     callback(e)
   })
+})
+
+Template.afAutocomplete.onDestroyed(function () {
+  const instance = this
+  const $input = instance.$('input[type="text"]')
+  $input.off()
+
+  const $hidden = instance.$('input[type="hidden"]')
+  $hidden.off()
+
+  const $container = instance.$('.dropdown')
+  $container.off()
+
+  const $suggestions = instance.$('.dropdown-menu')
+  $suggestions.off()
 })
