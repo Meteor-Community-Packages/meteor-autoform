@@ -539,10 +539,7 @@ Template.autoForm.events({
       event.preventDefault()
     }
   },
-  'click .autoform-remove-item': function autoFormClickRemoveItem (
-    event,
-    template
-  ) {
+  'click .autoform-remove-item': function autoFormClickRemoveItem (event, template) {
     const self = this // This type of button must be used within an afEachArrayItem block, so we know the context
 
     event.preventDefault()
@@ -567,13 +564,15 @@ Template.autoForm.events({
   },
   'click .autoform-add-item': function autoFormClickAddItem (event, template) {
     event.preventDefault()
+    const self = this // This type of button must be used within an afEachArrayItem block, so we know the context
 
     // We pull from data attributes because the button could be manually
     // added anywhere, so we don't know the data context.
-    const btn = $(event.currentTarget)
-    const name = btn.attr('data-autoform-field')
-    const minCount = btn.attr('data-autoform-minCount') // optional, overrides schema
-    const maxCount = btn.attr('data-autoform-maxCount') // optional, overrides schema
+    const btn = template.$(event.currentTarget)
+    const name = self.arrayFieldName || btn.attr('data-autoform-field')
+
+    const minCount = self.minCount || btn.attr('data-autoform-minCount') // optional, overrides schema
+    const maxCount = self.maxCount || btn.attr('data-autoform-maxCount') // optional, overrides schema
 
     const data = template.data
     const formId = data && data.id
