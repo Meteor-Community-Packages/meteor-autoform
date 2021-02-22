@@ -12,7 +12,11 @@ Template.afEachArrayItem.helpers({
     if (docCount === undefined) {
       docCount = ctx.atts.initialCount
     }
-    arrayTracker.initField(formId, name, formSchema, docCount, ctx.atts.minCount, ctx.atts.maxCount)
+
+    const minCount = typeof ctx.atts.minCount === 'number' ? ctx.atts.minCount : ctx.defs.minCount
+    const maxCount = typeof ctx.atts.maxCount === 'number' ? ctx.atts.maxCount : ctx.defs.maxCount
+
+    arrayTracker.initField(formId, name, formSchema, docCount, minCount, maxCount)
     return arrayTracker.getField(formId, name)
   }
 })
