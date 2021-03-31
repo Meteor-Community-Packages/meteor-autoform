@@ -72,9 +72,12 @@ Template.afAutocomplete.onRendered(function () {
   // defined in several ways
   const me = Template.instance()
   const items = new ReactiveVar([])
+  let isOption
+
   me.autorun(() => {
     const data = Template.currentData()
     items.set(data.items)
+    isOption = value => data.selectOptions.find(option => option.value === value)
   })
 
   // secure the dom so multiple autocompletes don't clash
@@ -123,11 +126,15 @@ Template.afAutocomplete.onRendered(function () {
   })
 
   /**
-   * Ensure reactivity when changing the hidden value
+   * Ensure reactivity when changing the hidden value to a valid option or a
+   * falsy value (= deleting the value / clearing the field)
    */
   const updateValue = value => {
     $hidden.val(value)
-    $hidden.trigger('change')
+
+    if (!value || isOption(value)) {
+      $hidden.trigger('change')
+    }
   }
 
   const callback = function (e) {
