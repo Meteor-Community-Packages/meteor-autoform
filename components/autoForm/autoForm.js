@@ -1,5 +1,3 @@
-import MongoObject from 'mongo-object';
-
 /* global AutoForm, ReactiveVar, arrayTracker, Hooks, Utility, setDefaults */
 import { Template } from 'meteor/templating'
 import { EJSON } from 'meteor/ejson'

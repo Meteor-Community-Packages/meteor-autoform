@@ -11,7 +11,7 @@ import { Utility } from './utility'
 
 // all form events handled here
 let lastAutoSaveElement = null
-AutoForm._lastKeyVals = {};
+AutoForm._lastKeyVals = {}
 
 function beginSubmit (formId, template, hookContext) {
   if (!Utility.checkTemplate(template)) return
@@ -466,7 +466,7 @@ Template.autoForm.events({
     keyVal = `${key}___${keyVal}`
 
     if (formId in AutoForm._lastKeyVals && keyVal === AutoForm._lastKeyVals[formId]) {
-      return;
+      return
     }
 
     AutoForm._lastKeyVals[formId] = keyVal
