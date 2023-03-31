@@ -1,35 +1,41 @@
 /* global AutoForm */
+import { Template } from 'meteor/templating'
 
 Template.afQuickField.helpers({
-  isGroup: function afQuickFieldIsGroup() {
-    var c = AutoForm.Utility.getComponentContext(this, "afQuickField");
-    // Render a group of fields if we expect an Object and we don't have options
-    // and we have not overridden the type
-    const isSubschema = typeof c.defs.type === 'object' && c.defs.type._schema;
-    return ((c.defs.type === Object || isSubschema) && !c.atts.options && !c.atts.type);
+  isReady: function afIsComponentContextReady () {
+    const context = AutoForm.Utility.getComponentContext(this, 'afQuickField') || {}
+    return Object.keys(context).length > 0
   },
-  isFieldArray: function afQuickFieldIsFieldArray() {
-    var c = AutoForm.Utility.getComponentContext(this, "afQuickField");
-    // Render an array of fields if we expect an Array and we don't have options
+  isGroup: function afQuickFieldIsGroup () {
+    const ctx = AutoForm.Utility.getComponentContext(this, 'afQuickField')
+    // Render a group of fields if we expect an Object and we don"t have options
     // and we have not overridden the type
-    return (c.defs.type === Array && !c.atts.options && !c.atts.type);
+    const isSubschema = typeof ctx.defs.type === 'object' && ctx.defs.type._schema
+    return ((ctx.defs.type === Object || isSubschema) && !ctx.atts.options && !ctx.atts.type)
   },
-  groupAtts: function afQuickFieldGroupAtts() {
+  isFieldArray: function afQuickFieldIsFieldArray () {
+    const ctx = AutoForm.Utility.getComponentContext(this, 'afQuickField')
+    // Render an array of fields if we expect an Array and we don"t have options
+    // and we have not overridden the type
+    return (ctx.defs.type === Array && !ctx.atts.options && !ctx.atts.type)
+  },
+  groupAtts: function afQuickFieldGroupAtts () {
     // afQuickField passes `fields` and `omitFields` on to `afObjectField`
     // and `afArrayField`, but not to `afFormGroup`
-    return _.omit(this, 'fields', 'omitFields');
+    const { fields, omitFields, ...rest } = this
+    return rest
   },
-  isHiddenInput: function afQuickFieldIsHiddenInput() {
-    var c = AutoForm.Utility.getComponentContext(this, "afQuickField");
-    var inputType = c.atts.type;
+  isHiddenInput: function afQuickFieldIsHiddenInput () {
+    const ctx = AutoForm.Utility.getComponentContext(this, 'afQuickField')
+    const inputType = ctx.atts.type
     if (inputType) {
-      var componentDef = AutoForm._inputTypeDefinitions[inputType];
+      const componentDef = AutoForm._inputTypeDefinitions[inputType]
       if (!componentDef) {
-        throw new Error('AutoForm: No component found for rendering input with type "' + inputType + '"');
+        throw new Error(`AutoForm: No component found for rendering input with type "${inputType}"`)
       }
-      return componentDef.isHidden;
+      return componentDef.isHidden
     }
 
-    return false;
+    return false
   }
-});
+})

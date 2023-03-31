@@ -1,8 +1,10 @@
 .DS_Store
 .build*
 .npm*
-.meteor*
 smart.lock
 nbproject*
 /packages/
-.idea/
+.idea
+.vscode
+node_modules/
+packages/
