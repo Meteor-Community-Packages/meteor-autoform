@@ -2,7 +2,7 @@
 
 // all form events handled here
 var lastAutoSaveElement = null;
-lastKeyVals = {};
+AutoForm._lastKeyVals = {};
 
 function beginSubmit(formId, template, hookContext) {
   if (!Utility.checkTemplate(template)) return;
@@ -402,10 +402,10 @@ Template.autoForm.events({
 
     keyVal = key + '___' + keyVal;
 
-    if (formId in lastKeyVals && keyVal === lastKeyVals[formId]) {
+    if (formId in AutoForm._lastKeyVals && keyVal === AutoForm._lastKeyVals[formId]) {
       return;
     }
-    lastKeyVals[formId] = keyVal;
+    AutoForm._lastKeyVals[formId] = keyVal;
 
     // Mark field value as changed for reactive updates
     updateTrackedFieldValue(template, key);
@@ -446,7 +446,7 @@ Template.autoForm.events({
     // Reset array counts
     arrayTracker.resetForm(formId);
     // Reset the last key value for the form
-    delete lastKeyVals[formId];
+    delete AutoForm._lastKeyVals[formId];
 
     var vc = AutoForm.getValidationContext(formId);
     if (vc) vc.reset();

@@ -82,7 +82,7 @@ Template.autoForm.created = function autoFormCreated() {
     // we also want to reset the array counts for the form
     arrayTracker.resetForm(formId);
     // and the stored last key value for the form
-    delete lastKeyVals[formId];
+    delete AutoForm._lastKeyVals[formId];
 
     data = setDefaults(data);
 
