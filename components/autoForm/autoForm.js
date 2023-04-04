@@ -1,10 +1,10 @@
+/* global AutoForm, ReactiveVar, arrayTracker, setDefaults */
 import { Template } from 'meteor/templating'
 import { EJSON } from 'meteor/ejson'
 import MongoObject from 'mongo-object'
 import { isObject, isFunction } from '../../common'
 import { Hooks } from '../../autoform-hooks'
 import { Utility } from '../../utility'
-/* global AutoForm, ReactiveVar, arrayTracker, setDefaults */
 
 Template.autoForm.helpers({
   atts: function autoFormTplAtts () {
@@ -92,7 +92,10 @@ Template.autoForm.created = function autoFormCreated () {
 
     // When we change the form, loading a different doc, reloading the current doc, etc.,
     // we also want to reset the array counts for the form
+
     arrayTracker.resetForm(formId)
+    // and the stored last key value for the form
+    delete AutoForm._lastKeyVals[formId]
 
     data = setDefaults(data)
 

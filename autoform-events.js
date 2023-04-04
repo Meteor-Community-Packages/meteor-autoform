@@ -11,7 +11,7 @@ import { Utility } from './utility'
 
 // all form events handled here
 let lastAutoSaveElement = null
-const lastKeyVals = {}
+AutoForm._lastKeyVals = {}
 
 function beginSubmit (formId, template, hookContext) {
   if (!Utility.checkTemplate(template)) return
@@ -465,10 +465,10 @@ Template.autoForm.events({
 
     keyVal = `${key}___${keyVal}`
 
-    if (formId in lastKeyVals && keyVal === lastKeyVals[formId]) {
+    if (formId in AutoForm._lastKeyVals && keyVal === AutoForm._lastKeyVals[formId]) {
       return
     }
-    lastKeyVals[formId] = keyVal
+    AutoForm._lastKeyVals[formId] = keyVal
 
     const value =
       event.target.type === 'checkbox'
@@ -518,7 +518,9 @@ Template.autoForm.events({
     AutoForm.formPreserve.clearDocument(formId)
 
     // Reset array counts
+    // Reset the last key value for the form
     arrayTracker.resetForm(formId)
+    delete AutoForm._lastKeyVals[formId]
 
     const vc = AutoForm.getValidationContext(formId)
     if (vc) vc.reset()
