@@ -1,25 +1,24 @@
-/* global FormData:true */
-
+import { Tracker } from 'meteor/tracker'
 /*
  * Tracks form data with reactivity. This is similar to
  * ReactiveDict, but we need to store typed objects and
  * keep their type upon retrieval.
  */
 
-FormData = function () {
-  var self = this;
-  self.forms = {};
-};
+export const FormData = function FormData () {
+  const self = this
+  self.forms = {}
+}
 
 /**
  * Initializes tracking for a given form, if not already done.
  * @param {String} formId The form's `id` attribute
  */
 FormData.prototype.initForm = function (formId) {
-  var self = this;
+  const self = this
 
   if (self.forms[formId]) {
-    return;
+    return
   }
 
   self.forms[formId] = {
@@ -27,8 +26,8 @@ FormData.prototype.initForm = function (formId) {
     deps: {
       sourceDoc: new Tracker.Dependency()
     }
-  };
-};
+  }
+}
 
 /**
  * Initializes tracking for a given form, if not already done.
@@ -42,16 +41,17 @@ FormData.prototype.initForm = function (formId) {
  * @returns {MongoObject|undefined} Returns the form's MongoObject if getting.
  */
 FormData.prototype.sourceDoc = function (formId, sourceDoc) {
-  var self = this;
-  self.initForm(formId);
+  const self = this
+  self.initForm(formId)
 
   if (sourceDoc || sourceDoc === null) {
-    //setter
-    self.forms[formId].sourceDoc = sourceDoc;
-    self.forms[formId].deps.sourceDoc.changed();
-  } else {
-    //getter
-    self.forms[formId].deps.sourceDoc.depend();
-    return self.forms[formId].sourceDoc;
+    // setter
+    self.forms[formId].sourceDoc = sourceDoc
+    self.forms[formId].deps.sourceDoc.changed()
   }
-};
+  else {
+    // getter
+    self.forms[formId].deps.sourceDoc.depend()
+    return self.forms[formId].sourceDoc
+  }
+}

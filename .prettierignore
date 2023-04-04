@@ -1,0 +1,7 @@
+build
+coverage
+testdummy
+*.md
+*.json
+.github
+.jshintrc

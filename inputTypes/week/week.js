@@ -1,6 +1,6 @@
-AutoForm.addInputType("week", {
-  template: "afInputWeek",
+AutoForm.addInputType('week', {
+  template: 'afInputWeek',
   valueConverters: {
-    "stringArray": AutoForm.valueConverters.stringToStringArray
+    stringArray: AutoForm.valueConverters.stringToStringArray
   }
-});
+})

@@ -1,120 +1,218 @@
-AutoForm
-=========================
-
-AutoForm is a smart package for Meteor that adds handlebars helpers to easily create basic
-forms with automatic insert and update events, and automatic reactive validation.
+# AutoForm Change Log
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [AutoForm](#autoform)
-  - [Change Log](#change-log)
-    - [6.2.0](#620)
-    - [6.1.0](#610)
-    - [6.0.0](#600)
-    - [5.8.1](#581)
-    - [5.8.0](#580)
-    - [5.7.1](#571)
-    - [5.7.0](#570)
-    - [5.6.1](#561)
-    - [5.6.0](#560)
-    - [5.5.1](#551)
-    - [5.5.0](#550)
-    - [5.4.1](#541)
-    - [5.4.0](#540)
-    - [5.3.2](#532)
-    - [5.3.1](#531)
-    - [5.3.0](#530)
-    - [5.2.0](#520)
-    - [5.1.2](#512)
-    - [5.1.1](#511)
-    - [5.1.0](#510)
-    - [5.0.3](#503)
-    - [5.0.1, 5.0.2](#501-502)
-    - [5.0.0](#500)
-    - [4.2.2](#422)
-    - [4.2.1](#421)
-    - [4.2.0](#420)
-    - [4.1.0](#410)
-    - [4.0.2 - 4.0.7](#402---407)
-    - [4.0.1](#401)
-    - [4.0.0](#400)
-    - [3.2.0](#320)
-    - [3.1.0](#310)
-    - [3.0.0](#300)
-    - [2.0.2](#202)
-    - [2.0.1](#201)
-    - [2.0.0](#200)
-    - [1.0.0](#100)
-    - [0.17.1](#0171)
-    - [0.17.0](#0170)
-    - [0.16.1](#0161)
-    - [0.16.0](#0160)
-    - [0.15.4](#0154)
-    - [0.15.3](#0153)
-    - [0.15.2](#0152)
-    - [0.15.1](#0151)
-    - [0.15.0](#0150)
-    - [0.14.1](#0141)
-    - [0.14.0](#0140)
-    - [0.13.5](#0135)
-    - [0.13.4](#0134)
-    - [0.13.3](#0133)
-    - [0.13.2](#0132)
-    - [0.13.1](#0131)
-    - [0.13.0](#0130)
-    - [0.12.0](#0120)
-    - [0.11.0](#0110)
-    - [0.10.0](#0100)
-    - [0.9.0](#090)
-    - [0.8.1](#081)
-    - [0.8.0](#080)
-    - [0.7.2](#072)
-    - [0.7.1](#071)
-    - [0.7.0](#070)
-    - [0.6.2](#062)
-    - [0.6.1](#061)
-    - [0.6.0](#060)
-    - [0.5.2](#052)
-    - [0.5.1](#051)
-    - [0.5.0](#050)
-    - [0.4.20](#0420)
-    - [0.4.19](#0419)
-    - [0.4.18](#0418)
-    - [0.4.17](#0417)
-    - [0.4.16](#0416)
-    - [0.4.15](#0415)
-    - [0.4.14](#0414)
-    - [0.4.13](#0413)
-    - [0.4.12](#0412)
-    - [0.4.11](#0411)
-    - [0.4.10](#0410)
-    - [0.4.9](#049)
-    - [0.4.8](#048)
-    - [0.4.7](#047)
-    - [0.4.6](#046)
-    - [0.4.5](#045)
-    - [0.4.4](#044)
-    - [0.4.3](#043)
-    - [0.4.2](#042)
-    - [0.4.1](#041)
-    - [0.4.0](#040)
-    - [0.3.6](#036)
-    - [0.3.5](#035)
-    - [0.3.4](#034)
-    - [0.3.3](#033)
-    - [0.3.2](#032)
-    - [0.3.1](#031)
-    - [0.3.0](#030)
-    - [0.2.3](#023)
-    - [0.2.2](#022)
-    - [0.2.1](#021)
-    - [0.2.0](#020)
+- [7.0.0](#700)
+- [6.3.0](#630)
+- [6.2.0](#620)
+- [6.1.0](#610)
+- [6.0.0](#600)
+- [5.8.1](#581)
+- [5.8.0](#580)
+- [5.7.1](#571)
+- [5.7.0](#570)
+- [5.6.1](#561)
+- [5.6.0](#560)
+- [5.5.1](#551)
+- [5.5.0](#550)
+- [5.4.1](#541)
+- [5.4.0](#540)
+- [5.3.2](#532)
+- [5.3.1](#531)
+- [5.3.0](#530)
+- [5.2.0](#520)
+- [5.1.2](#512)
+- [5.1.1](#511)
+- [5.1.0](#510)
+- [5.0.3](#503)
+- [5.0.1, 5.0.2](#501-502)
+- [5.0.0](#500)
+- [4.2.2](#422)
+- [4.2.1](#421)
+- [4.2.0](#420)
+- [4.1.0](#410)
+- [4.0.2 - 4.0.7](#402---407)
+- [4.0.1](#401)
+- [4.0.0](#400)
+- [3.2.0](#320)
+- [3.1.0](#310)
+- [3.0.0](#300)
+- [2.0.2](#202)
+- [2.0.1](#201)
+- [2.0.0](#200)
+- [1.0.0](#100)
+- [0.17.1](#0171)
+- [0.17.0](#0170)
+- [0.16.1](#0161)
+- [0.16.0](#0160)
+- [0.15.4](#0154)
+- [0.15.3](#0153)
+- [0.15.2](#0152)
+- [0.15.1](#0151)
+- [0.15.0](#0150)
+- [0.14.1](#0141)
+- [0.14.0](#0140)
+- [0.13.5](#0135)
+- [0.13.4](#0134)
+- [0.13.3](#0133)
+- [0.13.2](#0132)
+- [0.13.1](#0131)
+- [0.13.0](#0130)
+- [0.12.0](#0120)
+- [0.11.0](#0110)
+- [0.10.0](#0100)
+- [0.9.0](#090)
+- [0.8.1](#081)
+- [0.8.0](#080)
+- [0.7.2](#072)
+- [0.7.1](#071)
+- [0.7.0](#070)
+- [0.6.2](#062)
+- [0.6.1](#061)
+- [0.6.0](#060)
+- [0.5.2](#052)
+- [0.5.1](#051)
+- [0.5.0](#050)
+- [0.4.20](#0420)
+- [0.4.19](#0419)
+- [0.4.18](#0418)
+- [0.4.17](#0417)
+- [0.4.16](#0416)
+- [0.4.15](#0415)
+- [0.4.14](#0414)
+- [0.4.13](#0413)
+- [0.4.12](#0412)
+- [0.4.11](#0411)
+- [0.4.10](#0410)
+- [0.4.9](#049)
+- [0.4.8](#048)
+- [0.4.7](#047)
+- [0.4.6](#046)
+- [0.4.5](#045)
+- [0.4.4](#044)
+- [0.4.3](#043)
+- [0.4.2](#042)
+- [0.4.1](#041)
+- [0.4.0](#040)
+- [0.3.6](#036)
+- [0.3.5](#035)
+- [0.3.4](#034)
+- [0.3.3](#033)
+- [0.3.2](#032)
+- [0.3.1](#031)
+- [0.3.0](#030)
+- [0.2.3](#023)
+- [0.2.2](#022)
+- [0.2.1](#021)
+- [0.2.0](#020)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Change Log
+### 7.0.0
+
+This is a major change and can break existing setups. However, we carefully
+worked out the changes and updated documentation accordingly. In theory there
+should be no issues if you follow the [installation](./README.md#installation) 
+guide.
+
+**Performance**
+
+- **support dynamic imports**:
+  The package can now be imported with a minimal set of base functionality, 
+  while the greater part of templates can be dynamically loaded. Saves 
+
+- **No underscore.js**:
+  Underscore dependency was removed.
+
+- **Mongo collections for arrayTracker**:
+  Improves the performance greatly. Blaze cannot diff the original
+  AutoForm arrayTracker items, so I replaced it with Mongo collections.
+
+- **Wait for context**:
+  Instead of reactively re-rendering the entire form, we wait for the
+  context before we render it for the first time.
+
+- **Cache field Ids**:
+  This prevents regenerating the field Id and rerendering the field
+  just because the Id is changed.
+
+- **`clean` option for `getFieldValue` and `getFieldValues`**:
+  By default AutoForm cleans all the values fetched from the form,
+  however that's only necessary when we're putting the data into
+  the database and/or validating, for rendering the value of a field
+  in a view that isn't necessary. I added a `option` argument to these
+  two functions, this defaults to true which is the normal AutoForm
+  behavior. When set to false it won't clean the form data (clean
+  function is really heavy and doesn't make much sense on our views).
+
+- **`getFieldValue` is cached**:
+  This function is reactive and recomputes its return value when
+  there is a change in the value. Sometimes it's necessary to call
+  this function several times and we do not want to recompute when
+  the value hasn't been changed. This function now caches its results,
+  then invalidates the cache when there's a change in the value.
+
+- **`markChanged` function is throttled now**:
+  This function gets called a million times when our form has too
+  many reactive dependencies or too many fields. This isn't necessary,
+  we don't need to mark a field value changed when it hasn't been changed.
+
+- **Pass field value to `markChanged`**:
+  To prevent unnecessary `changed` events
+
+- **Refuse to change if value is undefined (`markChanged`)**:
+  To prevent unnecessary `changed` events
+
+**Bugs Fixes**
+
+- **`disabled` in select options**: didn't work.
+- merged aldeed/meteor-autoform/pull/1289
+- Detects **nested forms** in `form change` event
+- quickForm field grouping now corrected filtering, preventing followup errors
+
+**Features**
+
+- **`omit` can be a function now**
+- **`AutoForm.setFieldValue(fieldName, value, formId)` added**: aldeed/meteor-autoform/issues/452
+- **`AutoForm.setFormValues(values, formId)` added**
+- **`methodargs`**:
+  Allows passing a `methodargs` attribute to autoForm/quickForm templates.
+  These args will be passed to `meteormethod` if form type is `method` or `method-update`.
+
+**Tests**
+
+- **`replaced`** TinyTest with `meteortesting:mocha` in combination with `chai` and `puppeteer`. This makes local tests
+  much easier. In Order to execute local tests, there is a local bare Meteor project required. It can easily be created
+  and executed via
+  
+```bash
+$  meteor create --bare testdummy # testdummy is already in the .gitignore
+$ cd testdummmy
+$ meteor npm install --save-dev puppeteer simpl-schema chai sinon
+$ METEOR_PACKAGE_DIRS="../" TEST_BROWSER_DRIVER=puppeteer TEST_WATCH=1 TEST_SERVER=0 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../
+```
+
+- **`replaced`** TravisCI with GitHub actions
+- **`implemented`** testsuite for API and internals
+
+**Other**
+
+- **Standard code style**:
+  All code has been updated to use standard code style as defined in the Meteor
+  Community Packages template repository
+
+- **No templates in main package**:
+  BS3 is deprecated. These templates are rarely used, including them in the main package and
+  supporting them makes the code unnecessarily huge and difficult to maintain.
+  These were moved to their own packages:
+  [autoform-bootstrap3](https://github.com/pouya-eghbali/autoform-bootstrap3),
+  [autoform-plain](https://github.com/pouya-eghbali/autoform-plain)
+
+### 6.3.0
+
+Updated to have a weak dependency on `aldeed:collection2@3.0.0` in addition to `aldeed:collection2-core`. Core has been merged back into the main package as a 3.0.0 release.
 
 ### 6.2.0
 
