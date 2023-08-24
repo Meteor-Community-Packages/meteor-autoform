@@ -171,7 +171,7 @@ describe('api', function () {
       delete Template[template]
     })
     it("shows a warnring, if the attributes provided a templateName but that template didn't exist", function (done) {
-      let warned = false
+      const warned = false
       AutoForm._debug = true
       stub(console, 'warn', message => {
         expect(message).to.equal(`${templateType}: "${templateName}" is not a valid template name. Falling back to a different template.`)
@@ -182,7 +182,7 @@ describe('api', function () {
       expect(warned).to.equal(true)
       AutoForm._debug = false
     })
-    it("shows a warnring, if no theme exists", function (done) {
+    it('shows a warnring, if no theme exists', function (done) {
       AutoForm._debug = false
       stub(console, 'warn', message => {
         expect(message).to.equal('AutoForm: no theme found, please consult the README.')
