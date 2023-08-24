@@ -17,7 +17,7 @@ AutoForm 7.0 is now available and decouples from the default themes. **You will 
 Be sure to check out the [change log](./CHANGELOG.md#700) for full details, first.
 Note that if you use add-on packages that haven't been updated yet, you will not yet be able to update to version 6.
 
-**Add-on Package Authors**: Please test your package against AutoForm 7.0, and then release a major version update in which you change your `api.use` to `api.use('aldeed:autoform@7.0.0');`. 
+**Add-on Package Authors**: Please test your package against AutoForm 7.0, and then release a major version update in which you change your `api.use` to `api.use('aldeed:autoform@7.0.0');`.
 We do NOT recommend using something like `api.use('aldeed:autoform@6.0.0 || 7.0.0');` to try to support multiple major versions of AutoForm because there is currently a known Meteor issue where trying to support too many dependency paths leads to running out of memory when trying to resolve dependencies.
 
 ## Table of Contents
@@ -138,6 +138,7 @@ The following themes are available and tested to work with v7:
 - [autoform-plain](https://github.com/Meteor-Community-Packages/meteor-autoform-themes/tree/main/plain)
 - [autoform-bootstrap3](https://github.com/Meteor-Community-Packages/meteor-autoform-themes/tree/main/bootstrap3)
 - [autoform-bootstrap4](https://github.com/Meteor-Community-Packages/meteor-autoform-themes/tree/main/bootstrap4)
+- [autoform-bootstrap5](https://github.com/Meteor-Community-Packages/meteor-autoform-themes/tree/main/bootstrap5)
 
 Please also consider, that `twbs:bootstrap` is depending on an outdated (and potential insecure!) Bootstrap version.
 Better: Use the latest Bootstrap 3.x or 4.x from NPM in favour.
@@ -160,7 +161,7 @@ You can easily circumvent this issue by editing the package entry in `.meteor/pa
 from `aldeed:autoform` to `aldeed:autoform@7.0.0!` (note the exclamation mark).
 
 This is because many extensions will not have the `7.0.0` reference in their
-`package.js` file, yet. However, this major version is intended to not break 
+`package.js` file, yet. However, this major version is intended to not break
 compatibility with extensions, that worked with `6.x`. If you encounter any
 runtime issues with extensions, please open an issue.
 
@@ -183,7 +184,7 @@ That's it. The Templates are now available.
 ### Import using dynamic imports
 
 This package supports `dynamic-import`, which helps to reduce initial bundle
-size of the package from ~110 KB to ~60 KB (estimated via `bundle-visualizer`). 
+size of the package from ~110 KB to ~60 KB (estimated via `bundle-visualizer`).
 
 The following example shows how to import the packages dynamically:
 
@@ -199,7 +200,7 @@ AutoForm.load()
   })
 ```
 
-You can even combine this with one of the themes (if they support dynamic imports) 
+You can even combine this with one of the themes (if they support dynamic imports)
 like in the following example:
 
 ```javascript
@@ -237,14 +238,14 @@ initAutoForm()
   .catch(e => {
     // ... on error code
   })
-  
+
 // ... other Template code
-  
+
 Template.myCoolForm.helpers({
   loadComplete() {
     return autoFormLoaded.get()
   }
-})  
+})
 ```
 
 ### Community Add-On Packages
@@ -1801,6 +1802,8 @@ on the site, too. If the code is publicly available, link to that, too.
 
 ## Troubleshooting
 
+* A warning is raised, containing `AutoForm: no theme found, please consult the README.`.
+  In such case you may want to [install a theme](#installation).
 * While developing, be sure to call `AutoForm.debug()` in your client code to enable extra logging.
 * If nothing happens when you click the submit button for your form and there are
 no errors, make sure the button's type is `submit`.
@@ -1814,8 +1817,8 @@ about it in the [contributing guide](CONTRIBUTING.md) and also consider the
 
 ## Testing
 
-In order to improve development we have replaced TinyTest with 
-`meteortesting:mocha` in combination with `chai` and `puppeteer`. 
+In order to improve development we have replaced TinyTest with
+`meteortesting:mocha` in combination with `chai` and `puppeteer`.
 
 This makes local tests much easier and also allows us to run tests in the CI.
 We have added a minimal test project in this repo, that serves as our proxy
@@ -1839,7 +1842,7 @@ The following test commands are available:
 - `test` - runs the tests once; CLI-only
 - `test:watch` - runs the tests in watch mode; CLI-only
 
-**Publishing note** 
+**Publishing note**
 
 If you publish the package to atmosphere, make sure you
 remove the test project or move it outside of the package root.
@@ -1881,7 +1884,7 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 
 ## Credits
 
-Many thanks to [Eric Dobbertin (aldeed)](https://github.com/aldeed) for creating 
+Many thanks to [Eric Dobbertin (aldeed)](https://github.com/aldeed) for creating
 this package and many years of improvement and for the trust in Meteor Community Packages.
 
 Also many thanks to all the [contributors](https://github.com/Meteor-Community-Packages/meteor-autoform/graphs/contributors).

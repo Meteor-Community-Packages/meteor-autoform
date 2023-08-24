@@ -309,6 +309,7 @@ AutoForm.getTemplateName = function autoFormGetTemplateName (
   }
 
   // Found nothing. Return undefined
+  console.warn('AutoForm: no theme found, please consult the README.')
 }
 
 /**
