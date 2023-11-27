@@ -264,6 +264,7 @@ Dates and times:
 * [antalakas:autoform-bs-daterangepicker](https://atmospherejs.com/antalakas/autoform-bs-daterangepicker)
 * [drewy:autoform-datetimepicker](https://atmospherejs.com/drewy/autoform-datetimepicker)
 * [bookmd:autoform-time-from-now](https://atmospherejs.com/bookmd/autoform-time-from-now)
+* [jkutianski:autoform-datemask](https://atmospherejs.com/jkutianski/autoform-datemask)
 
 Selects:
 
