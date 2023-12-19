@@ -10,16 +10,18 @@
     "test:watch": "METEOR_PACKAGE_DIRS='../' TEST_BROWSER_DRIVER=puppeteer TEST_SERVER=0 TEST_WATCH=1 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../"
   },
   "dependencies": {
-    "@babel/runtime": "^7.11.2",
-    "meteor-node-stubs": "^1.0.1",
-    "puppeteer": "^5.5.0"
+    "@babel/runtime": "^7.23.6",
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.2",
+    "meteor-node-stubs": "^1.2.7",
+    "puppeteer": "^21.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.7",
     "@babel/eslint-parser": "^7.12.1",
     "chai": "^4.2.0",
     "eslint-config-standard": "^16.0.2",
-    "simpl-schema": "^1.10.2",
+    "simpl-schema": "^1.13.1",
     "sinon": "^9.2.1",
     "snazzy": "^9.0.0",
     "standardx": "^7.0.0"
@@ -51,6 +53,11 @@
           "allowSingleLine": true
         }
       ]
+    }
+  },
+  "meteor": {
+    "mainModule": {
+      "client": "client/main.js"
     }
   }
 }
