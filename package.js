@@ -7,6 +7,10 @@ Package.describe({
   version: '7.0.1'
 })
 
+Npm.depends({
+  'mongo-object': '3.0.1'
+});
+
 Package.onUse(function (api) {
   api.versionsFrom('METEOR@1.3')
 
