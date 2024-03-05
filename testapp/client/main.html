@@ -1,0 +1,16 @@
+<head>
+  <meta charset="UTF-8">
+  <title>AutoForm DEMO</title>
+</head>
+<body>
+<div class="container">
+  <h1>AutoForm DEMO</h1>
+
+  {{> quickForm id="userForm" type="normal" schema=schema}}
+
+  {{#let userDoc=userDoc}}
+    <span>Name: {{userDoc.name}}</span>
+      <span>Age: {{userDoc.age}}</span>
+  {{/let}}
+</div>
+</body>
