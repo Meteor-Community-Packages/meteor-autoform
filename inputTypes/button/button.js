@@ -1,3 +1,3 @@
-AutoForm.addInputType("button", {
-  template: "afInputButton"
-});
+AutoForm.addInputType('button', {
+  template: 'afInputButton'
+})

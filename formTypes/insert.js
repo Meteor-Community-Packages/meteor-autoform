@@ -2,43 +2,44 @@
 
 AutoForm.addFormType('insert', {
   onSubmit: function () {
-    var c = this;
+    const ctx = this
 
     // Prevent browser form submission
-    this.event.preventDefault();
+    this.event.preventDefault()
 
     // Make sure we have a collection
-    var collection = this.collection;
+    const collection = this.collection
     if (!collection) {
-      throw new Error("AutoForm: You must specify a collection when form type is insert.");
+      throw new Error('AutoForm: You must specify a collection when form type is insert.')
     }
 
     // See if the collection has a schema attached
-    var collectionHasSchema = (typeof collection.simpleSchema === "function" &&
-                               collection.simpleSchema(this.insertDoc) != null);
+    const collectionHasSchema = (typeof collection.simpleSchema === 'function' &&
+                               collection.simpleSchema(this.insertDoc) != null)
 
     // Run "before.insert" hooks
     this.runBeforeHooks(this.insertDoc, function (doc) {
       // Perform insert
       if (collectionHasSchema) {
         // If the collection2 pkg is used and a schema is attached, we pass a validationContext
-        collection.insert(doc, c.validationOptions, c.result);
-      } else {
+        collection.insert(doc, ctx.validationOptions, ctx.result)
+      }
+      else {
         // If the collection2 pkg is not used or no schema is attached, we don't pass options
         // because core Meteor's `insert` function does not accept
         // an options argument.
-        collection.insert(doc, c.result);
+        collection.insert(doc, ctx.result)
       }
-    });
+    })
   },
   validateForm: function () {
     // Get SimpleSchema
-    var ss = AutoForm.getFormSchema(this.form.id);
+    const formSchema = AutoForm.getFormSchema(this.form.id)
     // Validate
-    return AutoForm._validateFormDoc(this.formDoc, false, this.form.id, ss, this.form);
+    return AutoForm._validateFormDoc(this.formDoc, false, this.form.id, formSchema, this.form)
   },
   shouldPrevalidate: function () {
     // Prevalidate only if there is both a `schema` attribute and a `collection` attribute
-    return !!this.formAttributes.collection && !!this.formAttributes.schema;
+    return !!this.formAttributes.collection && !!this.formAttributes.schema
   }
-});
+})

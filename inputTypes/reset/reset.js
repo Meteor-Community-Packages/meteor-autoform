@@ -1,3 +1,3 @@
-AutoForm.addInputType("reset", {
-  template: "afInputReset"
-});
+AutoForm.addInputType('reset', {
+  template: 'afInputReset'
+})

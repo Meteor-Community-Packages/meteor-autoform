@@ -1,3 +1,3 @@
-AutoForm.addInputType("image", {
-  template: "afInputImage"
-});
+AutoForm.addInputType('image', {
+  template: 'afInputImage'
+})

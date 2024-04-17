@@ -1,6 +1,6 @@
-AutoForm.addInputType("month", {
-  template: "afInputMonth",
+AutoForm.addInputType('month', {
+  template: 'afInputMonth',
   valueConverters: {
-    "stringArray": AutoForm.valueConverters.stringToStringArray
+    stringArray: AutoForm.valueConverters.stringToStringArray
   }
-});
+})
