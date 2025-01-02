@@ -22,7 +22,7 @@ jobs:
       - name: Setup meteor
         uses: meteorengineer/setup-meteor@v1
         with:
-          meteor-release: '3.0-rc.4'
+          meteor-release: '3.1'
 
       - name: cache dependencies
         uses: actions/cache@v4
