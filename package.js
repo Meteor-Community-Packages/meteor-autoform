@@ -4,7 +4,7 @@ Package.describe({
   summary:
     'Easily create forms with automatic insert and update, and automatic reactive validation.',
   git: 'https://github.com/aldeed/meteor-autoform.git',
-  version: '8.0.0-rc.4'
+  version: '8.0.0'
 })
 
 Npm.depends({
@@ -31,8 +31,8 @@ Package.onUse(function (api) {
     [
       'momentjs:moment@2.30.1',
       'mrt:moment-timezone@0.2.1',
-      'aldeed:collection2@4.0.3',
-      'aldeed:simple-schema@2.0.0-rc.300.10',
+      'aldeed:collection2@4.0.4',
+      'aldeed:simple-schema@2.0.0',
       'aldeed:moment-timezone@0.4.0',
       'reload'
     ],
@@ -61,7 +61,7 @@ Package.onUse(function (api) {
 })
 
 Package.onTest(function (api) {
-  api.versionsFrom(['2.8.0', '3.0-rc.4'])
+  api.versionsFrom(['2.8.0', '3.0.1'])
   // Running the tests requires a dummy project in order to
   // resolve npm dependencies and the test env dependencies.
   api.use([
@@ -71,16 +71,16 @@ Package.onTest(function (api) {
     'mongo',
     'blaze@3.0.0',
     'templating@1.4.4',
-    'meteortesting:mocha@3.0.0-rc.1',
-    'aldeed:collection2@4.0.3'
+    'meteortesting:mocha@3.2.0'
   ])
   api.use([
+    'aldeed:collection2@4.0.4',
     'momentjs:moment@2.30.1'
   ], 'client', { weak: true })
   api.use([
-    'aldeed:autoform@8.0.0-rc.2',
+    'aldeed:autoform@8.0.0',
     'aldeed:moment-timezone',
-    'aldeed:simple-schema@2.0.0-rc.300.10'
+    'aldeed:simple-schema@2.0.0'
   ], 'client')
 
   api.addFiles([
