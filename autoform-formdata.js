@@ -5,53 +5,50 @@ import { Tracker } from 'meteor/tracker'
  * keep their type upon retrieval.
  */
 
-export const FormData = function FormData () {
-  const self = this
-  self.forms = {}
-}
-
-/**
- * Initializes tracking for a given form, if not already done.
- * @param {String} formId The form's `id` attribute
- */
-FormData.prototype.initForm = function (formId) {
-  const self = this
-
-  if (self.forms[formId]) {
-    return
+export class FormData {
+  constructor () {
+    const self = this
+    self.forms = {}
   }
 
-  self.forms[formId] = {
-    sourceDoc: null,
-    deps: {
-      sourceDoc: new Tracker.Dependency()
+  /**
+   * Initializes tracking for a given form, if not already done.
+   * @param {String} formId The form's `id` attribute
+   */
+  initForm (formId) {
+    const self = this
+
+    if (self.forms[formId]) {
+      return
+    }
+
+    self.forms[formId] = {
+      sourceDoc: null,
+      deps: {
+        sourceDoc: new Tracker.Dependency()
+      }
     }
   }
-}
 
-/**
- * Initializes tracking for a given form, if not already done.
- * @param {String} formId The form's `id` attribute
- */
+  /**
+   * Gets or sets a source doc for the given form. Reactive.
+   * @param   {String}                formId    The form's `id` attribute
+   * @param   {MongoObject|null}      sourceDoc The mDoc for the form or `null` if no doc.
+   * @returns {MongoObject|undefined} Returns the form's MongoObject if getting.
+   */
+  sourceDoc (formId, sourceDoc) {
+    const self = this
+    self.initForm(formId)
 
-/**
- * Gets or sets a source doc for the given form. Reactive.
- * @param   {String}                formId    The form's `id` attribute
- * @param   {MongoObject|null}      sourceDoc The mDoc for the form or `null` if no doc.
- * @returns {MongoObject|undefined} Returns the form's MongoObject if getting.
- */
-FormData.prototype.sourceDoc = function (formId, sourceDoc) {
-  const self = this
-  self.initForm(formId)
-
-  if (sourceDoc || sourceDoc === null) {
-    // setter
-    self.forms[formId].sourceDoc = sourceDoc
-    self.forms[formId].deps.sourceDoc.changed()
-  }
-  else {
-    // getter
-    self.forms[formId].deps.sourceDoc.depend()
-    return self.forms[formId].sourceDoc
+    if (sourceDoc || sourceDoc === null) {
+      // setter
+      self.forms[formId].sourceDoc = sourceDoc
+      self.forms[formId].deps.sourceDoc.changed()
+    }
+    else {
+      // getter
+      self.forms[formId].deps.sourceDoc.depend()
+      return self.forms[formId].sourceDoc
+    }
   }
 }

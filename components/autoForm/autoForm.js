@@ -1,10 +1,11 @@
-/* global AutoForm, ReactiveVar, arrayTracker, setDefaults */
+/* global AutoForm, ReactiveVar, setDefaults */
 import { Template } from 'meteor/templating'
 import { EJSON } from 'meteor/ejson'
 import MongoObject from 'mongo-object'
 import { isObject, isFunction } from '../../common'
 import { Hooks } from '../../autoform-hooks'
 import { Utility } from '../../utility'
+import { arrayTracker } from '../../autoform-arrays'
 
 Template.autoForm.helpers({
   atts: function autoFormTplAtts () {

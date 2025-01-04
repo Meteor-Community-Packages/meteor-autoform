@@ -1,4 +1,4 @@
-/* global $ deps globalDefaultTemplate defaultTypeTemplates arrayTracker  setDefaults */
+/* global $ setDefaults */
 import { Meteor } from 'meteor/meteor'
 import { Tracker } from 'meteor/tracker'
 import { Template } from 'meteor/templating'
@@ -14,6 +14,8 @@ import {
 import { validateField } from './autoform-validation'
 import { Hooks } from './autoform-hooks'
 import { Utility } from './utility'
+import { arrayTracker } from './autoform-arrays'
+import { Internal } from './internal'
 
 // This file defines the public, exported API
 
@@ -136,8 +138,8 @@ AutoForm.resetForm = function autoFormResetForm (formId, template) {
  * @param {String} template
  */
 AutoForm.setDefaultTemplate = function autoFormSetDefaultTemplate (template) {
-  globalDefaultTemplate = template // eslint-disable-line no-global-assign
-  deps.defaultTemplate.changed()
+  Internal.globalDefaultTemplate = template
+  Internal.deps.defaultTemplate.changed()
 }
 
 /**
@@ -147,8 +149,8 @@ AutoForm.setDefaultTemplate = function autoFormSetDefaultTemplate (template) {
  * Reactive.
  */
 AutoForm.getDefaultTemplate = function autoFormGetDefaultTemplate () {
-  deps.defaultTemplate.depend()
-  return globalDefaultTemplate
+  Internal.deps.defaultTemplate.depend()
+  return Internal.globalDefaultTemplate
 }
 
 /**
@@ -161,16 +163,16 @@ AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType 
   type,
   template
 ) {
-  if (!deps.defaultTypeTemplates[type]) {
-    deps.defaultTypeTemplates[type] = new Tracker.Dependency()
+  if (!Internal.deps.defaultTypeTemplates[type]) {
+    Internal.deps.defaultTypeTemplates[type] = new Tracker.Dependency()
   }
   if (template !== null && !Template[`${type}_${template}`]) {
     throw new Error(
       `setDefaultTemplateForType can't set default template to "${template}" for type "${type}" because there is no defined template with the name "${type}_${template}"`
     )
   }
-  defaultTypeTemplates[type] = template
-  deps.defaultTypeTemplates[type].changed()
+  Internal.defaultTypeTemplates[type] = template
+  Internal.deps.defaultTypeTemplates[type].changed()
 }
 
 /**
@@ -184,11 +186,11 @@ AutoForm.setDefaultTemplateForType = function autoFormSetDefaultTemplateForType 
 AutoForm.getDefaultTemplateForType = function autoFormGetDefaultTemplateForType (
   type
 ) {
-  if (!deps.defaultTypeTemplates[type]) {
-    deps.defaultTypeTemplates[type] = new Tracker.Dependency()
+  if (!Internal.deps.defaultTypeTemplates[type]) {
+    Internal.deps.defaultTypeTemplates[type] = new Tracker.Dependency()
   }
-  deps.defaultTypeTemplates[type].depend()
-  return defaultTypeTemplates[type]
+  Internal.deps.defaultTypeTemplates[type].depend()
+  return Internal.defaultTypeTemplates[type]
 }
 
 /**

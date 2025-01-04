@@ -4,6 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
+- [8.0.0](#800)
 - [7.0.0](#700)
 - [6.3.0](#630)
 - [6.2.0](#620)
@@ -110,18 +111,22 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+### 8.0.0
+
+- Package/dependencies: make this package work for Meteor 3.0
+
 ### 7.0.0
 
 This is a major change and can break existing setups. However, we carefully
 worked out the changes and updated documentation accordingly. In theory there
-should be no issues if you follow the [installation](./README.md#installation) 
+should be no issues if you follow the [installation](./README.md#installation)
 guide.
 
 **Performance**
 
 - **support dynamic imports**:
-  The package can now be imported with a minimal set of base functionality, 
-  while the greater part of templates can be dynamically loaded. Saves 
+  The package can now be imported with a minimal set of base functionality,
+  while the greater part of templates can be dynamically loaded. Saves
 
 - **No underscore.js**:
   Underscore dependency was removed.
@@ -186,7 +191,7 @@ guide.
 - **`replaced`** TinyTest with `meteortesting:mocha` in combination with `chai` and `puppeteer`. This makes local tests
   much easier. In Order to execute local tests, there is a local bare Meteor project required. It can easily be created
   and executed via
-  
+
 ```bash
 $  meteor create --bare testdummy # testdummy is already in the .gitignore
 $ cd testdummmy

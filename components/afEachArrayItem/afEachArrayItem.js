@@ -1,5 +1,6 @@
-/* global AutoForm, arrayTracker */
+/* global AutoForm */
 import { Template } from 'meteor/templating'
+import { arrayTracker } from '../../autoform-arrays'
 
 Template.afEachArrayItem.helpers({
   innerContext: function afEachArrayItemContext () {

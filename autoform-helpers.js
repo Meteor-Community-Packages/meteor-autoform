@@ -1,7 +1,7 @@
+/* global AutoForm */
 import { Template } from 'meteor/templating'
 import { isFunction } from './common'
-
-/* global arrayTracker, AutoForm */
+import { arrayTracker } from './autoform-arrays'
 
 function parseOptions (options, helperName, skipSchema) {
   const hash = (options || {}).hash || {}

@@ -1,11 +1,12 @@
 /* eslint-env mocha */
-/* global moment Package */
+/* global Package */
 import { Random } from 'meteor/random'
 import { expect } from 'chai'
 import { Mongo } from 'meteor/mongo'
 import MongoObject from 'mongo-object'
 import { stub, restoreAll, overrideStub, getVoid } from './test-utils.tests'
 import { Utility } from '../utility'
+import { moment } from 'meteor/momentjs:moment'
 
 describe('Utility', function () {
   afterEach(function () {
