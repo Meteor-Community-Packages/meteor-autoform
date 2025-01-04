@@ -20,3 +20,5 @@ AutoForm._formTypeDefinitions = {} // for storing submit type definitions added 
 
 // Used by AutoForm._forceResetFormValues; temporary hack
 AutoForm._destroyForm = {}
+
+module.exports.AutoForm = AutoForm
