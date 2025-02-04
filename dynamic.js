@@ -1,5 +1,7 @@
 let initialized = false
 
+export const AutoForm = global.AutoForm
+
 AutoForm.load = async function load () {
   if (!initialized) {
     await init()

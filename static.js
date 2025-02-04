@@ -100,3 +100,5 @@ import './components/afQuickFields/afQuickFields.js'
 import './autoform-events.js'
 
 AutoForm.load = () => {} // keep isomorph with dynamic version
+
+export { AutoForm } from './autoform'

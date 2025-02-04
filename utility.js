@@ -1,12 +1,12 @@
-/* global moment */
 import MongoObject from 'mongo-object'
 import { isObject } from './common'
+import { getMoment } from './getMoment'
 
 /**
  * @private
  * @type {RegExp}
- * Used to validate time strings. This reg ex actually allows a few invalid hours/minutes/seconds,
- * but we can catch that when parsing.
+ * Used to validate time strings. This reg ex actually allows a few invalid
+ *   hours/minutes/seconds, but we can catch that when parsing.
  */
 const timeStringRegExp = /^[0-2][0-9]:[0-5][0-9](:[0-5][0-9](\.[0-9]{1,3})?)?$/
 
@@ -69,7 +69,8 @@ export const Utility = {
   /**
    * @method Utility.reportNulls
    * @private
-   * @param {Object} flatDoc - An object with no properties that are also objects.
+   * @param {Object} flatDoc - An object with no properties that are also
+   *   objects.
    * @param {Boolean} keepEmptyStrings
    * @returns {Object} An object in which the keys represent the keys in the
    * original object that were null, undefined, or empty strings, and the value
@@ -109,8 +110,10 @@ export const Utility = {
    * @private
    * @param {Object} doc - An object to be converted into a MongoDB modifier
    * @param {Object} [options] - Options
-   * @param {Boolean} [options.keepEmptyStrings] - Pass `true` to keep empty strings in the $set. Otherwise $unset them.
-   * @param {Boolean} [options.keepArrays] - Pass `true` to $set entire arrays. Otherwise the modifier will $set individual array items.
+   * @param {Boolean} [options.keepEmptyStrings] - Pass `true` to keep empty
+   *   strings in the $set. Otherwise $unset them.
+   * @param {Boolean} [options.keepArrays] - Pass `true` to $set entire arrays.
+   *   Otherwise the modifier will $set individual array items.
    * @returns {Object} A MongoDB modifier.
    *
    * Converts an object into a modifier by flattening it, putting keys with
@@ -151,7 +154,8 @@ export const Utility = {
    * @param {Element} select - DOM Element from which to get current values
    * @returns {string[]}
    *
-   * Gets a string array of all the selected values in a given `select` DOM element.
+   * Gets a string array of all the selected values in a given `select` DOM
+   *   element.
    */
   getSelectValues: function getSelectValues (select) {
     const result = []
@@ -224,8 +228,8 @@ export const Utility = {
    * @param {String} name
    * @return {Object} Schema definitions object
    *
-   * Returns the schema definitions object from a SimpleSchema instance, grabbing the first
-   * type definition out of potentially multiple.
+   * Returns the schema definitions object from a SimpleSchema instance,
+   *   grabbing the first type definition out of potentially multiple.
    */
   getFieldDefinition (ss, name) {
     const def = ss.getDefinition(name)
@@ -302,7 +306,8 @@ export const Utility = {
    * @param  {Object} obj
    * @return {undefined}
    *
-   * Edits the object by reference, compacting any arrays at any level recursively.
+   * Edits the object by reference, compacting any arrays at any level
+   *   recursively.
    */
   compactArrays: function compactArrays (obj) {
     if (isObject(obj)) {
@@ -379,6 +384,7 @@ export const Utility = {
    * Returns `true` if dateString is a "valid date string"
    */
   isValidDateString: function isValidDateString (dateString) {
+    const moment = getMoment(true)
     const m = moment(dateString, 'YYYY-MM-DD', true)
     return m && m.isValid()
   },
@@ -403,7 +409,8 @@ export const Utility = {
    * @param  {String} dateString
    * @return {Boolean}
    *
-   * Returns true if dateString is a "valid normalized forced-UTC global date and time string"
+   * Returns true if dateString is a "valid normalized forced-UTC global date
+   *   and time string"
    */
   isValidNormalizedForcedUtcGlobalDateAndTimeString: function isValidNormalizedForcedUtcGlobalDateAndTimeString (
     dateString
@@ -451,13 +458,15 @@ export const Utility = {
    * @method Utility.getComponentContext
    * @private
    * @param  {Object} context A context (`this`) object
-   * @param {String} name The name of the helper or component we're calling from.
+   * @param {String} name The name of the helper or component we're calling
+   *   from.
    * @return {Object|undefined} Normalized context object
    *
-   * Returns an object with `atts` and `defs` properties, normalized from whatever object is passed in.
-   * This helps deal with the fact that we have to pass the ancestor autoform's context to different
-   * helpers and components in different ways, but in all cases we want to get access to it and throw
-   * an error if we can't find an autoform context.
+   * Returns an object with `atts` and `defs` properties, normalized from
+   *   whatever object is passed in. This helps deal with the fact that we have
+   *   to pass the ancestor autoform's context to different helpers and
+   *   components in different ways, but in all cases we want to get access to
+   *   it and throw an error if we can't find an autoform context.
    */
   getComponentContext: function autoFormGetComponentContext (context, name) {
     let atts = { ...context }
@@ -514,8 +523,10 @@ export const Utility = {
    * @method Utility.stringToArray
    * @private
    * @param {String|Array} s A variable that might be a string or an array.
-   * @param {String} errorMessage Error message to use if it's not a string or an array.
-   * @return {Array} The array, building it from a comma-delimited string if necessary.
+   * @param {String} errorMessage Error message to use if it's not a string or
+   *   an array.
+   * @return {Array} The array, building it from a comma-delimited string if
+   *   necessary.
    */
   stringToArray: function stringToArray (s, errorMessage) {
     if (typeof s === 'string') {
@@ -533,7 +544,8 @@ export const Utility = {
    * @private
    * @param {Object} atts An object that might have a "class" property
    * @param {String} klass The class string to add
-   * @return {Object} The object with klass added to the "class" property, creating the property if necessary
+   * @return {Object} The object with klass added to the "class" property,
+   *   creating the property if necessary
    */
   addClass: function addClass (atts, klass) {
     if (typeof atts.class === 'string') {
@@ -548,7 +560,8 @@ export const Utility = {
    * @method Utility.getFormTypeDef
    * @private
    * @param {String} formType The form type
-   * @return {Object} The definition. Throws an error if type hasn't been defined.
+   * @return {Object} The definition. Throws an error if type hasn't been
+   *   defined.
    */
   getFormTypeDef: function getFormTypeDef (formType) {
     const ftd = AutoForm._formTypeDefinitions[formType]

@@ -7,7 +7,7 @@ on:
   push:
     branches:
       - master
-      - develop
+      - devel
   pull_request:
 
 jobs:
@@ -17,15 +17,15 @@ jobs:
     # needs: [lintcode,lintstyle,lintdocs] # we could add prior jobs for linting, if desired
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup meteor
         uses: meteorengineer/setup-meteor@v1
         with:
-          meteor-release: '1.10.1'
+          meteor-release: '3.1'
 
       - name: cache dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}

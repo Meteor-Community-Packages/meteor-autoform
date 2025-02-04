@@ -1,4 +1,4 @@
-/* global AutoForm, arrayTracker $ */
+/* global AutoForm $ */
 import { Template } from 'meteor/templating'
 import { isObject, throttle } from './common'
 import {
@@ -8,6 +8,7 @@ import {
 import { validateField } from './autoform-validation'
 import { Hooks } from './autoform-hooks'
 import { Utility } from './utility'
+import { arrayTracker } from './autoform-arrays'
 
 // all form events handled here
 let lastAutoSaveElement = null

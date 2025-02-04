@@ -1,5 +1,6 @@
-/* global moment */
+/* global AutoForm */
 import { Utility } from '../utility'
+import { getMoment } from '../getMoment'
 
 const isDate = d => Object.prototype.toString.call(d) === '[object Date]'
 const toTrimmedString = s => s.trim()
@@ -129,7 +130,8 @@ AutoForm.valueConverters = {
    * Returns a "valid normalized local date and time string".
    */
   dateToNormalizedLocalDateAndTimeString: function dateToNormalizedLocalDateAndTimeString (date, timezoneId) {
-    if (!isDate(date)) return date
+    const moment = getMoment()
+    if (!isDate(date) || !moment) return date
 
     const m = moment(date)
     // by default, we assume local timezone; add moment-timezone to app and pass timezoneId

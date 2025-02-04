@@ -1,4 +1,5 @@
-/* global moment */
+import { getMoment } from '../../getMoment'
+
 AutoForm.addInputType('datetime-local', {
   template: 'afInputDateTimeLocal',
   valueIn: function (val, atts) {
@@ -6,6 +7,7 @@ AutoForm.addInputType('datetime-local', {
     return (val instanceof Date) ? AutoForm.valueConverters.dateToNormalizedLocalDateAndTimeString(val, atts.timezoneId) : val
   },
   valueOut: function () {
+    const moment = getMoment(true)
     let val = this.val()
     val = (typeof val === 'string') ? val.replace(/ /g, 'T') : val
     if (AutoForm.Utility.isValidNormalizedLocalDateAndTimeString(val)) {
