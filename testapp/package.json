@@ -11,7 +11,7 @@
     "test:browser": "METEOR_PACKAGE_DIRS='../' TEST_SERVER=0 TEST_WATCH=1 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../"
   },
   "dependencies": {
-    "@babel/runtime": "^7.24.4",
+    "@babel/runtime": "^7.26.10",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
     "jquery": "^3.7.1",
