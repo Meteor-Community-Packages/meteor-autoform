@@ -2,7 +2,7 @@
 import { Meteor } from 'meteor/meteor'
 
 AutoForm.addFormType('method-update', {
-  onSubmit: function () {
+  onSubmit: async function () {
     const ctx = this
 
     // Prevent browser form submission
@@ -15,13 +15,13 @@ AutoForm.addFormType('method-update', {
     }
 
     // Run "before.method" hooks
-    this.runBeforeHooks(this.updateDoc, function (updateDoc) {
+    await this.runBeforeHooks(this.updateDoc, async function (updateDoc) {
       // Validate. If both schema and collection were provided, then we validate
       // against the collection schema here. Otherwise we validate against whichever
       // one was passed.
       const valid =
         ctx.formAttributes.validation === 'none' ||
-        ctx.formTypeDefinition.validateForm.call({
+        await ctx.formTypeDefinition.validateForm.call({
           form: ctx.formAttributes,
           formDoc: updateDoc,
           useCollectionSchema: ctx.ssIsOverride
@@ -29,13 +29,12 @@ AutoForm.addFormType('method-update', {
 
       if (valid === false) {
         ctx.failedValidation()
-      }
-      else {
-        const { methodargs } = ctx.formAttributes
+      } else {
+        const {methodargs} = ctx.formAttributes
         const args = methodargs
           ? typeof methodargs === 'function'
-              ? methodargs()
-              : methodargs
+            ? methodargs()
+            : methodargs
           : []
         // Call the method. If a ddp connection was provided, use
         // that instead of the default Meteor connection

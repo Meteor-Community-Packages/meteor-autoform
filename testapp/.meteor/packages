@@ -20,5 +20,5 @@ shell-server@0.6.1            # Server-side component of the `meteor shell` comm
 blaze-html-templates
 aldeed:autoform@8.0.0
 communitypackages:autoform-bootstrap5@2.0.0
-aldeed:simple-schema@2.0.0
 momentjs:moment
+aldeed:simple-schema

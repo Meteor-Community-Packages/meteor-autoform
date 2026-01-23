@@ -114,8 +114,8 @@ Template.autoForm.created = function autoFormCreated () {
       // reaction
       AutoForm.formPreserve.registerForm(
         formId,
-        function autoFormRegFormCallback () {
-          return AutoForm.getFormValues(
+        async function autoFormRegFormCallback() {
+          return await AutoForm.getFormValues(
             formId,
             template,
             data._resolvedSchema,

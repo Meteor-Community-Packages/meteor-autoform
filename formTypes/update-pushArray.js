@@ -1,7 +1,7 @@
 /* global AutoForm */
 
 AutoForm.addFormType('update-pushArray', {
-  onSubmit: function () {
+  onSubmit: async function () {
     const ctx = this
 
     // Prevent browser form submission
@@ -20,16 +20,15 @@ AutoForm.addFormType('update-pushArray', {
     }
 
     // Run "before.update" hooks
-    this.runBeforeHooks(this.insertDoc, function (doc) {
+    await this.runBeforeHooks(this.insertDoc, function (doc) {
       if (!Object.keys(doc).length) { // make sure this check stays after the before hooks
         // Nothing to update. Just treat it as a successful update.
         ctx.result(null, 0)
-      }
-      else {
-        const modifer = { $push: {} }
+      } else {
+        const modifer = {$push: {}}
         modifer.$push[scope] = doc
         // Perform update
-        collection.update({ _id: ctx.docId }, modifer, ctx.validationOptions, ctx.result)
+        collection.update({_id: ctx.docId}, modifer, ctx.validationOptions, ctx.result)
       }
     })
   },

@@ -41,9 +41,9 @@ Template.body.helpers({
 })
 
 Template.body.events({
-  'submit #userForm' (event, instance) {
+  async 'submit #userForm'(event, instance) {
     event.preventDefault()
-    const { insertDoc } = AutoForm.getFormValues('userForm')
+    const {insertDoc} = await AutoForm.getFormValues('userForm')
     instance.user.set(insertDoc)
   }
 })

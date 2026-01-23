@@ -328,7 +328,7 @@ AutoForm.getTemplateName = function autoFormGetTemplateName (
  * Returns an object representing the current values of all schema-based fields in the form.
  * The returned object is either a normal object or a MongoDB modifier, based on the `getModifier` argument. Return value may be `null` if the form is not currently rendered on screen.
  */
-AutoForm.getFormValues = function autoFormGetFormValues (
+AutoForm.getFormValues = async function autoFormGetFormValues(
   formId,
   template,
   ss,
@@ -407,8 +407,7 @@ AutoForm.getFormValues = function autoFormGetFormValues (
     // we will set `profile.address=null`. This ensures that we don"t get incorrect validation
     // errors about required fields that are children of optional objects.
     AutoForm.Utility.bubbleEmpty(doc, keepEmptyStrings)
-  }
-  else {
+  } else {
     // If the form is not yet rendered, use the form.doc
     doc = form.doc || {}
   }
@@ -418,7 +417,7 @@ AutoForm.getFormValues = function autoFormGetFormValues (
     // Delete any properties that are null, undefined, or empty strings,
     // unless the form has requested to keep empty string.
     // Do not add autoValues at this stage.
-    insertDoc = AutoForm.Utility.cleanNulls(doc, false, keepEmptyStrings)
+    insertDoc = await AutoForm.Utility.cleanNulls(doc, false, keepEmptyStrings)
 
     // As array items are removed, gaps can appear in the numbering,
     // which results in arrays that have undefined items. Here we
@@ -430,7 +429,7 @@ AutoForm.getFormValues = function autoFormGetFormValues (
     AutoForm.Utility.compactArrays(insertDoc)
 
     if (clean) {
-      ss.clean(insertDoc, {
+      await ss.clean(insertDoc, {
         isModifier: false,
         getAutoValues: false,
         filter: filter,
@@ -441,10 +440,10 @@ AutoForm.getFormValues = function autoFormGetFormValues (
     }
 
     // Pass expanded doc through formToDoc hooks
-    transforms = Hooks.getHooks(formId, 'formToDoc')
-    transforms.forEach(function formValuesTransform (transform) {
-      insertDoc = transform.call(hookCtx, insertDoc, ss)
-    })
+    transforms = await Hooks.getHooks(formId, 'formToDoc')
+    for(const transform of transforms){
+      insertDoc = await transform.call(hookCtx, insertDoc, ss)
+    }
   }
 
   // Create and clean update modifier.
@@ -469,18 +468,16 @@ AutoForm.getFormValues = function autoFormGetFormValues (
 
     // Pass modifier through formToModifier hooks
     transforms = Hooks.getHooks(formId, 'formToModifier')
-    transforms.forEach(function formValuesTransform (transform) {
+    transforms.forEach(function formValuesTransform(transform) {
       updateDoc = transform.call(hookCtx, updateDoc)
     })
   }
 
   if (getModifier === true) {
     return updateDoc
-  }
-  else if (getModifier === false) {
+  } else if (getModifier === false) {
     return insertDoc
-  }
-  else {
+  } else {
     // We return insertDoc and updateDoc when getModifier
     // is undefined for backwards compatibility
     return {
@@ -550,7 +547,7 @@ AutoForm.resetValueCache = function autoFormResetValueCache (formId, fieldName) 
  * Returns the value of the field (the value that would be used if the form were submitted right now).
  * This is a reactive method that will rerun whenever the current value of the requested field changes. Return value will be undefined if the field is not currently rendered.
  */
-AutoForm.getFieldValue = function autoFormGetFieldValue (
+AutoForm.getFieldValue = async function autoFormGetFieldValue(
   fieldName,
   formId,
   clean = true
@@ -575,12 +572,12 @@ AutoForm.getFieldValue = function autoFormGetFieldValue (
     template.formValues[fieldName].isMarkedChanged = true
   }
 
-  const { isMarkedChanged, cachedValue } = template.formValues[fieldName]
+  const {isMarkedChanged, cachedValue} = template.formValues[fieldName]
   template.formValues[fieldName].depend()
 
   if (isMarkedChanged === false) return cachedValue
 
-  const doc = AutoForm.getFormValues(
+  const doc = await AutoForm.getFormValues(
     formId,
     template,
     null,
@@ -816,7 +813,7 @@ AutoForm.validateField = function autoFormValidateField (
  * In addition to returning a boolean that indicates whether the form is currently valid,
  * this method causes the reactive validation messages to appear.
  */
-AutoForm.validateForm = function autoFormValidateForm (formId) {
+AutoForm.validateForm = async function autoFormValidateForm(formId) {
   const form = AutoForm.getCurrentDataForForm(formId)
   let formDoc
   const formType = form.type
@@ -825,13 +822,11 @@ AutoForm.validateForm = function autoFormValidateForm (formId) {
 
   // Gather all form values
   if (ftd.needsModifierAndDoc) {
-    formDoc = AutoForm.getFormValues(formId, null, null)
-  }
-  else if (ftd.usesModifier) {
-    formDoc = AutoForm.getFormValues(formId, null, null, true)
-  }
-  else {
-    formDoc = AutoForm.getFormValues(formId, null, null, false)
+    formDoc = await AutoForm.getFormValues(formId, null, null)
+  } else if (ftd.usesModifier) {
+    formDoc = await AutoForm.getFormValues(formId, null, null, true)
+  } else {
+    formDoc = await AutoForm.getFormValues(formId, null, null, false)
   }
 
   // If form is not currently rendered, return true
@@ -841,7 +836,7 @@ AutoForm.validateForm = function autoFormValidateForm (formId) {
 
   return (
     form.validation === 'none' ||
-    ftd.validateForm.call({
+    await ftd.validateForm.call({
       form: form,
       formDoc: formDoc,
       useCollectionSchema: false

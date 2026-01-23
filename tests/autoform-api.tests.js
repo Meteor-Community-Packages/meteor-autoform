@@ -324,13 +324,13 @@ describe('api', function () {
     })
   })
   describe('getFormValues', function () {
-    it('returns null if template is not rendered or destroyed', function () {
+    it('returns null if template is not rendered or destroyed', async function () {
       stub(AutoForm, 'templateInstanceForForm', () => ({}))
-      expect(AutoForm.getFormValues()).to.equal(null)
+      expect((await AutoForm.getFormValues())).to.equal(null)
     })
-    it('returns an object representing the current values of all schema-based fields in the form', function () {
+    it('returns an object representing the current values of all schema-based fields in the form', async function () {
       const formData = {
-        doc: { foo: Random.id(), empty: '' }, // the form is not yet rendered, use the form.doc
+        doc: {foo: Random.id(), empty: ''}, // the form is not yet rendered, use the form.doc
         autoConvert: false,
         removeEmptyStrings: false
       }
@@ -339,8 +339,8 @@ describe('api', function () {
       }
 
       const expectedDoc = {
-        insertDoc: { ...formData.doc },
-        updateDoc: { $set: { ...formData.doc } }
+        insertDoc: {...formData.doc},
+        updateDoc: {$set: {...formData.doc}}
       }
       const formToDocValue = Random.id() // should be added by hook
       const formToModifierValue = Random.id() // should be added by hook
@@ -355,8 +355,7 @@ describe('api', function () {
         clean: (doc, options) => {
           if (doc.$set) {
             expect(doc.$set).to.deep.equal(formData.doc)
-          }
-          else {
+          } else {
             expect(doc).to.deep.equal(formData.doc)
           }
           expect(options).to.deep.equal({
@@ -378,7 +377,8 @@ describe('api', function () {
 
       stub(AutoForm, 'getFormSchema', () => schema)
       stub(AutoForm, 'getCurrentDataForForm', () => formData)
-      stub(Utility, 'compactArrays', () => {})
+      stub(Utility, 'compactArrays', () => {
+      })
       stub(Hooks, 'getHooks', (id, name) => {
         if (name === 'formToDoc') {
           return [function (insertDoc) {
@@ -403,10 +403,10 @@ describe('api', function () {
         expect(isArray).to.equal(false, 'isArray')
         expect(keepEmptyStr).to.equal(true, 'keepEmptyStr')
         cleanNullsCalled = true
-        return { ...doc }
-      })
+        return {...doc}
+      });
 
-      const formValues = AutoForm.getFormValues(Random.id(), template)
+      const formValues = await AutoForm.getFormValues(Random.id(), template)
       expect(cleanCalled).to.equal(true, 'cleanCalled')
       expect(cleanNullsCalled).to.equal(true, 'cleanNullsCalled')
       expect(formValues).to.deep.equal(expectedDoc)
@@ -468,7 +468,7 @@ describe('api', function () {
     })
   })
   describe('getFieldValue', function () {
-    it('returns undefined, if there is no template and no formId', function () {
+    it('returns undefined, if there is no template and no formId', async function () {
       let exec = false
       stub(AutoForm, 'templateInstanceForForm', () => {
         exec = true
@@ -476,19 +476,20 @@ describe('api', function () {
       stub(AutoForm, 'rerunWhenFormRenderedOrDestroyed', () => {
         throw new UnexpectedCallError()
       })
-      expect(AutoForm.getFieldValue()).to.equal(undefined)
+      expect((await AutoForm.getFieldValue())).to.equal(undefined)
       expect(exec).to.equal(true)
     })
-    it('marks form for rerun if there is no template but a formid', function () {
+    it('marks form for rerun if there is no template but a formid', async function () {
       let exec = false
-      stub(AutoForm, 'templateInstanceForForm', () => {})
+      stub(AutoForm, 'templateInstanceForForm', () => {
+      })
       stub(AutoForm, 'rerunWhenFormRenderedOrDestroyed', () => {
         exec = true
       })
-      expect(AutoForm.getFieldValue(undefined, Random.id())).to.equal(undefined)
+      expect((await AutoForm.getFieldValue(undefined, Random.id()))).to.equal(undefined)
       expect(exec).to.equal(true)
     })
-    it('returns the cached value if the field is not markedChanged', function () {
+    it('returns the cached value if the field is not markedChanged', async function () {
       const fieldName = Random.id()
       const formId = Random.id()
       const template = {
@@ -504,9 +505,9 @@ describe('api', function () {
       stub(AutoForm, 'getFormValues', () => {
         throw new UnexpectedCallError()
       })
-      expect(AutoForm.getFieldValue(fieldName, formId)).to.eq(value)
+      expect((await AutoForm.getFieldValue(fieldName, formId))).to.eq(value)
     })
-    it('returns undefined if no doc is found for this form', function () {
+    it('returns undefined if no doc is found for this form', async function () {
       let exec = false
       const fieldName = Random.id()
       const formId = Random.id()
@@ -522,10 +523,10 @@ describe('api', function () {
       stub(AutoForm, 'getFormValues', () => {
         exec = true
       })
-      expect(AutoForm.getFieldValue(fieldName, formId)).to.equal(undefined)
+      expect((await AutoForm.getFieldValue(fieldName, formId))).to.equal(undefined)
       expect(exec).to.equal(true)
     })
-    it('caches the current field value and returns it', function () {
+    it('caches the current field value and returns it', async function () {
       const fieldName = Random.id()
       const formId = Random.id()
       const template = {
@@ -539,7 +540,7 @@ describe('api', function () {
       stub(AutoForm, 'templateInstanceForForm', () => template)
       stub(AutoForm, 'getFormValues', () => ({}))
       stub(MongoObject.prototype, 'getValueForKey', () => value)
-      expect(AutoForm.getFieldValue(fieldName, formId)).to.equal(value)
+      expect((await AutoForm.getFieldValue(fieldName, formId))).to.equal(value)
       expect(template.formValues[fieldName].isMarkedChanged).to.equal(false)
       expect(template.formValues[fieldName].cachedValue).to.equal(value)
     })
@@ -558,8 +559,8 @@ describe('api', function () {
       stub(AutoForm, 'getFormValues', () => ({}))
       stub(MongoObject.prototype, 'getValueForKey', () => value)
 
-      Tracker.autorun(() => {
-        const currentValue = AutoForm.getFieldValue(fieldName, formId)
+      Tracker.autorun(async () => {
+        const currentValue = await AutoForm.getFieldValue(fieldName, formId)
         if (currentValue === value) {
           expect(template.formValues[fieldName].isMarkedChanged).to.equal(false)
           expect(template.formValues[fieldName].cachedValue).to.equal(value)
@@ -812,7 +813,7 @@ describe('api', function () {
     it('returns the result of validateField')
   })
   describe('validateForm', function () {
-    it('skips with true if form is currently not rendered', function () {
+    it('skips with true if form is currently not rendered', async function () {
       let expectCalled = false
       stub(AutoForm, 'getCurrentDataForForm', () => ({}))
       stub(Utility, 'getFormTypeDef', () => ({}))
@@ -820,10 +821,10 @@ describe('api', function () {
         expectCalled = true
         return null
       })
-      expect(AutoForm.validateForm()).to.equal(true)
+      expect((await AutoForm.validateForm())).to.equal(true)
       expect(expectCalled).to.equal(true)
     })
-    it('returns a boolean that indicates whether the form is currently valid', function () {
+    it('returns a boolean that indicates whether the form is currently valid', async function () {
       let expectCalled = false
       const form = {
         validation: 'none'
@@ -840,12 +841,12 @@ describe('api', function () {
       stub(Utility, 'getFormTypeDef', () => formDef)
 
       // no validation
-      expect(AutoForm.validateForm()).to.equal(true)
+      expect((await AutoForm.validateForm())).to.equal(true)
       expect(expectCalled).to.equal(false)
 
       // with ftd validation
       delete form.validation
-      expect(AutoForm.validateForm()).to.equal(false)
+      expect((await AutoForm.validateForm())).to.equal(false)
       expect(expectCalled).to.equal(true)
     })
   })
