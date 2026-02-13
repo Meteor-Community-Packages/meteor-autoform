@@ -4,6 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
+- [8.1.0](#810)
 - [8.0.0](#800)
 - [7.0.0](#700)
 - [6.3.0](#630)
@@ -110,6 +111,14 @@
 - [0.2.0](#020)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+### 8.1.0
+- compatibility release for Meteor 3.4
+- fully dropping some remaining compat versions for Meteor 2.x in package.js
+- updated testapp to Meteor 3.4
+- update testapp dependencies
+- add 3.4 compat for package.js deps
+- update ci to use Meteor 3.4 and latest actions
 
 ### 8.0.0
 

@@ -4,15 +4,15 @@ Package.describe({
   summary:
     'Easily create forms with automatic insert and update, and automatic reactive validation.',
   git: 'https://github.com/aldeed/meteor-autoform.git',
-  version: '8.0.0'
+  version: '8.1.0',
 })
 
 Npm.depends({
-  'mongo-object': '3.0.1'
+  'mongo-object': '3.0.1',
 })
 
-Package.onUse(function (api) {
-  api.versionsFrom(['3.0.1'])
+Package.onUse((api) => {
+  api.versionsFrom(['3.0.1', '3.4'])
 
   // Dependencies
   api.use([
@@ -24,20 +24,20 @@ Package.onUse(function (api) {
     'mongo',
     'blaze@3.0.0',
     'templating@1.4.4',
-    'jquery@3.0.0'
+    'jquery@3.0.0',
   ])
 
   api.use(
     [
       'momentjs:moment@2.30.1',
       'mrt:moment-timezone@0.2.1',
-      'aldeed:collection2@4.0.4',
+      'aldeed:collection2@4.1.5',
       'aldeed:simple-schema@2.0.0',
       'aldeed:moment-timezone@0.4.0',
-      'reload'
+      'reload',
     ],
     'client',
-    { weak: true }
+    { weak: true },
   )
 
   // Exports
@@ -45,23 +45,26 @@ Package.onUse(function (api) {
 
   // adding the core files in order to keep it backwards-compatible with
   // extensions and themes
-  api.addFiles([
-    './utility.js',
-    './form-preserve.js',
-    './autoform-hooks.js',
-    './autoform-formdata.js',
-    './autoform-arrays.js',
-    './autoform.js',
-    './autoform-validation.js',
-    './autoform-inputs.js',
-    './autoform-api.js'
-  ], 'client')
+  api.addFiles(
+    [
+      './utility.js',
+      './form-preserve.js',
+      './autoform-hooks.js',
+      './autoform-formdata.js',
+      './autoform-arrays.js',
+      './autoform.js',
+      './autoform-validation.js',
+      './autoform-inputs.js',
+      './autoform-api.js',
+    ],
+    'client',
+  )
 
   // api.mainModule('main.js', 'client')
 })
 
-Package.onTest(function (api) {
-  api.versionsFrom(['2.8.0', '3.0.1'])
+Package.onTest((api) => {
+  api.versionsFrom(['3.0.1', '3.4'])
   // Running the tests requires a dummy project in order to
   // resolve npm dependencies and the test env dependencies.
   api.use([
@@ -71,33 +74,38 @@ Package.onTest(function (api) {
     'mongo',
     'blaze@3.0.0',
     'templating@1.4.4',
-    'meteortesting:mocha@3.2.0'
+    'meteortesting:mocha@3.2.0',
   ])
-  api.use([
-    'aldeed:collection2@4.0.4',
-    'momentjs:moment@2.30.1'
-  ], 'client', { weak: true })
-  api.use([
-    'aldeed:autoform@8.0.0',
-    'aldeed:moment-timezone',
-    'aldeed:simple-schema@2.0.0'
-  ], 'client')
+  api.use(['aldeed:collection2@4.1.5', 'momentjs:moment@2.30.1'], 'client', {
+    weak: true,
+  })
+  api.use(
+    [
+      'aldeed:autoform@8.1.0',
+      'aldeed:moment-timezone',
+      'aldeed:simple-schema@2.0.0',
+    ],
+    'client',
+  )
 
-  api.addFiles([
-    'tests/setup.tests.js',
-    'tests/utility.tests.js',
-    'tests/common.tests.js',
-    'tests/FormPreserve.tests.js',
-    'tests/FormData.tests.js',
-    'tests/Hooks.tests.js',
-    'tests/ArrayTracker.tests.js',
-    'tests/autoform-inputs.tests.js',
-    'tests/autoform-helpers.tests.js',
-    'tests/autoform-validation.tests.js',
-    'tests/autoform-api.tests.js',
-    // component specific
-    'tests/components/quickForm/quickFormUtils.tests.js',
-    // input types
-    'tests/inputTypes/value-converters.tests.js'
-  ], 'client')
+  api.addFiles(
+    [
+      'tests/setup.tests.js',
+      'tests/utility.tests.js',
+      'tests/common.tests.js',
+      'tests/FormPreserve.tests.js',
+      'tests/FormData.tests.js',
+      'tests/Hooks.tests.js',
+      'tests/ArrayTracker.tests.js',
+      'tests/autoform-inputs.tests.js',
+      'tests/autoform-helpers.tests.js',
+      'tests/autoform-validation.tests.js',
+      'tests/autoform-api.tests.js',
+      // component specific
+      'tests/components/quickForm/quickFormUtils.tests.js',
+      // input types
+      'tests/inputTypes/value-converters.tests.js',
+    ],
+    'client',
+  )
 })

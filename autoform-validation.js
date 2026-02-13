@@ -12,11 +12,11 @@ import { Utility } from './utility'
  * @return {*}
  * @private
  */
-const _validateField = function _validateField (
+const _validateField = function _validateField(
   key,
   formId,
   skipEmpty,
-  onlyIfAlreadyInvalid
+  onlyIfAlreadyInvalid,
 ) {
   // Due to throttling, this can be called after the autoForm template is destroyed.
   // If that happens, we exit without error.
@@ -45,7 +45,7 @@ const _validateField = function _validateField (
     formId,
     template,
     ss,
-    !!ftd.usesModifier
+    !!ftd.usesModifier,
   )
 
   // If form is not currently rendered, return true
@@ -65,7 +65,7 @@ const _validateField = function _validateField (
     formId,
     ss,
     form,
-    key
+    key,
   )
 }
 

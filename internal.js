@@ -8,5 +8,5 @@ Internal.defaultTypeTemplates = {}
 
 Internal.deps = {
   defaultTemplate: new Tracker.Dependency(),
-  defaultTypeTemplates: {}
+  defaultTypeTemplates: {},
 }
