@@ -4,8 +4,8 @@
   "scripts": {
     "start": "meteor run",
     "setup": "mkdir -p packages && ln -sfn ../../ ./packages/meteor-autoform",
-    "lint": "npm run setup && standardx -v ./packages/meteor-autoform/ | snazzy",
-    "lint:fix": "npm run setup && standardx --fix ./packages/meteor-autoform/ | snazzy",
+    "lint": "node_modules/@biomejs/biome/bin/biome check ../*.js",
+    "lint:fix": "node_modules/@biomejs/biome/bin/biome check  --write ../*.js",
     "test": "METEOR_PACKAGE_DIRS='../' TEST_BROWSER_DRIVER=puppeteer TEST_SERVER=0 meteor test-packages --once --raw-logs --driver-package meteortesting:mocha ../",
     "test:watch": "METEOR_PACKAGE_DIRS='../' TEST_BROWSER_DRIVER=puppeteer TEST_SERVER=0 TEST_WATCH=1 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../",
     "test:browser": "METEOR_PACKAGE_DIRS='../' TEST_SERVER=0 TEST_WATCH=1 meteor test-packages --raw-logs --driver-package meteortesting:mocha ../"
@@ -21,8 +21,8 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/eslint-parser": "^7.28.6",
+    "@biomejs/biome": "^2.3.15",
     "chai": "^6.2.2",
-    "eslint-config-standard": "^17.1.0",
     "sinon": "^21.0.1",
     "snazzy": "^9.0.0",
     "standardx": "^7.0.0"
