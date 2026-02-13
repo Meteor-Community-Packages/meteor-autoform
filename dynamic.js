@@ -2,7 +2,7 @@ let initialized = false
 
 export const AutoForm = global.AutoForm
 
-AutoForm.load = async function load () {
+AutoForm.load = async function load() {
   if (!initialized) {
     await init()
     initialized = true
@@ -11,7 +11,7 @@ AutoForm.load = async function load () {
   return initialized
 }
 
-function init () {
+function init() {
   return Promise.all([
     import('./autoform-helpers.js'),
     // form types
@@ -112,6 +112,6 @@ function init () {
     import('./components/afQuickFields/afQuickFields.html'),
     import('./components/afQuickFields/afQuickFields.js'),
     // event handling
-    import('./autoform-events.js')
+    import('./autoform-events.js'),
   ])
 }

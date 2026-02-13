@@ -1,5 +1,5 @@
-import { Tracker } from 'meteor/tracker'
 import { Mongo } from 'meteor/mongo'
+import { Tracker } from 'meteor/tracker'
 import { Utility } from './utility'
 
 /**
@@ -9,17 +9,12 @@ import { Utility } from './utility'
  */
 
 export class ArrayTracker {
-  constructor () {
+  constructor() {
     const self = this
     self.info = {}
   }
 
-  getMinMax (
-    ss,
-    field,
-    overrideMinCount,
-    overrideMaxCount
-  ) {
+  getMinMax(ss, field, overrideMinCount, overrideMaxCount) {
     const defs = Utility.getFieldDefinition(ss, field)
 
     // minCount is set by the schema, but can be set higher on the field attribute
@@ -35,33 +30,26 @@ export class ArrayTracker {
     return { minCount: minCount, maxCount: maxCount }
   }
 
-  initForm (formId) {
+  initForm(formId) {
     const self = this
     if (self.info[formId]) return
     self.info[formId] = {}
   }
 
-  getForm (formId) {
+  getForm(formId) {
     const self = this
     self.initForm(formId)
     return self.info[formId]
   }
 
-  ensureField (formId, field) {
+  ensureField(formId, field) {
     const self = this
     self.initForm(formId)
 
     if (!self.info[formId][field]) self.resetField(formId, field)
   }
 
-  initField (
-    formId,
-    field,
-    ss,
-    docCount,
-    overrideMinCount,
-    overrideMaxCount
-  ) {
+  initField(formId, field, ss, docCount, overrideMinCount, overrideMaxCount) {
     const self = this
     self.ensureField(formId, field)
 
@@ -89,7 +77,7 @@ export class ArrayTracker {
         i,
         childKeys,
         overrideMinCount,
-        overrideMaxCount
+        overrideMaxCount,
       )
       loopArray.push(loopCtx)
       collection.insert(loopCtx)
@@ -104,13 +92,13 @@ export class ArrayTracker {
     self.info[formId][field].deps.changed()
   }
 
-  resetField (formId, field) {
+  resetField(formId, field) {
     const self = this
     self.initForm(formId)
 
     if (!self.info[formId][field]) {
       self.info[formId][field] = {
-        deps: new Tracker.Dependency()
+        deps: new Tracker.Dependency(),
       }
     }
 
@@ -124,14 +112,14 @@ export class ArrayTracker {
     self.info[formId][field].deps.changed()
   }
 
-  resetForm (formId) {
+  resetForm(formId) {
     const self = this
-    Object.keys(self.info[formId] || {}).forEach(function (field) {
+    Object.keys(self.info[formId] || {}).forEach((field) => {
       self.resetField(formId, field)
     })
   }
 
-  untrackForm (formId) {
+  untrackForm(formId) {
     const self = this
     if (self.info[formId]) {
       Object.keys(self.info[formId]).forEach((field) => {
@@ -143,73 +131,67 @@ export class ArrayTracker {
     self.info[formId] = {}
   }
 
-  tracksField (formId, field) {
+  tracksField(formId, field) {
     const self = this
     self.ensureField(formId, field)
     self.info[formId][field].deps.depend()
     return !!self.info[formId][field].array
   }
 
-  getField (formId, field) {
+  getField(formId, field) {
     const self = this
     self.ensureField(formId, field)
     self.info[formId][field].deps.depend()
     return self.info[formId][field].collection.find({})
   }
 
-  getCount (formId, field) {
+  getCount(formId, field) {
     const self = this
     self.ensureField(formId, field)
     self.info[formId][field].deps.depend()
     return self.info[formId][field].count
   }
 
-  getVisibleCount (formId, field) {
+  getVisibleCount(formId, field) {
     const self = this
     self.ensureField(formId, field)
     self.info[formId][field].deps.depend()
     return self.info[formId][field].visibleCount
   }
 
-  isFirstFieldlVisible (formId, field, currentIndex) {
+  isFirstFieldlVisible(formId, field, currentIndex) {
     const self = this
     self.ensureField(formId, field)
     self.info[formId][field].deps.depend()
-    const firstVisibleField = self.info[formId][field].array.find(function (
-      currentField
-    ) {
-      return !currentField.removed
-    })
+    const firstVisibleField = self.info[formId][field].array.find(
+      (currentField) => !currentField.removed,
+    )
     return firstVisibleField && firstVisibleField.index === currentIndex
   }
 
-  isLastFieldlVisible (formId, field, currentIndex) {
+  isLastFieldlVisible(formId, field, currentIndex) {
     const self = this
     self.ensureField(formId, field)
     self.info[formId][field].deps.depend()
     const lastVisibleField = self.info[formId][field].array
-      .filter(function (currentField) {
-        return !currentField.removed
-      })
+      .filter((currentField) => !currentField.removed)
       .pop()
     return lastVisibleField && lastVisibleField.index === currentIndex
   }
 
-  addOneToField (
-    formId,
-    field,
-    ss,
-    overrideMinCount,
-    overrideMaxCount
-  ) {
+  addOneToField(formId, field, ss, overrideMinCount, overrideMaxCount) {
     const self = this
     self.ensureField(formId, field)
 
     if (!self.info[formId][field].array) return
 
     const currentCount = self.info[formId][field].visibleCount
-    const maxCount = self.getMinMax(ss, field, overrideMinCount, overrideMaxCount)
-      .maxCount
+    const maxCount = self.getMinMax(
+      ss,
+      field,
+      overrideMinCount,
+      overrideMaxCount,
+    ).maxCount
 
     if (currentCount < maxCount) {
       const i = self.info[formId][field].array.length
@@ -227,7 +209,7 @@ export class ArrayTracker {
         i,
         childKeys,
         overrideMinCount,
-        overrideMaxCount
+        overrideMaxCount,
       )
 
       self.info[formId][field].collection.insert(loopCtx)
@@ -240,13 +222,13 @@ export class ArrayTracker {
     }
   }
 
-  removeFromFieldAtIndex (
+  removeFromFieldAtIndex(
     formId,
     field,
     index,
     ss,
     overrideMinCount,
-    overrideMaxCount
+    overrideMaxCount,
   ) {
     const self = this
     self.ensureField(formId, field)
@@ -254,13 +236,17 @@ export class ArrayTracker {
     if (!self.info[formId][field].array) return
 
     const currentCount = self.info[formId][field].visibleCount
-    const minCount = self.getMinMax(ss, field, overrideMinCount, overrideMaxCount)
-      .minCount
+    const minCount = self.getMinMax(
+      ss,
+      field,
+      overrideMinCount,
+      overrideMaxCount,
+    ).minCount
 
     if (currentCount > minCount) {
       self.info[formId][field].collection.update(
         { index: index },
-        { $set: { removed: true } }
+        { $set: { removed: true } },
       )
       self.info[formId][field].array[index].removed = true
       self.info[formId][field].count--
@@ -275,28 +261,28 @@ export class ArrayTracker {
 /* ----------------------------------------------------------------------------
  * PRIVATE
  * -------------------------------------------------------------------------- */
-const createLoopCtx = function (
+const createLoopCtx = (
   formId,
   field,
   index,
   childKeys,
   overrideMinCount,
-  overrideMaxCount
-) {
+  overrideMaxCount,
+) => {
   const loopCtx = {
     formId: formId,
     arrayFieldName: field,
-    name: field + '.' + index,
+    name: `${field}.${index}`,
     index: index,
     minCount: overrideMinCount,
-    maxCount: overrideMaxCount
+    maxCount: overrideMaxCount,
   }
 
   // If this is an array of objects, add child key names under loopCtx.current[childName] = fullKeyName
   if (childKeys.length) {
     loopCtx.current = {}
-    childKeys.forEach(function (k) {
-      loopCtx.current[k] = field + '.' + index + '.' + k
+    childKeys.forEach((k) => {
+      loopCtx.current[k] = `${field}.${index}.${k}`
     })
   }
 

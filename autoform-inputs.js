@@ -9,9 +9,9 @@ import { Utility } from './utility'
  * @param ss {SimpleSchema} The current SimpleSchema instance for the form, related to the fields.
  * @returns {Object} The document Object with key/value-paired fields.
  */
-export const getFlatDocOfFieldValues = function getFlatDocOfFieldValues (
+export const getFlatDocOfFieldValues = function getFlatDocOfFieldValues(
   fields,
-  ss
+  ss,
 ) {
   const doc = {}
   fields.each(function () {
@@ -45,13 +45,13 @@ export const getFlatDocOfFieldValues = function getFlatDocOfFieldValues (
  * @param typeDefs {Object} The type definitions that are used when an input is registered (valueIn, valueIsArray etc.)
  * @returns {*} The (maybe transformed) input value.
  */
-export const getInputValue = function getInputValue (
+export const getInputValue = function getInputValue(
   atts,
   value,
   mDoc,
   schemaDefaultValue,
   fieldDefaultValue,
-  typeDefs
+  typeDefs,
 ) {
   if (typeof value === 'undefined') {
     // Get the value for this key in the current document
@@ -59,8 +59,7 @@ export const getInputValue = function getInputValue (
       const valueInfo = mDoc.getInfoForKey(atts.name)
       if (valueInfo) {
         value = valueInfo.value
-      }
-      else {
+      } else {
         value = fieldDefaultValue
       }
     }
@@ -85,8 +84,7 @@ export const getInputValue = function getInputValue (
   if (typeDefs.valueIsArray && !Array.isArray(value)) {
     if (typeof value === 'string') {
       value = value.split(',')
-    }
-    else {
+    } else {
       value = [value]
     }
   }
@@ -111,12 +109,12 @@ export const getInputValue = function getInputValue (
  * @example
  * const iData = getInputData(defs, atts, value, ss.label(c.atts.name), form.type);
  */
-export const getInputData = function getInputData (
+export const getInputData = function getInputData(
   defs,
   hash,
   value,
   label,
-  formType
+  formType,
 ) {
   /*
    * Get HTML attributes
@@ -150,13 +148,12 @@ export const getInputData = function getInputData (
   if (hash.placeholder === 'schemaLabel') {
     inputAtts.placeholder = label
   }
-
   // To enable reactively toggling boolean attributes
   // in a simple way, we add the attributes to the HTML
   // only if their value is `true`. That is, unlike in
   // HTML, their mere presence does not matter.
-  ['disabled', 'readonly', 'checked', 'required', 'autofocus'].forEach(
-    function (booleanProp) {
+  ;['disabled', 'readonly', 'checked', 'required', 'autofocus'].forEach(
+    (booleanProp) => {
       if (!(booleanProp in hash)) {
         return
       }
@@ -170,12 +167,11 @@ export const getInputData = function getInputData (
         hash[booleanProp] === ''
       ) {
         inputAtts[booleanProp] = ''
-      }
-      else {
+      } else {
         // If the value is anything else, we don't render it
         delete inputAtts[booleanProp]
       }
-    }
+    },
   )
 
   /*
@@ -190,7 +186,7 @@ export const getInputData = function getInputData (
     max: defs.max,
     value: value,
     atts: inputAtts,
-    selectOptions: AutoForm.Utility.getSelectOptions(defs, hash)
+    selectOptions: AutoForm.Utility.getSelectOptions(defs, hash),
   }
 
   /*
@@ -215,11 +211,11 @@ export const getInputData = function getInputData (
  * @param limit {Number} The throttle limit in ms
  * @return {Function} The throttled markChanged function
  */
-function markChangedThrottle (fn, limit) {
+function markChangedThrottle(fn, limit) {
   const timeouts = {}
-  return function (template, fieldName, fieldValue) {
+  return (template, fieldName, fieldValue) => {
     clearTimeout(timeouts[fieldName])
-    timeouts[fieldName] = setTimeout(function () {
+    timeouts[fieldName] = setTimeout(() => {
       fn(template, fieldName, fieldValue)
     }, limit)
   }
@@ -248,10 +244,7 @@ const markChangedAncestors = (template, fieldName) => {
  * @return {*|{}|boolean} truthy/falsy value, based on all checked properties
  */
 const isRendered = (template) =>
-  template &&
-  template.view &&
-  template.view._domrange &&
-  !template.view.isDestroyed
+  template?.view?._domrange && !template.view.isDestroyed
 
 /**
  * @private Applies the change marking, creates a new Tracker Dependency if there is none for the field.
@@ -275,10 +268,10 @@ const doMarkChanged = (template, fieldName) => {
  * @param fieldName {String} The name of the current field
  * @param fieldValue {*} The current field value
  */
-export const markChanged = markChangedThrottle(function _markChanged (
+export const markChanged = markChangedThrottle(function _markChanged(
   template,
   fieldName,
-  fieldValue
+  fieldValue,
 ) {
   // is it really changed?
   const { cachedValue } = template.formValues[fieldName] || {}
@@ -291,8 +284,7 @@ export const markChanged = markChangedThrottle(function _markChanged (
     return markChanged(template, fieldName, fieldValue)
   }
   doMarkChanged(template, fieldName)
-},
-150)
+}, 150)
 
 /**
  * Creates a formValues entry on the template, in case it does not exist yet and updates the given
@@ -302,10 +294,10 @@ export const markChanged = markChangedThrottle(function _markChanged (
  * @param fieldName {String} The name of the current field
  * @param fieldValue {*} The current field value
  */
-export const updateTrackedFieldValue = function updateTrackedFieldValue (
+export const updateTrackedFieldValue = function updateTrackedFieldValue(
   template,
   fieldName,
-  fieldValue
+  fieldValue,
 ) {
   if (!template) return
 
@@ -322,11 +314,11 @@ export const updateTrackedFieldValue = function updateTrackedFieldValue (
  * @see {updateTrackedFieldValue}
  * @param template {Template} The current form template
  */
-export const updateAllTrackedFieldValues = function updateAllTrackedFieldValues (
-  template
+export const updateAllTrackedFieldValues = function updateAllTrackedFieldValues(
+  template,
 ) {
-  if (template && template.formValues) {
-    Object.keys(template.formValues).forEach(function (fieldName) {
+  if (template?.formValues) {
+    Object.keys(template.formValues).forEach((fieldName) => {
       // XXX - if we would not pass a fieldValue here, then there would be none of the fields marked as
       // XXX - changed when the 'reset form'  event is running. We use a random number in order to prevent
       // XXX - the chance of collision with the cachedValue.
@@ -335,9 +327,9 @@ export const updateAllTrackedFieldValues = function updateAllTrackedFieldValues 
   }
 }
 
-export const getAllFieldsInForm = function getAllFieldsInForm (
+export const getAllFieldsInForm = function getAllFieldsInForm(
   template,
-  disabled = false
+  disabled = false,
 ) {
   // Get all elements with `data-schema-key` attribute, unless disabled
   const formId = template.data.id

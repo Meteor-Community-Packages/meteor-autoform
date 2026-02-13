@@ -4,11 +4,11 @@
  */
 export const getMoment = (throwIfNotFound) => {
   if (!moment) {
-    const message = 'aldeed:autoform requires momentjs:moment to handle date/time.'
+    const message =
+      'aldeed:autoform requires momentjs:moment to handle date/time.'
     if (throwIfNotFound) {
       throw new TypeError(message)
-    }
-    else {
+    } else {
       console.warn(message)
     }
   }
@@ -17,7 +17,7 @@ export const getMoment = (throwIfNotFound) => {
 
 const name = 'momentjs:moment'
 const moment = ((packageDef) => {
-  if (typeof packageDef !== 'undefined' && packageDef[name]) {
+  if (packageDef?.[name]) {
     return packageDef[name].moment
   }
 })(window.Package)

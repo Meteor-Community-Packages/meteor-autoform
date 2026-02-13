@@ -10,7 +10,7 @@ export class FormPreserve {
    * @constructor
    * @param {String} migrationName
    */
-  constructor (migrationName) {
+  constructor(migrationName) {
     const self = this
     if (typeof migrationName !== 'string') {
       throw Error('You must define an unique migration name of type String')
@@ -28,14 +28,14 @@ export class FormPreserve {
         self.retrievedDocuments = EJSON.parse(self.retrievedDocuments)
       }
 
-      Reload._onMigrate(migrationName, function () {
+      Reload._onMigrate(migrationName, () => {
         const doc = self._retrieveRegisteredDocuments()
         return [true, EJSON.stringify(doc)]
       })
     }
   }
 
-  getDocument (formId) {
+  getDocument(formId) {
     const self = this
     if (!(formId in self.retrievedDocuments)) {
       return false
@@ -44,37 +44,35 @@ export class FormPreserve {
     return self.retrievedDocuments[formId]
   }
 
-  clearDocument (formId) {
+  clearDocument(formId) {
     delete this.retrievedDocuments[formId]
   }
 
-  registerForm (formId, retrieveFunc) {
+  registerForm(formId, retrieveFunc) {
     this.registeredForms[formId] = retrieveFunc
   }
 
-  formIsRegistered (formId) {
+  formIsRegistered(formId) {
     return !!this.registeredForms[formId]
   }
 
-  unregisterForm (formId) {
+  unregisterForm(formId) {
     delete this.registeredForms[formId]
     delete this.retrievedDocuments[formId]
   }
 
-  unregisterAllForms () {
+  unregisterAllForms() {
     const self = this
     self.registeredForms = {}
     self.retrievedDocuments = {}
   }
 
-  _retrieveRegisteredDocuments () {
+  _retrieveRegisteredDocuments() {
     const self = this
     const res = {}
-    Object
-      .entries(self.registeredForms)
-      .forEach(function ([formId, retrieveFunc]) {
-        res[formId] = retrieveFunc()
-      })
+    Object.entries(self.registeredForms).forEach(([formId, retrieveFunc]) => {
+      res[formId] = retrieveFunc()
+    })
     return res
   }
 }
