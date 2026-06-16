@@ -1,7 +1,7 @@
 /* global AutoForm */
 
 AutoForm.addFormType('insert', {
-  onSubmit: function () {
+  onSubmit: async function () {
     const ctx = this
 
     // Prevent browser form submission
@@ -15,16 +15,15 @@ AutoForm.addFormType('insert', {
 
     // See if the collection has a schema attached
     const collectionHasSchema = (typeof collection.simpleSchema === 'function' &&
-                               collection.simpleSchema(this.insertDoc) != null)
+      collection.simpleSchema(this.insertDoc) != null)
 
     // Run "before.insert" hooks
-    this.runBeforeHooks(this.insertDoc, function (doc) {
+    await this.runBeforeHooks(this.insertDoc, function (doc) {
       // Perform insert
       if (collectionHasSchema) {
         // If the collection2 pkg is used and a schema is attached, we pass a validationContext
         collection.insert(doc, ctx.validationOptions, ctx.result)
-      }
-      else {
+      } else {
         // If the collection2 pkg is not used or no schema is attached, we don't pass options
         // because core Meteor's `insert` function does not accept
         // an options argument.

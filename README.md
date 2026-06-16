@@ -1576,6 +1576,8 @@ There is nothing overly special about the HTML template you define. Check out th
 
 For more examples, see the built-in input types [here](https://github.com/aldeed/meteor-autoform/tree/master/inputTypes).
 
+You may get an error looking for theme.  You need to have componentname-theme defined as a template.  The error message will give you the exact name of the blaze template you need to make.
+
 ## Common Questions
 
 ### Should the value of `schema` and `collection` have quotation marks around it?

@@ -81,7 +81,7 @@ Template.autoForm.created = function autoFormCreated () {
   // be wiped out by further client validation.
   template._stickyErrors = {}
 
-  template.autorun(function (c) {
+  template.autorun(async function (c) {
     let data = Template.currentData() // rerun when current data changes
     const formId = data.id
 
@@ -101,21 +101,20 @@ Template.autoForm.created = function autoFormCreated () {
     data = setDefaults(data)
 
     // Clone the doc so that docToForm and other modifications do not change
-    // the original referenced object.
+    // the original referenced object.  Use await to allow a promise to passed via template helper
     let doc = data.doc ? EJSON.clone(data.doc) : null
 
     // Update cached form values for hot code reload persistence
     if (data.preserveForm === false) {
       AutoForm.formPreserve.unregisterForm(formId)
-    }
-    else {
+    } else {
       // Even if we have already registered, we reregister to ensure that the
       // closure values of template, formId, and ss remain correct after each
       // reaction
       AutoForm.formPreserve.registerForm(
         formId,
-        function autoFormRegFormCallback () {
-          return AutoForm.getFormValues(
+        async function autoFormRegFormCallback() {
+          return await AutoForm.getFormValues(
             formId,
             template,
             data._resolvedSchema,
@@ -130,22 +129,22 @@ Template.autoForm.created = function autoFormCreated () {
       const retrievedDoc = AutoForm.formPreserve.getDocument(formId)
       if (retrievedDoc !== false) {
         // Ensure we keep the _id property which may not be present in retrievedDoc.
-        doc = { ...doc, ...retrievedDoc }
+        doc = {...doc, ...retrievedDoc}
       }
     }
 
     let mDoc
     if (doc && Object.keys(doc).length) {
-      const hookCtx = { formId: formId }
+      const hookCtx = {formId: formId}
       // Pass doc through docToForm hooks
       Hooks.getHooks(formId, 'docToForm').forEach(
-        function autoFormEachDocToForm (hook) {
+        function autoFormEachDocToForm(hook) {
           doc = hook.call(hookCtx, doc, data._resolvedSchema)
           if (!doc) {
             throw new Error(
               'Oops! Did you forget to return the modified document from your docToForm hook for the ' +
-                formId +
-                ' form?'
+              formId +
+              ' form?'
             )
           }
         }
@@ -155,8 +154,7 @@ Template.autoForm.created = function autoFormCreated () {
       // form fields.
       mDoc = new MongoObject(doc)
       AutoForm.reactiveFormData.sourceDoc(formId, mDoc)
-    }
-    else {
+    } else {
       AutoForm.reactiveFormData.sourceDoc(formId, undefined)
     }
   })

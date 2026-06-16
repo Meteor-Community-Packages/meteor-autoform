@@ -1,7 +1,7 @@
 /* global AutoForm */
 
 AutoForm.addFormType('update', {
-  onSubmit: function () {
+  onSubmit: async function () {
     const ctx = this
 
     // Prevent browser form submission
@@ -14,14 +14,13 @@ AutoForm.addFormType('update', {
     }
 
     // Run "before.update" hooks
-    this.runBeforeHooks(this.updateDoc, function (modifier) {
+    await this.runBeforeHooks(this.updateDoc, function (modifier) {
       if (!Object.keys(modifier).length) { // make sure this check stays after the before hooks
         // Nothing to update. Just treat it as a successful update.
         ctx.result(null, 0)
-      }
-      else {
+      } else {
         // Perform update
-        collection.update({ _id: ctx.docId }, modifier, ctx.validationOptions, ctx.result)
+        collection.update({_id: ctx.docId}, modifier, ctx.validationOptions, ctx.result)
       }
     })
   },
