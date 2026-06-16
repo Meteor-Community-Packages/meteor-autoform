@@ -191,7 +191,6 @@ Template.autoForm.events({
       // add validationErrors array as a property
       // of the Error object before we call
       // onError hooks
-      console.log('validation failed');
       const ec = ss.namedContext(formId)
       const ik = ec.validationErrors()
       let error
